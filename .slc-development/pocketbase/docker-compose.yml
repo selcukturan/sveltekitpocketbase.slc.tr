@@ -1,0 +1,13 @@
+services:
+  s_pocketbase:
+    build:
+      context: ./docker-config
+      dockerfile: Dockerfile
+    container_name: c_pocketbase_spa
+    restart: unless-stopped
+    volumes:
+      - ../../.slc-local/pocketbase/pb_data:/pb/pb_data
+      - ../../.slc-local/pocketbase/pb_hooks:/pb/pb_hooks
+      - ../../.slc-local/pocketbase/pb_migrations:/pb/pb_migrations
+    ports:
+      - 8099:8099

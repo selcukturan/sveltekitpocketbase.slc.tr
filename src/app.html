@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+	<meta name="description" content="SLC Web Uygulamalari ©, bir sonraki web tabanli projenizin baslangic noktasi olsun" />
+	<meta name="keywords" content="svelte,sveltekit,pocketbase,application,dashboard,admin,api,spa" />
+	<meta name="author" content="SLC" />
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/%sveltekit.assets%/images/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/%sveltekit.assets%/images/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/%sveltekit.assets%/images/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/%sveltekit.assets%/images/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/%sveltekit.assets%/images/favicon/safari-pinned-tab.svg" color="#000000">
+	<link rel="shortcut icon" href="/%sveltekit.assets%/images/favicon/favicon.ico">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-config" content="/%sveltekit.assets%/images/favicon/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+
+	<script>
+		// setInitialMode
+		const current =
+			JSON.parse(localStorage.getItem('slc:theme'))?.current || 'light';
+		if (current === 'dark') {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	</script>
+
+	%sveltekit.head%
+</head>
+
+<body data-sveltekit-preload-data="tap">
+	<div style="display: contents">%sveltekit.body%</div>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+services:
+  s_watchtower:
+    image: containrrr/watchtower
+    container_name: c_watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/slcspa/slc-sveltekit-spa/watchtower/config.json:/config.json
+    command:
+      - '--label-enable'
+      - '--cleanup'
+      - '--interval'
+      - '30'
+    networks:
+      - network_0
+  # NODE.JS APPLICATION
+  s_app:
+    image: selcukt/slc-sveltekit-spa-app:latest
+    container_name: c_app
+    restart: unless-stopped
+    volumes:
+      - shared_app_caddy:/app/.slc-production/caddy
+      - shared_app_pb_hooks:/app/.slc-production/pocketbase/pb_hooks
+    environment:
+      PORT: 4005
+      ORIGIN: 'https://slcweb.app'
+    labels:
+      - 'com.centurylinklabs.watchtower.enable=true'
+    networks:
+      - network_0
+  # POCKETBASE SQLITE DB
+  s_pocketbase:
+    image: selcukt/slc-sveltekit-spa-pocketbase:latest
+    container_name: c_pocketbase
+    restart: unless-stopped
+    volumes:
+      - shared_app_pb_hooks:/pb/pb_hooks
+      - unshared_pb_data:/pb/pb_data
+      - unshared_pb_migrations:/pb/pb_migrations
+    depends_on:
+      - s_app
+    networks:
+      - network_0
+  # CADDY WEB SERVER
+  s_caddy:
+    image: caddy:2.7.6-alpine
+    container_name: c_caddy
+    restart: unless-stopped
+    ports:
+      - '80:80' # Host:Container
+      - '443:443' # Host:Container
+    volumes:
+      - shared_app_caddy:/etc/caddy
+      - unshared_caddy_data:/data
+      - unshared_caddy_config:/config
+    depends_on:
+      - s_app
+      - s_pocketbase
+    networks:
+      - network_0
+
+networks:
+  network_0:
+    driver: bridge
+
+volumes:
+  shared_app_caddy:
+  shared_app_pb_hooks:
+  unshared_pb_data:
+  unshared_pb_migrations:
+  unshared_caddy_data:
+  unshared_caddy_config:
