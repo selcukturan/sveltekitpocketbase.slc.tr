@@ -15,7 +15,7 @@
 		{#snippet thead()}
 			<Trh {src}>
 				<SelectionCell type="header" {src} />
-				{#each table.visibleColumns as col, ci (ci)}
+				{#each table.visibleColumns as col, ci (col.oi)}
 					{@const header = col.label}
 					<Th {src} {col} {ci}>
 						{header}
@@ -27,7 +27,7 @@
 		{#snippet tbody(row, ri)}
 			<Trd {src} {row} {ri}>
 				<SelectionCell type="cell" {src} {row} {ri} />
-				{#each table.visibleColumns as col, ci (ci)}
+				{#each table.visibleColumns as col, ci (col.oi)}
 					{@const cell = row[col.field]}
 					<Td {src} {col} {ci} {row} {ri}>
 						{#if col.field === 'grapeColor'}
@@ -44,7 +44,7 @@
 		{#snippet tfoot(foot, fi)}
 			<Trf {src} {fi}>
 				<SelectionCell type="footer" {src} {foot} {fi} />
-				{#each table.visibleColumns as col, ci (ci)}
+				{#each table.visibleColumns as col, ci (col.oi)}
 					{@const footer = foot[col.field]}
 					<Tf {src} {col} {ci} {foot} {fi}>
 						{footer}
@@ -188,7 +188,7 @@
 	.s:global(.s [data-scope='td-action'][data-part='popup']) {
 		border: 1px solid hsl(var(--surface-300));
 		background-color: hsl(var(--surface-50));
-		margin-right: 2px;
+		margin-right: 5px;
 		margin-top: -1px;
 	}
 	/* Popup Item */

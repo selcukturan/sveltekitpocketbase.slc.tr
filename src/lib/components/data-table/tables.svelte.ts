@@ -149,11 +149,17 @@ class Table<TData extends Row> {
 		const { rowOverscanStartIndex, rowOverscanEndIndex } = this.findVisibleRowIndexs({ headerRowsHeight, footerRowsHeight, dataRowHeight, dataLength });
 		if (rowOverscanStartIndex == null || rowOverscanEndIndex == null) return [];
 
-		const slicedData = $state.snapshot(this.get.data.slice(rowOverscanStartIndex, rowOverscanEndIndex + 1)) as TData[];
+		const processedData: TData[] = [];
 
-		const processedData = slicedData.map((row: TData, index: number): TData => {
-			return { ...row, oi: rowOverscanStartIndex + index }; // oi = original row index
-		});
+		// Görünür aralıktaki verileri işle (slice yok!)
+		for (let i = rowOverscanStartIndex; i <= rowOverscanEndIndex; i++) {
+			// Doğrudan index ile erişim ve snapshot (opsiyonel, satır objesi reaktif değilse gerekmeyebilir)
+			const row = $state.snapshot(this.get.data[i]) as TData;
+			if (row) {
+				// Ekstra kontrol
+				processedData.push({ ...row, oi: i });
+			}
+		}
 
 		const focusedCell = untrack(() => this.getFocusedCell);
 		const focusedCellRowIndex = focusedCell?.rowIndex;
