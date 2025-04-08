@@ -2,7 +2,6 @@
 	import type { Row, Footer, Sources } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
 	import { getTable } from './tables.svelte';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
@@ -20,74 +19,6 @@
 
 	const table = getTable<TData>(src.id);
 
-	/**
-	 * Belirtilen süre içinde bir fonksiyonun en fazla bir kez çağrılmasını sağlar.
-	 * Hem ilk çağrıyı (leading edge) hem de süre sonunda son çağrıyı (trailing edge)
-	 * garanti eden bir throttle implementasyonudur.
-	 *
-	 * @template This Fonksiyonun çalıştırılacağı 'this' bağlamının türü.
-	 * @template Args Fonksiyonun kabul ettiği argümanların türü (tuple).
-	 * @template Return Fonksiyonun dönüş türü (Not: Bu throttle fonksiyonu doğrudan değer döndürmez).
-	 * @param func Kısıtlanacak olan orijinal fonksiyon.
-	 * @param delay Milisaniye cinsinden kısıtlama süresi.
-	 * @returns Orijinal fonksiyonla aynı argümanları kabul eden, ancak kısıtlanmış çağrı
-	 *          davranışına sahip yeni bir fonksiyon. Ayrıca bir 'cancel' metodu içerir.
-	 */
-	function throttle<This, Args extends unknown[], Return>(func: (this: This, ...args: Args) => Return, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } {
-		let timeoutId: ReturnType<typeof setTimeout> | null = null; // setTimeout'un dönüş türünü kullan
-		let lastExecTime = 0;
-		// Trailing çağrı için son argümanları ve 'this'i saklamak gerekebilir (opsiyonel iyileştirme)
-		// let lastArgs: Args | null = null;
-		// let lastThis: This | null = null;
-
-		const throttled = function (this: This, ...args: Args): void {
-			const context = this; // 'this' bağlamını setTimeout içinde kullanmak için sakla
-			const currentTime = Date.now();
-			// Son gerçek çalıştırma zamanına göre kalan süre
-			const elapsedTime = currentTime - lastExecTime;
-
-			// Çalıştırma fonksiyonu (hem leading hem trailing için)
-			const execute = () => {
-				lastExecTime = currentTime; // Çalıştırma zamanını GÜNCELLE
-				timeoutId = null; // Zamanlayıcı ID'sini temizle
-				func.apply(context, args); // Orijinal fonksiyonu ÇALIŞTIR
-			};
-
-			// Önceki (bekleyen) trailing zamanlayıcısını temizle
-			// Bu, her zaman en son çağrının zamanlayıcısının aktif kalmasını sağlar.
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-				// timeoutId = null; // Henüz null yapma, sadece execute içinde veya leading çalışırsa
-			}
-
-			if (elapsedTime >= delay) {
-				// Leading edge (ilk kenar) durumu
-				// Eğer bir trailing zamanlayıcı bekliyorduysa onu iptal et, çünkü şimdi çalıştırıyoruz.
-				// Bu genellikle olmaz çünkü timeoutId zaten yukarıda temizlendi ama garanti olsun.
-				// if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
-				execute(); // Hemen çalıştır
-			} else {
-				// Trailing edge (sondaki kenar) durumu - yeniden zamanla
-				timeoutId = setTimeout(execute, delay - elapsedTime);
-			}
-		};
-
-		/**
-		 * Bekleyen throttle çağrısını iptal eder.
-		 */
-		throttled.cancel = (): void => {
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-			}
-			timeoutId = null;
-			lastExecTime = 0; // Durumu sıfırla
-			// lastArgs = null; // Eğer saklanıyorsa bunları da temizle
-			// lastThis = null;
-		};
-
-		return throttled;
-	}
-
 	const virtualScrollAction = (tableNode: HTMLDivElement) => {
 		if (table.get.enableVirtualization === false) return;
 
@@ -97,7 +28,7 @@
 			await table.setVirtualDataDerivedTrigger(`scroll_${scrollTop}`);
 		};
 
-		const throttledScrollHandler = throttle(setScrollTop, 60);
+		const throttledScrollHandler = table.throttle(setScrollTop, 60);
 
 		tableNode.addEventListener('scroll', throttledScrollHandler, { passive: true });
 
@@ -108,22 +39,39 @@
 		};
 	};
 
-	onMount(() => {
-		if (table.get.enableVirtualization === true) {
-			const observer = new ResizeObserver(async (entries) => {
-				for (let entry of entries) {
-					const clientHeight = entry.contentRect.height;
-					if (clientHeight === 0) return;
-					await table.setVirtualDataDerivedTrigger(`height_${clientHeight}`);
-				}
-			});
+	let resizeObserver: ResizeObserver | null = null;
 
-			if (table.element) observer.observe(table.element);
+	$effect(() => {
+		const enabled = table.get.enableVirtualization;
+		const element = table.element; // Element state'ini de dinle
 
-			return () => {
-				if (table.element) observer.unobserve(table.element);
-			};
+		if (enabled && element) {
+			if (!resizeObserver) {
+				// Zaten varsa tekrar kurma
+				resizeObserver = new ResizeObserver(async (entries) => {
+					for (let entry of entries) {
+						const clientHeight = entry.contentRect.height;
+						if (clientHeight === 0) return;
+						await table.setVirtualDataDerivedTrigger(`height_${clientHeight}`);
+					}
+				});
+				resizeObserver.observe(element);
+			}
+		} else {
+			if (resizeObserver && element) {
+				resizeObserver.unobserve(element);
+				resizeObserver.disconnect();
+				resizeObserver = null;
+			}
 		}
+
+		return () => {
+			if (resizeObserver && element) {
+				resizeObserver.unobserve(element);
+				resizeObserver.disconnect();
+				resizeObserver = null;
+			}
+		};
 	});
 </script>
 

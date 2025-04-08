@@ -14,7 +14,7 @@
 	const table = getTable<TData>(src.id);
 </script>
 
-<div role="row" data-scope="trh" class={classes} aria-rowindex={table.headerRowsCount} {...attributes}>
+<div role="row" data-scope="trh" class:group={true} class={classes} aria-rowindex={table.headerRowsCount} {...attributes}>
 	{@render children?.()}
 </div>
 

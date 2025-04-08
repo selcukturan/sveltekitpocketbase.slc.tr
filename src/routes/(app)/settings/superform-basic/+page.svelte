@@ -6,7 +6,7 @@
 	<div class="bg-success-100-800-token p-1">
 		<h6>SUPERFORM PAGEHEADER</h6>
 	</div>
-	<div class="relative flex-1 overflow-y-auto overflow-x-hidden p-1">SUPERFORM</div>
+	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">SUPERFORM</div>
 	<div class="bg-warning-100-800-token p-1">
 		<h6>SUPERFORM PAGE FOOTER</h6>
 	</div>

@@ -8,7 +8,7 @@
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table1',
-		data: common.generateExampleData(100),
+		data: common.generateExampleData(1000),
 		enableVirtualization: true,
 		rowSelection: 'multiple',
 		rowAction: true,

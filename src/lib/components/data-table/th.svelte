@@ -45,6 +45,8 @@
 	let pointerDownClientX: number;
 	let pointerDownWidth: number;
 	const colResizePointerAction = (node: HTMLElement, callback: (event: PointerEvent) => void) => {
+		if (col.resizeable == null) return;
+
 		const pointerdown = (event: PointerEvent) => {
 			if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
 
@@ -115,7 +117,6 @@
 	style:right
 	style:margin-right={!selection && !action ? '-1px' : undefined}
 	class={classes}
-	class:group={true}
 	aria-colindex={ci + 1}
 	data-col={ci}
 	data-oi={col.oi}
@@ -143,11 +144,13 @@
 		</div>
 		<div style="display: none; align-items: center;">x</div>
 	</div>
-	{#if !selection && !action && col.resizeable}
+	{#if !selection && !action}
+		{@const opacity = col.resizeable ? 'group-hover:opacity-40' : 'group-hover:opacity-40'}
+		{@const hover = col.resizeable ? 'hover:opacity-80 cursor-ew-resize' : ''}
 		<div
 			data-scope="th-resize"
 			use:colResizePointerAction={(e) => colResizeUpdate(e)}
-			class={`absolute top-0 right-0 bottom-0 mt-1.5 mr-0.5 mb-1.5 w-1 cursor-ew-resize !touch-none rounded-full opacity-0 duration-150 group-hover:opacity-60 hover:opacity-80`}
+			class={`absolute top-0 right-0 bottom-0 mt-1.5 mr-0.5 mb-1.5 w-1 ${opacity} ${hover} !touch-none rounded-full opacity-0 delay-150 duration-150`}
 		></div>
 	{/if}
 </div>
