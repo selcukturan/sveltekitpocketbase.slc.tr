@@ -2,7 +2,9 @@
 	import type { Row, Footer, Sources } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import { onMount, tick } from 'svelte'; // tick eklendi (onMount içinde gerekebilir)
 	import { getTable } from './tables.svelte';
+	import { debounce /* , throttle  */ } from './utils'; // lodash kullanıldı
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		src: Sources<TData>;
@@ -19,28 +21,77 @@
 
 	const table = getTable<TData>(src.id);
 
+	// --- OPTIMIZED virtualScrollAction ---
 	const virtualScrollAction = (tableNode: HTMLDivElement) => {
 		if (table.get.enableVirtualization === false) return;
 
-		const setScrollTop = async () => {
-			const { scrollTop, clientHeight } = tableNode;
-			if (clientHeight === 0) return;
-			await table.setVirtualDataDerivedTrigger(`scroll_${scrollTop}`);
+		// setScrollTop kaldırıldı, doğrudan updateVisibleIndexes çağrılacak
+		const setScrollTop = () => {
+			table.updateVisibleIndexes();
 		};
 
-		const throttledScrollHandler = table.throttle(setScrollTop, 60);
+		/* // Throttled handler şimdi table.updateVisibleIndexes'ı çağırıyor
+		const throttledScrollHandler = throttle(() => {
+			// console.log('Scroll event throttled - updating indexes'); // Debug
+			console.log('virtualScrollAction - updateVisibleIndexes called');
+			table.updateVisibleIndexes();
+		}, 60); // 60ms gecikme makul olabilir, test edin */
 
-		tableNode.addEventListener('scroll', throttledScrollHandler, { passive: true });
+		tableNode.addEventListener('scroll', setScrollTop, { passive: true });
 
 		return {
 			destroy() {
-				tableNode.removeEventListener('scroll', throttledScrollHandler);
+				tableNode.removeEventListener('scroll', setScrollTop);
+				// throttledScrollHandler.cancel(); // Throttle'ı temizle
 			}
 		};
 	};
 
+	// --- OPTIMIZED ResizeObserver ---
 	let resizeObserver: ResizeObserver | null = null;
+	// Debounced handler (resize için daha iyi)
+	const debouncedResizeHandler = debounce(() => {
+		// console.log('Resize event debounced - updating indexes'); // Debug
+		console.log('readonly debouncedResizeHandler - updateVisibleIndexes called');
+		table.updateVisibleIndexes();
+	}, 60); // Resize sonrası 60ms bekle
 
+	onMount(() => {
+		// İlk render sonrası boyutlar/scroll pozisyonu belli olunca indexleri hesapla
+		const initialUpdate = async () => {
+			await tick(); // DOM'un güncellenmesini bekle
+			if (table.element) {
+				console.log('readonly initialUpdate - updateVisibleIndexes called');
+				table.updateVisibleIndexes();
+			}
+		};
+
+		if (table.get.enableVirtualization === true) {
+			resizeObserver = new ResizeObserver((_entries) => {
+				// Entries detayına gerek yok, sadece resize olduğunu bilmemiz yeterli
+				debouncedResizeHandler();
+			});
+
+			if (table.element) {
+				resizeObserver.observe(table.element);
+				// Başlangıçta indexleri hesapla
+				// await kullanmadık. çünkü initialUpdate fonksiyonu bir değer döndürmüyor ve onMount içindeki başka bir kodun çalışması, initialUpdate'in tamamlanmasına bağlı değil.
+				initialUpdate();
+			}
+		}
+
+		return () => {
+			if (resizeObserver && table.element) {
+				resizeObserver.unobserve(table.element);
+			}
+			if (resizeObserver) {
+				resizeObserver.disconnect(); // Observer'ı tamamen temizle
+			}
+			debouncedResizeHandler.cancel(); // Debounce'u temizle
+		};
+	});
+
+	// EnableVirtualization değiştiğinde Observer'ı kur/kaldır ve ilk hesaplamayı yap
 	$effect(() => {
 		const enabled = table.get.enableVirtualization;
 		const element = table.element; // Element state'ini de dinle
@@ -48,38 +99,32 @@
 		if (enabled && element) {
 			if (!resizeObserver) {
 				// Zaten varsa tekrar kurma
-				resizeObserver = new ResizeObserver(async (entries) => {
-					for (let entry of entries) {
-						const clientHeight = entry.contentRect.height;
-						if (clientHeight === 0) return;
-						await table.setVirtualDataDerivedTrigger(`height_${clientHeight}`);
-					}
+				resizeObserver = new ResizeObserver((_entries) => {
+					debouncedResizeHandler();
 				});
 				resizeObserver.observe(element);
+				// Etkinleştirildiğinde ilk hesaplamayı yap
+				tick().then(() => table.updateVisibleIndexes());
 			}
 		} else {
 			if (resizeObserver && element) {
 				resizeObserver.unobserve(element);
 				resizeObserver.disconnect();
 				resizeObserver = null;
+				debouncedResizeHandler.cancel();
 			}
 		}
-
-		return () => {
-			if (resizeObserver && element) {
-				resizeObserver.unobserve(element);
-				resizeObserver.disconnect();
-				resizeObserver = null;
-			}
-		};
 	});
 </script>
 
 <div class:slc-table-main={true} class={containerClass} style:width={table.get.width} style:height={table.get.height}>
 	{@render toolbar?.()}
 	<div class:slc-table-container={true} class={tableContainerClass}>
+		<!-- Bu kısımlar aynı kalır -->
 		<div style:display={'none'} class:slc-table-action-content={true}>Gösterilecek veri yok</div>
 		<div style:display={table.get.data.length > 0 ? 'none' : 'flex'} class:slc-table-no-data={true}>Gösterilecek veri yok</div>
+
+		<!-- Ana tablo div'i -->
 		<div
 			role="grid"
 			bind:this={table.element}
@@ -120,6 +165,7 @@
 </div>
 
 <style>
+	/* Style aynı kalır */
 	.slc-table-main {
 		display: flex;
 		flex-direction: column;
@@ -134,8 +180,8 @@
 		display: grid;
 		width: 100%;
 		height: 100%;
-		contain: content; /* contain özelliği, bir elementin içeriksel sınırlarını belirler ve tarayıcıların bu sınırlar içinde optimizasyon yapmasına olanak tanır. content: Elementin içeriği, boyut, düzen ve stil açısından izole edilir. */
-		content-visibility: auto; /* auto: Tarayıcı, elementin içeriğini yalnızca görünür olduğunda render eder. Bu, performans optimizasyonları yapmasına olanak tanır. */
+		contain: strict; /* Daha agresif containment, layout/paint izolasyonu */
+		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;

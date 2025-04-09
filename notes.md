@@ -3,8 +3,8 @@
 - Geliştirme ortamını ayağa kaldırma
 
 ```bash
-npm run slc:dev:app
-npm run slc:dev:pocketbase
+npm run dev
+npm run pb
 ```
 
 - Geliştirme ortamını build etme ve ön izleme
