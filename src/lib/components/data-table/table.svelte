@@ -121,7 +121,7 @@
 	{@render toolbar?.()}
 	<div class:slc-table-container={true} class={tableContainerClass}>
 		<!-- Bu kısımlar aynı kalır -->
-		<div style:display={'none'} class:slc-table-action-content={true}>Gösterilecek veri yok</div>
+		<div style:display={'none'} class:slc-table-action-content={true}>Veri yok</div>
 		<div style:display={table.get.data.length > 0 ? 'none' : 'flex'} class:slc-table-no-data={true}>Gösterilecek veri yok</div>
 
 		<!-- Ana tablo div'i -->

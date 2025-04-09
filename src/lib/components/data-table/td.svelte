@@ -58,7 +58,6 @@
 			const rowLastIndex = table.get.data.length - 1;
 			const colFirstIndex = table.get.rowSelection !== 'none' ? -1 : 0; // Seçim kolonu için -1
 			const colLastIndex = table.get.rowAction ? table.visibleColumns.length : table.visibleColumns.length - 1;
-			let triggerVirtual = false;
 
 			if (key === 'ArrowUp') {
 				cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
@@ -92,11 +91,9 @@
 				e.preventDefault();
 			} else if (key === 'PageUp') {
 				cellToFocus.rowIndex = Math.max(rowFirstIndex, table.getPageUpRowIndex() ?? rowFirstIndex);
-				triggerVirtual = true;
 				e.preventDefault();
 			} else if (key === 'PageDown') {
 				cellToFocus.rowIndex = Math.min(rowLastIndex, table.getPageDownRowIndex() ?? rowLastIndex);
-				triggerVirtual = true;
 				e.preventDefault();
 			} else if (key === ' ' && cellToFocus.colIndex === -1) {
 				// Seçim kolonunda boşluk tuşuna basıldığında satırı seç/kaldır
@@ -114,7 +111,7 @@
 			cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
 
 			if (initalOriginalCell !== cellToFocus.originalCell) {
-				await table.focusCell({ cellToFocus, triggerVirtual });
+				await table.focusCell({ cellToFocus });
 			}
 		};
 

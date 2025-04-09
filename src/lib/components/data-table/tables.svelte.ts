@@ -367,13 +367,14 @@ class Table<TData extends Row> {
 		elementToFocus.focus({ preventScroll: true });
 	};
 
-	readonly focusCell = async ({ cellToFocus, triggerVirtual = false }: { cellToFocus: Required<FocucedCell>; triggerVirtual?: boolean }) => {
+	readonly focusCell = async ({ cellToFocus }: { cellToFocus: Required<FocucedCell> }) => {
 		await this.setFocusedCellTabIndex(cellToFocus); // tabindex durumunu ve focucedCell state'ini günceller.
 
 		// pageup veya pagedown gibi uzun atlamalar olduğunda, yani scan edilmiş tüm virtual datanın da uzağına gidilmek istendiğinde, virtual data bir kez güncellenir.
 		// bu güncelleme setFocusedCellState ile değişen state'i baz alarak focuslanacak hücre bilgilerini virtual dataya pinler ve dom'u günceller.
 		// artık uzaktaki hücre dom'da oluşturulmuştur.
-		if (this.get.enableVirtualization === true && triggerVirtual === true) {
+		const focusedCellNode = this.element?.querySelector<HTMLDivElement>(`:scope > [role="row"] > [data-cell="${cellToFocus.rowIndex}_${cellToFocus.colIndex}"]`);
+		if (this.get.enableVirtualization === true && !focusedCellNode) {
 			/* const { rowOverscanStartIndex, rowOverscanEndIndex } = this.findVisibleRowIndexs({}); */
 			this.updateVisibleIndexes(true);
 			if (
