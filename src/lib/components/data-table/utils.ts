@@ -1,5 +1,4 @@
 export function throttle<This, Args extends unknown[], Return>(func: (this: This, ...args: Args) => Return, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } {
-	// ... throttle implementasyonu ...
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	let lastExecTime = 0;
 	const throttled = function (this: This, ...args: Args): void {
@@ -30,7 +29,6 @@ export function throttle<This, Args extends unknown[], Return>(func: (this: This
 	return throttled;
 }
 export function debounce<This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } {
-	// ... debounce implementasyonu ...
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	const debounced = function (this: This, ...args: Args): void {
 		const context = this;

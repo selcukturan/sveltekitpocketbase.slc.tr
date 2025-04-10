@@ -146,7 +146,7 @@
 	</div>
 	{#if !selection && !action}
 		{@const opacity = col.resizeable ? 'group-hover:opacity-40' : 'group-hover:opacity-40'}
-		{@const hover = col.resizeable ? 'hover:opacity-80 cursor-ew-resize' : ''}
+		{@const hover = col.resizeable ? 'hover:opacity-80 hover:delay-0 cursor-ew-resize' : ''}
 		<div
 			data-scope="th-resize"
 			use:colResizePointerAction={(e) => colResizeUpdate(e)}

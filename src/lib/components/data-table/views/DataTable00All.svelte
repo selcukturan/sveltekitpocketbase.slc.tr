@@ -5,7 +5,7 @@
 
 	const { sources: src }: { sources: Sources<TData> } = $props();
 	const table = getTable<TData>(src.id);
-	// $inspect('$inspect-virtualData', table.virtualData);
+	$inspect('$inspect-virtualData', table.virtualData);
 	// $inspect('table.rowOverscanStartIndexState', table.rowIndices.visibleStart);
 	// $inspect('table.rowOverscanEndIndexState', table.rowIndices.visibleEnd);
 	// $inspect('$inspect-focusedCell', table.focusedCell);

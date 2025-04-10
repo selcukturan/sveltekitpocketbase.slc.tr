@@ -202,11 +202,12 @@
 	[data-scope='td'][data-freezed='action'] {
 		z-index: 1;
 		position: sticky;
+		margin-bottom: -1px;
 	}
 
 	[data-focused] {
 		outline-width: 2px;
-		outline-offset: -2px;
+		outline-offset: -3px;
 		outline-style: solid;
 		outline-color: currentColor;
 	}
