@@ -111,7 +111,7 @@
 			cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
 
 			if (initalOriginalCell !== cellToFocus.originalCell) {
-				await table.focusCell({ cellToFocus });
+				await table.focusCell({ cellToFocus, triggerVirtual: true });
 			}
 		};
 

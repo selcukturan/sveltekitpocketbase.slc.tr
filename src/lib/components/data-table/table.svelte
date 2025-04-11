@@ -2,9 +2,9 @@
 	import type { Row, Footer, Sources } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import { onMount, tick } from 'svelte'; // tick eklendi (onMount içinde gerekebilir)
+	import { onMount } from 'svelte';
 	import { getTable } from './tables.svelte';
-	import { debounce, throttle } from './utils'; // lodash kullanıldı
+	/* import { debounce, throttle } from './utils'; */
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		src: Sources<TData>;
@@ -24,81 +24,38 @@
 	const virtualScrollAction = (tableNode: HTMLDivElement) => {
 		if (table.get.enableVirtualization === false) return;
 
-		const throttledScrollHandler = throttle(() => {
-			table.updateVisibleIndexes();
-		}, 60); // Scroll işlemlerini 60ms aralıklarla yap
+		const setScrollTop = async () => {
+			const { scrollTop, clientHeight } = tableNode;
+			if (clientHeight === 0 || !table.isScrollSignificant(scrollTop)) return;
+			await table.setVirtualDataDerivedTrigger(`scroll_${scrollTop}`);
+		};
 
-		tableNode.addEventListener('scroll', throttledScrollHandler, { passive: true });
+		// const throttledScrollHandler = throttle(setScrollTop, 60); // Scroll işlemlerini 60ms aralıklarla yap
+
+		tableNode.addEventListener('scroll', setScrollTop, { passive: true });
 
 		return {
 			destroy() {
-				tableNode.removeEventListener('scroll', throttledScrollHandler);
-				throttledScrollHandler.cancel(); // Throttle'ı temizle
+				tableNode.removeEventListener('scroll', setScrollTop);
 			}
 		};
 	};
 
-	let resizeObserver: ResizeObserver | null = null;
-	// Debounced handler (resize için daha iyi)
-	const debouncedResizeHandler = debounce(() => {
-		table.updateVisibleIndexes();
-	}, 60); // Resize sonrası 60ms bekle
-
 	onMount(() => {
-		// İlk render sonrası boyutlar/scroll pozisyonu belli olunca indexleri hesapla
-		const initialUpdate = async () => {
-			await tick(); // DOM'un güncellenmesini bekle
-			if (table.element) {
-				table.updateVisibleIndexes();
-			}
-		};
-
 		if (table.get.enableVirtualization === true) {
-			resizeObserver = new ResizeObserver((_entries) => {
-				debouncedResizeHandler();
+			const observer = new ResizeObserver(async (entries) => {
+				for (let entry of entries) {
+					const clientHeight = entry.contentRect.height;
+					if (clientHeight === 0) return;
+					await table.setVirtualDataDerivedTrigger(`height_${clientHeight}`);
+				}
 			});
 
-			if (table.element) {
-				resizeObserver.observe(table.element);
-				// Başlangıçta indexleri hesapla
-				// await kullanmadık. çünkü initialUpdate fonksiyonu bir değer döndürmüyor ve onMount içindeki başka bir kodun çalışması, initialUpdate'in tamamlanmasına bağlı değil.
-				initialUpdate();
-			}
-		}
+			if (table.element) observer.observe(table.element);
 
-		return () => {
-			if (resizeObserver && table.element) {
-				resizeObserver.unobserve(table.element);
-			}
-			if (resizeObserver) {
-				resizeObserver.disconnect(); // Observer'ı tamamen temizle
-			}
-			debouncedResizeHandler.cancel(); // Debounce'u temizle
-		};
-	});
-
-	// EnableVirtualization değiştiğinde Observer'ı kur/kaldır ve ilk hesaplamayı yap
-	$effect(() => {
-		const enabled = table.get.enableVirtualization;
-		const element = table.element; // Element state'ini de dinle
-
-		if (enabled && element) {
-			// Zaten varsa tekrar kurma
-			if (!resizeObserver) {
-				resizeObserver = new ResizeObserver((_entries) => {
-					debouncedResizeHandler();
-				});
-				resizeObserver.observe(element);
-				// Etkinleştirildiğinde ilk hesaplamayı yap
-				tick().then(() => table.updateVisibleIndexes());
-			}
-		} else {
-			if (resizeObserver && element) {
-				resizeObserver.unobserve(element);
-				resizeObserver.disconnect();
-				resizeObserver = null;
-				debouncedResizeHandler.cancel();
-			}
+			return () => {
+				if (table.element) observer.unobserve(table.element);
+			};
 		}
 	});
 </script>
@@ -106,10 +63,8 @@
 <div class:slc-table-main={true} class={containerClass} style:width={table.get.width} style:height={table.get.height}>
 	{@render toolbar?.()}
 	<div class:slc-table-container={true} class={tableContainerClass}>
-		<div style:display={'none'} class:slc-table-action-content={true}>Veri yok</div>
+		<div style:display={'none'} class:slc-table-action-content={true}>Gösterilecek veri yok</div>
 		<div style:display={table.get.data.length > 0 ? 'none' : 'flex'} class:slc-table-no-data={true}>Gösterilecek veri yok</div>
-
-		<!-- Ana tablo div'i -->
 		<div
 			role="grid"
 			bind:this={table.element}
@@ -164,8 +119,8 @@
 		display: grid;
 		width: 100%;
 		height: 100%;
-		contain: strict; /* Daha agresif containment, layout/paint izolasyonu */
-		content-visibility: auto;
+		contain: strict; /* contain özelliği, bir elementin içeriksel sınırlarını belirler ve tarayıcıların bu sınırlar içinde optimizasyon yapmasına olanak tanır. content: Elementin içeriği, boyut, düzen ve stil açısından izole edilir. */
+		content-visibility: auto; /* auto: Tarayıcı, elementin içeriğini yalnızca görünür olduğunda render eder. Bu, performans optimizasyonları yapmasına olanak tanır. */
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
