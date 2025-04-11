@@ -1,7 +1,7 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row, Column, Sources, FocucedCell } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { type Snippet } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import { getTable } from './tables.svelte';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
@@ -22,49 +22,77 @@
 	const indexToRow = 1;
 	const gridRowStart = $derived(typeof row_oi === 'number' ? row_oi + table.headerRowsCount + indexToRow : 0);
 
-	const clickAction = (cellNode: HTMLDivElement) => {
-		const handleClick = async (e: Event) => {
-			if (row_oi == null) return;
-			const cellToFocus: Required<FocucedCell> = { rowIndex: row_oi, colIndex: ci, originalCell: `${row_oi}_${ci}`, tabIndex: 0 };
-			if (cellToFocus.originalCell === table.getFocusedCell?.originalCell) return;
-			await table.focusCell({ cellToFocus });
-		};
-
-		cellNode.addEventListener('click', handleClick);
-
-		return {
-			destroy() {
-				cellNode.removeEventListener('click', handleClick);
-			}
-		};
+	const onmousedown = async (e: Event) => {
+		if (row_oi == null) return;
+		const cellToFocus: Required<FocucedCell> = { rowIndex: row_oi, colIndex: ci, originalCell: `${row_oi}_${ci}`, tabIndex: 0 };
+		if (cellToFocus.originalCell === table.getFocusedCell?.originalCell) return;
+		await table.focusCell({ cellToFocus });
 	};
 
-	const keyboardAction = (cellNode: HTMLDivElement) => {
-		const handleKeydown = async (e: KeyboardEvent) => {
-			const { rowIndex, colIndex, originalCell } = table.getFocusedCell ?? {};
-			if (rowIndex == null || colIndex == null || originalCell == null) return;
+	const onkeydown = (e: KeyboardEvent) => {
+		// async artık throttled fonksiyon içinde
+		const { key } = e;
+		const typableNumber = '1234567890';
+		const typableLower = 'abcdefghijklmnopqrstuvwxyz';
+		const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		const typableOther = " =-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 
+		// --- İzin Verilmeyen Tuşları Filtrele ---
+		const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
+		const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V'].includes(key); // Boşluk, F2, Kopyala/Yapıştır
+		const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
+
+		// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
+		if (!isNavigationKey && !isActionKey && !isTypable) {
+			if (!((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C' || key === 'v' || key === 'V'))) {
+				// console.log('Key ignored:', key);
+				return; // İzin verilmeyen tuş
+			}
+		}
+
+		const { rowIndex, colIndex, originalCell } = table.getFocusedCell ?? {};
+		if (rowIndex == null || colIndex == null || originalCell == null) {
+			return; // Odak yoksa (şimdilik) çık
+		}
+
+		// --- Anlık Eylemler (Throttle EDİLMEZ) ---
+		if (
+			key === 'F2' ||
+			((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
+			((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
+			(!e.ctrlKey && !e.metaKey && isTypable && key !== ' ') ||
+			key === ' ' /* && özel koşul, örn: colIndex === -1 */
+		) {
+			// console.log('Immediate action key:', key);
+			// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
+			// Örnek: if (key === 'F2') { createCellInput... }
+			// Bu eylemler throttle edilmeden hemen çalışmalı ve navigasyonu tetiklememeli.
+			// Gerekirse e.preventDefault() burada çağrılabilir.
+			return; // Anlık eylemden sonra çık
+		}
+
+		// --- Sadece Navigasyon Tuşları İçin Devam Et ---
+		if (isNavigationKey) {
+			// Varsayılan davranışı HEMEN engelle
+			e.preventDefault();
+
+			// --- Navigasyon Hesaplamaları (HER ÇAĞRIDA YAPILIR) ---
 			let cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
-			let initalOriginalCell = cellToFocus.originalCell;
-
-			const { key } = e;
-
-			const typableNumber = '1234567890';
-			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
-			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-			const typableOther = " =-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+			const initialOriginalCell = cellToFocus.originalCell; // Hesaplama *öncesi* hücre
 
 			const rowFirstIndex = 0;
 			const rowLastIndex = table.get.data.length - 1;
-			const colFirstIndex = table.get.rowSelection !== 'none' ? -1 : 0; // Seçim kolonu için -1
+			const colFirstIndex = table.get.rowSelection !== 'none' ? -1 : 0;
 			const colLastIndex = table.get.rowAction ? table.visibleColumns.length : table.visibleColumns.length - 1;
+
+			let navigationHappened = false; // Hesaplama yapıldı mı?
 
 			if (key === 'ArrowUp') {
 				cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'ArrowDown' || key === 'Enter') {
 				cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'ArrowLeft' || (e.shiftKey && key === 'Tab')) {
 				cellToFocus.colIndex = cellToFocus.colIndex - 1;
 				if (key === 'Tab' && cellToFocus.colIndex < colFirstIndex) {
@@ -73,7 +101,7 @@
 				} else {
 					cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex);
 				}
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'ArrowRight' || (!e.shiftKey && key === 'Tab')) {
 				cellToFocus.colIndex = cellToFocus.colIndex + 1;
 				if (key === 'Tab' && cellToFocus.colIndex > colLastIndex) {
@@ -82,47 +110,29 @@
 				} else {
 					cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex);
 				}
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'Home') {
 				cellToFocus.colIndex = colFirstIndex;
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'End') {
 				cellToFocus.colIndex = colLastIndex;
-				e.preventDefault();
+				navigationHappened = true;
 			} else if (key === 'PageUp') {
-				cellToFocus.rowIndex = Math.max(rowFirstIndex, table.getPageUpRowIndex() ?? rowFirstIndex);
-				e.preventDefault();
+				cellToFocus.rowIndex = Math.max(rowFirstIndex, table.getPageUpRowIndex() || rowFirstIndex);
+				navigationHappened = true;
 			} else if (key === 'PageDown') {
-				cellToFocus.rowIndex = Math.min(rowLastIndex, table.getPageDownRowIndex() ?? rowLastIndex);
-				e.preventDefault();
-			} else if (key === ' ' && cellToFocus.colIndex === -1) {
-				// Seçim kolonunda boşluk tuşuna basıldığında satırı seç/kaldır
-				// table.toggleRowSelection(cellToFocus.rowIndex);
-				// e.preventDefault();
-			} else if (key === 'F2') {
-				/* e.preventDefault(); createCellInput({ rowIndex, colIndex, originalCell }); */
-			} else if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) {
-				/* Ctrl + C = Copy */
-			} else if ((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) {
-				/* Ctrl + V = Paste */
-			} else if (!e.ctrlKey && !e.metaKey && (typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key))) {
-				/* e.preventDefault(); createCellInput({ rowIndex, colIndex, originalCell }); */
+				cellToFocus.rowIndex = Math.min(rowLastIndex, table.getPageDownRowIndex() || rowLastIndex);
+				navigationHappened = true;
 			}
-			cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
 
-			if (initalOriginalCell !== cellToFocus.originalCell) {
-				await table.focusCell({ cellToFocus, triggerVirtual: true });
+			// --- Throttled Fonksiyonu Çağır (Eğer Navigasyon Olduysa) ---
+			if (navigationHappened) {
+				// hesaplanan hedef hücreyi ve başlangıç hücresini ilet
+				table.throttledFocusLogic(cellToFocus, initialOriginalCell);
 			}
-		};
-
-		cellNode.addEventListener('keydown', handleKeydown);
-
-		return {
-			destroy() {
-				cellNode.removeEventListener('keydown', handleKeydown);
-			}
-		};
+		}
 	};
+
 	const gridColumn = $derived.by(() => {
 		const offset = table.get.rowSelection !== 'none' ? 1 : 0;
 		if (table.get.rowSelection !== 'none' && col.field === '_selection') {
@@ -145,8 +155,8 @@
 
 <div
 	role="gridcell"
-	use:clickAction
-	use:keyboardAction
+	{onmousedown}
+	{onkeydown}
 	style:grid-row={`${gridRowStart} / ${gridRowStart + 1}`}
 	style:grid-column={gridColumn}
 	data-scope="td"

@@ -296,7 +296,36 @@ class Table<TData extends Row> {
 	};
 	// ################################## END Row Selection Methods ################################################################
 
-	// ################################## BEGIN General Methods ##############################################################
+	// ################################## BEGIN General Methods ####################################################################
+	readonly throttle = <T extends (...args: any[]) => any>(func: T, limit: number): ((...args: Parameters<T>) => void) => {
+		let inThrottle: boolean = false;
+		return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+			if (!inThrottle) {
+				func.apply(this, args); // Fonksiyonu çağır
+				inThrottle = true; // Kısıtlama bayrağını ayarla
+				setTimeout(() => (inThrottle = false), limit); // Belirtilen süre sonra bayrağı kaldır
+			}
+		};
+	};
+	readonly throttledFocusLogic = this.throttle(async (cellToFocus: Required<FocucedCell>, initialOriginalCell: string) => {
+		// Cell identifier'ı throttle edilen fonksiyon içinde hesapla/güncelle
+		cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
+
+		// --- Hücreyi Odakla (Eğer Değiştiyse) ---
+		// initialOriginalCell, throttle çağrılmadan *önceki* hücreydi
+		if (initialOriginalCell !== cellToFocus.originalCell) {
+			// console.log('Focusing cell (throttled):', cellToFocus);
+			try {
+				await this.focusCell({ cellToFocus, triggerVirtual: true });
+			} catch (error) {
+				console.error('Error focusing cell (throttled):', error);
+			}
+		} else {
+			// Bu durum throttle ile daha az olasıdır ama yine de olabilir
+			// console.log('Cell did not change, no focus needed (throttled).');
+		}
+	}, 20);
+
 	readonly setColumnWidth = (ci: number, min: number, width: number) => {
 		this.set.columns[ci].width = `${Math.max(min, width)}px`;
 	};

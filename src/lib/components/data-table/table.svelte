@@ -4,7 +4,6 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { getTable } from './tables.svelte';
-	/* import { debounce, throttle } from './utils'; */
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		src: Sources<TData>;
@@ -27,10 +26,8 @@
 		const setScrollTop = async () => {
 			const { scrollTop, clientHeight } = tableNode;
 			if (clientHeight === 0 || !table.isScrollSignificant(scrollTop)) return;
-			await table.setVirtualDataDerivedTrigger(`scroll_${scrollTop}`);
+			await table.setVirtualDataDerivedTrigger(`scroll_${Math.round(scrollTop)}`);
 		};
-
-		// const throttledScrollHandler = throttle(setScrollTop, 60); // Scroll işlemlerini 60ms aralıklarla yap
 
 		tableNode.addEventListener('scroll', setScrollTop, { passive: true });
 
@@ -47,7 +44,7 @@
 				for (let entry of entries) {
 					const clientHeight = entry.contentRect.height;
 					if (clientHeight === 0) return;
-					await table.setVirtualDataDerivedTrigger(`height_${clientHeight}`);
+					await table.setVirtualDataDerivedTrigger(`height_${Math.round(clientHeight)}`);
 				}
 			});
 
