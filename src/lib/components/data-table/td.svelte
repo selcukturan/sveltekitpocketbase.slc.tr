@@ -1,5 +1,5 @@
 <script lang="ts" generics="TData extends Row">
-	import type { Row, Column, Sources, FocucedCell } from './types';
+	import type { Row, Column, Sources, FocucedCell, Field } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { tick, type Snippet } from 'svelte';
 	import { getTable } from './tables.svelte';
@@ -39,7 +39,7 @@
 
 		// --- İzin Verilmeyen Tuşları Filtrele ---
 		const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
-		const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V'].includes(key); // Boşluk, F2, Kopyala/Yapıştır
+		const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
 		const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
 
 		// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
@@ -57,12 +57,24 @@
 
 		// --- Anlık Eylemler (Throttle EDİLMEZ) ---
 		if (
+			key === 'Escape' ||
 			key === 'F2' ||
 			((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 			((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
 			(!e.ctrlKey && !e.metaKey && isTypable && key !== ' ') ||
 			key === ' ' /* && özel koşul, örn: colIndex === -1 */
 		) {
+			if (key === 'Escape' && table.editingCell) {
+				e.preventDefault();
+				table.removeCellInput();
+				const cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
+				table.throttledFocusLogic(cellToFocus, '');
+			} else if (isTypable || key === 'F2') {
+				if (table.editingCell || row_oi == null || col.oi == null || !table.visibleColumns[ci].editable) return;
+				e.preventDefault();
+				table.createCellInput(key, row_oi, col.oi, col.field);
+			}
+
 			// console.log('Immediate action key:', key);
 			// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
 			// Örnek: if (key === 'F2') { createCellInput... }
@@ -133,6 +145,50 @@
 		}
 	};
 
+	const inputOnAction = (input: HTMLInputElement) => {
+		input.focus();
+		// input.select();
+
+		const blur = (e: FocusEvent) => {
+			if (row_oi == null || col.oi == null) return;
+
+			const newValue = table.editingCellValue;
+			const oldValue = table.editingCellOldValue;
+
+			table.removeCellInput();
+
+			if (newValue === oldValue) return;
+
+			table.setCellValue(newValue, oldValue, row_oi, col.oi, col.field);
+			/*
+			// onCellEdit
+			if (onCellEdit && table.columns)
+					thisOnCellEdit({
+						event: 'celledit',
+						detail: { newValue, oldValue, rowIndex: inputrow, colIndex: inputcol, field: inputfield, column: $state.snapshot(table.columns[+inputcol]), row: $state.snapshot(table.data[+inputrow]) as TDataType }
+					});
+			*/
+		};
+		const click = (e: MouseEvent) => {
+			e.stopPropagation();
+		};
+		const mousedown = (e: MouseEvent) => {
+			e.stopPropagation();
+		};
+
+		input.addEventListener('blur', blur);
+		input.addEventListener('click', click);
+		input.addEventListener('mousedown', mousedown);
+
+		return {
+			destroy() {
+				input.removeEventListener('blur', blur);
+				input.removeEventListener('click', click);
+				input.removeEventListener('mousedown', mousedown);
+			}
+		};
+	};
+
 	const gridColumn = $derived.by(() => {
 		const offset = table.get.rowSelection !== 'none' ? 1 : 0;
 		if (table.get.rowSelection !== 'none' && col.field === '_selection') {
@@ -182,9 +238,27 @@
 			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
 			style:justify-content={col.align === 'center' ? 'center' : col.align === 'right' ? 'flex-end' : 'flex-start'}
 		>
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-				{@render children?.()}
-			</span>
+			{#if col.oi != null && row_oi != null && table.editingCellPath === `r${row_oi}c${col.oi}` && col.editable}
+				<span style="overflow: hidden; width:100%">
+					<input
+						type="text"
+						spellcheck="false"
+						autocomplete="off"
+						data-inputrow={row_oi}
+						data-inputcol={col.oi}
+						data-inputfield={col.field || 'slcNullField'}
+						use:inputOnAction
+						bind:this={table.editingCellInput}
+						bind:value={table.editingCellValue}
+						style:text-align={col.align || 'left'}
+						style="margin:0px; height:100%; width:100%; border:none; background-color:transparent; padding:0px; outline:none; box-shadow:none; transition:none;"
+					/>
+				</span>
+			{:else}
+				<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+					{@render children?.()}
+				</span>
+			{/if}
 		</div>
 		<div style="display: none; align-items: center;">x</div>
 	</div>
@@ -214,6 +288,13 @@
 		position: sticky;
 		margin-bottom: -1px;
 	}
+
+	/* @media (min-aspect-ratio: 1/1) {
+		[data-scope='td'][data-freezed='selection'],
+		[data-scope='td'][data-freezed='action'] {
+			background-color: lightblue !important;
+		}
+	} */
 
 	[data-focused] {
 		outline-width: 2px;

@@ -96,8 +96,8 @@ class Table<TData extends Row> {
 
 	readonly gridTemplateColumns = $derived(
 		`${this.get.rowSelection !== 'none' ? this.get.rowSelectionColumnWidth + 'px' : ''} 
- 		${this.visibleColumns.map((col) => col.width ?? `150px`).join(' ')} 
- 		${this.get.rowAction ? this.get.rowActionColumnWidth + 'px' : ''}`
+		${this.visibleColumns.map((col) => col.width ?? `150px`).join(' ')} 
+		${this.get.rowAction ? this.get.rowActionColumnWidth + 'px' : ''}`
 	);
 	// ################################## END General Variables ########################################################
 
@@ -134,6 +134,7 @@ class Table<TData extends Row> {
 			this.onTableActionThis(params);
 		}
 	};
+
 	// ################################## BEGIN Vertical Virtual Data ##################################################
 	private calculatingVirtualData = false;
 	private virtualDataDerivedTrigger?: string = $state();
@@ -149,22 +150,34 @@ class Table<TData extends Row> {
 		const { rowOverscanStartIndex, rowOverscanEndIndex } = this.findVisibleRowIndexs({ headerRowsHeight, footerRowsHeight, dataRowHeight, dataLength });
 		if (rowOverscanStartIndex == null || rowOverscanEndIndex == null) return [];
 
-		const slicedData = $state.snapshot(this.get.data.slice(rowOverscanStartIndex, rowOverscanEndIndex + 1)) as TData[];
+		const processedData: TData[] = [];
 
-		const processedData = slicedData.map((row: TData, index: number): TData => {
-			return { ...row, oi: rowOverscanStartIndex + index }; // oi = original row index
-		});
+		// Görünür aralıktaki verileri işle (slice yok!)
+		for (let i = rowOverscanStartIndex; i <= rowOverscanEndIndex; i++) {
+			// Doğrudan index ile erişim ve snapshot (opsiyonel, satır objesi reaktif değilse gerekmeyebilir)
+			const row = $state.snapshot(this.get.data[i]) as TData;
+			if (row) {
+				processedData.push({ ...row, oi: i });
+			}
+		}
 
 		const focusedCell = untrack(() => this.getFocusedCell);
 		const focusedCellRowIndex = focusedCell?.rowIndex;
 		if (typeof focusedCellRowIndex === 'number' && focusedCellRowIndex < dataLength) {
-			const isAboveOverscanStart = focusedCellRowIndex < rowOverscanStartIndex ? true : false;
-			const isBelowOverscanEnd = focusedCellRowIndex >= rowOverscanEndIndex + 1 ? true : false;
-			if (isAboveOverscanStart || isBelowOverscanEnd) {
+			// Odaklanmış satır zaten işlenen aralıkta mı?
+			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= rowOverscanStartIndex && focusedCellRowIndex <= rowOverscanEndIndex;
+			if (!isFocusedRowAlreadyIncluded) {
+				// Eğer dahil değilse, odaklanmış satırı al ve ekle
 				const focusedCellRow: TData = $state.snapshot(this.get.data[focusedCellRowIndex]) as TData;
-				focusedCellRow.oi = focusedCellRowIndex;
-				if (isAboveOverscanStart) processedData.unshift(focusedCellRow);
-				if (isBelowOverscanEnd) processedData.push(focusedCellRow);
+				if (focusedCellRow) {
+					const rowWithOi = { ...focusedCellRow, oi: focusedCellRowIndex };
+					if (focusedCellRowIndex < rowOverscanStartIndex) {
+						processedData.unshift(rowWithOi); // Başa ekle
+					} else {
+						// focusedCellRowIndex > endIndex olmalı
+						processedData.push(rowWithOi); // Sona ekle
+					}
+				}
 			}
 		}
 
@@ -295,6 +308,44 @@ class Table<TData extends Row> {
 		this.onRowSelectionChangeThis({ selectedRows: this.getSelectedRows });
 	};
 	// ################################## END Row Selection Methods ################################################################
+
+	// ################################## BEGIN Cell Edit ##################################################
+	editingCell: boolean = $state(false);
+	editingCellInput: HTMLInputElement | undefined = $state(undefined);
+	editingCellValue: unknown = $state('');
+	editingCellOldValue: unknown = $state('');
+	editingCellPath: string = $state('');
+	removeCellInput = () => {
+		if (this.editingCell) {
+			this.editingCellPath = '';
+			this.editingCellInput = undefined;
+			this.editingCellOldValue = '';
+			this.editingCellValue = '';
+			this.editingCell = false;
+		}
+	};
+	createCellInput = (key: string, rowOi: number, colOi: number, field: Field<TData>) => {
+		const snapshotRow = $state.snapshot(this.get.data[rowOi]) as TData;
+		const oldValue = snapshotRow[field];
+		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
+		this.editingCellOldValue = oldValueForInput;
+		this.editingCellValue = key === 'F2' || key === 'SLCDBL' ? oldValueForInput : key;
+		this.editingCell = true;
+		this.editingCellPath = `r${rowOi}c${colOi}`;
+	};
+	setCellValue = (newValue: unknown, oldValue: unknown, rowOi: number, colOi: number, field: Field<TData>) => {
+		if (newValue === oldValue) return;
+
+		const snapshotRow = $state.snapshot(this.get.data[rowOi]) as TData;
+
+		if (this.set.data && typeof snapshotRow[field] === typeof newValue) {
+			snapshotRow[field] = newValue as TData[Field<TData>];
+			this.set.data[rowOi] = snapshotRow;
+		} else {
+			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
+		}
+	};
+	// ################################## END Cell Edit ##################################################
 
 	// ################################## BEGIN General Methods ####################################################################
 	readonly throttle = <T extends (...args: any[]) => any>(func: T, limit: number): ((...args: Parameters<T>) => void) => {
