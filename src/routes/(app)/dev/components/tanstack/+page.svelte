@@ -1,94 +1,49 @@
 <script lang="ts">
-	import type { ColumnDef } from '$lib/components/base/data-table-tanstack/tanstack';
 	import { BasicDataTable } from '$lib/components/base/data-table-tanstack/provider';
-	import { Head, Page, Header, Main, Footer } from '$lib/components/base/templates';
 
-	type Person = {
-		firstName: string;
-		lastName: string;
-		email: string;
-		age: number;
-		visits: number;
-		status: string;
-		progress: number;
+	import common from '$lib/utils/common';
+	import { type Sources } from '$lib/components/data-table/views';
+	import { createTable } from '$lib/components/data-table/tables.svelte';
+
+	import type { ProducedGrapes } from '$lib/dev/schemaProducedGrapes';
+
+	// initial sources setup
+	const sources: Sources<ProducedGrapes> = {
+		id: 'table22',
+		data: common.generateExampleData(1000),
+		enableVirtualization: true,
+		rowSelection: 'none',
+		rowAction: false,
+		actions: {
+			tableActions: [
+				{ label: 'Ekle', action: 'add' },
+				{ label: 'Seçili Satırları Sil', action: 'delete_all' },
+				{ label: 'Excel', action: 'excel' }
+			],
+			rowActions: [
+				{ label: 'Düzenle', action: 'edit' },
+				{ label: 'Sil', action: 'delete' },
+				{ label: 'Detay', action: 'detail' }
+			]
+		},
+		columns: [
+			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)' },
+			{ field: 'producer', label: 'Producer', width: 'minmax(75px,1fr)', editable: true, hidden: false },
+			{ field: 'province', label: 'Province', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
+			{ field: 'district', label: 'District', width: 'minmax(75px,1fr)', resizeable: true, hidden: true },
+			{ field: 'village', label: 'Village', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
+			{ field: 'grape', label: 'Grape', width: 'minmax(75px,1fr)', resizeable: true },
+			{ field: 'grapeColor', label: 'Grape Color', width: 'minmax(75px,1fr)', hidden: false },
+			{ field: 'quantity', label: 'Quantity', align: 'right', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
+			{ field: 'price', label: 'Price', align: 'right', width: 'minmax(75px,1fr)' },
+			{ field: 'amount', label: 'Amount', align: 'right', width: 'minmax(75px,1fr)' }
+		],
+		footers: [{ order: 'f1' }, { quantity: 'sum' }]
 	};
 
-	function generatePersons(count: number): Person[] {
-		const firstNames = ['tanner', 'tandy', 'joe'];
-		const lastNames = ['linsley', 'miller', 'dirte'];
-		const statuses = ['In Relationship', 'Single', 'Complicated'];
+	const table = createTable<ProducedGrapes>(sources);
 
-		const persons: Person[] = [];
-		for (let i = 0; i < count; i++) {
-			const person: Person = {
-				firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
-				lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-				email: '',
-				age: Math.floor(Math.random() * 60) + 18,
-				visits: Math.floor(Math.random() * 100),
-				status: statuses[Math.floor(Math.random() * statuses.length)],
-				progress: Math.floor(Math.random() * 100)
-			};
-			persons.push(person);
-		}
-		return persons;
-	}
-	const data: Person[] = $state(generatePersons(100));
-
-	const columns: ColumnDef<Person>[] = $state([
-		{
-			accessorKey: 'firstName',
-			cell: (info) => info.getValue(),
-			footer: (info) => info.column.id
-		},
-		{
-			accessorFn: (row) => row.lastName,
-			id: 'lastName',
-			cell: (info) => info.getValue(),
-			header: () => 'Last Name',
-			footer: (info) => info.column.id
-		},
-		{
-			accessorKey: 'email',
-			header: () => 'Email',
-			cell: (info) => info.getValue(),
-			footer: (info) => info.column.id
-		},
-		{
-			accessorKey: 'age',
-			header: () => 'Age',
-			footer: (info) => info.column.id
-		},
-		{
-			accessorKey: 'visits',
-			header: () => 'Visits',
-			footer: (info) => info.column.id
-		},
-		{
-			accessorKey: 'status',
-			header: 'Status',
-			footer: (info) => info.column.id
-		},
-		{
-			accessorKey: 'progress',
-			header: 'Profile Progress',
-			footer: (info) => info.column.id
-		}
-	]);
+	$inspect('$inspect-virtualData', table.virtualData);
 </script>
 
-<Head>
-	<title>TanStack Table - SLC Web Applications</title>
-	<meta name="description" content="TanStack Table - SLC Web Applications" />
-</Head>
-<Page>
-	<Header class="flex gap-10 border-b bg-surface-50">
-		<h1>Page Header</h1>
-	</Header>
-	<Main>
-		<BasicDataTable {data} {columns} />
-	</Main>
-	<Footer class="flex gap-10 border-t bg-surface-50">
-		<p>Footer</p>
-	</Footer>
-</Page>
+<BasicDataTable sources={table.get} />

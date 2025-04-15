@@ -2,8 +2,8 @@
 	import type { Row, Footer, Sources } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
 	import { getTable } from './tables.svelte';
+	import { debounce, throttle } from './utils';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		src: Sources<TData>;
@@ -20,40 +20,78 @@
 
 	const table = getTable<TData>(src.id);
 
-	const virtualScrollAction = (tableNode: HTMLDivElement) => {
-		if (table.get.enableVirtualization === false) return;
+	let cachedClientHeight: number = table?.element?.clientHeight || 0; // İlk yükleme için bir kez oku
 
-		const setScrollTop = async () => {
-			const { scrollTop, clientHeight } = tableNode;
-			if (clientHeight === 0 || !table.isScrollSignificant(scrollTop)) return;
-			await table.setVirtualDataDerivedTrigger(`scroll_${Math.round(scrollTop)}`);
+	const virtualScrollAction = (tableNode: HTMLDivElement) => {
+		// table sağlanmadıysa veya sanallaştırma kapalıysa erken çık
+		if (!table || !table.get.enableVirtualization) {
+			return {
+				destroy() {} // Yine de destroy fonksiyonu döndürmek iyi bir pratik
+			};
+		}
+		cachedClientHeight = tableNode.clientHeight; // İlk yükleme için bir kez oku
+
+		const handleScroll = () => {
+			const { scrollTop } = tableNode;
+
+			// Eğer clientHeight sıfırdan büyükse ve scrollTop ile min pixel farkı varsa
+			if (cachedClientHeight > 0 && table.isMinPixelDiff(scrollTop)) {
+				// Önemliyse veriyi tetikle (await kaldırıldı, genellikle rAF içinde gerekmez)
+				table.setVirtualDataDerivedTrigger(`scroll_${Math.round(scrollTop)}`);
+			}
 		};
 
-		tableNode.addEventListener('scroll', setScrollTop, { passive: true });
+		const throttledScrollHandler = throttle(handleScroll, 60);
+
+		tableNode.addEventListener('scroll', handleScroll, { passive: true });
 
 		return {
 			destroy() {
-				tableNode.removeEventListener('scroll', setScrollTop);
+				tableNode.removeEventListener('scroll', throttledScrollHandler);
 			}
 		};
 	};
 
-	onMount(() => {
-		if (table.get.enableVirtualization === true) {
-			const observer = new ResizeObserver(async (entries) => {
-				for (let entry of entries) {
-					const clientHeight = entry.contentRect.height;
-					if (clientHeight === 0) return;
-					await table.setVirtualDataDerivedTrigger(`height_${Math.round(clientHeight)}`);
-				}
-			});
+	let resizeObserver: ResizeObserver | null = null;
 
-			if (table.element) observer.observe(table.element);
+	// Debounced handler (resize için daha iyi)
+	const debouncedResizeHandler = debounce(() => {
+		// await kaldırıldı
+		table.setVirtualDataDerivedTrigger(`height_${cachedClientHeight}`);
+	}, 60); // Resize sonrası 60ms bekle
 
-			return () => {
-				if (table.element) observer.unobserve(table.element);
-			};
+	$effect(() => {
+		const enabled = table.get.enableVirtualization;
+		const element = table.element; // Element state'ini de dinle
+
+		if (enabled && element) {
+			if (!resizeObserver) {
+				// Zaten varsa tekrar kurma
+				resizeObserver = new ResizeObserver(async (entries) => {
+					for (let entry of entries) {
+						const clientHeight = entry.contentRect.height;
+						if (clientHeight === 0) return;
+						cachedClientHeight = clientHeight;
+						debouncedResizeHandler();
+					}
+				});
+				resizeObserver.observe(element);
+			}
+		} else {
+			if (resizeObserver && element) {
+				resizeObserver.unobserve(element);
+				resizeObserver.disconnect();
+				resizeObserver = null;
+			}
 		}
+
+		return () => {
+			if (resizeObserver && element) {
+				resizeObserver.unobserve(element);
+				resizeObserver.disconnect();
+				resizeObserver = null;
+			}
+		};
 	});
 </script>
 
@@ -118,6 +156,7 @@
 		height: 100%;
 		contain: strict; /* contain özelliği, bir elementin içeriksel sınırlarını belirler ve tarayıcıların bu sınırlar içinde optimizasyon yapmasına olanak tanır. content: Elementin içeriği, boyut, düzen ve stil açısından izole edilir. */
 		content-visibility: auto; /* auto: Tarayıcı, elementin içeriğini yalnızca görünür olduğunda render eder. Bu, performans optimizasyonları yapmasına olanak tanır. */
+		will-change: transform; /* Bunu ekleyin */
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;

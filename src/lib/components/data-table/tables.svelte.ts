@@ -168,7 +168,8 @@ class Table<TData extends Row> {
 			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= rowOverscanStartIndex && focusedCellRowIndex <= rowOverscanEndIndex;
 			if (!isFocusedRowAlreadyIncluded) {
 				// Eğer dahil değilse, odaklanmış satırı al ve ekle
-				const focusedCellRow: TData = $state.snapshot(this.get.data[focusedCellRowIndex]) as TData;
+				const focusedCellRow = this.get.data[focusedCellRowIndex];
+				// const focusedCellRow: TData = $state.snapshot(this.get.data[focusedCellRowIndex]) as TData;
 				if (focusedCellRow) {
 					const rowWithOi = { ...focusedCellRow, oi: focusedCellRowIndex };
 					if (focusedCellRowIndex < rowOverscanStartIndex) {
@@ -194,12 +195,10 @@ class Table<TData extends Row> {
 	};
 
 	private previousScrollTop = 0;
-	readonly isScrollSignificant = (currentScrollTop: number) => {
-		const previousScrollTop = this.previousScrollTop;
+	readonly isMinPixelDiff = (currentScrollTop: number) => {
 		const diff = this.get.tbodyRowHeight * (this.defaultOverscanThreshold - 1);
-		const control = Math.abs(currentScrollTop - previousScrollTop) > diff;
+		const control = Math.abs(currentScrollTop - this.previousScrollTop) > diff;
 		if (control) this.previousScrollTop = currentScrollTop;
-
 		return control;
 	};
 	// ################################## END Vertical Virtual Data ####################################################
