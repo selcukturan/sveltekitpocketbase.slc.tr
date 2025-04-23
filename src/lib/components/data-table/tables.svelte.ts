@@ -85,7 +85,7 @@ class Table<TData extends Row> {
 	readonly headerRowsCount = $derived(this.headerRowsCountState);
 	private setHeaderRowsCount = (value: number) => (this.headerRowsCountState = value);
 
-	private defaultOverscanThreshold = 4;
+	public defaultOverscanThreshold = 4;
 
 	readonly gridTemplateRows = $derived.by(() => {
 		const repeatThead = this.headerRowsCount >= 1 ? `repeat(${this.headerRowsCount}, ${this.get.theadRowHeight}px)` : ``;
@@ -136,6 +136,8 @@ class Table<TData extends Row> {
 	};
 
 	// ################################## BEGIN Vertical Virtual Data ##################################################
+	cachedScrollTop = undefined as number | undefined;
+	cachedClientHeight = undefined as number | undefined;
 	private calculatingVirtualData = false;
 	private virtualDataDerivedTrigger?: string = $state();
 	// derived virtualData. Virtual veriler okurken bu değişken kullanılacak. `table.data`
@@ -145,7 +147,8 @@ class Table<TData extends Row> {
 		const headerRowsHeight = this.headerRowsCount * this.get.theadRowHeight;
 		const footerRowsHeight = this.get.footers.length * this.get.tfootRowHeight;
 		const dataRowHeight = this.get.tbodyRowHeight;
-		const dataLength = this.get.data.length;
+		const rawData = this.get.data;
+		const dataLength = rawData.length; // Sadece uzunluk kontrolü için
 
 		const { rowOverscanStartIndex, rowOverscanEndIndex } = this.findVisibleRowIndexs({ headerRowsHeight, footerRowsHeight, dataRowHeight, dataLength });
 		if (rowOverscanStartIndex == null || rowOverscanEndIndex == null) return [];
@@ -155,7 +158,7 @@ class Table<TData extends Row> {
 		// Görünür aralıktaki verileri işle (slice yok!)
 		for (let i = rowOverscanStartIndex; i <= rowOverscanEndIndex; i++) {
 			// Doğrudan index ile erişim ve snapshot (opsiyonel, satır objesi reaktif değilse gerekmeyebilir)
-			const row = $state.snapshot(this.get.data[i]) as TData;
+			const row = rawData[i];
 			if (row) {
 				processedData.push({ ...row, oi: i });
 			}
@@ -168,7 +171,7 @@ class Table<TData extends Row> {
 			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= rowOverscanStartIndex && focusedCellRowIndex <= rowOverscanEndIndex;
 			if (!isFocusedRowAlreadyIncluded) {
 				// Eğer dahil değilse, odaklanmış satırı al ve ekle
-				const focusedCellRow = this.get.data[focusedCellRowIndex];
+				const focusedCellRow = rawData[focusedCellRowIndex];
 				// const focusedCellRow: TData = $state.snapshot(this.get.data[focusedCellRowIndex]) as TData;
 				if (focusedCellRow) {
 					const rowWithOi = { ...focusedCellRow, oi: focusedCellRowIndex };
@@ -186,20 +189,59 @@ class Table<TData extends Row> {
 	});
 
 	readonly setVirtualDataDerivedTrigger = async (virtualDataDerivedTrigger: string) => {
-		if (this.calculatingVirtualData) return;
+		/* if (this.calculatingVirtualData) return;
 
-		this.calculatingVirtualData = true;
+		this.calculatingVirtualData = true; */
 		this.virtualDataDerivedTrigger = virtualDataDerivedTrigger;
 		await tick();
-		this.calculatingVirtualData = false;
+		/* this.calculatingVirtualData = false; */
 	};
 
-	private previousScrollTop = 0;
-	readonly isMinPixelDiff = (currentScrollTop: number) => {
-		const diff = this.get.tbodyRowHeight * (this.defaultOverscanThreshold - 1);
-		const control = Math.abs(currentScrollTop - this.previousScrollTop) > diff;
-		if (control) this.previousScrollTop = currentScrollTop;
-		return control;
+	private findVisibleRowIndexs: (params: {
+		scrollTop?: number;
+		clientHeight?: number;
+		headerRowsHeight?: number;
+		footerRowsHeight?: number;
+		dataRowHeight?: number;
+		overscanThreshold?: number;
+		dataLength?: number;
+	}) => {
+		rowVisibleStartIndex?: number;
+		rowVisibleEndIndex?: number;
+		rowOverscanStartIndex?: number;
+		rowOverscanEndIndex?: number;
+		overscan: number;
+		currentHeight?: number;
+		dataRowHeight?: number;
+	} = ({ scrollTop, clientHeight, headerRowsHeight, footerRowsHeight, dataRowHeight, overscanThreshold, dataLength }) => {
+		const defaultOverscanThreshold = this.defaultOverscanThreshold;
+
+		if (this.element == null) return { overscan: defaultOverscanThreshold };
+
+		const xScrollTop = scrollTop ?? (this.cachedScrollTop || this.element.scrollTop);
+		const xClientHeight = clientHeight ?? (this.cachedClientHeight || this.element.clientHeight);
+		const xHeaderRowsHeight = headerRowsHeight ?? this.headerRowsCount * this.get.theadRowHeight;
+		const xFooterRowsHeight = footerRowsHeight ?? this.get.footers.length * this.get.tfootRowHeight;
+		const xDataRowHeight = dataRowHeight ?? this.get.tbodyRowHeight;
+		const xOverscanThreshold = typeof overscanThreshold !== 'undefined' && overscanThreshold >= defaultOverscanThreshold ? overscanThreshold : defaultOverscanThreshold;
+		const xDataLength = dataLength ?? this.get.data.length;
+
+		const currentHeight = xClientHeight - xHeaderRowsHeight - xFooterRowsHeight;
+
+		const rowVisibleStartIndex = Math.floor(xScrollTop / xDataRowHeight);
+		const rowVisibleEndIndex = Math.min(xDataLength - 1, Math.floor((xScrollTop + currentHeight) / xDataRowHeight));
+		const rowOverscanStartIndex = Math.max(0, rowVisibleStartIndex - xOverscanThreshold);
+		const rowOverscanEndIndex = Math.min(xDataLength - 1, rowVisibleEndIndex + xOverscanThreshold);
+
+		return {
+			rowVisibleStartIndex,
+			rowVisibleEndIndex,
+			rowOverscanStartIndex,
+			rowOverscanEndIndex,
+			overscan: xOverscanThreshold,
+			currentHeight: currentHeight,
+			dataRowHeight: xDataRowHeight
+		};
 	};
 	// ################################## END Vertical Virtual Data ####################################################
 
@@ -398,52 +440,6 @@ class Table<TData extends Row> {
 					: footer;
 	};
 
-	private findVisibleRowIndexs: (params: {
-		scrollTop?: number;
-		clientHeight?: number;
-		headerRowsHeight?: number;
-		footerRowsHeight?: number;
-		dataRowHeight?: number;
-		overscanThreshold?: number;
-		dataLength?: number;
-	}) => {
-		rowVisibleStartIndex?: number;
-		rowVisibleEndIndex?: number;
-		rowOverscanStartIndex?: number;
-		rowOverscanEndIndex?: number;
-		overscan: number;
-		currentHeight?: number;
-		dataRowHeight?: number;
-	} = ({ scrollTop, clientHeight, headerRowsHeight, footerRowsHeight, dataRowHeight, overscanThreshold, dataLength }) => {
-		const defaultOverscanThreshold = this.defaultOverscanThreshold;
-
-		if (this.element == null) return { overscan: defaultOverscanThreshold };
-
-		const xScrollTop = scrollTop ?? this.element.scrollTop;
-		const xClientHeight = clientHeight ?? this.element.clientHeight;
-		const xHeaderRowsHeight = headerRowsHeight ?? this.headerRowsCount * this.get.theadRowHeight;
-		const xFooterRowsHeight = footerRowsHeight ?? this.get.footers.length * this.get.tfootRowHeight;
-		const xDataRowHeight = dataRowHeight ?? this.get.tbodyRowHeight;
-		const xOverscanThreshold = typeof overscanThreshold !== 'undefined' && overscanThreshold >= defaultOverscanThreshold ? overscanThreshold : defaultOverscanThreshold;
-		const xDataLength = dataLength ?? this.get.data.length;
-
-		const currentHeight = xClientHeight - xHeaderRowsHeight - xFooterRowsHeight;
-
-		const rowVisibleStartIndex = Math.floor(xScrollTop / xDataRowHeight);
-		const rowVisibleEndIndex = Math.min(xDataLength - 1, Math.floor((xScrollTop + currentHeight) / xDataRowHeight));
-		const rowOverscanStartIndex = Math.max(0, rowVisibleStartIndex - xOverscanThreshold);
-		const rowOverscanEndIndex = Math.min(xDataLength - 1, rowVisibleEndIndex + xOverscanThreshold);
-
-		return {
-			rowVisibleStartIndex,
-			rowVisibleEndIndex,
-			rowOverscanStartIndex,
-			rowOverscanEndIndex,
-			overscan: xOverscanThreshold,
-			currentHeight: currentHeight,
-			dataRowHeight: xDataRowHeight
-		};
-	};
 	// ################################## END General Methods ################################################################
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts" generics="TData extends Row">
 	import { getTable, type Sources, type Row } from '$lib/components/data-table/tables.svelte';
 	import { debounce } from '$lib/components/data-table/utils';
+	import { untrack } from 'svelte';
 
 	const { sources: src }: { sources: Sources<TData> } = $props();
 	const table = getTable<TData>(src.id);
@@ -29,6 +30,26 @@
 			const row = table.get.data[i];
 			if (row) {
 				processedData.push({ data: row, oi: i });
+			}
+		}
+
+		const focusedCell = untrack(() => table.getFocusedCell);
+		const focusedCellRowIndex = focusedCell?.rowIndex;
+		if (typeof focusedCellRowIndex === 'number' && focusedCellRowIndex < dataLength) {
+			// Odaklanmış satır zaten işlenen aralıkta mı?
+			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= rowOverscanStartIndex && focusedCellRowIndex <= rowOverscanEndIndex;
+			if (!isFocusedRowAlreadyIncluded) {
+				// Eğer dahil değilse, odaklanmış satırı al ve ekle
+				const focusedCellRow = table.get.data[focusedCellRowIndex];
+				if (focusedCellRow) {
+					const rowWithOi = { data: focusedCellRow, oi: focusedCellRowIndex };
+					if (focusedCellRowIndex < rowOverscanStartIndex) {
+						processedData.unshift(rowWithOi); // Başa ekle
+					} else {
+						// focusedCellRowIndex > endIndex olmalı
+						processedData.push(rowWithOi); // Sona ekle
+					}
+				}
 			}
 		}
 

@@ -20,34 +20,39 @@
 
 	const table = getTable<TData>(src.id);
 
-	let cachedClientHeight: number = table?.element?.clientHeight || 0; // İlk yükleme için bir kez oku
-
 	const virtualScrollAction = (tableNode: HTMLDivElement) => {
-		// table sağlanmadıysa veya sanallaştırma kapalıysa erken çık
-		if (!table || !table.get.enableVirtualization) {
-			return {
-				destroy() {} // Yine de destroy fonksiyonu döndürmek iyi bir pratik
-			};
-		}
-		cachedClientHeight = tableNode.clientHeight; // İlk yükleme için bir kez oku
+		let ticking = false;
+		table.cachedClientHeight = Math.round(tableNode.clientHeight);
+		table.cachedScrollTop = Math.round(tableNode.scrollTop);
 
-		const handleScroll = () => {
-			const { scrollTop } = tableNode;
+		const handleScroll = async () => {
+			if (!ticking) {
+				const newScrollTop = Math.round(tableNode.scrollTop);
+				const cachedScrollTop = table.cachedScrollTop;
+				if (cachedScrollTop != null) {
+					const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
+					const overscan = table.defaultOverscanThreshold;
+					const scrollThreshold = table.get.tbodyRowHeight * (overscan - 1);
 
-			// Eğer clientHeight sıfırdan büyükse ve scrollTop ile min pixel farkı varsa
-			if (cachedClientHeight > 0 && table.isMinPixelDiff(scrollTop)) {
-				// Önemliyse veriyi tetikle (await kaldırıldı, genellikle rAF içinde gerekmez)
-				table.setVirtualDataDerivedTrigger(`scroll_${Math.round(scrollTop)}`);
+					if (scrollDelta > scrollThreshold) {
+						ticking = true;
+						/* requestAnimationFrame(() => { */
+						table.cachedScrollTop = newScrollTop;
+						await table.setVirtualDataDerivedTrigger(`scroll_${newScrollTop}`);
+						ticking = false;
+						/* }); */
+					}
+				}
 			}
 		};
 
-		const throttledScrollHandler = throttle(handleScroll, 60);
+		// const throttledScrollHandler = throttle(handleScroll, 30);
 
 		tableNode.addEventListener('scroll', handleScroll, { passive: true });
 
 		return {
 			destroy() {
-				tableNode.removeEventListener('scroll', throttledScrollHandler);
+				tableNode.removeEventListener('scroll', handleScroll);
 			}
 		};
 	};
@@ -55,10 +60,11 @@
 	let resizeObserver: ResizeObserver | null = null;
 
 	// Debounced handler (resize için daha iyi)
-	const debouncedResizeHandler = debounce(() => {
+	const debouncedResizeHandler = debounce((height: number) => {
 		// await kaldırıldı
-		table.setVirtualDataDerivedTrigger(`height_${cachedClientHeight}`);
-	}, 60); // Resize sonrası 60ms bekle
+		table.cachedClientHeight = height;
+		table.setVirtualDataDerivedTrigger(`height_${height}`);
+	}, 30);
 
 	$effect(() => {
 		const enabled = table.get.enableVirtualization;
@@ -71,8 +77,7 @@
 					for (let entry of entries) {
 						const clientHeight = entry.contentRect.height;
 						if (clientHeight === 0) return;
-						cachedClientHeight = clientHeight;
-						debouncedResizeHandler();
+						debouncedResizeHandler(clientHeight);
 					}
 				});
 				resizeObserver.observe(element);
