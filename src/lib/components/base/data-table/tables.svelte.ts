@@ -1,60 +1,10 @@
 import type { Sources, RequiredSources, Row, FocucedCell, Column, Footer, Field, OnCellFocusChange, OnRowSelectionChange, OnTableAction, OnRowAction, OnActionParams } from './types';
 import { getContext, setContext } from 'svelte';
 import { tick } from 'svelte';
-import { debounce } from './utils';
 
 class Table<TData extends Row> {
-	// ################################## BEGIN Constructor ################################################################
-	element?: HTMLDivElement = $state();
-	private set: Sources<TData> = $state({ id: '', columns: [] }); // orjinal sources. kaynaklar/sources değiştirilirken bu değişken kullanılacak. `table.set`
-	readonly sources = (value: Sources<TData>) => (this.set = value); // Set All Sources Method
-	private resizeObserver: ResizeObserver | null = null;
-	// Debounced handler (resize için daha iyi)
-	private debouncedResizeHandler = debounce((height: number) => {
-		this.cachedClientHeight = Math.round(height);
-		this.updateVisibleIndexes();
-	}, 100);
-	constructor(sources: Sources<TData>) {
-		$effect(() => {
-			const element = this.element;
-
-			if (element) {
-				if (!this.resizeObserver) {
-					// Zaten varsa tekrar kurma
-					this.resizeObserver = new ResizeObserver(async (entries) => {
-						for (let entry of entries) {
-							const height = entry.contentRect.height;
-							if (height > 0) {
-								// height değerini doğrudan parametre olarak geçir
-								this.debouncedResizeHandler(height);
-							}
-						}
-					});
-					this.resizeObserver.observe(element);
-				}
-			} else {
-				if (this.resizeObserver && element) {
-					this.resizeObserver.unobserve(element);
-					this.resizeObserver.disconnect();
-					this.resizeObserver = null;
-				}
-			}
-
-			return () => {
-				if (this.resizeObserver && element) {
-					this.resizeObserver.unobserve(element);
-					this.resizeObserver.disconnect();
-					this.resizeObserver = null;
-				}
-			};
-		});
-
-		this.sources(sources);
-	}
-	// ################################## END Constructor #################################################################
-
 	// ################################## BEGIN Default Sources ############################################################
-	private readonly defaultSources: RequiredSources<TData> = {
+	#defSrc: RequiredSources<TData> = {
 		id: '',
 		data: [],
 		width: '100%',
@@ -72,36 +22,71 @@ class Table<TData extends Row> {
 	};
 	// ################################## END Default Sources ##############################################################
 
-	// ################################## BEGIN Set Sources ################################################################
-	readonly id = (value: RequiredSources<TData>['id']) => (this.set.id = value);
-	readonly data = (value: RequiredSources<TData>['data']) => {
-		this.clearSelectedRows();
-		this.set.data = value;
-	};
-	readonly width = (value: RequiredSources<TData>['width']) => (this.set.width = value);
-	readonly height = (value: RequiredSources<TData>['height']) => (this.set.height = value);
+	// ################################## BEGIN Constructor ################################################################
+	element?: HTMLDivElement = $state();
+	#src: Sources<TData> = $state(this.#defSrc); // orjinal sources. kaynaklar/sources değiştirilirken bu değişken kullanılacak. `table.#src`
+	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
+	#resizeObserver: ResizeObserver | null = null;
 
-	readonly actions = (value: RequiredSources<TData>['actions']) => (this.set.actions = value);
-	readonly rowSelection = (value: RequiredSources<TData>['rowSelection']) => {
-		this.clearSelectedRows();
-		this.set.rowSelection = value;
-	};
-	readonly rowSelectionColumnWidth = (value: RequiredSources<TData>['rowSelectionColumnWidth']) => (this.set.rowSelectionColumnWidth = value);
-	readonly rowAction = (value: RequiredSources<TData>['rowAction']) => (this.set.rowAction = value);
-	readonly rowActionColumnWidth = (value: RequiredSources<TData>['rowActionColumnWidth']) => (this.set.rowActionColumnWidth = value);
-	readonly theadRowHeight = (value: RequiredSources<TData>['theadRowHeight']) => (this.set.theadRowHeight = value);
-	readonly tbodyRowHeight = (value: RequiredSources<TData>['tbodyRowHeight']) => (this.set.tbodyRowHeight = value);
-	readonly tfootRowHeight = (value: RequiredSources<TData>['tfootRowHeight']) => (this.set.tfootRowHeight = value);
-	readonly columns = (value: RequiredSources<TData>['columns']) => (this.set.columns = value);
-	readonly footers = (value: RequiredSources<TData>['footers']) => (this.set.footers = value);
-	// ################################## END Set Sources ##################################################################
+	constructor(sources: Sources<TData>) {
+		this.sources(sources);
 
-	// ################################## BEGIN Properties ################################################################
-	// derived sources. kaynaklar/sources okunurken bu değişken kullanılacak. `table.get`
-	readonly get = $derived({ ...this.defaultSources, ...this.set });
-	// derived columns. kolon bilgileri okunurken bu değişken kullanılacak. `table.visibleColumns`
+		$effect(() => {
+			const currentElement = this.element;
+
+			if (currentElement) {
+				this.#resizeObserver = new ResizeObserver((entries) => {
+					const entry = entries[0];
+					if (entry?.contentRect.height > 0) {
+						this.#debouncedResizeHandler(entry.contentRect.height);
+					}
+				});
+				this.#resizeObserver.observe(currentElement);
+			}
+
+			return () => {
+				this.#resizeObserver?.disconnect();
+				this.#resizeObserver = null;
+			};
+		});
+	}
+	// ################################## END Constructor #################################################################
+
+	// ################################## BEGIN Setter Sources ################################################################
+	readonly setSource = <K extends keyof RequiredSources<TData>>(key: K, value: RequiredSources<TData>[K]) => {
+		// Önce özel işlemler için kontrolleri yapalım
+		if (key === 'data' || key === 'rowSelection') {
+			this.clearSelectedRows();
+		}
+		if (key === 'tbodyRowHeight') {
+			this.updateVisibleIndexes(true);
+		}
+
+		// Değeri güncelleyelim (tip güvenli olarak)
+		this.#src[key] = value;
+	};
+	// ################################## END Setter Sources ##################################################################
+
+	// ################################## BEGIN Getter Sources ################################################################
+	readonly srcId = $derived(this.#src.id || this.#defSrc.id);
+	readonly srcData = $derived(this.#src.data || this.#defSrc.data);
+	readonly srcWidth = $derived(this.#src.width || this.#defSrc.width);
+	readonly srcHeight = $derived(this.#src.height || this.#defSrc.height);
+	readonly srcRowSelection = $derived(this.#src.rowSelection || this.#defSrc.rowSelection);
+	readonly srcRowSelectionColumnWidth = $derived(this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth);
+	readonly srcActions = $derived(this.#src.actions || this.#defSrc.actions);
+	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
+	readonly srcRowActionColumnWidth = $derived(this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth);
+	readonly srcTheadRowHeight = $derived(this.#src.theadRowHeight || this.#defSrc.theadRowHeight);
+	readonly srcTbodyRowHeight = $derived(this.#src.tbodyRowHeight || this.#defSrc.tbodyRowHeight);
+	readonly srcTfootRowHeight = $derived(this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight);
+	readonly srcColumns = $derived(this.#src.columns || this.#defSrc.columns);
+	readonly srcFooters = $derived(this.#src.footers || this.#defSrc.footers);
+	// ################################## END Getter Sources ################################################################
+
+	// ################################## BEGIN Getter Visible Columns ###############################################################
 	readonly visibleColumns = $derived.by(() => {
-		const columns = this.get.columns;
+		const columns = this.srcColumns;
 
 		const processedColumns: Array<{ data: Column<TData>; coi: number }> = [];
 
@@ -114,34 +99,26 @@ class Table<TData extends Row> {
 
 		return processedColumns;
 	});
-	// ################################## END Properties ###############################################################
+	// ################################## END Getter Visible Columns ###############################################################
 
 	// ################################## BEGIN General Variables ######################################################
-	#test = $state('test');
-	get test() {
-		return this.#test;
-	}
-	set test(v) {
-		this.#test = v;
+	#defaultOverscanThreshold = 4;
+	#headerRowsCountState = $state(1);
+	get headerRowsCountState() {
+		return this.#headerRowsCountState;
 	}
 
-	private headerRowsCountState = $state(1);
-	readonly headerRowsCount = $derived(this.headerRowsCountState);
-	private setHeaderRowsCount = (value: number) => (this.headerRowsCountState = value);
-
-	private defaultOverscanThreshold = 4;
-
-	readonly gridTemplateRows = $derived.by(() => {
-		const repeatThead = this.headerRowsCount >= 1 ? `repeat(${this.headerRowsCount}, ${this.get.theadRowHeight}px)` : ``;
-		const repeatTbody = this.get.data.length > 0 ? `repeat(${this.get.data.length}, ${this.get.tbodyRowHeight}px)` : ``;
-		const repeatTfoot = this.get.footers.length > 0 ? `repeat(${this.get.footers.length}, ${this.get.tfootRowHeight}px)` : ``;
+	readonly #gridTemplateRows = $derived.by(() => {
+		const repeatThead = this.headerRowsCountState >= 1 ? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)` : ``;
+		const repeatTbody = this.srcData.length > 0 ? `repeat(${this.srcData.length}, ${this.srcTbodyRowHeight}px)` : ``;
+		const repeatTfoot = this.srcFooters.length > 0 ? `repeat(${this.srcFooters.length}, ${this.srcTfootRowHeight}px)` : ``;
 		return `${repeatThead} ${repeatTbody} ${repeatTfoot}`;
 	});
 
-	readonly gridTemplateColumns = $derived(
-		`${this.get.rowSelection !== 'none' ? this.get.rowSelectionColumnWidth + 'px' : ''} 
+	readonly #gridTemplateColumns = $derived(
+		`${this.srcRowSelection !== 'none' ? this.srcRowSelectionColumnWidth + 'px' : ''} 
 		${this.visibleColumns.map((col) => col.data.width ?? `150px`).join(' ')} 
-		${this.get.rowAction ? this.get.rowActionColumnWidth + 'px' : ''}`
+		${this.srcRowAction ? this.srcRowActionColumnWidth + 'px' : ''}`
 	);
 	// ################################## END General Variables ########################################################
 
@@ -171,6 +148,7 @@ class Table<TData extends Row> {
 		if (this.onTableActionRun != null) this.onTableActionRun(params);
 	};
 	// ################################## END Events ############################################################
+
 	readonly actionTrigger = (params: OnActionParams) => {
 		if (params.type === 'row') {
 			this.onRowActionThis(params);
@@ -180,10 +158,13 @@ class Table<TData extends Row> {
 	};
 
 	// ################################## BEGIN Vertical Virtual Data ##################################################
-	focusedCellState?: FocucedCell = $state();
+	#focusedCellState?: FocucedCell = $state();
+	get focusedCellState() {
+		return this.#focusedCellState;
+	}
 	cachedScrollTop = undefined as number | undefined;
 	cachedClientHeight = undefined as number | undefined;
-	rowIndices = $state.raw({
+	#rowIndices = $state.raw({
 		visibleStart: undefined as number | undefined,
 		visibleEnd: undefined as number | undefined,
 		overscanStart: undefined as number | undefined,
@@ -192,6 +173,9 @@ class Table<TData extends Row> {
 		clientHeight: undefined as number | undefined,
 		focusedCellRowIndex: undefined as number | undefined
 	});
+	get rowIndices() {
+		return this.#rowIndices;
+	}
 
 	readonly updateVisibleIndexes = (force: boolean = false) => {
 		// 1. Cache Değerleri.
@@ -205,7 +189,7 @@ class Table<TData extends Row> {
 		}
 
 		// 3. Mevcut Index Değerleri. Odaklanmış Satır Değişti mi?
-		const currentIndices = this.rowIndices;
+		const currentIndices = this.#rowIndices;
 		const focusedChanged = focusedCellRowIndex !== currentIndices.focusedCellRowIndex;
 
 		// 4. Erken Çıkış Kontrolü
@@ -216,17 +200,17 @@ class Table<TData extends Row> {
 		//############################### Eğer buraya geldiysek *YA* scroll/boyut değişti *YA* güncelleme zorlandı *YA DA* odaklanmış satır değişti.
 
 		// 5. Hesaplama İçin Gerekli Değerler
-		const headerRowsHeight = this.headerRowsCount * this.get.theadRowHeight;
-		const footerRowsHeight = this.get.footers.length * this.get.tfootRowHeight;
-		const dataRowHeight = this.get.tbodyRowHeight;
-		const dataLength = this.get.data.length;
-		const overscanThreshold = this.defaultOverscanThreshold;
+		const headerRowsHeight = this.headerRowsCountState * this.srcTheadRowHeight;
+		const footerRowsHeight = this.srcFooters.length * this.srcTfootRowHeight;
+		const dataRowHeight = this.srcTbodyRowHeight;
+		const dataLength = this.srcData.length;
+		const overscanThreshold = this.#defaultOverscanThreshold;
 
 		// 6. Erken Çıkış Kontrolü (Veri Yok veya Satır Yüksekliği Geçersizse Resetle).
 		if (dataLength === 0 || dataRowHeight <= 0) {
 			// Sadece mevcut state resetlenmemişse resetle.
-			if (this.rowIndices.visibleStart !== undefined || this.rowIndices.overscanStart !== undefined) {
-				this.rowIndices = {
+			if (this.#rowIndices.visibleStart !== undefined || this.#rowIndices.overscanStart !== undefined) {
+				this.#rowIndices = {
 					visibleStart: undefined,
 					visibleEnd: undefined,
 					overscanStart: undefined,
@@ -255,7 +239,7 @@ class Table<TData extends Row> {
 
 		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa
 		if (indicesChanged || force || (focusedChanged && !isFocusedRowAlreadyIncluded)) {
-			this.rowIndices = {
+			this.#rowIndices = {
 				visibleStart: visibleStartIndex,
 				visibleEnd: visibleEndIndex,
 				overscanStart: overscanStartIndex,
@@ -270,10 +254,10 @@ class Table<TData extends Row> {
 	};
 
 	readonly virtualData = $derived.by(() => {
-		const startIndex = this.rowIndices.overscanStart;
-		const endIndex = this.rowIndices.overscanEnd;
-		const focusedCellRowIndex = this.rowIndices.focusedCellRowIndex;
-		const rawData = this.get.data;
+		const startIndex = this.#rowIndices.overscanStart;
+		const endIndex = this.#rowIndices.overscanEnd;
+		const focusedCellRowIndex = this.#rowIndices.focusedCellRowIndex;
+		const rawData = this.srcData;
 		const dataLength = rawData.length; // Sadece uzunluk kontrolü için
 
 		// Geçerli indexler yoksa veya data yoksa boş dizi
@@ -288,7 +272,7 @@ class Table<TData extends Row> {
 			}
 		}
 
-		if (typeof focusedCellRowIndex === 'number' && focusedCellRowIndex < dataLength) {
+		if (focusedCellRowIndex != null && focusedCellRowIndex < dataLength) {
 			// Odaklanmış satır zaten işlenen aralıkta mı?
 			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= startIndex && focusedCellRowIndex <= endIndex;
 			if (!isFocusedRowAlreadyIncluded) {
@@ -309,7 +293,7 @@ class Table<TData extends Row> {
 		return processedData;
 	});
 
-	tableVirtualScrollAction = (tableNode: HTMLDivElement) => {
+	virtualScrollAction = (tableNode: HTMLDivElement) => {
 		let ticking = false;
 
 		this.cachedClientHeight = Math.round(tableNode.clientHeight);
@@ -320,8 +304,8 @@ class Table<TData extends Row> {
 				const newScrollTop = Math.round(tableNode.scrollTop);
 				const cachedScrollTop = this.cachedScrollTop ?? 0;
 				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-				const overscan = Math.max(1, this.defaultOverscanThreshold - 1);
-				const scrollThreshold = this.get.tbodyRowHeight * overscan;
+				const overscan = Math.max(1, this.#defaultOverscanThreshold - 1);
+				const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
 				if (scrollDelta > scrollThreshold) {
 					ticking = true;
@@ -355,14 +339,14 @@ class Table<TData extends Row> {
 	// Public methods with business logic
 	// Bir satırın seçimini değiştirir
 	readonly toggleRowSelection = async (rowIndex: number) => {
-		if (this.get.rowSelection === 'none') return;
+		if (this.srcRowSelection === 'none') return;
 
 		const selectedRows = this.getSelectedRows;
 		const index = selectedRows.indexOf(rowIndex);
 
-		if (this.get.rowSelection === 'single') {
+		if (this.srcRowSelection === 'single') {
 			this.setSelectedRows(index === -1 ? [rowIndex] : []);
-		} else if (this.get.rowSelection === 'multiple') {
+		} else if (this.srcRowSelection === 'multiple') {
 			if (index === -1) {
 				this.setSelectedRows([...selectedRows, rowIndex]);
 			} else {
@@ -376,10 +360,10 @@ class Table<TData extends Row> {
 
 	// Tüm satırları seçer veya seçimi kaldırır
 	readonly toggleAllRows = async (select: boolean) => {
-		if (this.get.rowSelection !== 'multiple') return;
+		if (this.srcRowSelection !== 'multiple') return;
 
 		if (select) {
-			this.setSelectedRows(Array.from({ length: this.get.data.length }, (_, i) => i)); // Tüm satırları seç
+			this.setSelectedRows(Array.from({ length: this.srcData.length }, (_, i) => i)); // Tüm satırları seç
 		} else {
 			this.clearSelectedRows(); // Tüm seçimleri kaldır
 		}
@@ -404,7 +388,7 @@ class Table<TData extends Row> {
 		}
 	};
 	createCellInput = (key: string, rowOi: number, colOi: number, field: Field<TData>) => {
-		const snapshotRow = $state.snapshot(this.get.data[rowOi]) as TData;
+		const snapshotRow = $state.snapshot(this.srcData[rowOi]) as TData;
 		const oldValue = snapshotRow[field];
 		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
 		this.editingCellOldValue = oldValueForInput;
@@ -415,98 +399,18 @@ class Table<TData extends Row> {
 	setCellValue = (newValue: unknown, oldValue: unknown, rowOi: number, colOi: number, field: Field<TData>) => {
 		if (newValue === oldValue) return;
 
-		const snapshotRow = $state.snapshot(this.get.data[rowOi]) as TData;
+		const snapshotRow = $state.snapshot(this.srcData[rowOi]) as TData;
 
-		if (this.set.data && typeof snapshotRow[field] === typeof newValue) {
+		if (this.#src.data && typeof snapshotRow[field] === typeof newValue) {
 			snapshotRow[field] = newValue as TData[Field<TData>];
-			this.set.data[rowOi] = snapshotRow;
+			this.#src.data[rowOi] = snapshotRow;
 		} else {
 			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
 		}
 	};
 	// ################################## END Cell Edit ##################################################
-
-	// ################################## BEGIN General Methods ####################################################################
-
-	readonly setColumnWidth = (ci: number, min: number, width: number) => {
-		this.set.columns[ci].width = `${Math.max(min, width)}px`;
-	};
-	readonly getFooter = ({ field, foot }: { field: Field<TData>; foot: Footer<TData> }): number | string => {
-		const footer = foot[field]; // sum, avg, count or footer content
-		if (footer == null) return '';
-
-		return footer === 'count'
-			? this.get.data.length
-			: footer === 'avg'
-				? this.get.data.reduce((acc, row) => {
-						const value = row[field];
-						return typeof value === 'number' ? acc + value : acc;
-					}, 0) / this.get.data.length
-				: footer === 'sum'
-					? this.get.data.reduce((acc, row) => {
-							const value = row[field];
-							return typeof value === 'number' ? acc + value : acc;
-						}, 0)
-					: footer;
-	};
-
-	// ################################## END General Methods ################################################################
-
-	// ################################## BEGIN Attr ################################################################
-	attr = $derived({
-		role: 'grid',
-		class: 'slc-table',
-		style: `
-			grid-template-rows: ${this.gridTemplateRows};
-			grid-template-columns: ${this.gridTemplateColumns};
-			scroll-padding-block-start: ${this.headerRowsCount > 0 ? `${this.headerRowsCount * this.get.theadRowHeight}px` : 'unset'};
-			scroll-padding-block-end: ${this.get.footers.length > 0 ? `${this.get.footers.length * this.get.tfootRowHeight}px` : 'unset'};
-			scroll-padding-inline-start: ${this.focusedCellState?.colIndex === -1 || this.get.rowSelection === 'none' ? 'unset' : `${this.get.rowSelectionColumnWidth}px`};
-			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.get.rowAction === false ? 'unset' : `${this.get.rowActionColumnWidth}px`};
-			
-		`,
-		'aria-colcount': this.visibleColumns.length,
-		'aria-rowcount': this.get.data.length + this.get.footers.length + this.headerRowsCount
-	});
-	attr_trh = {
-		role: 'row',
-		class: 'slc-table-trh',
-		style: `display: contents;`,
-		'aria-rowindex': 1
-	};
-	attr_th = {
-		role: 'columnheader',
-		class: 'slc-table-th',
-		style: `grid-row-start: 1;`
-	};
-	attr_trd = {
-		role: 'row',
-		class: 'slc-table-trd',
-		style: `display: contents;`
-	};
-	attr_td = {
-		/* role: 'gridcell', */
-		class: 'slc-table-td'
-	};
-	attr_trf = {
-		role: 'row',
-		class: 'slc-table-trf',
-		style: `display: contents;`
-	};
-	attr_tf = {
-		role: 'gridcell',
-		class: 'slc-table-tf'
-	};
-	// ################################## END Attr ################################################################
-
 	// ################################## BEGIN Actions ################################################################
-	tdFocusAction = (
-		node: HTMLDivElement,
-		originalCell: {
-			rowIndex: number;
-			colIndex: number;
-		}
-	) => {
+	tdFocusAction = (node: HTMLDivElement, originalCell: { rowIndex: number; colIndex: number }) => {
 		const mousedown = (e: Event) => {
 			const cellToFocus: Required<FocucedCell> = {
 				rowIndex: originalCell.rowIndex,
@@ -517,11 +421,17 @@ class Table<TData extends Row> {
 
 			if (cellToFocus.originalCell === this.focusedCellState?.originalCell) return;
 
-			this.focusedCellState = cellToFocus;
+			this.#focusedCellState = cellToFocus;
 			this.updateVisibleIndexes();
+			tick().then(() => {
+				node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+				node.focus({ preventScroll: true });
+			});
+		};
 
-			node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-			node.focus({ preventScroll: true });
+		const click = (e: MouseEvent) => {
+			e.stopPropagation();
+			e.preventDefault();
 		};
 
 		let ticking = false;
@@ -581,9 +491,9 @@ class Table<TData extends Row> {
 				const initialOriginalCell = cellToFocus.originalCell;
 
 				const rowFirstIndex = 0;
-				const rowLastIndex = this.get.data.length - 1;
-				const colFirstIndex = this.get.rowSelection !== 'none' ? -1 : 0;
-				const colLastIndex = this.get.rowAction ? this.visibleColumns.length : this.visibleColumns.length - 1;
+				const rowLastIndex = this.srcData.length - 1;
+				const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
+				const colLastIndex = this.srcRowAction ? this.visibleColumns.length : this.visibleColumns.length - 1;
 
 				let forceUpdate = false;
 
@@ -624,16 +534,16 @@ class Table<TData extends Row> {
 						cellToFocus.colIndex = colLastIndex;
 					}
 				} else if (key === 'PageUp') {
-					const visibleEnd = this.rowIndices.visibleEnd;
-					const visibleStart = this.rowIndices.visibleStart;
+					const visibleEnd = this.#rowIndices.visibleEnd;
+					const visibleStart = this.#rowIndices.visibleStart;
 					if (visibleEnd == null || visibleStart == null) return;
 
 					const index = cellToFocus.rowIndex - (visibleEnd - visibleStart);
 					cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
 					forceUpdate = true;
 				} else if (key === 'PageDown') {
-					const visibleEnd = this.rowIndices.visibleEnd;
-					const visibleStart = this.rowIndices.visibleStart;
+					const visibleEnd = this.#rowIndices.visibleEnd;
+					const visibleStart = this.#rowIndices.visibleStart;
 					if (visibleEnd == null || visibleStart == null) return;
 
 					const index = cellToFocus.rowIndex + (visibleEnd - visibleStart);
@@ -648,7 +558,7 @@ class Table<TData extends Row> {
 					return; // Odaklanmış hücre değişmedi, çık
 				}
 
-				this.focusedCellState = cellToFocus;
+				this.#focusedCellState = cellToFocus;
 				this.updateVisibleIndexes(forceUpdate);
 				tick().then(() => {
 					const nextFocusedCellNode = this.element?.querySelector<HTMLDivElement>('.slc-table-td-focused');
@@ -663,15 +573,150 @@ class Table<TData extends Row> {
 
 		node.addEventListener('keydown', keydown);
 		node.addEventListener('mousedown', mousedown);
+		node.addEventListener('click', click);
 
 		return {
 			destroy() {
 				node.removeEventListener('keydown', keydown);
 				node.removeEventListener('mousedown', mousedown);
+				node.removeEventListener('click', click);
 			}
 		};
 	};
 	// ################################## END Actions ################################################################
+
+	// ################################## BEGIN Utils ############################################################
+	debounce = <This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+		const debounced = function (this: This, ...args: Args): void {
+			const context = this;
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+			timeoutId = setTimeout(() => {
+				timeoutId = null;
+				func.apply(context, args);
+			}, delay);
+		};
+		debounced.cancel = (): void => {
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+			timeoutId = null;
+		};
+		return debounced;
+	};
+	// ################################## END Utils ############################################################
+
+	// ################################## BEGIN General Methods ####################################################################
+	readonly setColumnWidth = (ci: number, min: number, width: number) => {
+		this.#src.columns[ci].width = `${Math.max(min, width)}px`;
+	};
+	readonly getFooter = ({ field, foot }: { field: Field<TData>; foot: Footer<TData> }): number | string => {
+		const footer = foot[field]; // sum, avg, count or footer content
+		if (footer == null) return '';
+
+		return footer === 'count'
+			? this.srcData.length
+			: footer === 'avg'
+				? this.srcData.reduce((acc, row) => {
+						const value = row[field];
+						return typeof value === 'number' ? acc + value : acc;
+					}, 0) / this.srcData.length
+				: footer === 'sum'
+					? this.srcData.reduce((acc, row) => {
+							const value = row[field];
+							return typeof value === 'number' ? acc + value : acc;
+						}, 0)
+					: footer;
+	};
+	// Debounced handler (resize için daha iyi)
+	#debouncedResizeHandler = this.debounce((height: number) => {
+		this.cachedClientHeight = Math.round(height);
+		this.updateVisibleIndexes();
+	}, 100);
+	// ################################## END General Methods ################################################################
+
+	// ################################## BEGIN Attr ################################################################
+	attr_main = $derived({
+		class: 'slc-table-main',
+		style: `
+			width: ${this.srcWidth};
+			height: ${this.srcHeight};
+		`
+	});
+	attr_container = {
+		class: 'slc-table-container'
+	};
+	attr = $derived({
+		role: 'grid',
+		class: 'slc-table',
+		style: `
+			grid-template-rows: ${this.#gridTemplateRows};
+			grid-template-columns: ${this.#gridTemplateColumns};
+			scroll-padding-block-start: ${this.headerRowsCountState > 0 ? `${this.headerRowsCountState * this.srcTheadRowHeight}px` : 'unset'};
+			scroll-padding-block-end: ${this.srcFooters.length > 0 ? `${this.srcFooters.length * this.srcTfootRowHeight}px` : 'unset'};
+			scroll-padding-inline-start: ${this.focusedCellState?.colIndex === -1 || this.srcRowSelection === 'none' ? 'unset' : `${this.srcRowSelectionColumnWidth}px`};
+			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.srcRowAction === false ? 'unset' : `${this.srcRowActionColumnWidth}px`};			
+		`,
+		'aria-colcount': this.visibleColumns.length,
+		'aria-rowcount': this.srcData.length + this.srcFooters.length + this.headerRowsCountState
+	});
+	attr_trh = {
+		role: 'row',
+		class: 'slc-table-trh',
+		style: `display: contents;`
+	};
+	attr_th = {
+		role: 'columnheader',
+		class: 'slc-table-th',
+		style: `grid-row-start: 1;`
+	};
+	attr_th_selection = {
+		role: 'columnheader',
+		class: 'slc-table-th slc-table-th-selection',
+		style: `grid-row-start: 1;`
+	};
+	attr_th_action = {
+		role: 'columnheader',
+		class: 'slc-table-th slc-table-th-action',
+		style: `grid-row-start: 1;`
+	};
+	attr_trd = {
+		role: 'row',
+		class: 'slc-table-trd',
+		style: `display: contents;`
+	};
+	attr_td = {
+		/* role: 'gridcell', */
+		class: 'slc-table-td'
+	};
+	attr_td_selection = {
+		/* role: 'gridcell', */
+		class: 'slc-table-td slc-table-td-selection'
+	};
+	attr_td_action = {
+		/* role: 'gridcell', */
+		class: 'slc-table-td slc-table-td-action'
+	};
+	attr_trf = {
+		role: 'row',
+		class: 'slc-table-trf',
+		style: `display: contents;`
+	};
+	attr_tf = {
+		role: 'gridcell',
+		class: 'slc-table-tf'
+	};
+	attr_tf_selection = {
+		role: 'gridcell',
+		class: 'slc-table-tf slc-table-tf-selection'
+	};
+	attr_tf_action = {
+		role: 'gridcell',
+		class: 'slc-table-tf slc-table-tf-action'
+	};
+	// ################################## END Attr ################################################################
 }
 
 // ################################## BEGIN Export Table Context ###############################################################

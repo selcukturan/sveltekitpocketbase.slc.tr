@@ -96,10 +96,10 @@
 	/* .s:global(.s .slc-row-odd[data-scope='trd']) {
 		background-color: color-mix(in srgb, hsl(var(--surface-100)) 90%, hsl(var(--surface-50)) 10%);
 	} */
-	.s:global(.s .slc-row-odd[data-scope='trd']:hover),
+	/* .s:global(.s .slc-row-odd[data-scope='trd']:hover),
 	.s:global(.s [data-scope='trd']:hover) {
 		background-color: color-mix(in srgb, hsl(var(--surface-200)) 70%, hsl(var(--surface-50)) 30%);
-	}
+	} */
 	.s:global(.s [data-scope='trd'][aria-selected='true']) {
 		background-color: hsl(var(--primary-200)) !important;
 	}

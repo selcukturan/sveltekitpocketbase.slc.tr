@@ -27,7 +27,7 @@
 
 	const table = getTable<TData>(src.id);
 
-	const row_oi = $derived(table.get.enableVirtualization === false ? ri : row?.oi);
+	const row_oi = $derived(table.get.enableVirtualization === false ? ri : ri);
 
 	const col: Column<TData> = { field: '_action', align: 'center' };
 

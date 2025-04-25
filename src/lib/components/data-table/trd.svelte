@@ -14,7 +14,7 @@
 
 	const table = getTable<TData>(src.id);
 
-	const row_oi = $derived(table.get.enableVirtualization === false ? ri : (row.oi ?? 0));
+	const row_oi = $derived(table.get.enableVirtualization === false ? ri : ri);
 	const indexToRow = 1;
 	const ariaRowIndex = $derived(row_oi + table.headerRowsCount + indexToRow);
 

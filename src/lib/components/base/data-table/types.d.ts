@@ -2,7 +2,7 @@ export type RowKey = string;
 export type RowValue = unknown;
 export type Row = Record<RowKey, RowValue>;
 
-export type Field<TData> = Extract<keyof TData, RowKey> | '_selection' | '_action';
+export type Field<TData> = Extract<keyof TData, RowKey>;
 
 // 100px | 1.25fr | minmax(100px,1.25fr) | minmax(1.25fr,100px) | minmax(1fr,1.25fr) | minmax(100px,200px)
 export type Width =

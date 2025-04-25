@@ -2,6 +2,7 @@
 	import type { Row, Footer, Sources } from './types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import { tick } from 'svelte';
 	import { getTable } from './tables.svelte';
 	import { debounce, throttle } from './utils';
 
@@ -22,31 +23,30 @@
 
 	const virtualScrollAction = (tableNode: HTMLDivElement) => {
 		let ticking = false;
+
 		table.cachedClientHeight = Math.round(tableNode.clientHeight);
 		table.cachedScrollTop = Math.round(tableNode.scrollTop);
 
-		const handleScroll = async () => {
+		const handleScroll = () => {
 			if (!ticking) {
 				const newScrollTop = Math.round(tableNode.scrollTop);
-				const cachedScrollTop = table.cachedScrollTop;
-				if (cachedScrollTop != null) {
-					const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-					const overscan = table.defaultOverscanThreshold;
-					const scrollThreshold = table.get.tbodyRowHeight * (overscan - 1);
+				const cachedScrollTop = table.cachedScrollTop ?? 0;
+				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
+				const overscan = Math.max(1, table.defaultOverscanThreshold - 1);
+				const scrollThreshold = table.get.tbodyRowHeight * overscan;
 
-					if (scrollDelta > scrollThreshold) {
-						ticking = true;
-						/* requestAnimationFrame(() => { */
-						table.cachedScrollTop = newScrollTop;
-						await table.setVirtualDataDerivedTrigger(`scroll_${newScrollTop}`);
+				if (scrollDelta > scrollThreshold) {
+					ticking = true;
+					/* requestAnimationFrame(() => { */
+					table.cachedScrollTop = newScrollTop;
+					table.updateVisibleIndexes();
+					tick().then(() => {
 						ticking = false;
-						/* }); */
-					}
+					});
+					/* }); */
 				}
 			}
 		};
-
-		// const throttledScrollHandler = throttle(handleScroll, 30);
 
 		tableNode.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -63,7 +63,7 @@
 	const debouncedResizeHandler = debounce((height: number) => {
 		// await kaldırıldı
 		table.cachedClientHeight = height;
-		table.setVirtualDataDerivedTrigger(`height_${height}`);
+		// table.setVirtualDataDerivedTrigger(`height_${height}`);
 	}, 30);
 
 	$effect(() => {
@@ -124,15 +124,9 @@
 		>
 			{@render thead?.()}
 
-			{#if table.get.enableVirtualization === true}
-				{#each table.virtualData as row, rowindex (row.oi)}
-					{@render tbody?.(row, rowindex)}
-				{/each}
-			{:else}
-				{#each table.get.data as row, rowindex (rowindex)}
-					{@render tbody?.(row, rowindex)}
-				{/each}
-			{/if}
+			{#each table.virtualData as rowWrapper, rowindex (rowWrapper.roi)}
+				{@render tbody?.(rowWrapper.data, rowWrapper.roi)}
+			{/each}
 
 			{#if table.get.data.length > 0}
 				{#each table.get.footers as foot, footerindex (footerindex)}
@@ -149,11 +143,13 @@
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
+		contain: inline-size;
 	}
 	.slc-table-container {
 		position: relative;
 		flex: 1 1 0%;
 		overflow: hidden;
+		contain: inline-size;
 	}
 	[data-scope='table'] {
 		display: grid;

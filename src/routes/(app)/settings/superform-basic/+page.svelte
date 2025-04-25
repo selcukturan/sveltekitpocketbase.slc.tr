@@ -9,8 +9,8 @@
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
 		data: common.generateExampleData(1000),
-		rowSelection: 'none',
-		rowAction: false,
+		rowSelection: 'single',
+		rowAction: true,
 		actions: {
 			tableActions: [
 				{ label: 'Ekle', action: 'add' },
@@ -41,7 +41,6 @@
 	const table = createTable<ProducedGrapes>(sources);
 
 	$inspect('$inspect-rowIndices', table.rowIndices);
-	// $inspect('$inspect-virtualData', table.virtualData);
 </script>
 
 <DataTable {sources} />

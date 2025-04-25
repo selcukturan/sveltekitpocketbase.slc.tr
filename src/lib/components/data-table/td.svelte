@@ -17,7 +17,7 @@
 
 	const table = getTable<TData>(src.id);
 
-	const row_oi = $derived(table.get.enableVirtualization === false ? ri : row.oi);
+	const row_oi = $derived(table.get.enableVirtualization === false ? ri : ri);
 	const originalCell = $derived(`${row_oi}_${ci}`);
 	const indexToRow = 1;
 	const gridRowStart = $derived(typeof row_oi === 'number' ? row_oi + table.headerRowsCount + indexToRow : 0);
@@ -26,7 +26,7 @@
 		if (row_oi == null) return;
 		const cellToFocus: Required<FocucedCell> = { rowIndex: row_oi, colIndex: ci, originalCell: `${row_oi}_${ci}`, tabIndex: 0 };
 		if (cellToFocus.originalCell === table.getFocusedCell?.originalCell) return;
-		await table.focusCell({ cellToFocus });
+		// await table.focusCell({ cellToFocus });
 	};
 
 	const onkeydown = (e: KeyboardEvent) => {
@@ -130,10 +130,10 @@
 				cellToFocus.colIndex = colLastIndex;
 				navigationHappened = true;
 			} else if (key === 'PageUp') {
-				cellToFocus.rowIndex = Math.max(rowFirstIndex, table.getPageUpRowIndex() || rowFirstIndex);
+				// cellToFocus.rowIndex = Math.max(rowFirstIndex, table.getPageUpRowIndex() || rowFirstIndex);
 				navigationHappened = true;
 			} else if (key === 'PageDown') {
-				cellToFocus.rowIndex = Math.min(rowLastIndex, table.getPageDownRowIndex() || rowLastIndex);
+				// cellToFocus.rowIndex = Math.min(rowLastIndex, table.getPageDownRowIndex() || rowLastIndex);
 				navigationHappened = true;
 			}
 

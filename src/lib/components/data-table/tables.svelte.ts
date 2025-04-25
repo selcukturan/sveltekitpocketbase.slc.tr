@@ -136,50 +136,127 @@ class Table<TData extends Row> {
 	};
 
 	// ################################## BEGIN Vertical Virtual Data ##################################################
+	focusedCellState?: FocucedCell = $state();
 	cachedScrollTop = undefined as number | undefined;
 	cachedClientHeight = undefined as number | undefined;
-	private calculatingVirtualData = false;
-	private virtualDataDerivedTrigger?: string = $state();
-	// derived virtualData. Virtual veriler okurken bu değişken kullanılacak. `table.data`
-	readonly virtualData = $derived.by(() => {
-		if (this.get.enableVirtualization === false || this.element == null || this.virtualDataDerivedTrigger == null) return [];
+	rowIndices = $state.raw({
+		visibleStart: undefined as number | undefined,
+		visibleEnd: undefined as number | undefined,
+		overscanStart: undefined as number | undefined,
+		overscanEnd: undefined as number | undefined,
+		scrollTop: undefined as number | undefined,
+		clientHeight: undefined as number | undefined,
+		focusedCellRowIndex: undefined as number | undefined
+	});
 
+	readonly updateVisibleIndexes = (force: boolean = false) => {
+		// 1. Cache Değerleri.
+		const scrollTop = this.cachedScrollTop;
+		const clientHeight = this.cachedClientHeight;
+		const focusedCellRowIndex = this.focusedCellState?.rowIndex;
+
+		// 2. Erken Çıkış Kontrolü.
+		if (scrollTop == null || clientHeight == null) {
+			return;
+		}
+
+		// 3. Mevcut Index Değerleri. Odaklanmış Satır Değişti mi?
+		const currentIndices = this.rowIndices;
+		const focusedChanged = focusedCellRowIndex !== currentIndices.focusedCellRowIndex;
+
+		// 4. Erken Çıkış Kontrolü
+		if (currentIndices.scrollTop === scrollTop && currentIndices.clientHeight === clientHeight && !force && !focusedChanged) {
+			return;
+		}
+
+		//############################### Eğer buraya geldiysek *YA* scroll/boyut değişti *YA* güncelleme zorlandı *YA DA* odaklanmış satır değişti.
+
+		// 5. Hesaplama İçin Gerekli Değerler
 		const headerRowsHeight = this.headerRowsCount * this.get.theadRowHeight;
 		const footerRowsHeight = this.get.footers.length * this.get.tfootRowHeight;
 		const dataRowHeight = this.get.tbodyRowHeight;
+		const dataLength = this.get.data.length;
+		const overscanThreshold = this.defaultOverscanThreshold;
+
+		// 6. Erken Çıkış Kontrolü (Veri Yok veya Satır Yüksekliği Geçersizse Resetle).
+		if (dataLength === 0 || dataRowHeight <= 0) {
+			// Sadece mevcut state resetlenmemişse resetle.
+			if (this.rowIndices.visibleStart !== undefined || this.rowIndices.overscanStart !== undefined) {
+				this.rowIndices = {
+					visibleStart: undefined,
+					visibleEnd: undefined,
+					overscanStart: undefined,
+					overscanEnd: undefined,
+					scrollTop: undefined,
+					clientHeight: undefined,
+					focusedCellRowIndex: undefined
+				};
+			}
+			return;
+		}
+
+		// 7. Yeni Indexleri Hesapla
+		const currentContentHeight = Math.max(0, clientHeight - headerRowsHeight - footerRowsHeight); // Negatif olmamasını sağla
+		const visibleStartIndex = Math.max(0, Math.floor(scrollTop / dataRowHeight));
+		const visibleEndIndex = Math.min(dataLength - 1, Math.floor((scrollTop + currentContentHeight) / dataRowHeight));
+		const overscanStartIndex = Math.max(0, visibleStartIndex - overscanThreshold);
+		const overscanEndIndex = Math.min(dataLength - 1, visibleEndIndex + overscanThreshold);
+
+		// 8. Mevcut Overscan Indexler Değişti mi?
+		const indicesChanged = overscanStartIndex !== currentIndices.overscanStart || overscanEndIndex !== currentIndices.overscanEnd;
+
+		// 9. Mevcut Odaklanmış Satır, Yeni Index Aralığında mı?
+		const isFocusedRowAlreadyIncluded =
+			currentIndices.focusedCellRowIndex && currentIndices.focusedCellRowIndex >= overscanStartIndex && currentIndices.focusedCellRowIndex <= overscanEndIndex;
+
+		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa
+		if (indicesChanged || force || (focusedChanged && !isFocusedRowAlreadyIncluded)) {
+			this.rowIndices = {
+				visibleStart: visibleStartIndex,
+				visibleEnd: visibleEndIndex,
+				overscanStart: overscanStartIndex,
+				overscanEnd: overscanEndIndex,
+				scrollTop: scrollTop,
+				clientHeight: clientHeight,
+				focusedCellRowIndex: focusedCellRowIndex
+			};
+		} else {
+			// Indexler değişmedi, güncelleme zorlanmadı ve odaklanmış satır zaten mevcut aralıkta
+		}
+	};
+
+	readonly virtualData = $derived.by(() => {
+		const startIndex = this.rowIndices.overscanStart;
+		const endIndex = this.rowIndices.overscanEnd;
+		const focusedCellRowIndex = this.rowIndices.focusedCellRowIndex;
 		const rawData = this.get.data;
 		const dataLength = rawData.length; // Sadece uzunluk kontrolü için
 
-		const { rowOverscanStartIndex, rowOverscanEndIndex } = this.findVisibleRowIndexs({ headerRowsHeight, footerRowsHeight, dataRowHeight, dataLength });
-		if (rowOverscanStartIndex == null || rowOverscanEndIndex == null) return [];
+		// Geçerli indexler yoksa veya data yoksa boş dizi
+		if (startIndex == null || endIndex == null || dataLength === 0 || startIndex > endIndex) return [];
 
-		const processedData: TData[] = [];
+		const processedData: Array<{ data: TData; roi: number }> = [];
 
-		// Görünür aralıktaki verileri işle (slice yok!)
-		for (let i = rowOverscanStartIndex; i <= rowOverscanEndIndex; i++) {
-			// Doğrudan index ile erişim ve snapshot (opsiyonel, satır objesi reaktif değilse gerekmeyebilir)
+		for (let i = startIndex; i <= endIndex; i++) {
 			const row = rawData[i];
 			if (row) {
-				processedData.push({ ...row, oi: i });
+				processedData.push({ data: row, roi: i });
 			}
 		}
 
-		const focusedCell = untrack(() => this.getFocusedCell);
-		const focusedCellRowIndex = focusedCell?.rowIndex;
 		if (typeof focusedCellRowIndex === 'number' && focusedCellRowIndex < dataLength) {
 			// Odaklanmış satır zaten işlenen aralıkta mı?
-			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= rowOverscanStartIndex && focusedCellRowIndex <= rowOverscanEndIndex;
+			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= startIndex && focusedCellRowIndex <= endIndex;
 			if (!isFocusedRowAlreadyIncluded) {
 				// Eğer dahil değilse, odaklanmış satırı al ve ekle
 				const focusedCellRow = rawData[focusedCellRowIndex];
-				// const focusedCellRow: TData = $state.snapshot(this.get.data[focusedCellRowIndex]) as TData;
 				if (focusedCellRow) {
-					const rowWithOi = { ...focusedCellRow, oi: focusedCellRowIndex };
-					if (focusedCellRowIndex < rowOverscanStartIndex) {
-						processedData.unshift(rowWithOi); // Başa ekle
+					const rowWithRoi = { data: focusedCellRow, roi: focusedCellRowIndex };
+					if (focusedCellRowIndex < startIndex) {
+						processedData.unshift(rowWithRoi); // Başa ekle
 					} else {
 						// focusedCellRowIndex > endIndex olmalı
-						processedData.push(rowWithOi); // Sona ekle
+						processedData.push(rowWithRoi); // Sona ekle
 					}
 				}
 			}
@@ -187,66 +264,10 @@ class Table<TData extends Row> {
 
 		return processedData;
 	});
-
-	readonly setVirtualDataDerivedTrigger = async (virtualDataDerivedTrigger: string) => {
-		/* if (this.calculatingVirtualData) return;
-
-		this.calculatingVirtualData = true; */
-		this.virtualDataDerivedTrigger = virtualDataDerivedTrigger;
-		await tick();
-		/* this.calculatingVirtualData = false; */
-	};
-
-	private findVisibleRowIndexs: (params: {
-		scrollTop?: number;
-		clientHeight?: number;
-		headerRowsHeight?: number;
-		footerRowsHeight?: number;
-		dataRowHeight?: number;
-		overscanThreshold?: number;
-		dataLength?: number;
-	}) => {
-		rowVisibleStartIndex?: number;
-		rowVisibleEndIndex?: number;
-		rowOverscanStartIndex?: number;
-		rowOverscanEndIndex?: number;
-		overscan: number;
-		currentHeight?: number;
-		dataRowHeight?: number;
-	} = ({ scrollTop, clientHeight, headerRowsHeight, footerRowsHeight, dataRowHeight, overscanThreshold, dataLength }) => {
-		const defaultOverscanThreshold = this.defaultOverscanThreshold;
-
-		if (this.element == null) return { overscan: defaultOverscanThreshold };
-
-		const xScrollTop = scrollTop ?? (this.cachedScrollTop || this.element.scrollTop);
-		const xClientHeight = clientHeight ?? (this.cachedClientHeight || this.element.clientHeight);
-		const xHeaderRowsHeight = headerRowsHeight ?? this.headerRowsCount * this.get.theadRowHeight;
-		const xFooterRowsHeight = footerRowsHeight ?? this.get.footers.length * this.get.tfootRowHeight;
-		const xDataRowHeight = dataRowHeight ?? this.get.tbodyRowHeight;
-		const xOverscanThreshold = typeof overscanThreshold !== 'undefined' && overscanThreshold >= defaultOverscanThreshold ? overscanThreshold : defaultOverscanThreshold;
-		const xDataLength = dataLength ?? this.get.data.length;
-
-		const currentHeight = xClientHeight - xHeaderRowsHeight - xFooterRowsHeight;
-
-		const rowVisibleStartIndex = Math.floor(xScrollTop / xDataRowHeight);
-		const rowVisibleEndIndex = Math.min(xDataLength - 1, Math.floor((xScrollTop + currentHeight) / xDataRowHeight));
-		const rowOverscanStartIndex = Math.max(0, rowVisibleStartIndex - xOverscanThreshold);
-		const rowOverscanEndIndex = Math.min(xDataLength - 1, rowVisibleEndIndex + xOverscanThreshold);
-
-		return {
-			rowVisibleStartIndex,
-			rowVisibleEndIndex,
-			rowOverscanStartIndex,
-			rowOverscanEndIndex,
-			overscan: xOverscanThreshold,
-			currentHeight: currentHeight,
-			dataRowHeight: xDataRowHeight
-		};
-	};
 	// ################################## END Vertical Virtual Data ####################################################
 
 	// ################################## BEGIN Keyboard Navigation Methods ############################################
-	readonly getPageUpRowIndex = () => {
+	/* readonly getPageUpRowIndex = () => {
 		const { rowVisibleStartIndex, currentHeight, dataRowHeight } = this.findVisibleRowIndexs({});
 		if (rowVisibleStartIndex == null || currentHeight == null || dataRowHeight == null) return undefined;
 
@@ -257,7 +278,7 @@ class Table<TData extends Row> {
 		if (rowVisibleEndIndex == null || currentHeight == null || dataRowHeight == null) return undefined;
 
 		return rowVisibleEndIndex + Math.floor(currentHeight / dataRowHeight) - 1;
-	};
+	}; */
 	// ################################## END Keyboard Navigation Methods ###############################################
 
 	// ################################## BEGIN Set Focused Cell State ##################################################
@@ -287,7 +308,7 @@ class Table<TData extends Row> {
 		elementToFocus.focus({ preventScroll: true });
 	};
 
-	readonly focusCell = async ({ cellToFocus, triggerVirtual = false }: { cellToFocus: Required<FocucedCell>; triggerVirtual?: boolean }) => {
+	/* readonly focusCell = async ({ cellToFocus, triggerVirtual = false }: { cellToFocus: Required<FocucedCell>; triggerVirtual?: boolean }) => {
 		await this.setFocusedCellTabIndex(cellToFocus); // tabindex durumunu ve focucedCell state'ini günceller.
 
 		// pageup veya pagedown gibi uzun atlamalar olduğunda, yani scan edilmiş tüm virtual datanın da uzağına gidilmek istendiğinde, virtual data bir kez güncellenir.
@@ -305,7 +326,7 @@ class Table<TData extends Row> {
 		this.focusCellNode();
 
 		this.onCellFocusChangeThis({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
-	};
+	}; */
 	// ################################## END Set Focused Cell State #####################################################
 
 	// ################################## BEGIN Row Selection Methods ##############################################################
@@ -408,7 +429,7 @@ class Table<TData extends Row> {
 		if (initialOriginalCell !== cellToFocus.originalCell) {
 			// console.log('Focusing cell (throttled):', cellToFocus);
 			try {
-				await this.focusCell({ cellToFocus, triggerVirtual: true });
+				// await this.focusCell({ cellToFocus, triggerVirtual: true });
 			} catch (error) {
 				console.error('Error focusing cell (throttled):', error);
 			}
