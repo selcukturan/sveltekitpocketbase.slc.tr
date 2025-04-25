@@ -3,7 +3,7 @@ import { getContext, setContext } from 'svelte';
 import { tick } from 'svelte';
 
 class Table<TData extends Row> {
-	// ################################## BEGIN Default Sources ############################################################
+	// ################################## BEGIN Default Sources #####################################################################################################################
 	#defSrc: RequiredSources<TData> = {
 		id: '',
 		data: [],
@@ -20,11 +20,11 @@ class Table<TData extends Row> {
 		columns: [],
 		footers: []
 	};
-	// ################################## END Default Sources ##############################################################
+	// ################################## END Default Sources #######################################################################################################################
 
-	// ################################## BEGIN Constructor ################################################################
+	// ################################## BEGIN Constructor #########################################################################################################################
 	element?: HTMLDivElement = $state();
-	#src: Sources<TData> = $state(this.#defSrc); // orjinal sources. kaynaklar/sources değiştirilirken bu değişken kullanılacak. `table.#src`
+	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
 	#resizeObserver: ResizeObserver | null = null;
 
@@ -50,9 +50,9 @@ class Table<TData extends Row> {
 			};
 		});
 	}
-	// ################################## END Constructor #################################################################
+	// ################################## END Constructor ##########################################################################################################################
 
-	// ################################## BEGIN Setter Sources ################################################################
+	// ################################## BEGIN Source Setter Method for Global Use. `table.setSource('width','100px')` or `this.setSource('width','100px')` #######################
 	readonly setSource = <K extends keyof RequiredSources<TData>>(key: K, value: RequiredSources<TData>[K]) => {
 		// Önce özel işlemler için kontrolleri yapalım
 		if (key === 'data' || key === 'rowSelection') {
@@ -65,9 +65,9 @@ class Table<TData extends Row> {
 		// Değeri güncelleyelim (tip güvenli olarak)
 		this.#src[key] = value;
 	};
-	// ################################## END Setter Sources ##################################################################
+	// ################################## END Source Setter Method for Global Use ###################################################################################################
 
-	// ################################## BEGIN Getter Sources ################################################################
+	// ################################## BEGIN Methods that reactively return sources for global use. `table.srcWidth` or `this.srcWidth` ##########################################
 	readonly srcId = $derived(this.#src.id || this.#defSrc.id);
 	readonly srcData = $derived(this.#src.data || this.#defSrc.data);
 	readonly srcWidth = $derived(this.#src.width || this.#defSrc.width);
@@ -82,9 +82,9 @@ class Table<TData extends Row> {
 	readonly srcTfootRowHeight = $derived(this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight);
 	readonly srcColumns = $derived(this.#src.columns || this.#defSrc.columns);
 	readonly srcFooters = $derived(this.#src.footers || this.#defSrc.footers);
-	// ################################## END Getter Sources ################################################################
+	// ################################## END Methods that reactively return sources for global use. #################################################################################
 
-	// ################################## BEGIN Getter Visible Columns ###############################################################
+	// ################################## BEGIN Getter Visible Columns ###############################################################################################################
 	readonly visibleColumns = $derived.by(() => {
 		const columns = this.srcColumns;
 
@@ -92,16 +92,16 @@ class Table<TData extends Row> {
 
 		for (let i = 0; i <= columns.length; i++) {
 			const col = columns[i];
-			if (col) {
+			if (col && col.hidden !== true) {
 				processedColumns.push({ data: col, coi: i });
 			}
 		}
 
 		return processedColumns;
 	});
-	// ################################## END Getter Visible Columns ###############################################################
+	// ################################## END Getter Visible Columns ##################################################################################################################
 
-	// ################################## BEGIN General Variables ######################################################
+	// ################################## BEGIN General Variables #####################################################################################################################
 	#defaultOverscanThreshold = 4;
 	#headerRowsCountState = $state(1);
 	get headerRowsCountState() {
@@ -120,9 +120,9 @@ class Table<TData extends Row> {
 		${this.visibleColumns.map((col) => col.data.width ?? `150px`).join(' ')} 
 		${this.srcRowAction ? this.srcRowActionColumnWidth + 'px' : ''}`
 	);
-	// ################################## END General Variables ########################################################
+	// ################################## END General Variables ########################################################################################################################
 
-	// ################################## BEGIN Events ##########################################################
+	// ################################## BEGIN Events #################################################################################################################################
 	// ***** onCellFocusChange Event *****
 	readonly onCellFocusChange = (fn: OnCellFocusChange) => (this.onCellFocusChangeRun = fn);
 	private onCellFocusChangeRun?: OnCellFocusChange;
@@ -147,7 +147,7 @@ class Table<TData extends Row> {
 	private onTableActionThis: OnTableAction = (params) => {
 		if (this.onTableActionRun != null) this.onTableActionRun(params);
 	};
-	// ################################## END Events ############################################################
+	// ################################## END Events #######################################################################################################################################
 
 	readonly actionTrigger = (params: OnActionParams) => {
 		if (params.type === 'row') {
@@ -157,7 +157,7 @@ class Table<TData extends Row> {
 		}
 	};
 
-	// ################################## BEGIN Vertical Virtual Data ##################################################
+	// ################################## BEGIN Vertical Virtual Data ######################################################################################################################
 	#focusedCellState?: FocucedCell = $state();
 	get focusedCellState() {
 		return this.#focusedCellState;
@@ -237,7 +237,7 @@ class Table<TData extends Row> {
 		const isFocusedRowAlreadyIncluded =
 			currentIndices.focusedCellRowIndex && currentIndices.focusedCellRowIndex >= overscanStartIndex && currentIndices.focusedCellRowIndex <= overscanEndIndex;
 
-		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa
+		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa VEYA Odaklanmış Satır Değiştiyse ve Yeni Aralıkta Değilse
 		if (indicesChanged || force || (focusedChanged && !isFocusedRowAlreadyIncluded)) {
 			this.#rowIndices = {
 				visibleStart: visibleStartIndex,
@@ -304,7 +304,7 @@ class Table<TData extends Row> {
 				const newScrollTop = Math.round(tableNode.scrollTop);
 				const cachedScrollTop = this.cachedScrollTop ?? 0;
 				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-				const overscan = Math.max(1, this.#defaultOverscanThreshold - 1);
+				const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
 				const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
 				if (scrollDelta > scrollThreshold) {
@@ -328,9 +328,9 @@ class Table<TData extends Row> {
 			}
 		};
 	};
-	// ################################## END Vertical Virtual Data ####################################################
+	// ################################## END Vertical Virtual Data #######################################################################################################################
 
-	// ################################## BEGIN Row Selection Methods ##############################################################
+	// ################################## BEGIN Row Selection Methods #####################################################################################################################
 	private selectedRows: number[] = $state.raw([]); // Private state manager
 	readonly getSelectedRows = $derived(this.selectedRows); // Public readonly getter
 	private setSelectedRows = (param: number[]) => (this.selectedRows = param); // Private set method
@@ -370,9 +370,9 @@ class Table<TData extends Row> {
 		await tick();
 		this.onRowSelectionChangeThis({ selectedRows: this.getSelectedRows });
 	};
-	// ################################## END Row Selection Methods ################################################################
+	// ################################## END Row Selection Methods ########################################################################################################################
 
-	// ################################## BEGIN Cell Edit ##################################################
+	// ################################## BEGIN Cell Edit ##################################################################################################################################
 	editingCell: boolean = $state(false);
 	editingCellInput: HTMLInputElement | undefined = $state(undefined);
 	editingCellValue: unknown = $state('');
@@ -408,8 +408,8 @@ class Table<TData extends Row> {
 			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
 		}
 	};
-	// ################################## END Cell Edit ##################################################
-	// ################################## BEGIN Actions ################################################################
+	// ################################## END Cell Edit ####################################################################################################################################
+	// ################################## BEGIN Actions ####################################################################################################################################
 	tdFocusAction = (node: HTMLDivElement, originalCell: { rowIndex: number; colIndex: number }) => {
 		const mousedown = (e: Event) => {
 			const cellToFocus: Required<FocucedCell> = {
@@ -583,9 +583,9 @@ class Table<TData extends Row> {
 			}
 		};
 	};
-	// ################################## END Actions ################################################################
+	// ################################## END Actions ######################################################################################################################################
 
-	// ################################## BEGIN Utils ############################################################
+	// ################################## BEGIN Utils #######################################################################################################################################
 	debounce = <This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
 		const debounced = function (this: This, ...args: Args): void {
@@ -606,9 +606,9 @@ class Table<TData extends Row> {
 		};
 		return debounced;
 	};
-	// ################################## END Utils ############################################################
+	// ################################## END Utils #############################################################################################################################################
 
-	// ################################## BEGIN General Methods ####################################################################
+	// ################################## BEGIN General Methods #################################################################################################################################
 	readonly setColumnWidth = (ci: number, min: number, width: number) => {
 		this.#src.columns[ci].width = `${Math.max(min, width)}px`;
 	};
@@ -635,9 +635,9 @@ class Table<TData extends Row> {
 		this.cachedClientHeight = Math.round(height);
 		this.updateVisibleIndexes();
 	}, 100);
-	// ################################## END General Methods ################################################################
+	// ################################## END General Methods ################################################################################################################################
 
-	// ################################## BEGIN Attr ################################################################
+	// ################################## BEGIN Attr ########################################################################################################################################
 	attr_main = $derived({
 		class: 'slc-table-main',
 		style: `
@@ -716,16 +716,16 @@ class Table<TData extends Row> {
 		role: 'gridcell',
 		class: 'slc-table-tf slc-table-tf-action'
 	};
-	// ################################## END Attr ################################################################
+	// ################################## END Attr ###########################################################################################################################################
 }
 
-// ################################## BEGIN Export Table Context ###############################################################
+// ################################## BEGIN Export Table Context ##############################################################################################################################
 export function createTable<TData extends Row>(sources: Sources<TData>) {
 	return setContext(sources.id, new Table<TData>(sources));
 }
 export function getTable<TData extends Row>(id: string) {
 	return getContext<ReturnType<typeof createTable<TData>>>(id);
 }
-// ################################## END Export Table Context #################################################################
+// ################################## END Export Table Context ################################################################################################################################
 
-export type { Sources, Row };
+export type { Sources, Row, Column, Field };
