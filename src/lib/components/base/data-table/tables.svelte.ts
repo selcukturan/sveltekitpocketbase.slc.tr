@@ -409,6 +409,67 @@ class Table<TData extends Row> {
 		}
 	};
 	// ################################## END Cell Edit ####################################################################################################################################
+
+	// ################################## BEGIN Set Columns Width ##########################################################################################################################
+	// #colResizeDragging = false;
+	#colResizePointerDownClientX = 0;
+	#colResizePointerDownWidth = 0;
+	#colResizeIsAllWidth = false;
+
+	readonly setColumnWidth = (coi: number, width: number) => {
+		this.#src.columns[coi].width = `${Math.max(50, width)}px`;
+	};
+
+	readonly colResizeUpdate = (event: PointerEvent, coi: number) => {
+		const width = this.#colResizePointerDownWidth + (event.clientX - this.#colResizePointerDownClientX);
+		this.setColumnWidth(coi, width);
+
+		if (!this.#colResizeIsAllWidth) {
+			this.srcColumns.forEach((column, index) => {
+				if (index !== coi && column?.width?.startsWith('minmax')) {
+					const width = this.element?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect().width || 100;
+					this.setColumnWidth(index, width);
+				}
+			});
+			this.#colResizeIsAllWidth = true;
+		}
+	};
+
+	readonly colResizePointerAction = (node: HTMLElement, callback: (event: PointerEvent) => void) => {
+		const pointerdown = (event: PointerEvent) => {
+			if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
+
+			const parentNode = node.parentNode;
+			if (!parentNode || !(parentNode instanceof HTMLElement)) return;
+
+			this.#colResizePointerDownClientX = event.clientX;
+			this.#colResizePointerDownWidth = parentNode.getBoundingClientRect().width;
+
+			node.setPointerCapture(event.pointerId);
+			event.preventDefault();
+			// this.#colResizeDragging = true;
+
+			const onpointerup = () => {
+				// this.#colResizeDragging = false;
+				node.setPointerCapture(event.pointerId);
+				window.removeEventListener('pointermove', callback, false);
+				window.removeEventListener('pointerup', onpointerup, false);
+			};
+
+			window.addEventListener('pointermove', callback, false);
+			window.addEventListener('pointerup', onpointerup, false);
+		};
+
+		node.addEventListener('pointerdown', pointerdown, { capture: true, passive: false });
+
+		return {
+			destroy() {
+				node.removeEventListener('pointerdown', pointerdown);
+			}
+		};
+	};
+	// ################################## END Set Columns Width ##########################################################################################################################
+
 	// ################################## BEGIN Actions ####################################################################################################################################
 	tdFocusAction = (node: HTMLDivElement, originalCell: { rowIndex: number; colIndex: number }) => {
 		const mousedown = (e: Event) => {
@@ -609,9 +670,6 @@ class Table<TData extends Row> {
 	// ################################## END Utils #############################################################################################################################################
 
 	// ################################## BEGIN General Methods #################################################################################################################################
-	readonly setColumnWidth = (ci: number, min: number, width: number) => {
-		this.#src.columns[ci].width = `${Math.max(min, width)}px`;
-	};
 	readonly getFooter = ({ field, foot }: { field: Field<TData>; foot: Footer<TData> }): number | string => {
 		const footer = foot[field]; // sum, avg, count or footer content
 		if (footer == null) return '';
@@ -672,6 +730,10 @@ class Table<TData extends Row> {
 		class: 'slc-table-th',
 		style: `grid-row-start: 1;`
 	};
+	attr_th_resize = {
+		class: 'slc-table-th-resize',
+		style: `position: absolute; touch-action: none !important; background-color: red; top: 0px; right: 0px; bottom: 0px; width: 8px; opacity: 0; cursor: col-resize;`
+	};
 	attr_th_selection = {
 		role: 'columnheader',
 		class: 'slc-table-th slc-table-th-selection',
@@ -728,4 +790,4 @@ export function getTable<TData extends Row>(id: string) {
 }
 // ################################## END Export Table Context ################################################################################################################################
 
-export type { Sources, Row, Column, Field };
+export type { Sources, Row, Column, Footer };

@@ -1,5 +1,5 @@
 <script lang="ts" generics="TData extends Row">
-	import { getTable, type Sources, type Row, type Column, type Field } from './tables.svelte';
+	import { getTable, type Sources, type Row, type Column, type Footer } from './tables.svelte';
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
 </script>
@@ -15,20 +15,21 @@
 				{#if t.srcRowSelection !== 'none'}
 					<!-- TH selection -->
 					<div {...t.attr_th_selection}>
-						{@render baseContent({ type: 'header', content: 'sh', align: 'center' })}
+						{@render selectionContent()}
 					</div>
 				{/if}
 				{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 					{@const col = colWrapper.data}
+					{@const coi = colWrapper.coi}
 					<!-- TH -->
-					<div {...t.attr_th}>
-						{@render baseContent({ type: 'header', content: col.label, align: col.align, alignHeader: col.alignHeader })}
+					<div {...t.attr_th} data-coi={coi}>
+						{@render baseContent({ type: 'header', col, coi })}
 					</div>
 				{/each}
 				{#if t.srcRowAction}
 					<!-- TH action -->
 					<div {...t.attr_th_action}>
-						{@render baseContent({ type: 'header', content: 'ah', align: 'center' })}
+						{@render actionContent()}
 					</div>
 				{/if}
 			</div>
@@ -45,17 +46,18 @@
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD selection -->
 						<div {...t.attr_td_selection} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render baseContent({ content: 's', align: 'center' })}
+							{@render selectionContent()}
 						</div>
 					{/if}
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 						{@const col = colWrapper.data}
+						{@const coi = colWrapper.coi}
 						{@const originalCell = { rowIndex: roi, colIndex: ci }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD -->
 						<div {...t.attr_td} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render dataContent({ content: row[col.field], align: col.align })}
+							{@render baseContent({ type: 'data', row, col, coi })}
 						</div>
 					{/each}
 					{#if t.srcRowAction}
@@ -64,7 +66,7 @@
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD action -->
 						<div {...t.attr_td_action} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render baseContent({ content: 'a', align: 'center' })}
+							{@render actionContent()}
 						</div>
 					{/if}
 				</div>
@@ -79,20 +81,21 @@
 						{#if t.srcRowSelection !== 'none'}
 							<!-- TF selection -->
 							<div {...t.attr_tf_selection} style:bottom style:grid-row-start={rowStart}>
-								{@render baseContent({ type: 'footer', content: 'sf', align: 'center' })}
+								{@render selectionContent()}
 							</div>
 						{/if}
 						{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 							{@const col = colWrapper.data}
+							{@const coi = colWrapper.coi}
 							<!-- TF -->
 							<div {...t.attr_tf} style:bottom style:grid-row-start={rowStart}>
-								{@render baseContent({ type: 'footer', content: foot[col.field], align: col.align, alignFooter: col.alignFooter })}
+								{@render baseContent({ type: 'footer', foot, col, coi })}
 							</div>
 						{/each}
 						{#if t.srcRowAction}
 							<!-- TF action -->
 							<div {...t.attr_tf_action} style:bottom style:grid-row-start={rowStart}>
-								{@render baseContent({ type: 'footer', content: 'af', align: 'center' })}
+								{@render actionContent()}
 							</div>
 						{/if}
 					</div>
@@ -103,53 +106,68 @@
 </div>
 
 <!-- ############################################################ SNIPPETS ############################################################ -->
-{#snippet baseContent({
-	type = 'data',
-	content,
-	align = 'left',
-	alignHeader,
-	alignFooter
-}: {
-	type?: 'header' | 'footer' | 'data';
-	content: any;
-	align?: Column<TData>['align'];
-	alignHeader?: Column<TData>['alignHeader'];
-	alignFooter?: Column<TData>['alignFooter'];
-})}
+{#snippet baseContent({ type, row, roi, col, coi, foot }: { type: 'header' | 'footer' | 'data'; row?: TData; roi?: number; col: Column<TData>; coi: number; foot?: Footer<TData> })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
 		<div
 			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
-			style:justify-content={type === 'header' && alignHeader
-				? alignHeader === 'center'
+			style:justify-content={type === 'header' && col.alignHeader
+				? col.alignHeader === 'center'
 					? 'center'
-					: alignHeader === 'right'
+					: col.alignHeader === 'right'
 						? 'flex-end'
 						: 'flex-start'
-				: type === 'footer' && alignFooter
-					? alignFooter === 'center'
+				: type === 'footer' && col.alignFooter
+					? col?.alignFooter === 'center'
 						? 'center'
-						: alignFooter === 'right'
+						: col.alignFooter === 'right'
 							? 'flex-end'
 							: 'flex-start'
-					: align
-						? align === 'center'
+					: col.align
+						? col.align === 'center'
 							? 'center'
-							: align === 'right'
+							: col.align === 'right'
 								? 'flex-end'
 								: 'flex-start'
 						: 'flex-start'}
 		>
 			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-				{content}
+				{#if type === 'header' && col.label}
+					{col.label}
+				{:else if type === 'data' && row}
+					{row[col.field]}
+				{:else if type === 'footer' && foot}
+					{foot[col.field]}
+				{:else}
+					{'x'}
+				{/if}
 			</span>
+		</div>
+		<div style="display: none; align-items: center;">x</div>
+	</div>
+	{#if type === 'header' && col.resizeable}
+		<div {...t.attr_th_resize} use:t.colResizePointerAction={(e) => t.colResizeUpdate(e, coi)}></div>
+	{/if}
+{/snippet}
+
+{#snippet selectionContent()}
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+		<div style="display: none; align-items: center;">x</div>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"> s </span>
 		</div>
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 {/snippet}
 
-{#snippet dataContent({ content, align }: { content: TData[Field<TData>]; align?: Column<TData>['align'] })}
-	{@render baseContent({ content, align })}
+{#snippet actionContent()}
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+		<div style="display: none; align-items: center;">x</div>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"> a </span>
+		</div>
+		<div style="display: none; align-items: center;">x</div>
+	</div>
 {/snippet}
 
 <!-- ############################################################ STYLE ############################################################ -->
