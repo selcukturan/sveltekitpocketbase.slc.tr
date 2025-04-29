@@ -1,6 +1,7 @@
 import type { Sources, RequiredSources, Row, FocucedCell, Column, Footer, Field, OnCellFocusChange, OnRowSelectionChange, OnTableAction, OnRowAction, OnActionParams } from './types';
 import { getContext, setContext } from 'svelte';
 import { tick } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 
 class Table<TData extends Row> {
 	// ################################## BEGIN Default Sources #####################################################################################################################
@@ -42,6 +43,10 @@ class Table<TData extends Row> {
 					}
 				});
 				this.#resizeObserver.observe(currentElement);
+			}
+
+			if (this.headerCheckbox) {
+				this.headerCheckbox.indeterminate = this.#headerIsIndeterminate === true;
 			}
 
 			return () => {
@@ -331,44 +336,87 @@ class Table<TData extends Row> {
 	// ################################## END Vertical Virtual Data #######################################################################################################################
 
 	// ################################## BEGIN Row Selection Methods #####################################################################################################################
-	private selectedRows: number[] = $state.raw([]); // Private state manager
-	readonly getSelectedRows = $derived(this.selectedRows); // Public readonly getter
-	private setSelectedRows = (param: number[]) => (this.selectedRows = param); // Private set method
-	private clearSelectedRows = () => (this.selectedRows = []); // Private clear methods
+	headerCheckbox: HTMLInputElement | null = $state(null);
+	#headerIsIndeterminate = $state(false);
+	get headerIsIndeterminate() {
+		return this.#headerIsIndeterminate;
+	}
+	#headerIsChecked = $state(false);
+	get headerIsChecked() {
+		return this.#headerIsChecked;
+	}
+	#selectedRows = new SvelteSet<number>(); // Private state manager
+	get selectedRows() {
+		return this.#selectedRows;
+	}
+	private clearSelectedRows = () => {
+		this.#selectedRows.clear();
+	};
 
-	// Public methods with business logic
-	// Bir satırın seçimini değiştirir
 	readonly toggleRowSelection = async (rowIndex: number) => {
 		if (this.srcRowSelection === 'none') return;
 
-		const selectedRows = this.getSelectedRows;
-		const index = selectedRows.indexOf(rowIndex);
-
 		if (this.srcRowSelection === 'single') {
-			this.setSelectedRows(index === -1 ? [rowIndex] : []);
+			// Tek seçim için Set'i temizle ve yeni değeri ekle veya boş bırak
+			this.#selectedRows.clear();
+			if (!this.#selectedRows.has(rowIndex)) {
+				this.#selectedRows.add(rowIndex);
+			}
 		} else if (this.srcRowSelection === 'multiple') {
-			if (index === -1) {
-				this.setSelectedRows([...selectedRows, rowIndex]);
+			// Çoklu seçim için toggle işlemi
+			if (this.#selectedRows.has(rowIndex)) {
+				this.#selectedRows.delete(rowIndex);
 			} else {
-				this.setSelectedRows(selectedRows.filter((idx) => idx !== rowIndex));
+				this.#selectedRows.add(rowIndex);
+			}
+		}
+		// TÜM İNDEXLER: Array.from({ length: this.srcData.length }, (_, i) => i)
+		await tick();
+		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
+	};
+
+	// OPTİMİZE EDİLMESİ GEREKEN KISIM
+	readonly toggleAllRows = async (select: boolean) => {
+		if (this.srcRowSelection !== 'multiple') return;
+
+		this.#selectedRows.clear();
+		if (select) {
+			// Tüm indeksleri Set'e ekle
+			for (let i = 0; i < this.srcData.length; i++) {
+				// if (!this.#selectedRows.has(i)) {
+				this.#selectedRows.add(i);
+				// }
 			}
 		}
 
 		await tick();
-		this.onRowSelectionChangeThis({ selectedRows: this.getSelectedRows });
+		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
 	};
 
-	// Tüm satırları seçer veya seçimi kaldırır
-	readonly toggleAllRows = async (select: boolean) => {
-		if (this.srcRowSelection !== 'multiple') return;
+	selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
+		const { roi, type } = params;
+		const change = (e: Event) => {
+			// e.preventDefault();
 
-		if (select) {
-			this.setSelectedRows(Array.from({ length: this.srcData.length }, (_, i) => i)); // Tüm satırları seç
-		} else {
-			this.clearSelectedRows(); // Tüm seçimleri kaldır
-		}
-		await tick();
-		this.onRowSelectionChangeThis({ selectedRows: this.getSelectedRows });
+			if (type === 'header') {
+				const allSelected = this.#selectedRows.size === this.srcData.length;
+				this.toggleAllRows(!allSelected);
+
+				this.#headerIsIndeterminate = false;
+				this.#headerIsChecked = !allSelected;
+			} else if (roi != null) {
+				this.toggleRowSelection(roi);
+				this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
+			}
+		};
+
+		checkInput.addEventListener('change', change);
+
+		return {
+			destroy() {
+				checkInput.removeEventListener('change', change);
+			}
+		};
 	};
 	// ################################## END Row Selection Methods ########################################################################################################################
 
@@ -491,8 +539,8 @@ class Table<TData extends Row> {
 		};
 
 		const click = (e: MouseEvent) => {
-			e.stopPropagation();
-			e.preventDefault();
+			/* e.stopPropagation();
+			e.preventDefault(); */
 		};
 
 		let ticking = false;

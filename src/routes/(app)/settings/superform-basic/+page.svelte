@@ -9,7 +9,7 @@
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
 		data: common.generateExampleData(1000),
-		rowSelection: 'single',
+		rowSelection: 'multiple',
 		rowAction: true,
 		actions: {
 			tableActions: [

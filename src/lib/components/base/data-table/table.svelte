@@ -2,6 +2,7 @@
 	import { getTable, type Sources, type Row, type Column, type Footer } from './tables.svelte';
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
+	// $inspect('$inspect-selectedRows', t.selectedRows);
 </script>
 
 <!-- ############################################################ DATA TABLE ############################################################ -->
@@ -15,7 +16,7 @@
 				{#if t.srcRowSelection !== 'none'}
 					<!-- TH selection -->
 					<div {...t.attr_th_selection}>
-						{@render selectionContent()}
+						{@render selectionContent({ type: 'header' })}
 					</div>
 				{/if}
 				{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
@@ -44,9 +45,10 @@
 						{@const originalCell = { rowIndex: roi, colIndex: -1 }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
+						{@const checked = t.selectedRows.has(roi)}
 						<!-- TD selection -->
 						<div {...t.attr_td_selection} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render selectionContent()}
+							{@render selectionContent({ type: 'data', checked, roi })}
 						</div>
 					{/if}
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
@@ -81,7 +83,7 @@
 						{#if t.srcRowSelection !== 'none'}
 							<!-- TF selection -->
 							<div {...t.attr_tf_selection} style:bottom style:grid-row-start={rowStart}>
-								{@render selectionContent()}
+								{@render selectionContent({ type: 'footer' })}
 							</div>
 						{/if}
 						{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
@@ -150,11 +152,29 @@
 	{/if}
 {/snippet}
 
-{#snippet selectionContent()}
+{#snippet selectionContent({ type, checked, roi }: { type: 'header' | 'footer' | 'data'; checked?: boolean; roi?: number })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
 		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"> s </span>
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+				{#if type === 'header' && t.srcRowSelection === 'multiple'}
+					<input
+						aria-label="Select All"
+						bind:this={t.headerCheckbox}
+						tabindex="-1"
+						type="checkbox"
+						class="slc-table-selection-checkbox"
+						use:t.selectAction={{ type }}
+						checked={t.headerIsIndeterminate ? false : t.headerIsChecked}
+					/>
+				{:else if type === 'data' && roi != null}
+					<input aria-label="Select" class="slc-table-selection-checkbox" tabindex="-1" type="checkbox" use:t.selectAction={{ type, roi }} {checked} />
+				{:else if type === 'footer'}
+					{@html ``}
+				{:else}
+					{@html ``}
+				{/if}
+			</span>
 		</div>
 		<div style="display: none; align-items: center;">x</div>
 	</div>
@@ -280,6 +300,13 @@
 		/* position: sticky; */
 		left: 0px;
 		border-right-width: 5px;
+	}
+	/******************************************************/
+	.slc-table-selection-checkbox {
+		display: block;
+		margin: auto;
+		inline-size: 16px;
+		block-size: 16px;
 	}
 	/******************************************************/
 	.slc-table-th-action {
