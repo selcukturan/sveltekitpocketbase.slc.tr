@@ -1,6 +1,6 @@
 import type { Sources, RequiredSources, Row, FocucedCell, Column, Footer, Field, OnCellFocusChange, OnRowSelectionChange, OnTableAction, OnRowAction, OnActionParams } from './types';
 import { getContext, setContext } from 'svelte';
-import { tick } from 'svelte';
+import { tick, flushSync } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
 
 class Table<TData extends Row> {
@@ -34,6 +34,26 @@ class Table<TData extends Row> {
 
 		$effect(() => {
 			const currentElement = this.element;
+			const currentHeaderCheckbox = this.headerCheckbox;
+			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
+
+			if (currentActionActiveRowIndex != null) {
+				window.addEventListener('click', this.handleWindowOutsideClick);
+				window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
+				window.addEventListener('keydown', this.handleWindowEscPress);
+				window.addEventListener('focusin', this.handleWindowFocusChange);
+				return () => {
+					window.removeEventListener('click', this.handleWindowOutsideClick);
+					window.removeEventListener('mousedown', this.handleWindowOutsideMousedown);
+					window.removeEventListener('keydown', this.handleWindowEscPress);
+					window.removeEventListener('focusin', this.handleWindowFocusChange);
+				};
+			}
+
+			if (currentHeaderCheckbox != null) {
+				currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate === true;
+				// return () => {};
+			}
 
 			if (currentElement) {
 				this.#resizeObserver = new ResizeObserver((entries) => {
@@ -43,10 +63,6 @@ class Table<TData extends Row> {
 					}
 				});
 				this.#resizeObserver.observe(currentElement);
-			}
-
-			if (this.headerCheckbox) {
-				this.headerCheckbox.indeterminate = this.#headerIsIndeterminate === true;
 			}
 
 			return () => {
@@ -335,6 +351,86 @@ class Table<TData extends Row> {
 	};
 	// ################################## END Vertical Virtual Data #######################################################################################################################
 
+	// ################################## BEGIN Row Action Methods #####################################################################################################################
+	#actionIsOutsideMouseDown = $state(false);
+	#actionActiveContainerNode?: HTMLElement = $state();
+	#actionActiveRowIndex?: number = $state();
+	get actionActiveRowIndex() {
+		return this.#actionActiveRowIndex;
+	}
+
+	private showActionPopup = (roi: number) => {
+		if (this.#actionActiveRowIndex === roi) return;
+		this.#actionActiveRowIndex = roi;
+		flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
+	};
+	private hideActionPopup = () => {
+		if (this.#actionActiveRowIndex == null) return;
+		this.#actionActiveRowIndex = undefined;
+		flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
+		this.#actionActiveContainerNode = undefined;
+		this.#actionIsOutsideMouseDown = false;
+	};
+	private toggleActionPopup = (roi: number) => (this.#actionActiveRowIndex === roi ? this.hideActionPopup() : this.showActionPopup(roi));
+
+	readonly handleItemClick = (params: OnActionParams) => {
+		this.hideActionPopup();
+		this.actionTrigger(params);
+		alert('Item clicked: ' + params.action);
+	};
+
+	actionAction = (buttonNode: HTMLButtonElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
+		const { roi, type } = params;
+		const click = (e: Event) => {
+			const target = e.currentTarget as HTMLElement;
+			const parentContainer = target.parentElement;
+			if (!parentContainer || !(parentContainer instanceof HTMLElement)) return;
+
+			// Şimdi parent elementi kullanabilirsiniz
+			this.#actionActiveContainerNode = parentContainer;
+
+			if (type === 'header') {
+				/* const allSelected = this.#selectedRows.size === this.srcData.length;
+				this.toggleAllRows(!allSelected); */
+			} else if (roi != null) {
+				this.toggleActionPopup(roi);
+			}
+		};
+
+		buttonNode.addEventListener('click', click);
+
+		return {
+			destroy() {
+				buttonNode.removeEventListener('click', click);
+			}
+		};
+	};
+
+	// `window: Window` Event Listeners
+	private handleWindowFocusChange = (e: FocusEvent) => {
+		const target = e.target as HTMLElement;
+		if (this.#actionActiveRowIndex != null && !this.#actionActiveContainerNode?.contains(target)) {
+			this.hideActionPopup();
+		}
+	};
+	private handleWindowEscPress = (e: KeyboardEvent) => {
+		if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
+			e.preventDefault();
+			this.hideActionPopup();
+		}
+	};
+	private handleWindowOutsideMousedown = (e: MouseEvent) => {
+		if (this.#actionActiveRowIndex == null || this.#actionActiveContainerNode == null) return;
+		const target = e.target as HTMLElement;
+		this.#actionIsOutsideMouseDown = !this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
+	};
+	private handleWindowOutsideClick = (e: MouseEvent) => {
+		if (this.#actionIsOutsideMouseDown && this.#actionActiveRowIndex != null && this.#actionActiveContainerNode != null) {
+			this.hideActionPopup();
+		}
+	};
+	// ################################## END Row Action Methods #####################################################################################################################
+
 	// ################################## BEGIN Row Selection Methods #####################################################################################################################
 	headerCheckbox: HTMLInputElement | null = $state(null);
 	#headerIsIndeterminate = $state(false);
@@ -370,7 +466,9 @@ class Table<TData extends Row> {
 				this.#selectedRows.add(rowIndex);
 			}
 		}
-		// TÜM İNDEXLER: Array.from({ length: this.srcData.length }, (_, i) => i)
+
+		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
+
 		await tick();
 		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
 	};
@@ -389,6 +487,9 @@ class Table<TData extends Row> {
 			}
 		}
 
+		this.#headerIsIndeterminate = false;
+		this.#headerIsChecked = select;
+
 		await tick();
 		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
 	};
@@ -401,12 +502,8 @@ class Table<TData extends Row> {
 			if (type === 'header') {
 				const allSelected = this.#selectedRows.size === this.srcData.length;
 				this.toggleAllRows(!allSelected);
-
-				this.#headerIsIndeterminate = false;
-				this.#headerIsChecked = !allSelected;
 			} else if (roi != null) {
 				this.toggleRowSelection(roi);
-				this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
 			}
 		};
 
@@ -549,7 +646,7 @@ class Table<TData extends Row> {
 			const typableNumber = '1234567890';
 			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
 			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-			const typableOther = " =-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 
 			// --- İzin Verilmeyen Tuşları Filtrele ---
 			const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
@@ -574,9 +671,10 @@ class Table<TData extends Row> {
 			if (
 				key === 'Escape' ||
 				key === 'F2' ||
+				key === ' ' ||
 				((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 				((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-				(!e.ctrlKey && !e.metaKey && isTypable && key !== ' ')
+				(!e.ctrlKey && !e.metaKey && isTypable)
 			) {
 				if (key === 'Escape' && this.editingCell) {
 					/* e.preventDefault();
@@ -587,6 +685,15 @@ class Table<TData extends Row> {
 					/* if (this.editingCell || row_oi == null || col.oi == null || !this.visibleColumns[ci].editable) return;
 					e.preventDefault();
 					this.createCellInput(key, row_oi, col.oi, col.field); */
+				} else if (key === ' ') {
+					e.preventDefault();
+					if (this.srcRowSelection !== 'none' && colIndex === -1) {
+						this.toggleRowSelection(rowIndex);
+					} else if (this.srcRowAction && colIndex === this.visibleColumns.length) {
+						this.toggleActionPopup(rowIndex);
+					} else {
+						// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
+					}
 				}
 				return; // Anlık eylemden sonra çık
 			}
@@ -838,4 +945,4 @@ export function getTable<TData extends Row>(id: string) {
 }
 // ################################## END Export Table Context ################################################################################################################################
 
-export type { Sources, Row, Column, Footer };
+export type { Sources };

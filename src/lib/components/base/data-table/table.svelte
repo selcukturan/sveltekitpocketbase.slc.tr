@@ -1,5 +1,8 @@
 <script lang="ts" generics="TData extends Row">
-	import { getTable, type Sources, type Row, type Column, type Footer } from './tables.svelte';
+	import type { Sources, Row, Column, Footer } from './types';
+	import { getTable } from './tables.svelte';
+	import { fly } from 'svelte/transition';
+
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
 	// $inspect('$inspect-selectedRows', t.selectedRows);
@@ -30,7 +33,7 @@
 				{#if t.srcRowAction}
 					<!-- TH action -->
 					<div {...t.attr_th_action}>
-						{@render actionContent()}
+						{@render actionContent({ type: 'header' })}
 					</div>
 				{/if}
 			</div>
@@ -68,7 +71,7 @@
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD action -->
 						<div {...t.attr_td_action} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render actionContent()}
+							{@render actionContent({ type: 'data', roi })}
 						</div>
 					{/if}
 				</div>
@@ -97,7 +100,7 @@
 						{#if t.srcRowAction}
 							<!-- TF action -->
 							<div {...t.attr_tf_action} style:bottom style:grid-row-start={rowStart}>
-								{@render actionContent()}
+								{@render actionContent({ type: 'footer' })}
 							</div>
 						{/if}
 					</div>
@@ -180,11 +183,42 @@
 	</div>
 {/snippet}
 
-{#snippet actionContent()}
+{#snippet actionContent({ type, roi }: { type: 'header' | 'footer' | 'data'; roi?: number })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
 		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"> a </span>
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+				{#if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
+					<div data-scope="td-action" data-part="container" tabindex="-1">
+						<button data-scope="td-action" data-part="trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
+							<span>
+								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
+							</span>
+						</button>
+						{#if t.actionActiveRowIndex === roi}
+							<div data-scope="td-action" data-part="popup" transition:fly={{ y: 0, duration: 150 }}>
+								<div style:display="grid" role="menu">
+									{#each t.srcActions.rowActions as item}
+										<button
+											data-scope="td-action"
+											data-part="popup-item"
+											data-action={item.action}
+											type="button"
+											onclick={() => t.handleItemClick({ type: 'row', rowIndex: roi, action: item.action })}
+											role="menuitem"
+											tabindex="-1"
+										>
+											<span>{item.label + ' - ' + roi}</span>
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+					</div>
+				{:else}
+					{@html ``}
+				{/if}
+			</span>
 		</div>
 		<div style="display: none; align-items: center;">x</div>
 	</div>
@@ -326,5 +360,60 @@
 		/* position: sticky; */
 		right: 0px;
 		border-left-width: 5px;
+	}
+	/******************************************************/
+	[data-scope='th-action'][data-part='trigger'],
+	[data-scope='td-action'][data-part='trigger'] {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		user-select: none;
+		border-radius: 9999px;
+		padding: 4px;
+		margin: 0;
+		outline: none;
+		cursor: pointer;
+		background-color: hsl(var(--surface-200));
+	}
+	[data-scope='th-action'][data-part='trigger']:focus-visible,
+	[data-scope='td-action'][data-part='trigger']:focus-visible {
+		background-color: hsl(var(--surface-400));
+	}
+	[data-scope='th-action'][data-part='trigger']:hover,
+	[data-scope='td-action'][data-part='trigger']:hover {
+		background-color: hsl(var(--surface-300));
+	}
+	[data-scope='th-action'][data-part='popup'],
+	[data-scope='td-action'][data-part='popup'] {
+		display: block;
+		position: absolute;
+		/* z-index: 1; */
+		cursor: default;
+		width: auto;
+		min-width: 140px;
+		max-width: 450px;
+		max-height: 330px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		border-radius: 4px;
+		/* position */
+		top: 0;
+		right: 100%;
+		bottom: auto;
+		left: auto;
+		border: 1px solid hsl(var(--surface-300));
+		background-color: hsl(var(--surface-50));
+		margin-right: 5px;
+		margin-top: -1px;
+	}
+	[data-scope='th-action'][data-part='popup-item'],
+	[data-scope='td-action'][data-part='popup-item'] {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		padding: 0.5rem 1rem;
+		border: none;
+		cursor: pointer;
+		background-color: hsl(var(--surface-100));
 	}
 </style>
