@@ -33,7 +33,7 @@
 				{#if t.srcRowAction}
 					<!-- TH action -->
 					<div {...t.attr_th_action}>
-						{@render actionContent({ type: 'header' })}
+						{@render actionContent({ type: 'header', roi: -1 })}
 					</div>
 				{/if}
 			</div>
@@ -42,13 +42,13 @@
 				{@const row = rowWrapper.data}
 				{@const roi = rowWrapper.roi}
 				{@const rowStart = roi + t.headerRowsCountState + 1}
+				{@const checked = t.selectedRows.has(roi)}
 				<!-- ********** TRD ********** -->
-				<div {...t.attr_trd}>
+				<div {...t.attr_trd} class:slc-table-trd-selected={checked}>
 					{#if t.srcRowSelection !== 'none'}
 						{@const originalCell = { rowIndex: roi, colIndex: -1 }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
-						{@const checked = t.selectedRows.has(roi)}
 						<!-- TD selection -->
 						<div {...t.attr_td_selection} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
 							{@render selectionContent({ type: 'data', checked, roi })}
@@ -188,20 +188,45 @@
 		<div style="display: none; align-items: center;">x</div>
 		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
 			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-				{#if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
-					<div data-scope="td-action" data-part="container" tabindex="-1">
-						<button data-scope="td-action" data-part="trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
+				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
+					<div class="slc-table-th-action-container" tabindex="-1">
+						<button class="slc-table-th-action-trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
 						</button>
 						{#if t.actionActiveRowIndex === roi}
-							<div data-scope="td-action" data-part="popup" transition:fly={{ y: 0, duration: 150 }}>
+							<div class="slc-table-th-action-popup" transition:fly={{ y: 0, duration: 150 }}>
+								<div style:display="grid" role="menu">
+									{#each t.srcActions.tableActions as item}
+										<button
+											class="slc-table-th-action-popup-item"
+											data-action={item.action}
+											type="button"
+											onclick={() => t.handleItemClick({ type: 'table', rowIndex: roi, action: item.action })}
+											role="menuitem"
+											tabindex="-1"
+										>
+											<span>{item.label + ' - ' + roi}</span>
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+					</div>
+				{:else if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
+					<div class="slc-table-td-action-container" tabindex="-1">
+						<button class="slc-table-td-action-trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
+							<span>
+								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
+							</span>
+						</button>
+						{#if t.actionActiveRowIndex === roi}
+							<div class="slc-table-td-action-popup" transition:fly={{ y: 0, duration: 150 }}>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.rowActions as item}
 										<button
-											data-scope="td-action"
-											data-part="popup-item"
+											class="slc-table-td-action-popup-item"
 											data-action={item.action}
 											type="button"
 											onclick={() => t.handleItemClick({ type: 'row', rowIndex: roi, action: item.action })}
@@ -264,9 +289,12 @@
 		background-color: hsl(var(--surface-100));
 	}
 	/******************************************************/
-	/* .slc-table-trd:hover {
+	.slc-table-trd:hover {
 		background-color: color-mix(in srgb, hsl(var(--surface-200)) 70%, hsl(var(--surface-50)) 30%);
-	} */
+	}
+	.slc-table-trd-selected {
+		background-color: hsl(var(--primary-200)) !important;
+	}
 	/******************************************************/
 	.slc-table-th {
 		border-color: hsl(var(--surface-200));
@@ -281,7 +309,7 @@
 		outline: none;
 		user-select: none;
 		touch-action: none;
-		overflow: clip;
+		/* overflow: clip; */
 		background-color: inherit;
 	}
 	.slc-table-td {
@@ -362,8 +390,8 @@
 		border-left-width: 5px;
 	}
 	/******************************************************/
-	[data-scope='th-action'][data-part='trigger'],
-	[data-scope='td-action'][data-part='trigger'] {
+	.slc-table-th-action-trigger,
+	.slc-table-td-action-trigger {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -375,16 +403,16 @@
 		cursor: pointer;
 		background-color: hsl(var(--surface-200));
 	}
-	[data-scope='th-action'][data-part='trigger']:focus-visible,
+	/* [data-scope='th-action'][data-part='trigger']:focus-visible,
 	[data-scope='td-action'][data-part='trigger']:focus-visible {
 		background-color: hsl(var(--surface-400));
-	}
-	[data-scope='th-action'][data-part='trigger']:hover,
-	[data-scope='td-action'][data-part='trigger']:hover {
+	} */
+	.slc-table-th-action-trigger:hover,
+	.slc-table-td-action-trigger:hover {
 		background-color: hsl(var(--surface-300));
 	}
-	[data-scope='th-action'][data-part='popup'],
-	[data-scope='td-action'][data-part='popup'] {
+	.slc-table-th-action-popup,
+	.slc-table-td-action-popup {
 		display: block;
 		position: absolute;
 		/* z-index: 1; */
@@ -401,19 +429,30 @@
 		right: 100%;
 		bottom: auto;
 		left: auto;
-		border: 1px solid hsl(var(--surface-300));
-		background-color: hsl(var(--surface-50));
+		border: 1px solid hsl(var(--surface-400));
+		/* background-color: hsl(var(--surface-50)); */
 		margin-right: 5px;
-		margin-top: -1px;
+		/* margin-top: -1px; */
 	}
-	[data-scope='th-action'][data-part='popup-item'],
-	[data-scope='td-action'][data-part='popup-item'] {
+	.slc-table-th-action-popup-item,
+	.slc-table-td-action-popup-item {
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
 		padding: 0.5rem 1rem;
 		border: none;
 		cursor: pointer;
+		background-color: hsl(var(--surface-200));
+	}
+	/* .slc-table-th-action-popup-item[data-action='delete_all'] {
+		background-color: hsl(var(--secondary-100));
+	} */
+	.slc-table-th-action-popup-item:hover,
+	.slc-table-td-action-popup-item:hover {
 		background-color: hsl(var(--surface-100));
+	}
+	.slc-table-th-action-popup-item:active,
+	.slc-table-td-action-popup-item:active {
+		background-color: hsl(var(--surface-300));
 	}
 </style>

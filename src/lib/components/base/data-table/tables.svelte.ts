@@ -376,23 +376,19 @@ class Table<TData extends Row> {
 	readonly handleItemClick = (params: OnActionParams) => {
 		this.hideActionPopup();
 		this.actionTrigger(params);
-		alert('Item clicked: ' + params.action);
+		/* alert('Item clicked: ' + params.action); */
 	};
 
-	actionAction = (buttonNode: HTMLButtonElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
+	actionAction = (buttonNode: HTMLButtonElement, params: { roi: number; type: 'header' | 'footer' | 'data' }) => {
 		const { roi, type } = params;
 		const click = (e: Event) => {
 			const target = e.currentTarget as HTMLElement;
 			const parentContainer = target.parentElement;
 			if (!parentContainer || !(parentContainer instanceof HTMLElement)) return;
 
-			// Şimdi parent elementi kullanabilirsiniz
 			this.#actionActiveContainerNode = parentContainer;
 
-			if (type === 'header') {
-				/* const allSelected = this.#selectedRows.size === this.srcData.length;
-				this.toggleAllRows(!allSelected); */
-			} else if (roi != null) {
+			if (type === 'header' || type === 'data') {
 				this.toggleActionPopup(roi);
 			}
 		};
