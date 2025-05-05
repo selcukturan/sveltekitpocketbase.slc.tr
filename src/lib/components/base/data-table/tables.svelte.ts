@@ -449,12 +449,13 @@ class Table<TData extends Row> {
 		if (this.srcRowSelection === 'none') return;
 
 		if (this.srcRowSelection === 'single') {
-			// Tek seçim için Set'i temizle ve yeni değeri ekle veya boş bırak
-			this.#selectedRows.clear();
 			if (!this.#selectedRows.has(rowIndex)) {
+				this.#selectedRows.clear();
 				this.#selectedRows.add(rowIndex);
+			} else {
+				this.#selectedRows.clear();
 			}
-		} else if (this.srcRowSelection === 'multiple') {
+		} else if (this.srcRowSelection === 'multiple-all' || this.srcRowSelection === 'multiple') {
 			// Çoklu seçim için toggle işlemi
 			if (this.#selectedRows.has(rowIndex)) {
 				this.#selectedRows.delete(rowIndex);
@@ -471,7 +472,7 @@ class Table<TData extends Row> {
 
 	// OPTİMİZE EDİLMESİ GEREKEN KISIM
 	readonly toggleAllRows = async (select: boolean) => {
-		if (this.srcRowSelection !== 'multiple') return;
+		if (this.srcRowSelection !== 'multiple-all') return;
 
 		this.#selectedRows.clear();
 		if (select) {

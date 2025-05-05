@@ -15,7 +15,7 @@
 // ```
 // ===================================================================
 
-import CommonHelper from '$lib/utils/common';
+import CommonHelper from '$lib/utils';
 
 // tooltip element type [extended div]
 interface TooltipElementType extends HTMLDivElement {

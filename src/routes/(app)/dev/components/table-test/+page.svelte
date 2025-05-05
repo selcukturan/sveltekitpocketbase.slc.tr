@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CommonHelper from '$lib/utils/common';
+	import utils from '$lib/utils';
 	import DataTable1 from '$lib/components/base/data-table-test/DataTable1.svelte';
 	import DataTable2 from '$lib/components/base/data-table-test/DataTable2.svelte';
 
@@ -21,8 +21,8 @@
 
 <button
 	onclick={() => {
-		src1 = 'src-11 ' + CommonHelper.randomString(2);
-		tbl1 = 'tbl-11 ' + CommonHelper.randomString(2);
+		src1 = 'src-11 ' + utils.randomString(2);
+		tbl1 = 'tbl-11 ' + utils.randomString(2);
 	}}
 >
 	Button 11
@@ -30,8 +30,8 @@
 
 <button
 	onclick={() => {
-		src2 = 'src-22 ' + CommonHelper.randomString(2);
-		tbl2 = 'tbl-22 ' + CommonHelper.randomString(2);
+		src2 = 'src-22 ' + utils.randomString(2);
+		tbl2 = 'tbl-22 ' + utils.randomString(2);
 	}}
 >
 	Button 22
@@ -39,8 +39,8 @@
 
 <button
 	onclick={() => {
-		src3 = 'src-33 ' + CommonHelper.randomString(2);
-		tbl3 = 'tbl-33 ' + CommonHelper.randomString(2);
+		src3 = 'src-33 ' + utils.randomString(2);
+		tbl3 = 'tbl-33 ' + utils.randomString(2);
 	}}
 >
 	Button 33

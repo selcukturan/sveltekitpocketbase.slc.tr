@@ -1,22 +1,12 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import common from '$lib/utils/common';
+	import utils from '$lib/utils';
 	import Popup from '../common/Popup.svelte';
 	import type { Props } from './types';
 
-	let {
-		value = $bindable(undefined),
-		data,
-		label,
-		class: classes,
-		variant = undefined,
-		size = undefined,
-		errors,
-		constraints,
-		...attributes
-	}: Props = $props();
+	let { value = $bindable(undefined), data, label, class: classes, variant = undefined, size = undefined, errors, constraints, ...attributes }: Props = $props();
 
-	const uuid = `slc_${common.randomString(8).toLowerCase()}`;
+	const uuid = `slc_${utils.randomString(8).toLowerCase()}`;
 
 	let myPopover: HTMLDivElement;
 	const selectText = '-- Seçiniz --';
@@ -54,32 +44,24 @@
 		style:left={`anchor(left)`}
 		popover=""
 		bind:this={myPopover}
-		class="slc-anchored-notice rounded-md border bg-surface-50 text-surface-950"
+		class="slc-anchored-notice bg-surface-50 text-surface-950 rounded-md border"
 	>
 		<div class="flex flex-col">
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div
-				onclick={handleSelectOnClick}
-				data-slcselectvalue=""
-				class="cursor-pointer select-none rounded-md p-2 hover:bg-surface-200 active:bg-surface-300"
-			>
+			<div onclick={handleSelectOnClick} data-slcselectvalue="" class="hover:bg-surface-200 active:bg-surface-300 cursor-pointer rounded-md p-2 select-none">
 				{selectText}
 			</div>
 			{#if data}
 				{#each data as item}
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div
-						onclick={handleSelectOnClick}
-						data-slcselectvalue={item.value}
-						class="cursor-pointer select-none rounded-md p-2 hover:bg-surface-200 active:bg-surface-300"
-					>
+					<div onclick={handleSelectOnClick} data-slcselectvalue={item.value} class="hover:bg-surface-200 active:bg-surface-300 cursor-pointer rounded-md p-2 select-none">
 						{item.label}
 					</div>
 				{/each}
 			{:else}
-				<div class="cursor-pointer select-none p-2">No data</div>
+				<div class="cursor-pointer p-2 select-none">No data</div>
 			{/if}
 		</div>
 	</div>

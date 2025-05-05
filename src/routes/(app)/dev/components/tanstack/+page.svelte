@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BasicDataTable } from '$lib/components/base/data-table-tanstack/provider';
 
-	import common from '$lib/utils/common';
+	import utils from '$lib/utils';
 	import { type Sources } from '$lib/components/data-table/views';
 	import { createTable } from '$lib/components/data-table/tables.svelte';
 
@@ -10,7 +10,7 @@
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
-		data: common.generateExampleData(1000),
+		data: utils.generateExampleData(1000),
 		enableVirtualization: true,
 		rowSelection: 'none',
 		rowAction: false,

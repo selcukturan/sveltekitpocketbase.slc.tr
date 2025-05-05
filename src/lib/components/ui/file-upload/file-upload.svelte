@@ -2,12 +2,12 @@
 	import * as fileUpload from '@zag-js/file-upload';
 	import { normalizeProps, useMachine } from '@zag-js/svelte';
 	import { Icon } from '$lib/components/icons';
-	import common from '$lib/utils/common';
+	import utils from '$lib/utils';
 
 	let { name = undefined }: { name?: string } = $props();
 
-	const id = `fileupload_${common.randomString(8).toLowerCase()}`;
-	name = name ?? `fileupload_${common.randomString(8).toLowerCase()}`;
+	const id = `fileupload_${utils.randomString(8).toLowerCase()}`;
+	name = name ?? `fileupload_${utils.randomString(8).toLowerCase()}`;
 	const [snapshot, send] = useMachine(fileUpload.machine({ id, name, maxFiles: 25 }));
 
 	const api = $derived(fileUpload.connect(snapshot, send, normalizeProps));
@@ -44,10 +44,10 @@
 	}
 
 	[data-scope='file-upload'][data-part='trigger'] {
-		@apply inline-flex items-center justify-center gap-0.5 rounded-md bg-primary-500 px-4 py-2;
+		@apply bg-primary-500 inline-flex items-center justify-center gap-0.5 rounded-md px-4 py-2;
 	}
 	[data-scope='file-upload'][data-part='item'] {
-		@apply flex items-center gap-0.5 border border-border px-4 py-2;
+		@apply border-border flex items-center gap-0.5 border px-4 py-2;
 	}
 
 	[data-part='label'] {

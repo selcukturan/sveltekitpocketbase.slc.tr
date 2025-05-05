@@ -32,7 +32,7 @@ export type Sources<TData> = {
 	data?: TData[];
 	width?: string;
 	height?: string;
-	rowSelection?: 'none' | 'single' | 'multiple';
+	rowSelection?: 'none' | 'single' | 'multiple' | 'multiple-all';
 	rowSelectionColumnWidth?: number;
 	actions?: {
 		tableActions?: { label: string; action: string }[];

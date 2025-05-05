@@ -160,7 +160,7 @@
 		<div style="display: none; align-items: center;">x</div>
 		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
 			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-				{#if type === 'header' && t.srcRowSelection === 'multiple'}
+				{#if type === 'header' && t.srcRowSelection === 'multiple-all'}
 					<input
 						aria-label="Select All"
 						bind:this={t.headerCheckbox}

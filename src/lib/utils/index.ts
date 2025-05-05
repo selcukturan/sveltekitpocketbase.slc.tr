@@ -1,11 +1,11 @@
 import { browser } from '$app/environment';
 import type { ProducedGrapes } from '$lib/dev/schemaProducedGrapes';
 
-export default class common {
+export default class utils {
 	static isFocusable(element: HTMLElement): boolean {
 		const tagName = element && element.tagName ? element.tagName.toLowerCase() : '';
 
-		return common.isInput(element) || tagName === 'button' || tagName === 'a' || tagName === 'details' || element?.tabIndex >= 0;
+		return utils.isInput(element) || tagName === 'button' || tagName === 'a' || tagName === 'details' || element?.tabIndex >= 0;
 	}
 
 	static isInput(element: HTMLElement): boolean {
@@ -75,6 +75,16 @@ export default class common {
 	 */
 
 	static isBrowser = typeof document !== 'undefined';
+
+	static turkishLowerCase(str: string): string {
+		if (typeof str !== 'string') return '';
+		return str.toLocaleLowerCase('tr-TR');
+	}
+
+	static turkishUpperCase(str: string): string {
+		if (typeof str !== 'string') return '';
+		return str.toLocaleUpperCase('tr-TR');
+	}
 
 	static chunkArray<T>(array: T[], chunkSize: number): T[][] {
 		const chunks: T[][] = [];

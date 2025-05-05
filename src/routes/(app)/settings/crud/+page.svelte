@@ -1,5 +1,5 @@
 <script lang="ts">
-	import common from '$lib/utils/common';
+	import utils from '$lib/utils';
 	import { DataTableAll, type Sources } from '$lib/components/data-table/views';
 	import { createTable } from '$lib/components/data-table/tables.svelte';
 
@@ -8,7 +8,7 @@
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table1',
-		data: common.generateExampleData(1000),
+		data: utils.generateExampleData(1000),
 		enableVirtualization: true,
 		rowSelection: 'multiple',
 		rowAction: true,
