@@ -5,13 +5,7 @@ export type Row = Record<RowKey, RowValue>;
 export type Field<TData> = Extract<keyof TData, RowKey>;
 
 // 100px | 1.25fr | minmax(100px,1.25fr) | minmax(1.25fr,100px) | minmax(1fr,1.25fr) | minmax(100px,200px)
-export type Width =
-	| `${number}px`
-	| `${number}fr`
-	| `minmax(${number}px,${number}fr)`
-	| `minmax(${number}fr,${number}px)`
-	| `minmax(${number}fr,${number}fr)`
-	| `minmax(${number}px,${number}px)`;
+export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(${number}fr,${number}fr)`;
 
 export type Column<TData> = {
 	field: Field<TData>; // field required

@@ -529,26 +529,70 @@ class Table<TData extends Row> {
 			this.editingCell = false;
 		}
 	};
-	createCellInput = (key: string, rowOi: number, colOi: number, field: Field<TData>) => {
-		const snapshotRow = $state.snapshot(this.srcData[rowOi]) as TData;
+	createCellInput = (key: string, rowIndex: number, colIndex: number, field: Field<TData>) => {
+		const snapshotRow = $state.snapshot(this.srcData[rowIndex]) as TData;
 		const oldValue = snapshotRow[field];
 		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
 		this.editingCellOldValue = oldValueForInput;
 		this.editingCellValue = key === 'F2' || key === 'SLCDBL' ? oldValueForInput : key;
 		this.editingCell = true;
-		this.editingCellPath = `r${rowOi}c${colOi}`;
+		this.editingCellPath = `r${rowIndex}c${colIndex}`;
 	};
-	setCellValue = (newValue: unknown, oldValue: unknown, rowOi: number, colOi: number, field: Field<TData>) => {
+	setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
 		if (newValue === oldValue) return;
 
-		const snapshotRow = $state.snapshot(this.srcData[rowOi]) as TData;
+		const snapshotRow = $state.snapshot(this.srcData[rowIndex]) as TData;
 
 		if (this.#src.data && typeof snapshotRow[field] === typeof newValue) {
 			snapshotRow[field] = newValue as TData[Field<TData>];
-			this.#src.data[rowOi] = snapshotRow;
+			this.#src.data[rowIndex] = snapshotRow;
 		} else {
 			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
 		}
+	};
+
+	readonly inputOnAction = (input: HTMLInputElement, params: { roi: number; coi: number; col: Column<TData> }) => {
+		const { roi, coi, col } = params;
+
+		input.focus();
+		// input.select();
+
+		const blur = (e: FocusEvent) => {
+			const newValue = this.editingCellValue;
+			const oldValue = this.editingCellOldValue;
+
+			this.removeCellInput();
+
+			if (newValue === oldValue) return;
+
+			this.setCellValue(newValue, oldValue, roi, coi, col.field);
+			/*
+			// onCellEdit
+			if (onCellEdit && table.columns)
+					thisOnCellEdit({
+						event: 'celledit',
+						detail: { newValue, oldValue, rowIndex: inputrow, colIndex: inputcol, field: inputfield, column: $state.snapshot(table.columns[+inputcol]), row: $state.snapshot(table.data[+inputrow]) as TDataType }
+					});
+			*/
+		};
+		/* const click = (e: MouseEvent) => {
+			e.stopPropagation();
+		};
+		const mousedown = (e: MouseEvent) => {
+			e.stopPropagation();
+		}; */
+
+		input.addEventListener('blur', blur);
+		/* input.addEventListener('click', click);
+		input.addEventListener('mousedown', mousedown); */
+
+		return {
+			destroy() {
+				input.removeEventListener('blur', blur);
+				/* input.removeEventListener('click', click);
+				input.removeEventListener('mousedown', mousedown); */
+			}
+		};
 	};
 	// ################################## END Cell Edit ####################################################################################################################################
 
@@ -613,12 +657,12 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	tdFocusAction = (node: HTMLDivElement, originalCell: { rowIndex: number; colIndex: number }) => {
+	tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData> }) => {
 		const mousedown = (e: Event) => {
 			const cellToFocus: Required<FocucedCell> = {
-				rowIndex: originalCell.rowIndex,
-				colIndex: originalCell.colIndex,
-				originalCell: `${originalCell.rowIndex}_${originalCell.colIndex}`,
+				rowIndex: params.rowIndex,
+				colIndex: params.colIndex,
+				originalCell: `${params.rowIndex}_${params.colIndex}`,
 				tabIndex: 0
 			};
 
@@ -645,6 +689,8 @@ class Table<TData extends Row> {
 			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 
+			const field = params.field;
+
 			// --- İzin Verilmeyen Tuşları Filtrele ---
 			const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
 			const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
@@ -653,7 +699,6 @@ class Table<TData extends Row> {
 			// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
 			if (!isNavigationKey && !isActionKey && !isTypable) {
 				if (!((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C' || key === 'v' || key === 'V'))) {
-					// console.log('Key ignored:', key);
 					return; // İzin verilmeyen tuş
 				}
 			}
@@ -668,20 +713,21 @@ class Table<TData extends Row> {
 			if (
 				key === 'Escape' ||
 				key === 'F2' ||
-				key === ' ' ||
+				(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
+				(key === ' ' && this.srcRowAction && colIndex === this.visibleColumns.length) ||
 				((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 				((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-				(!e.ctrlKey && !e.metaKey && isTypable)
+				(!e.ctrlKey && !e.metaKey && isTypable && !this.editingCell)
 			) {
 				if (key === 'Escape' && this.editingCell) {
-					/* e.preventDefault();
-					this.removeCellInput();
-					const cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
-					this.throttledFocusLogic(cellToFocus, ''); */
-				} else if (isTypable || key === 'F2') {
-					/* if (this.editingCell || row_oi == null || col.oi == null || !this.visibleColumns[ci].editable) return;
 					e.preventDefault();
-					this.createCellInput(key, row_oi, col.oi, col.field); */
+					this.removeCellInput();
+					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+					node.focus({ preventScroll: true });
+				} else if (isTypable || key === 'F2') {
+					if (this.editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
+					e.preventDefault();
+					this.createCellInput(key, rowIndex, colIndex, field);
 				} else if (key === ' ') {
 					e.preventDefault();
 					if (this.srcRowSelection !== 'none' && colIndex === -1) {

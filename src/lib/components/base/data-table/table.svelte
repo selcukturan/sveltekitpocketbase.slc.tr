@@ -5,7 +5,7 @@
 
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
-	// $inspect('$inspect-selectedRows', t.selectedRows);
+	$inspect('$inspect-editingCellPath', t.editingCellPath);
 </script>
 
 <!-- ############################################################ DATA TABLE ############################################################ -->
@@ -57,12 +57,18 @@
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 						{@const col = colWrapper.data}
 						{@const coi = colWrapper.coi}
-						{@const originalCell = { rowIndex: roi, colIndex: ci }}
+						{@const isEditable = t.editingCellPath === `r${roi}c${ci}` && col.editable}
+						{@const cancelEditable = row.order === 3}
+						{@const originalCell = { rowIndex: roi, colIndex: ci, field: col.field }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD -->
 						<div {...t.attr_td} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render baseContent({ type: 'data', row, col, coi })}
+							{#if isEditable}
+								{@render editableInput({ roi, coi, col })}
+							{:else}
+								{@render baseContent({ type: 'data', row, col, coi })}
+							{/if}
 						</div>
 					{/each}
 					{#if t.srcRowAction}
@@ -111,6 +117,29 @@
 </div>
 
 <!-- ############################################################ SNIPPETS ############################################################ -->
+{#snippet editableInput({ roi, col, coi }: { roi: number; col: Column<TData>; coi: number })}
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+		<div style="display: none; align-items: center;">x</div>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;">
+			<span style="overflow: hidden; width:100%">
+				<input
+					type="text"
+					spellcheck="false"
+					autocomplete="off"
+					data-inputrow={roi}
+					data-inputcol={coi}
+					data-inputfield={col.field || 'slcNullField'}
+					use:t.inputOnAction={{ roi, coi, col }}
+					bind:this={t.editingCellInput}
+					bind:value={t.editingCellValue}
+					style:text-align={col.align || 'left'}
+					style="margin:0px; height:100%; width:100%; border:none; background-color:transparent; padding:0px; outline:none; box-shadow:none; transition:none;"
+				/>
+			</span>
+		</div>
+		<div style="display: none; align-items: center;">x</div>
+	</div>
+{/snippet}
 {#snippet baseContent({ type, row, roi, col, coi, foot }: { type: 'header' | 'footer' | 'data'; row?: TData; roi?: number; col: Column<TData>; coi: number; foot?: Footer<TData> })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
