@@ -56,6 +56,14 @@
 		const { newValue, oldValue, rowIndex, colIndex, field } = params;
 		console.log('onCellEdit', newValue, oldValue, rowIndex, colIndex, field);
 	}); */
+	/* table.onColumnResize((params) => {
+		const { coi, width, field } = params;
+		console.log('onColumnResize', coi, width, field);
+	}); */
+	/* table.onVirtualDataChange((params) => {
+		const { visibleStart, visibleEnd, overscanStart, overscanEnd, scrollTop, clientHeight, focusedCellRowIndex } = params;
+		console.log('onVirtualDataChange', visibleStart, visibleEnd, overscanStart, overscanEnd, scrollTop, clientHeight, focusedCellRowIndex);
+	}); */
 	/* table.onTableAction((params) => {
 		const { action } = params;
 		console.log('onTableAction', action);

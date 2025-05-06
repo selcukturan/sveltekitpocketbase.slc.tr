@@ -194,7 +194,7 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 	{#if type === 'header' && col.resizeable}
-		<div {...t.attr_th_resize} use:t.colResizePointerAction={(e) => t.colResizeUpdate(e, coi)}></div>
+		<div {...t.attr_th_resize} use:t.colResizePointerAction={(e) => t.colResizeUpdate(e, coi, col.field)}></div>
 	{/if}
 {/snippet}
 

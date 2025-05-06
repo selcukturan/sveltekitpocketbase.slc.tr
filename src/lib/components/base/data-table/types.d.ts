@@ -4,7 +4,7 @@ export type Row = Record<RowKey, RowValue>;
 
 export type Field<TData> = Extract<keyof TData, RowKey>;
 
-// 100px | 1.25fr | minmax(100px,1.25fr) | minmax(1.25fr,100px) | minmax(1fr,1.25fr) | minmax(100px,200px)
+// 100px | minmax(100px,1.25fr) | minmax(1fr,1.25fr)
 export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(${number}fr,${number}fr)`;
 
 export type Column<TData> = {
@@ -54,5 +54,15 @@ export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action:
 export type OnCellFocusChange = (params: { rowIndex: number; colIndex: number }) => void;
 export type OnRowSelectionChange = (params: { selectedRows: number[] }) => void;
 export type OnCellEdit = (params: { newValue: unknown; oldValue: unknown; rowIndex: number; colIndex: number; field: Field<TData> }) => void;
+export type OnColumnResize = (params: { coi: number; width: number; field: Field<TData> }) => void;
+export type OnVirtualDataChange = (params: {
+	visibleStart?: number;
+	visibleEnd?: number;
+	overscanStart?: number;
+	overscanEnd?: number;
+	scrollTop?: number;
+	clientHeight?: number;
+	focusedCellRowIndex?: number;
+}) => void;
 export type OnRowAction = (params: OnActionParams) => void;
 export type OnTableAction = (params: OnActionParams) => void;

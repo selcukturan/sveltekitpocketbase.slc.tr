@@ -9,6 +9,8 @@ import type {
 	OnCellFocusChange,
 	OnRowSelectionChange,
 	OnCellEdit,
+	OnColumnResize,
+	OnVirtualDataChange,
 	OnTableAction,
 	OnRowAction,
 	OnActionParams
@@ -51,6 +53,16 @@ class Table<TData extends Row> {
 			const currentHeaderCheckbox = this.headerCheckbox;
 			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
 
+			if (currentElement && this.#resizeObserver == null) {
+				this.#resizeObserver = new ResizeObserver((entries) => {
+					const entry = entries[0];
+					if (entry?.contentRect.height > 0) {
+						this.#debouncedResizeHandler(entry.contentRect.height);
+					}
+				});
+				this.#resizeObserver.observe(currentElement);
+			}
+
 			if (currentActionActiveRowIndex != null) {
 				window.addEventListener('click', this.handleWindowOutsideClick);
 				window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
@@ -66,17 +78,7 @@ class Table<TData extends Row> {
 
 			if (currentHeaderCheckbox != null) {
 				currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate === true;
-				// return () => {};
-			}
-
-			if (currentElement) {
-				this.#resizeObserver = new ResizeObserver((entries) => {
-					const entry = entries[0];
-					if (entry?.contentRect.height > 0) {
-						this.#debouncedResizeHandler(entry.contentRect.height);
-					}
-				});
-				this.#resizeObserver.observe(currentElement);
+				return () => {};
 			}
 
 			return () => {
@@ -175,6 +177,18 @@ class Table<TData extends Row> {
 	private onCellEditRun?: OnCellEdit;
 	private onCellEditThis: OnCellEdit = (params) => {
 		if (this.onCellEditRun != null) this.onCellEditRun(params);
+	};
+	// ***** onCellEdit Event *****
+	readonly onColumnResize = (fn: OnColumnResize) => (this.onColumnResizeRun = fn);
+	private onColumnResizeRun?: OnColumnResize;
+	private onColumnResizeThis: OnColumnResize = (params) => {
+		if (this.onColumnResizeRun != null) this.onColumnResizeRun(params);
+	};
+	// ***** onVirtualDataChange Event *****
+	readonly onVirtualDataChange = (fn: OnVirtualDataChange) => (this.onVirtualDataChangeRun = fn);
+	private onVirtualDataChangeRun?: OnVirtualDataChange;
+	private onVirtualDataChangeThis: OnVirtualDataChange = (params) => {
+		if (this.onVirtualDataChangeRun != null) this.onVirtualDataChangeRun(params);
 	};
 	// ***** onRowAction Event *****
 	readonly onRowAction = (fn: OnRowAction) => (this.onRowActionRun = fn);
@@ -289,6 +303,8 @@ class Table<TData extends Row> {
 				clientHeight: clientHeight,
 				focusedCellRowIndex: focusedCellRowIndex
 			};
+
+			this.onVirtualDataChangeThis?.(this.#rowIndices);
 		} else {
 			// Indexler değişmedi, güncelleme zorlanmadı ve odaklanmış satır zaten mevcut aralıkta
 		}
@@ -619,19 +635,23 @@ class Table<TData extends Row> {
 	#colResizePointerDownWidth = 0;
 	#colResizeIsAllWidth = false;
 
-	readonly setColumnWidth = (coi: number, width: number) => {
-		this.#src.columns[coi].width = `${Math.max(50, width)}px`;
+	readonly setColumnWidth = (coi: number, width: number, field: Field<TData>) => {
+		const minWidth = 50;
+		if (width > minWidth) {
+			this.#src.columns[coi].width = `${Math.max(minWidth, width)}px`;
+			this.onColumnResizeThis({ coi, width, field });
+		}
 	};
 
-	readonly colResizeUpdate = (event: PointerEvent, coi: number) => {
+	readonly colResizeUpdate = (event: PointerEvent, coi: number, field: Field<TData>) => {
 		const width = this.#colResizePointerDownWidth + (event.clientX - this.#colResizePointerDownClientX);
-		this.setColumnWidth(coi, width);
+		this.setColumnWidth(coi, width, field);
 
 		if (!this.#colResizeIsAllWidth) {
 			this.srcColumns.forEach((column, index) => {
 				if (index !== coi && column?.width?.startsWith('minmax')) {
 					const width = this.element?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect().width || 100;
-					this.setColumnWidth(index, width);
+					this.setColumnWidth(index, width, field);
 				}
 			});
 			this.#colResizeIsAllWidth = true;
