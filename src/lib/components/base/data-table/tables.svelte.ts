@@ -1,4 +1,18 @@
-import type { Sources, RequiredSources, Row, FocucedCell, Column, Footer, Field, OnCellFocusChange, OnRowSelectionChange, OnTableAction, OnRowAction, OnActionParams } from './types';
+import type {
+	Sources,
+	RequiredSources,
+	Row,
+	FocucedCell,
+	Column,
+	Footer,
+	Field,
+	OnCellFocusChange,
+	OnRowSelectionChange,
+	OnCellEdit,
+	OnTableAction,
+	OnRowAction,
+	OnActionParams
+} from './types';
 import { getContext, setContext } from 'svelte';
 import { tick, flushSync } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
@@ -155,6 +169,12 @@ class Table<TData extends Row> {
 	private onRowSelectionChangeRun?: OnRowSelectionChange;
 	private onRowSelectionChangeThis: OnRowSelectionChange = (params) => {
 		if (this.onRowSelectionChangeRun != null) this.onRowSelectionChangeRun(params);
+	};
+	// ***** onCellEdit Event *****
+	readonly onCellEdit = (fn: OnCellEdit) => (this.onCellEditRun = fn);
+	private onCellEditRun?: OnCellEdit;
+	private onCellEditThis: OnCellEdit = (params) => {
+		if (this.onCellEditRun != null) this.onCellEditRun(params);
 	};
 	// ***** onRowAction Event *****
 	readonly onRowAction = (fn: OnRowAction) => (this.onRowActionRun = fn);
@@ -467,7 +487,7 @@ class Table<TData extends Row> {
 		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
 
 		await tick();
-		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
+		this.onRowSelectionChangeThis?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
 	// OPTİMİZE EDİLMESİ GEREKEN KISIM
@@ -488,7 +508,7 @@ class Table<TData extends Row> {
 		this.#headerIsChecked = select;
 
 		await tick();
-		// this.onRowSelectionChangeThis({ selectedRows: this.selectedRows });
+		this.onRowSelectionChangeThis?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
 	selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
@@ -515,28 +535,31 @@ class Table<TData extends Row> {
 	// ################################## END Row Selection Methods ########################################################################################################################
 
 	// ################################## BEGIN Cell Edit ##################################################################################################################################
-	editingCell: boolean = $state(false);
+	#editingCell: boolean = $state(false);
 	editingCellInput: HTMLInputElement | undefined = $state(undefined);
 	editingCellValue: unknown = $state('');
-	editingCellOldValue: unknown = $state('');
-	editingCellPath: string = $state('');
+	#editingCellOldValue: unknown = $state('');
+	#editingCellPath: string = $state('');
+	get editingCellPath() {
+		return this.#editingCellPath;
+	}
 	removeCellInput = () => {
-		if (this.editingCell) {
-			this.editingCellPath = '';
+		if (this.#editingCell) {
+			this.#editingCellPath = '';
 			this.editingCellInput = undefined;
-			this.editingCellOldValue = '';
+			this.#editingCellOldValue = '';
 			this.editingCellValue = '';
-			this.editingCell = false;
+			this.#editingCell = false;
 		}
 	};
 	createCellInput = (key: string, rowIndex: number, colIndex: number, field: Field<TData>) => {
 		const snapshotRow = $state.snapshot(this.srcData[rowIndex]) as TData;
 		const oldValue = snapshotRow[field];
 		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
-		this.editingCellOldValue = oldValueForInput;
+		this.#editingCellOldValue = oldValueForInput;
 		this.editingCellValue = key === 'F2' || key === 'SLCDBL' ? oldValueForInput : key;
-		this.editingCell = true;
-		this.editingCellPath = `r${rowIndex}c${colIndex}`;
+		this.#editingCell = true;
+		this.#editingCellPath = `r${rowIndex}c${colIndex}`;
 	};
 	setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
 		if (newValue === oldValue) return;
@@ -546,6 +569,8 @@ class Table<TData extends Row> {
 		if (this.#src.data && typeof snapshotRow[field] === typeof newValue) {
 			snapshotRow[field] = newValue as TData[Field<TData>];
 			this.#src.data[rowIndex] = snapshotRow;
+
+			this.onCellEditThis?.({ newValue, oldValue, rowIndex, colIndex, field });
 		} else {
 			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
 		}
@@ -559,21 +584,13 @@ class Table<TData extends Row> {
 
 		const blur = (e: FocusEvent) => {
 			const newValue = this.editingCellValue;
-			const oldValue = this.editingCellOldValue;
+			const oldValue = this.#editingCellOldValue;
 
 			this.removeCellInput();
 
 			if (newValue === oldValue) return;
 
 			this.setCellValue(newValue, oldValue, roi, coi, col.field);
-			/*
-			// onCellEdit
-			if (onCellEdit && table.columns)
-					thisOnCellEdit({
-						event: 'celledit',
-						detail: { newValue, oldValue, rowIndex: inputrow, colIndex: inputcol, field: inputfield, column: $state.snapshot(table.columns[+inputcol]), row: $state.snapshot(table.data[+inputrow]) as TDataType }
-					});
-			*/
 		};
 		/* const click = (e: MouseEvent) => {
 			e.stopPropagation();
@@ -657,7 +674,7 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData> }) => {
+	tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }) => {
 		const mousedown = (e: Event) => {
 			const cellToFocus: Required<FocucedCell> = {
 				rowIndex: params.rowIndex,
@@ -673,6 +690,7 @@ class Table<TData extends Row> {
 			tick().then(() => {
 				node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 				node.focus({ preventScroll: true });
+				this.onCellFocusChangeThis({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
 			});
 		};
 
@@ -688,8 +706,6 @@ class Table<TData extends Row> {
 			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
 			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
-
-			const field = params.field;
 
 			// --- İzin Verilmeyen Tuşları Filtrele ---
 			const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
@@ -708,31 +724,35 @@ class Table<TData extends Row> {
 				return; // Odak yoksa (şimdilik) çık
 			}
 
+			const field = params.field;
+			const cancelEditable = params.cancelEditable ?? false;
+
 			// --- Anlık Eylemler ---
 			// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
 			if (
-				key === 'Escape' ||
-				key === 'F2' ||
+				(key === 'Escape' && !cancelEditable) ||
+				(key === 'F2' && !cancelEditable) ||
 				(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
 				(key === ' ' && this.srcRowAction && colIndex === this.visibleColumns.length) ||
 				((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 				((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-				(!e.ctrlKey && !e.metaKey && isTypable && !this.editingCell)
+				(!e.ctrlKey && !e.metaKey && isTypable && !this.#editingCell && !cancelEditable)
 			) {
-				if (key === 'Escape' && this.editingCell) {
+				if (key === 'Escape' && this.#editingCell) {
 					e.preventDefault();
 					this.removeCellInput();
 					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 					node.focus({ preventScroll: true });
+					this.onCellFocusChangeThis({ rowIndex, colIndex });
 				} else if (isTypable || key === 'F2') {
-					if (this.editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
+					if (this.#editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
 					e.preventDefault();
 					this.createCellInput(key, rowIndex, colIndex, field);
 				} else if (key === ' ') {
 					e.preventDefault();
-					if (this.srcRowSelection !== 'none' && colIndex === -1) {
+					if (this.srcRowSelection !== 'none' && colIndex === -1 && !cancelEditable) {
 						this.toggleRowSelection(rowIndex);
-					} else if (this.srcRowAction && colIndex === this.visibleColumns.length) {
+					} else if (this.srcRowAction && colIndex === this.visibleColumns.length && !cancelEditable) {
 						this.toggleActionPopup(rowIndex);
 					} else {
 						// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
@@ -824,6 +844,7 @@ class Table<TData extends Row> {
 					if (nextFocusedCellNode != null) {
 						nextFocusedCellNode.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 						nextFocusedCellNode.focus({ preventScroll: true });
+						this.onCellFocusChangeThis({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
 					}
 					ticking = false;
 				});

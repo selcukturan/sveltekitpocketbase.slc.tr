@@ -5,7 +5,7 @@
 
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
-	$inspect('$inspect-editingCellPath', t.editingCellPath);
+	// $inspect('$inspect-editingCellPath', t.editingCellPath);
 </script>
 
 <!-- ############################################################ DATA TABLE ############################################################ -->
@@ -43,23 +43,33 @@
 				{@const roi = rowWrapper.roi}
 				{@const rowStart = roi + t.headerRowsCountState + 1}
 				{@const checked = t.selectedRows.has(roi)}
+				{@const cancelEditable = row.order === 3 || row.order === 4 || row.order === 5}
 				<!-- ********** TRD ********** -->
-				<div {...t.attr_trd} class:slc-table-trd-selected={checked}>
+				<div
+					{...t.attr_trd}
+					class:slc-table-trd-selected={checked}
+					class:slc-table-trd-subtotal1={row.order === 3}
+					class:slc-table-trd-subtotal2={row.order === 4}
+					class:slc-table-trd-subtotal3={row.order === 5}
+				>
 					{#if t.srcRowSelection !== 'none'}
-						{@const originalCell = { rowIndex: roi, colIndex: -1 }}
+						{@const originalCell = { rowIndex: roi, colIndex: -1, cancelEditable }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD selection -->
 						<div {...t.attr_td_selection} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render selectionContent({ type: 'data', checked, roi })}
+							{#if cancelEditable}
+								{@render selectionContent({ type: 'footer' })}
+							{:else}
+								{@render selectionContent({ type: 'data', checked, roi })}
+							{/if}
 						</div>
 					{/if}
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 						{@const col = colWrapper.data}
 						{@const coi = colWrapper.coi}
 						{@const isEditable = t.editingCellPath === `r${roi}c${ci}` && col.editable}
-						{@const cancelEditable = row.order === 3}
-						{@const originalCell = { rowIndex: roi, colIndex: ci, field: col.field }}
+						{@const originalCell = { rowIndex: roi, colIndex: ci, field: col.field, cancelEditable }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD -->
@@ -72,12 +82,16 @@
 						</div>
 					{/each}
 					{#if t.srcRowAction}
-						{@const originalCell = { rowIndex: roi, colIndex: t.visibleColumns.length }}
+						{@const originalCell = { rowIndex: roi, colIndex: t.visibleColumns.length, cancelEditable }}
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD action -->
 						<div {...t.attr_td_action} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
-							{@render actionContent({ type: 'data', roi })}
+							{#if cancelEditable}
+								{@render actionContent({ type: 'footer' })}
+							{:else}
+								{@render actionContent({ type: 'data', roi })}
+							{/if}
 						</div>
 					{/if}
 				</div>
@@ -194,13 +208,22 @@
 						aria-label="Select All"
 						bind:this={t.headerCheckbox}
 						tabindex="-1"
+						id={`slcTableSelectionCheckboxHeaderInput${roi}`}
 						type="checkbox"
 						class="slc-table-selection-checkbox"
 						use:t.selectAction={{ type }}
 						checked={t.headerIsIndeterminate ? false : t.headerIsChecked}
 					/>
 				{:else if type === 'data' && roi != null}
-					<input aria-label="Select" class="slc-table-selection-checkbox" tabindex="-1" type="checkbox" use:t.selectAction={{ type, roi }} {checked} />
+					<input
+						aria-label="Select"
+						class="slc-table-selection-checkbox"
+						tabindex="-1"
+						id={`slcTableSelectionCheckboxDataInput${roi}`}
+						type="checkbox"
+						use:t.selectAction={{ type, roi }}
+						{checked}
+					/>
 				{:else if type === 'footer'}
 					{@html ``}
 				{:else}
@@ -323,6 +346,15 @@
 	}
 	.slc-table-trd-selected {
 		background-color: hsl(var(--primary-200)) !important;
+	}
+	.slc-table-trd-subtotal1 {
+		background-color: hsl(var(--success-50)) !important;
+	}
+	.slc-table-trd-subtotal2 {
+		background-color: hsl(var(--info-50)) !important;
+	}
+	.slc-table-trd-subtotal3 {
+		background-color: hsl(var(--error-50)) !important;
 	}
 	/******************************************************/
 	.slc-table-th {

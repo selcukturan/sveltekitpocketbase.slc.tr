@@ -49,9 +49,10 @@ export type FocucedCell = {
 	tabIndex?: number;
 };
 
-export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action: string };
 // Events Types
+export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action: string };
 export type OnCellFocusChange = (params: { rowIndex: number; colIndex: number }) => void;
 export type OnRowSelectionChange = (params: { selectedRows: number[] }) => void;
+export type OnCellEdit = (params: { newValue: unknown; oldValue: unknown; rowIndex: number; colIndex: number; field: Field<TData> }) => void;
 export type OnRowAction = (params: OnActionParams) => void;
 export type OnTableAction = (params: OnActionParams) => void;

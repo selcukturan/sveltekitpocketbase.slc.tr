@@ -11,7 +11,7 @@
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
 		data: utils.generateExampleData(1000),
-		rowSelection: 'single',
+		rowSelection: 'multiple-all',
 		rowAction: true,
 		actions: {
 			tableActions: [
@@ -26,7 +26,7 @@
 			]
 		},
 		columns: [
-			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)' },
+			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)', hidden: true },
 			{ field: 'producer', label: 'Producer', width: 'minmax(75px,1fr)', editable: true, hidden: false },
 			{ field: 'province', label: 'Province', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
 			{ field: 'district', label: 'District', width: 'minmax(75px,1fr)', resizeable: true, hidden: true },
@@ -42,7 +42,28 @@
 
 	const table = createTable<ProducedGrapes>(sources);
 
-	$inspect('$inspect-rowIndices', table.rowIndices);
+	// $inspect('$inspect-rowIndices', table.rowIndices);
+
+	/* table.onCellFocusChange((params) => {
+		const { rowIndex, colIndex } = params;
+		console.log('onCellFocusChange', rowIndex, colIndex);
+	}); */
+	/* table.onRowSelectionChange((params) => {
+		const { selectedRows } = params;
+		console.log('onRowSelectionChange', selectedRows);
+	}); */
+	/* table.onCellEdit((params) => {
+		const { newValue, oldValue, rowIndex, colIndex, field } = params;
+		console.log('onCellEdit', newValue, oldValue, rowIndex, colIndex, field);
+	}); */
+	/* table.onTableAction((params) => {
+		const { action } = params;
+		console.log('onTableAction', action);
+	}); */
+	/* table.onRowAction((params) => {
+		const { rowIndex, action } = params;
+		console.log('onRowAction', rowIndex, action);
+	}); */
 </script>
 
 <DataTable {sources} />
