@@ -161,54 +161,47 @@ class Table<TData extends Row> {
 
 	// ################################## BEGIN Events #################################################################################################################################
 	// ***** onCellFocusChange Event *****
-	readonly onCellFocusChange = (fn: OnCellFocusChange) => (this.onCellFocusChangeRun = fn);
+	readonly onCellFocusChange = (fn: OnCellFocusChange): void => {
+		this.onCellFocusChangeRun = fn;
+	};
 	private onCellFocusChangeRun?: OnCellFocusChange;
-	private onCellFocusChangeThis: OnCellFocusChange = (params) => {
-		if (this.onCellFocusChangeRun != null) this.onCellFocusChangeRun(params);
-	};
 	// ***** onRowSelectionChange Event *****
-	readonly onRowSelectionChange = (fn: OnRowSelectionChange) => (this.onRowSelectionChangeRun = fn);
+	readonly onRowSelectionChange = (fn: OnRowSelectionChange): void => {
+		this.onRowSelectionChangeRun = fn;
+	};
 	private onRowSelectionChangeRun?: OnRowSelectionChange;
-	private onRowSelectionChangeThis: OnRowSelectionChange = (params) => {
-		if (this.onRowSelectionChangeRun != null) this.onRowSelectionChangeRun(params);
-	};
 	// ***** onCellEdit Event *****
-	readonly onCellEdit = (fn: OnCellEdit) => (this.onCellEditRun = fn);
+	readonly onCellEdit = (fn: OnCellEdit): void => {
+		this.onCellEditRun = fn;
+	};
 	private onCellEditRun?: OnCellEdit;
-	private onCellEditThis: OnCellEdit = (params) => {
-		if (this.onCellEditRun != null) this.onCellEditRun(params);
+	// ***** onColumnResize Event *****
+	readonly onColumnResize = (fn: OnColumnResize): void => {
+		this.onColumnResizeRun = fn;
 	};
-	// ***** onCellEdit Event *****
-	readonly onColumnResize = (fn: OnColumnResize) => (this.onColumnResizeRun = fn);
 	private onColumnResizeRun?: OnColumnResize;
-	private onColumnResizeThis: OnColumnResize = (params) => {
-		if (this.onColumnResizeRun != null) this.onColumnResizeRun(params);
-	};
 	// ***** onVirtualDataChange Event *****
-	readonly onVirtualDataChange = (fn: OnVirtualDataChange) => (this.onVirtualDataChangeRun = fn);
+	readonly onVirtualDataChange = (fn: OnVirtualDataChange): void => {
+		this.onVirtualDataChangeRun = fn;
+	};
 	private onVirtualDataChangeRun?: OnVirtualDataChange;
-	private onVirtualDataChangeThis: OnVirtualDataChange = (params) => {
-		if (this.onVirtualDataChangeRun != null) this.onVirtualDataChangeRun(params);
-	};
 	// ***** onRowAction Event *****
-	readonly onRowAction = (fn: OnRowAction) => (this.onRowActionRun = fn);
+	readonly onRowAction = (fn: OnRowAction): void => {
+		this.onRowActionRun = fn;
+	};
 	private onRowActionRun?: OnRowAction;
-	private onRowActionThis: OnRowAction = (params) => {
-		if (this.onRowActionRun != null) this.onRowActionRun(params);
-	};
 	// ***** onTableAction Event *****
-	readonly onTableAction = (fn: OnTableAction) => (this.onTableActionRun = fn);
-	private onTableActionRun?: OnTableAction;
-	private onTableActionThis: OnTableAction = (params) => {
-		if (this.onTableActionRun != null) this.onTableActionRun(params);
+	readonly onTableAction = (fn: OnTableAction): void => {
+		this.onTableActionRun = fn;
 	};
+	private onTableActionRun?: OnTableAction;
 	// ################################## END Events #######################################################################################################################################
 
 	readonly actionTrigger = (params: OnActionParams) => {
 		if (params.type === 'row') {
-			this.onRowActionThis(params);
+			this.onRowActionRun?.(params);
 		} else if (params.type === 'table') {
-			this.onTableActionThis(params);
+			this.onTableActionRun?.(params);
 		}
 	};
 
@@ -304,7 +297,7 @@ class Table<TData extends Row> {
 				focusedCellRowIndex: focusedCellRowIndex
 			};
 
-			this.onVirtualDataChangeThis?.(this.#rowIndices);
+			this.onVirtualDataChangeRun?.(this.#rowIndices);
 		} else {
 			// Indexler değişmedi, güncelleme zorlanmadı ve odaklanmış satır zaten mevcut aralıkta
 		}
@@ -503,7 +496,7 @@ class Table<TData extends Row> {
 		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
 
 		await tick();
-		this.onRowSelectionChangeThis?.({ selectedRows: Array.from(this.#selectedRows) });
+		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
 	// OPTİMİZE EDİLMESİ GEREKEN KISIM
@@ -524,7 +517,7 @@ class Table<TData extends Row> {
 		this.#headerIsChecked = select;
 
 		await tick();
-		this.onRowSelectionChangeThis?.({ selectedRows: Array.from(this.#selectedRows) });
+		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
 	selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
@@ -586,7 +579,7 @@ class Table<TData extends Row> {
 			snapshotRow[field] = newValue as TData[Field<TData>];
 			this.#src.data[rowIndex] = snapshotRow;
 
-			this.onCellEditThis?.({ newValue, oldValue, rowIndex, colIndex, field });
+			this.onCellEditRun?.({ newValue, oldValue, rowIndex, colIndex, field });
 		} else {
 			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
 		}
@@ -635,11 +628,11 @@ class Table<TData extends Row> {
 	#colResizePointerDownWidth = 0;
 	#colResizeIsAllWidth = false;
 
-	readonly setColumnWidth = (coi: number, width: number, field: Field<TData>) => {
+	readonly setColumnWidth = (colIndex: number, width: number, field: Field<TData>) => {
 		const minWidth = 50;
 		if (width > minWidth) {
-			this.#src.columns[coi].width = `${Math.max(minWidth, width)}px`;
-			this.onColumnResizeThis({ coi, width, field });
+			this.#src.columns[colIndex].width = `${Math.max(minWidth, width)}px`;
+			this.onColumnResizeRun?.({ colIndex, width, field });
 		}
 	};
 
@@ -710,7 +703,7 @@ class Table<TData extends Row> {
 			tick().then(() => {
 				node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 				node.focus({ preventScroll: true });
-				this.onCellFocusChangeThis({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
+				this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
 			});
 		};
 
@@ -763,7 +756,7 @@ class Table<TData extends Row> {
 					this.removeCellInput();
 					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 					node.focus({ preventScroll: true });
-					this.onCellFocusChangeThis({ rowIndex, colIndex });
+					this.onCellFocusChangeRun?.({ rowIndex, colIndex });
 				} else if (isTypable || key === 'F2') {
 					if (this.#editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
 					e.preventDefault();
@@ -864,7 +857,7 @@ class Table<TData extends Row> {
 					if (nextFocusedCellNode != null) {
 						nextFocusedCellNode.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 						nextFocusedCellNode.focus({ preventScroll: true });
-						this.onCellFocusChangeThis({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
+						this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
 					}
 					ticking = false;
 				});

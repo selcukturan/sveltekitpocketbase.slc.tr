@@ -44,34 +44,27 @@
 
 	// $inspect('$inspect-rowIndices', table.rowIndices);
 
-	/* table.onCellFocusChange((params) => {
-		const { rowIndex, colIndex } = params;
-		console.log('onCellFocusChange', rowIndex, colIndex);
-	}); */
-	/* table.onRowSelectionChange((params) => {
-		const { selectedRows } = params;
-		console.log('onRowSelectionChange', selectedRows);
-	}); */
-	/* table.onCellEdit((params) => {
-		const { newValue, oldValue, rowIndex, colIndex, field } = params;
-		console.log('onCellEdit', newValue, oldValue, rowIndex, colIndex, field);
-	}); */
-	/* table.onColumnResize((params) => {
-		const { coi, width, field } = params;
-		console.log('onColumnResize', coi, width, field);
-	}); */
-	/* table.onVirtualDataChange((params) => {
-		const { visibleStart, visibleEnd, overscanStart, overscanEnd, scrollTop, clientHeight, focusedCellRowIndex } = params;
-		console.log('onVirtualDataChange', visibleStart, visibleEnd, overscanStart, overscanEnd, scrollTop, clientHeight, focusedCellRowIndex);
-	}); */
-	/* table.onTableAction((params) => {
-		const { action } = params;
-		console.log('onTableAction', action);
-	}); */
-	/* table.onRowAction((params) => {
-		const { rowIndex, action } = params;
-		console.log('onRowAction', rowIndex, action);
-	}); */
+	table.onCellFocusChange((params) => {
+		console.log('onCellFocusChange', params);
+	});
+	table.onRowSelectionChange((params) => {
+		console.log('onRowSelectionChange', params);
+	});
+	table.onCellEdit((params) => {
+		console.log('onCellEdit', params);
+	});
+	table.onColumnResize((params) => {
+		console.log('onColumnResize', params);
+	});
+	table.onVirtualDataChange((params) => {
+		console.log('onVirtualDataChange', params);
+	});
+	table.onTableAction((params) => {
+		console.log('onTableAction', params);
+	});
+	table.onRowAction((params) => {
+		console.log('onRowAction', params);
+	});
 </script>
 
 <DataTable {sources} />

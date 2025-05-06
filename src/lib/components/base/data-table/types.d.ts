@@ -54,7 +54,7 @@ export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action:
 export type OnCellFocusChange = (params: { rowIndex: number; colIndex: number }) => void;
 export type OnRowSelectionChange = (params: { selectedRows: number[] }) => void;
 export type OnCellEdit = (params: { newValue: unknown; oldValue: unknown; rowIndex: number; colIndex: number; field: Field<TData> }) => void;
-export type OnColumnResize = (params: { coi: number; width: number; field: Field<TData> }) => void;
+export type OnColumnResize = (params: { colIndex: number; width: number; field: Field<TData> }) => void;
 export type OnVirtualDataChange = (params: {
 	visibleStart?: number;
 	visibleEnd?: number;
