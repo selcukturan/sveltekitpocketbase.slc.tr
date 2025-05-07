@@ -66,7 +66,7 @@ export class Auth extends LocalAuthStore {
 
 		// add toast error notification
 		if (notify && msg) {
-			console.warn('SLC: auth.ts - add toast error notification | ', msg);
+			console.warn('SLC: auth.ts - add toast error notification |', msg);
 		}
 
 		// populate form field errors
