@@ -35,3 +35,14 @@ services:
 networks:
   network_0:
     driver: bridge
+# ############################################ COOLIFY ##########################################
+# Name: sveltekitpocketbase.slc.tr
+# Description: SLC SvelteKit and Pocketbase for a closed-system full-stack SPA
+
+# Docker Compose Location: /docker-compose-production.yml
+
+# Domains for S App: https://sveltekitpocketbase.slc.tr:5554
+# Domains for S Pocketbase: https://sveltekitpocketbasedb.slc.tr:8097
+
+# Custom Build Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production build --pull
+# Custom Start Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d
