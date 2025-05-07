@@ -140,10 +140,7 @@
 					type="text"
 					spellcheck="false"
 					autocomplete="off"
-					data-inputrow={roi}
-					data-inputcol={coi}
-					data-inputfield={col.field || 'slcNullField'}
-					use:t.inputOnAction={{ roi, coi, col }}
+					use:t.editInputAction={{ roi, coi, col }}
 					bind:this={t.editingCellInput}
 					bind:value={t.editingCellValue}
 					style:text-align={col.align || 'left'}
@@ -154,6 +151,7 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 {/snippet}
+
 {#snippet baseContent({ type, row, roi, col, coi, foot }: { type: 'header' | 'footer' | 'data'; row?: TData; roi?: number; col: Column<TData>; coi: number; foot?: Footer<TData> })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>

@@ -57,7 +57,7 @@ class Table<TData extends Row> {
 				this.#resizeObserver = new ResizeObserver((entries) => {
 					const entry = entries[0];
 					if (entry?.contentRect.height > 0) {
-						this.#debouncedResizeHandler(entry.contentRect.height);
+						this.debouncedResizeHandler(entry.contentRect.height);
 					}
 				});
 				this.#resizeObserver.observe(currentElement);
@@ -225,7 +225,7 @@ class Table<TData extends Row> {
 		return this.#rowIndices;
 	}
 
-	readonly updateVisibleIndexes = (force: boolean = false) => {
+	private updateVisibleIndexes = (force: boolean = false) => {
 		// 1. Cache Değerleri.
 		const scrollTop = this.cachedScrollTop;
 		const clientHeight = this.cachedClientHeight;
@@ -343,7 +343,7 @@ class Table<TData extends Row> {
 		return processedData;
 	});
 
-	virtualScrollAction = (tableNode: HTMLDivElement) => {
+	readonly virtualScrollAction = (tableNode: HTMLDivElement) => {
 		let ticking = false;
 
 		this.cachedClientHeight = Math.round(tableNode.clientHeight);
@@ -408,7 +408,7 @@ class Table<TData extends Row> {
 		/* alert('Item clicked: ' + params.action); */
 	};
 
-	actionAction = (buttonNode: HTMLButtonElement, params: { roi: number; type: 'header' | 'footer' | 'data' }) => {
+	readonly actionAction = (buttonNode: HTMLButtonElement, params: { roi: number; type: 'header' | 'footer' | 'data' }) => {
 		const { roi, type } = params;
 		const click = (e: Event) => {
 			const target = e.currentTarget as HTMLElement;
@@ -474,15 +474,15 @@ class Table<TData extends Row> {
 		this.#selectedRows.clear();
 	};
 
-	readonly toggleRowSelection = async (rowIndex: number) => {
+	private toggleRowSelection = async (rowIndex: number) => {
 		if (this.srcRowSelection === 'none') return;
 
 		if (this.srcRowSelection === 'single') {
 			if (!this.#selectedRows.has(rowIndex)) {
-				this.#selectedRows.clear();
+				this.clearSelectedRows();
 				this.#selectedRows.add(rowIndex);
 			} else {
-				this.#selectedRows.clear();
+				this.clearSelectedRows();
 			}
 		} else if (this.srcRowSelection === 'multiple-all' || this.srcRowSelection === 'multiple') {
 			// Çoklu seçim için toggle işlemi
@@ -499,11 +499,11 @@ class Table<TData extends Row> {
 		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
-	// OPTİMİZE EDİLMESİ GEREKEN KISIM
-	readonly toggleAllRows = async (select: boolean) => {
+	// UYARI: `cancelEditable` kullanılarak eklenen `subtotal`leri de ekler.
+	private toggleAllRows = async (select: boolean) => {
 		if (this.srcRowSelection !== 'multiple-all') return;
 
-		this.#selectedRows.clear();
+		this.clearSelectedRows();
 		if (select) {
 			// Tüm indeksleri Set'e ekle
 			for (let i = 0; i < this.srcData.length; i++) {
@@ -520,7 +520,7 @@ class Table<TData extends Row> {
 		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
-	selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
+	readonly selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
 		const { roi, type } = params;
 		const change = (e: Event) => {
 			// e.preventDefault();
@@ -552,40 +552,34 @@ class Table<TData extends Row> {
 	get editingCellPath() {
 		return this.#editingCellPath;
 	}
-	removeCellInput = () => {
+	private removeCellInput = () => {
 		if (this.#editingCell) {
-			this.#editingCellPath = '';
-			this.editingCellInput = undefined;
-			this.#editingCellOldValue = '';
-			this.editingCellValue = '';
 			this.#editingCell = false;
+			this.editingCellInput = undefined;
+			this.editingCellValue = '';
+			this.#editingCellOldValue = '';
+			this.#editingCellPath = '';
 		}
 	};
-	createCellInput = (key: string, rowIndex: number, colIndex: number, field: Field<TData>) => {
-		const snapshotRow = $state.snapshot(this.srcData[rowIndex]) as TData;
-		const oldValue = snapshotRow[field];
+	private createCellInput = (key: string, rowIndex: number, colIndex: number, field: Field<TData>) => {
+		const oldValue = this.srcData[rowIndex][field] as TData[Field<TData>];
 		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
 		this.#editingCellOldValue = oldValueForInput;
-		this.editingCellValue = key === 'F2' || key === 'SLCDBL' ? oldValueForInput : key;
+		this.editingCellValue = key === 'F2' ? oldValueForInput : key;
 		this.#editingCell = true;
 		this.#editingCellPath = `r${rowIndex}c${colIndex}`;
 	};
-	setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
+	private setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
 		if (newValue === oldValue) return;
 
-		const snapshotRow = $state.snapshot(this.srcData[rowIndex]) as TData;
-
-		if (this.#src.data && typeof snapshotRow[field] === typeof newValue) {
-			snapshotRow[field] = newValue as TData[Field<TData>];
-			this.#src.data[rowIndex] = snapshotRow;
-
+		if (this.#src.data && typeof this.#src.data[rowIndex][field] === typeof newValue) {
+			this.#src.data[rowIndex][field] = newValue as TData[Field<TData>];
 			this.onCellEditRun?.({ newValue, oldValue, rowIndex, colIndex, field });
 		} else {
-			console.error(`Type mismatch: Field ${field} expects ${typeof snapshotRow[field]}, but got ${typeof newValue}`);
+			console.error(`Type mismatch: Field ${field} expects ${typeof this.#src.data?.[rowIndex][field]}, but got ${typeof newValue}`);
 		}
 	};
-
-	readonly inputOnAction = (input: HTMLInputElement, params: { roi: number; coi: number; col: Column<TData> }) => {
+	readonly editInputAction = (input: HTMLInputElement, params: { roi: number; coi: number; col: Column<TData> }) => {
 		const { roi, coi, col } = params;
 
 		input.focus();
@@ -628,7 +622,7 @@ class Table<TData extends Row> {
 	#colResizePointerDownWidth = 0;
 	#colResizeIsAllWidth = false;
 
-	readonly setColumnWidth = (colIndex: number, width: number, field: Field<TData>) => {
+	private setColumnWidth = (colIndex: number, width: number, field: Field<TData>) => {
 		const minWidth = 50;
 		if (width > minWidth) {
 			this.#src.columns[colIndex].width = `${Math.max(minWidth, width)}px`;
@@ -687,7 +681,7 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }) => {
+	readonly tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }) => {
 		const mousedown = (e: Event) => {
 			const cellToFocus: Required<FocucedCell> = {
 				rowIndex: params.rowIndex,
@@ -879,7 +873,7 @@ class Table<TData extends Row> {
 	// ################################## END Actions ######################################################################################################################################
 
 	// ################################## BEGIN Utils #######################################################################################################################################
-	debounce = <This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
+	readonly debounce = <This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
 		const debounced = function (this: This, ...args: Args): void {
 			const context = this;
@@ -921,7 +915,7 @@ class Table<TData extends Row> {
 					: footer;
 	};
 	// Debounced handler (resize için daha iyi)
-	#debouncedResizeHandler = this.debounce((height: number) => {
+	private debouncedResizeHandler = this.debounce((height: number) => {
 		this.cachedClientHeight = Math.round(height);
 		this.updateVisibleIndexes();
 	}, 100);

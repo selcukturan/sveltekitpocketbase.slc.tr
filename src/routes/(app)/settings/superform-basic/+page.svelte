@@ -5,8 +5,6 @@
 
 	import type { ProducedGrapes } from '$lib/dev/schemaProducedGrapes';
 
-	console.log(utils.turkishLowerCase('ğüşiöç ĞÜŞİÖÇ iİ ıI'));
-
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
@@ -42,29 +40,29 @@
 
 	const table = createTable<ProducedGrapes>(sources);
 
-	// $inspect('$inspect-rowIndices', table.rowIndices);
+	table.onCellFocusChange((data) => {
+		console.log('onCellFocusChange', data);
+	});
+	table.onRowSelectionChange((data) => {
+		console.log('onRowSelectionChange', data);
+	});
+	table.onCellEdit((data) => {
+		console.log('onCellEdit', data);
+	});
+	table.onColumnResize((data) => {
+		console.log('onColumnResize', data);
+	});
+	table.onVirtualDataChange((data) => {
+		console.log('onVirtualDataChange', data);
+	});
+	table.onTableAction((data) => {
+		console.log('onTableAction', data);
+	});
+	table.onRowAction((data) => {
+		console.log('onRowAction', data);
+	});
 
-	table.onCellFocusChange((params) => {
-		console.log('onCellFocusChange', params);
-	});
-	table.onRowSelectionChange((params) => {
-		console.log('onRowSelectionChange', params);
-	});
-	table.onCellEdit((params) => {
-		console.log('onCellEdit', params);
-	});
-	table.onColumnResize((params) => {
-		console.log('onColumnResize', params);
-	});
-	table.onVirtualDataChange((params) => {
-		console.log('onVirtualDataChange', params);
-	});
-	table.onTableAction((params) => {
-		console.log('onTableAction', params);
-	});
-	table.onRowAction((params) => {
-		console.log('onRowAction', params);
-	});
+	// $inspect('$inspect-rowIndices', table.rowIndices);
 </script>
 
 <DataTable {sources} />

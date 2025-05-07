@@ -8,7 +8,7 @@ export type Field<TData> = Extract<keyof TData, RowKey>;
 export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(${number}fr,${number}fr)`;
 
 export type Column<TData> = {
-	field: Field<TData>; // field required
+	field: Field<TData>; // required
 	label?: string;
 	hidden?: boolean;
 	resizeable?: boolean;
@@ -50,7 +50,6 @@ export type FocucedCell = {
 };
 
 // Events Types
-export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action: string };
 export type OnCellFocusChange = (params: { rowIndex: number; colIndex: number }) => void;
 export type OnRowSelectionChange = (params: { selectedRows: number[] }) => void;
 export type OnCellEdit = (params: { newValue: unknown; oldValue: unknown; rowIndex: number; colIndex: number; field: Field<TData> }) => void;
@@ -64,5 +63,6 @@ export type OnVirtualDataChange = (params: {
 	clientHeight?: number;
 	focusedCellRowIndex?: number;
 }) => void;
+export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action: string };
 export type OnRowAction = (params: OnActionParams) => void;
 export type OnTableAction = (params: OnActionParams) => void;
