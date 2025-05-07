@@ -7,6 +7,7 @@ services:
     container_name: c_node_slcapp
     restart: unless-stopped
     environment:
+      NODE_ENV: production
       PORT: ${PORT}
       ORIGIN: ${ORIGIN}
     ports:
