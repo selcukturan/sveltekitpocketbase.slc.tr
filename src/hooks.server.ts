@@ -39,7 +39,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookieExpDate = currentTokenExp ? new Date(currentTokenExp + utcOffsetMs) : undefined;
 	// 🍪 Set Cookie ################################################################################################################
 	// response.headers.append('set-cookie', event.locals.auth.exportToCookie({ expires: cookieExpDate, httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
-	response.headers.append('set-cookie', event.locals.auth.exportToCookie({ httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
+	// response.headers.append('set-cookie', event.locals.auth.exportToCookie({ httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
+	response.headers.append('set-cookie', event.locals.auth.exportToCookie({ httpOnly: true }));
 	// 🏆 ###########################################################################################################################
 	return response;
 };
