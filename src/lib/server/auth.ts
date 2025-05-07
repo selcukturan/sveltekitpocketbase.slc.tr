@@ -20,7 +20,6 @@ export class Auth extends LocalAuthStore {
 	constructor(event: RequestEvent, storageKey = 'sess') {
 		super(storageKey);
 		this.#storageKey = storageKey;
-		console.log('env.PB_BACKEND_URL', env.PB_BACKEND_URL);
 		this.#pb = new PocketBase(env.PB_BACKEND_URL, this, 'tr-TR');
 		this.loadFromCookie(event.request.headers.get('cookie') || '');
 	}
@@ -67,7 +66,7 @@ export class Auth extends LocalAuthStore {
 
 		// add toast error notification
 		if (notify && msg) {
-			console.warn('SLC: auth.ts - add toast error notification', msg);
+			console.warn('SLC: auth.ts - add toast error notification | ', msg);
 		}
 
 		// populate form field errors
