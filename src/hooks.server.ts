@@ -38,9 +38,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const utcOffsetMs = -utcOffset * 60 * 1000; // Dakikayı (-+) olarak tersine çevirip milisaniyeye çevir. (3 saat = 180 dakika = 10800000 milisaniye)
 	const cookieExpDate = currentTokenExp ? new Date(currentTokenExp + utcOffsetMs) : undefined;
 	// 🍪 Set Cookie ################################################################################################################
-	// response.headers.append('set-cookie', event.locals.auth.exportToCookie({ expires: cookieExpDate, httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
-	// response.headers.append('set-cookie', event.locals.auth.exportToCookie({ httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
-	response.headers.append('set-cookie', event.locals.auth.exportToCookie({ httpOnly: true }));
+	response.headers.append('set-cookie', event.locals.auth.exportToCookie({ expires: cookieExpDate, httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
 	// 🏆 ###########################################################################################################################
 	return response;
 };
