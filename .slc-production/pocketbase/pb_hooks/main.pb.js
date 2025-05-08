@@ -1,4 +1,3 @@
-// --- /// <reference path="../../../.slc-local/pocketbase/pb_data/types.d.ts" /> ---
 /// <reference path="../pb_data/types.d.ts" />
 
 // attach global middleware
