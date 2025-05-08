@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile
     container_name: c_node_slcapp
     restart: unless-stopped
-    volumes:
-      - ./pocketbase/pb_hooks:/app/.slc-production/pocketbase/pb_hooks
     environment:
       NODE_ENV: production
       PORT: ${PORT}

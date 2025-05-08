@@ -14,7 +14,7 @@
 		"lint": "prettier --check . && eslint .",
 		"slc:dev:build": "vite build",
 		"slc:dev:preview": "vite preview",
-		"pb": "docker compose --file ./.slc-development/pocketbase/docker-compose.yml --env-file ./.env.development up -d",
+		"pb": "docker compose --file ./.slc-development/pocketbase/docker-compose.yml --env-file ./.env.development up -d --build",
 		"slc:dev:push": "git add . && git commit -m \"SLC CLI Auto Push\" && git push origin main",
 		"slc:local:docker": "docker-compose -f docker-compose-local.yml up --build -d",
 		"slc:production:docker": "docker-compose -f docker-compose-production.yml up --build -d"
