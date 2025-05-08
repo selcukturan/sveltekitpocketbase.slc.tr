@@ -7,7 +7,7 @@ services:
     container_name: c_node_slcapp
     restart: unless-stopped
     volumes:
-      - ./.slc-production/pocketbase/pb_hooks:/app/.slc-production/pocketbase/pb_hooks
+      - ./pocketbase/pb_hooks:/app/.slc-production/pocketbase/pb_hooks
     environment:
       NODE_ENV: production
       PORT: ${PORT}
@@ -24,9 +24,9 @@ services:
     container_name: c_pocketbase_slcapp
     restart: unless-stopped
     volumes:
-      - ./.slc-production/pocketbase/pb_data:/pb/pb_data
-      - ./.slc-production/pocketbase/pb_hooks:/pb/pb_hooks
-      - ./.slc-production/pocketbase/pb_migrations:/pb/pb_migrations
+      - ./pocketbase/pb_data:/pb/pb_data
+      - ./pocketbase/pb_hooks:/pb/pb_hooks
+      - ./pocketbase/pb_migrations:/pb/pb_migrations
     ports:
       - ${PB_PORT}:${PB_PORT}
     depends_on:
