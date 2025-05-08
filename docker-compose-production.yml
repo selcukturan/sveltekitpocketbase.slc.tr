@@ -46,3 +46,6 @@ networks:
 
 # Custom Build Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production build --pull
 # Custom Start Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d
+
+# OR (build: anahtar kelimesiyle tanımlanmış servislerin imajlarını yeniden oluşturur)
+# Custom Start Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d --build
