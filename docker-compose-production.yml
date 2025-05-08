@@ -22,9 +22,9 @@ services:
     container_name: c_pocketbase_slcapp
     restart: unless-stopped
     volumes:
-      - pb_data:/pb/pb_data
-      - pb_hooks:/pb/pb_hooks
-      - pb_migrations:/pb/pb_migrations
+      - ./.slc-production/pocketbase/pb_data:/pb/pb_data
+      - ./.slc-production/pocketbase/pb_hooks:/pb/pb_hooks
+      - ./.slc-production/pocketbase/pb_migrations:/pb/pb_migrations
     ports:
       - ${PB_PORT}:${PB_PORT}
     depends_on:
@@ -35,14 +35,6 @@ services:
 networks:
   network_0:
     driver: bridge
-
-volumes:
-  pb_data:
-    driver: local
-  pb_hooks:
-    driver: local
-  pb_migrations:
-    driver: local
 # ############################################ COOLIFY ##########################################
 # Name: sveltekitpocketbase.slc.tr
 # Description: SLC SvelteKit and Pocketbase for a closed-system full-stack SPA
