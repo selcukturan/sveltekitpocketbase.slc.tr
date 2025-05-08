@@ -31,14 +31,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// 🔽 - istek sunucu tarafından işlendikten sonraki kodlar aşağıdadır.
 
 	// 📡 Get locals.auth ###########################################################################################################
-	const currentToken = event.locals.auth.token || '';
-	// ⌛ Cookie ayarları ###########################################################################################################
-	const currentTokenExp = currentToken ? auth.getTokenPayload(currentToken).exp * 1000 : undefined;
-	const utcOffset = new Date().getTimezoneOffset(); // UTC offset'i dakika cinsinden al (Türkiye-Europe/Istanbul için -180 dakika döner. 3 saat geride.)
-	const utcOffsetMs = -utcOffset * 60 * 1000; // Dakikayı (-+) olarak tersine çevirip milisaniyeye çevir. (3 saat = 180 dakika = 10800000 milisaniye)
-	const cookieExpDate = currentTokenExp ? new Date(currentTokenExp + utcOffsetMs) : undefined;
-	// 🍪 Set Cookie ################################################################################################################
-	response.headers.append('set-cookie', event.locals.auth.exportToCookie({ expires: cookieExpDate, httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' }));
+	// Buradan sonra `event.locals.auth` ile işlem yapılabilir.
+
+	// ⌛🍪 Set Cookie ################################################################################################################
+	response.headers.append(
+		'set-cookie',
+		event.locals.auth.exportToCookie({ expires: auth.getCookieExpDate(event.locals.auth.token), httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' })
+	);
 	// 🏆 ###########################################################################################################################
 	return response;
 };
