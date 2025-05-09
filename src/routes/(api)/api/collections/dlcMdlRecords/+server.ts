@@ -11,14 +11,14 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	if (id) {
 		// View (dlcMdlRecords) - /api/collections/dlcMdlRecords/records/:id
-		records = await locals.pbClient.collection('dlcMdlRecords').getOne(id, {
+		records = await locals.auth.pb.collection('dlcMdlRecords').getOne(id, {
 			expand: 'relField1,relField2.subRelField'
 		});
 	} else {
 		// List/Search (dlcMdlRecords) - /api/collections/dlcMdlRecords/records
 
 		// you can also fetch all records at once via getFullList
-		records = await locals.pbClient.collection('dlcMdlRecords').getFullList({
+		records = await locals.auth.pb.collection('dlcMdlRecords').getFullList({
 			sort: '-created'
 		});
 
@@ -78,7 +78,7 @@ export const POST: RequestHandler = async ({ locals }) => {
 		SLC_MDL_FILES_ID: ['RELATION_RECORD_ID']
 	};
 
-	const record = await locals.pbClient.collection('dlcMdlRecords').create(data);
+	const record = await locals.auth.pb.collection('dlcMdlRecords').create(data);
 	return json(record);
 };
 
@@ -125,7 +125,7 @@ export const PATCH: RequestHandler = async ({ url, locals }) => {
 		SLC_MDL_FILES_ID: ['RELATION_RECORD_ID']
 	};
 
-	const record = await locals.pbClient.collection('dlcMdlRecords').update(id, data);
+	const record = await locals.auth.pb.collection('dlcMdlRecords').update(id, data);
 
 	return json(record);
 };
@@ -133,7 +133,7 @@ export const PATCH: RequestHandler = async ({ url, locals }) => {
 // Delete       (dlcMdlRecords) - /api/collections/dlcMdlRecords/records/:id
 export const DELETE: RequestHandler = async ({ url, locals }) => {
 	const id = String(url.searchParams.get('id') ?? '0');
-	const record = await locals.pbClient.collection('dlcMdlRecords').delete(id);
+	const record = await locals.auth.pb.collection('dlcMdlRecords').delete(id);
 	return json(record);
 };
 
