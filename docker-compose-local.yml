@@ -4,16 +4,16 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: c_node_slcdlcapp
+    container_name: c_node_slcapplocal
     restart: unless-stopped
     env_file:
       - .env.production
     environment:
       NODE_ENV: production
-      PORT: 4006
-      ORIGIN: http://localhost:4006
+      PORT: ${PORT}
+      ORIGIN: ${ORIGIN}
     ports:
-      - 4006:4006
+      - ${PORT}:${PORT}
     networks:
       - network_0
   # POCKETBASE SQLITE DB
@@ -21,14 +21,14 @@ services:
     build:
       context: ./.slc-local/pocketbase
       dockerfile: Dockerfile
-    container_name: c_pocketbase_slcdlcapp
+    container_name: c_pocketbase_slcapplocal
     restart: unless-stopped
     volumes:
       - ./.slc-local/pocketbase/pb_data:/pb/pb_data
       - ./.slc-local/pocketbase/pb_hooks:/pb/pb_hooks
       - ./.slc-local/pocketbase/pb_migrations:/pb/pb_migrations
     ports:
-      - 8096:8096
+      - ${PB_PORT}:${PB_PORT}
     depends_on:
       - s_app
     networks:

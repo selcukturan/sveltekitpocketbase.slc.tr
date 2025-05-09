@@ -3,6 +3,7 @@
 	import { getGlobalStates } from '$lib/states/global.svelte';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { Icon } from '$lib/components/icons';
+	import { PUBLIC_ENV_TEST } from '$env/static/public';
 
 	const globalStates = getGlobalStates();
 
@@ -24,9 +25,9 @@
 			</button>
 		</div>
 		<div class="flex flex-1 items-center justify-center gap-4">
-			<!-- <a href="/pb/_" target="_blank">Remote Database</a> -->
-			<span><span class="red-blue-500">project name: </span>[slc-dlc-app]</span>
-			<a href="http://localhost:8099/_" target="_blank">Local Database</a>
+			{#if PUBLIC_ENV_TEST === 'public.env.development'}
+				<a href="http://localhost:8099/_" target="_blank">Local Database</a>
+			{/if}
 		</div>
 		<div class="flex items-center gap-4">
 			<form action="/logout" method="POST" use:enhance>

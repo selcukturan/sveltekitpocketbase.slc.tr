@@ -89,7 +89,7 @@
 							autocomplete="email"
 							autocorrect="off"
 							disabled={isLoading}
-							value="user1@slcweb.app"
+							value="demo@slc.tr"
 							class="h-input rounded-10px border-border-input bg-background text-foreground w-[219px] border pr-2 pl-2 text-base sm:text-sm"
 						/>
 					</label>
@@ -105,7 +105,7 @@
 							autocapitalize="none"
 							autocorrect="off"
 							disabled={isLoading}
-							value="SLc2176317"
+							value="SLc1234567"
 							class="h-input rounded-10px border-border-input bg-background text-foreground w-[219px] border pr-2 pl-2 text-base sm:text-sm"
 						/>
 					</label>

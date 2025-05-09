@@ -1,1 +1,0 @@
-# .slc-local notes

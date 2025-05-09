@@ -10,11 +10,11 @@ npm run pb
 - Geliştirme ortamını build etme ve ön izleme
 
 ```bash
-npm run slc:dev:build
-npm run slc:dev:preview
+npm run build
+npm run preview
 ```
 
-- Kök dizinde bulunan `docker-compose-local.yml` dosyasını ayağa kaldırma
+- Kök dizinde bulunan `docker-compose-local.yml` dosyasını ayağa kaldırma. (local production test)
 
 ```bash
 npm run slc:local:docker
