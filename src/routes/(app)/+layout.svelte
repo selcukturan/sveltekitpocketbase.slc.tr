@@ -49,8 +49,8 @@
 			icon: 'chart-spline'
 		},
 		{
-			title: 'Development',
-			href: '/dev',
+			title: 'Developments',
+			href: '/developments',
 			icon: 'square-code'
 		},
 		{

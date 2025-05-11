@@ -9,11 +9,11 @@
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
-			title: 'Development',
+			title: 'Developments',
 			child: [
 				{
 					title: 'Introduction',
-					href: `/dev`,
+					href: `/developments`,
 					icon: 'file-symlink',
 					root: true
 				}
@@ -24,77 +24,77 @@
 			child: [
 				{
 					title: 'Introduction',
-					href: `/dev/components`,
+					href: `/developments/components`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Virtual (ikili)',
-					href: `/dev/components/virtual`,
+					title: 'Tree',
+					href: `/developments/components/tree`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Virtual (döngü)',
-					href: `/dev/components/virtual-dongu`,
+					href: `/developments/components/virtual-dongu`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Tabular',
-					href: `/dev/components/tabular`,
+					href: `/developments/components/tabular`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Tanstack',
-					href: `/dev/components/tanstack`,
+					href: `/developments/components/tanstack`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Tooltip',
-					href: `/dev/components/tooltip`,
+					href: `/developments/components/tooltip`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Toast',
-					href: `/dev/components/toast`,
+					href: `/developments/components/toast`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Button',
-					href: `/dev/components/button`,
+					href: `/developments/components/button`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Toggler',
-					href: `/dev/components/toggler`,
+					href: `/developments/components/toggler`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Select',
-					href: `/dev/components/select`,
+					href: `/developments/components/select`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Data Table',
-					href: `/dev/components/data-table`,
+					href: `/developments/components/data-table`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Test Data Table',
-					href: `/dev/components/table-test`,
+					href: `/developments/components/table-test`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'InputText',
-					href: `/dev/components/input-text`,
+					href: `/developments/components/input-text`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'InputNumber',
-					href: `/dev/components/input-number`,
+					href: `/developments/components/input-number`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'InputDateTime',
-					href: `/dev/components/input-datetime`,
+					href: `/developments/components/input-datetime`,
 					icon: 'file-symlink'
 				}
 			]
