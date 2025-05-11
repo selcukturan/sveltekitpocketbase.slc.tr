@@ -32,21 +32,7 @@
 					href: `/developments/components/tree`,
 					icon: 'file-symlink'
 				},
-				{
-					title: 'Virtual (döngü)',
-					href: `/developments/components/virtual-dongu`,
-					icon: 'file-symlink'
-				},
-				{
-					title: 'Tabular',
-					href: `/developments/components/tabular`,
-					icon: 'file-symlink'
-				},
-				{
-					title: 'Tanstack',
-					href: `/developments/components/tanstack`,
-					icon: 'file-symlink'
-				},
+
 				{
 					title: 'Tooltip',
 					href: `/developments/components/tooltip`,
@@ -63,25 +49,11 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Toggler',
-					href: `/developments/components/toggler`,
-					icon: 'file-symlink'
-				},
-				{
 					title: 'Select',
 					href: `/developments/components/select`,
 					icon: 'file-symlink'
 				},
-				{
-					title: 'Data Table',
-					href: `/developments/components/data-table`,
-					icon: 'file-symlink'
-				},
-				{
-					title: 'Test Data Table',
-					href: `/developments/components/table-test`,
-					icon: 'file-symlink'
-				},
+
 				{
 					title: 'InputText',
 					href: `/developments/components/input-text`,
