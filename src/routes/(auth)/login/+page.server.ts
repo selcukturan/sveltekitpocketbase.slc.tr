@@ -20,7 +20,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			await locals.auth.pb.collection('acl_users').authWithPassword(email, password);
+			await locals.auth.pb.collection('users').authWithPassword(email, password);
 			redirect(303, '/');
 		} catch (err) {
 			if (err instanceof ClientResponseError) {

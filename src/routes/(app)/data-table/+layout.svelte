@@ -9,30 +9,28 @@
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
-			title: 'Settings',
+			title: 'Data Table',
 			child: [
 				{
 					title: 'Introduction',
-					href: `/settings`,
+					href: `/data-table`,
 					icon: 'file-symlink',
 					root: true
 				}
 			]
 		},
 		{
-			title: 'System',
+			title: 'Demos',
 			child: [
 				{
 					title: 'Introduction',
-					href: `/settings/system`,
-					icon: 'file-symlink',
-					root: true
+					href: `/data-table/demos`,
+					icon: 'file-symlink'
 				},
 				{
-					title: 'application',
-					href: `/settings/system/application`,
-					icon: 'file-symlink',
-					root: true
+					title: 'Common Features',
+					href: `/data-table/demos/common-features`,
+					icon: 'file-symlink'
 				}
 			]
 		}

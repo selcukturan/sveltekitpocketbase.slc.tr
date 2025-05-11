@@ -34,6 +34,16 @@
 			icon: 'home'
 		},
 		{
+			title: 'Grapes',
+			href: '/grapes',
+			icon: 'grape'
+		},
+		{
+			title: 'Data Table',
+			href: '/data-table',
+			icon: 'data-table'
+		},
+		{
 			title: 'Logs',
 			href: '/logs',
 			icon: 'chart-spline'
@@ -42,11 +52,6 @@
 			title: 'Development',
 			href: '/dev',
 			icon: 'square-code'
-		},
-		{
-			title: 'Doluca',
-			href: '/dlc',
-			icon: 'grape'
 		},
 		{
 			title: 'Settings',

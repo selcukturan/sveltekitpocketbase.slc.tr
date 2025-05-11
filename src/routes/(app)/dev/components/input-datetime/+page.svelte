@@ -1,25 +1,31 @@
 <script lang="ts">
-	import { DateTimeDev } from '$lib/components/ui/inputs';
-
-	let value = $state('2000-09-13T21:00:00.000Z');
+	import InputDateTime from '$lib/components/inputs/InputDateTime.svelte';
+	let value = $state(new Date());
 </script>
 
-<br />
+<div class="flex h-full w-full flex-col overflow-hidden">
+	<div class="bg-success-100 p-1">
+		<h6>Tests Root Header</h6>
+	</div>
+	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
+		<InputDateTime
+			bind:value
+			onchange={() => {
+				console.log('onchange');
+			}}
+			class="border-1 border-amber-600"
+		/>
 
-<DateTimeDev bind:value />
-
-<br />
-
-<DateTimeDev bind:value />
-
-<br />
-
-<div>Page Value {`=>`} {value} {`=>`} typeof {typeof value}</div>
-
-<br />
-
-<button
-	onclick={() => {
-		value = '1985-05-27T09:00:00.000Z';
-	}}>Set</button
->
+		<button
+			onclick={() => {
+				value = new Date();
+			}}
+		>
+			Set Value
+		</button>
+		<div>{value}</div>
+	</div>
+	<div class="bg-warning-100 p-1">
+		<h6>Tests Root Footer</h6>
+	</div>
+</div>

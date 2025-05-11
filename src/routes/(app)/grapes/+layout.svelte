@@ -9,32 +9,27 @@
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
-			title: 'Home',
+			title: 'Grapes',
 			child: [
 				{
-					title: 'Development',
-					href: `/dlc`,
+					title: 'Introduction',
+					href: `/grapes`,
 					icon: 'file-symlink',
 					root: true
 				}
 			]
 		},
 		{
-			title: 'MDL Aktarım',
+			title: 'CRUD',
 			child: [
 				{
-					title: 'mdl-upload-files',
-					href: `/dlc/mdl-upload-files`,
+					title: 'Introduction',
+					href: `/grapes/crud`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'mdl-write-files',
-					href: `/dlc/mdl-write-files`,
-					icon: 'file-symlink'
-				},
-				{
-					title: 'mdl-download-files',
-					href: `/dlc/mdl-download-files`,
+					title: 'Create, Read, Update, Delete',
+					href: `/grapes/crud/create-read-update-delete`,
 					icon: 'file-symlink'
 				}
 			]

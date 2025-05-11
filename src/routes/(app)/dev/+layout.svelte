@@ -9,10 +9,10 @@
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
-			title: 'Home',
+			title: 'Development',
 			child: [
 				{
-					title: 'Development',
+					title: 'Introduction',
 					href: `/dev`,
 					icon: 'file-symlink',
 					root: true
@@ -23,7 +23,7 @@
 			title: 'Components',
 			child: [
 				{
-					title: 'Components Root',
+					title: 'Introduction',
 					href: `/dev/components`,
 					icon: 'file-symlink'
 				},

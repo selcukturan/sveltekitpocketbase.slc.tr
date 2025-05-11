@@ -48,7 +48,7 @@ export class Auth extends LocalAuthStore {
 	save(token: string, record?: AuthRecord) {
 		// loadFromCookie, authWithPassword ve authRefresh'ten sonra otomatik calisir. class içinde onChange yerine kullanilabilir.
 		super.save(token, record);
-		if (record?.collectionName === 'acl_users') {
+		if (record?.collectionName === 'users') {
 			this.#user = structuredClone(record);
 		}
 	}
