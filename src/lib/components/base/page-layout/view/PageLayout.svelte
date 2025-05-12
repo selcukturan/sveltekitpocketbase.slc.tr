@@ -2,7 +2,7 @@
 	import { SplitPane } from '$lib/components/base/split-pane';
 	import type { Length } from '$lib/components/base/split-pane/types';
 	import { PageSidebar, PageContainer } from '../';
-	import { getGlobalStates } from '$lib/states/global.svelte';
+	import { getGlobalStates } from '$lib/client/global.svelte';
 	import { Icon } from '$lib/components/icons';
 	import type { PageLayoutPropsType } from '../types';
 
@@ -34,22 +34,22 @@
 >
 	{#snippet slotA()}
 		<section
-			class="h-full
-			w-full
-			overflow-hidden
-			border-b
-			border-r-0
-			border-surface-300
+			class="border-surface-300
 			bg-surface-50
 			text-surface-700
-			sm:border-b-0
-			sm:border-r"
+			h-full
+			w-full
+			overflow-hidden
+			border-r-0
+			border-b
+			sm:border-r
+			sm:border-b-0"
 		>
 			<button
 				type="button"
 				onclick={handleClick}
 				style:display={globalStates.hideSidebar ? 'none' : 'block'}
-				class="absolute z-[52] inline-flex h-5 w-5 transform cursor-pointer select-none items-center justify-center rounded-full border bg-surface-50 text-center align-middle leading-none"
+				class="bg-surface-50 absolute z-[52] inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full border text-center align-middle leading-none select-none"
 				class:mobile-position={globalStates.isMobileBreakpoint}
 				class:desktop-position={!globalStates.isMobileBreakpoint}
 				aria-label={globalStates.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
@@ -62,7 +62,7 @@
 
 	{#snippet slotB()}
 		<section class="flex h-full w-full flex-col overflow-hidden">
-			<header class="hidden bg-success-50 p-1">
+			<header class="bg-success-50 hidden p-1">
 				<h6>PAGE COMMON HEADER</h6>
 			</header>
 			<PageContainer>
@@ -70,7 +70,7 @@
 					{@render children()}
 				{/if}
 			</PageContainer>
-			<footer class="hidden bg-warning-50 p-1">
+			<footer class="bg-warning-50 hidden p-1">
 				<h6>PAGE COMMON FOOTER</h6>
 			</footer>
 		</section>
@@ -79,9 +79,9 @@
 
 <style lang="postcss">
 	.mobile-position {
-		@apply left-1/2 top-[var(--pos)] -translate-x-1/2 -translate-y-1/2;
+		@apply top-[var(--pos)] left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
 	.desktop-position {
-		@apply left-[var(--pos)] top-1/2 -translate-x-1/2 -translate-y-1/2;
+		@apply top-1/2 left-[var(--pos)] -translate-x-1/2 -translate-y-1/2;
 	}
 </style>

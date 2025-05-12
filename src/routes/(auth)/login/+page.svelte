@@ -42,7 +42,7 @@
 			sm:text-lg
 			md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl"
 		>
-			Merhaba, Hoşgeldiniz
+			Merhaba, Hoşgeldiniz | build.0.0.1
 		</h3>
 		<img
 			class="inline-block

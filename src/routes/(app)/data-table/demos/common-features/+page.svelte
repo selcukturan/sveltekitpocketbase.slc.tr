@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DataTable } from '$lib/components/base/data-table';
 	import { createTable, type Sources } from '$lib/components/base/data-table/tables.svelte';
-	import utils from '$lib/utils';
+	import utils from '$lib/client/utils';
 
 	import type { ProducedGrapes } from '$lib/dev/schemaProducedGrapes';
 

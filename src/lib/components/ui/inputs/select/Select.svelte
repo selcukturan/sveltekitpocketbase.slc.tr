@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import utils from '$lib/utils';
+	import utils from '$lib/client/utils';
 	import Popup from '../common/Popup.svelte';
 	import type { Props } from './types';
 

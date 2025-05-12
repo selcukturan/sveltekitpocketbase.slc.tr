@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { getGlobalStates } from '$lib/states/global.svelte';
+	import { getGlobalStates } from '$lib/client/global.svelte';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { Icon } from '$lib/components/icons';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';

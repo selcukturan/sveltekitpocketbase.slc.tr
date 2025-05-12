@@ -2,7 +2,7 @@
 	import { Icons } from '$lib/components/icons';
 	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
 	import { AppLayout } from '$lib/components/base/app-layout/view';
-	import { setGlobalStates } from '$lib/states/global.svelte';
+	import { setGlobalStates } from '$lib/client/global.svelte';
 
 	import { afterNavigate } from '$app/navigation';
 
