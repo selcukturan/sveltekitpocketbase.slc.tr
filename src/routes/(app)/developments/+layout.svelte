@@ -28,6 +28,11 @@
 					icon: 'file-symlink'
 				},
 				{
+					title: 'Form',
+					href: `/developments/components/form`,
+					icon: 'file-symlink'
+				},
+				{
 					title: 'Tree',
 					href: `/developments/components/tree`,
 					icon: 'file-symlink'

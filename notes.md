@@ -20,6 +20,13 @@ npm run preview
 npm run slc:local:docker
 ```
 
+# Pocketbase tip çıkarımı
+
+```bash
+npm install -D pocketbase-typegen
+npm run pb:typegen
+```
+
 # Paket güncellemeleri
 
 ```bash

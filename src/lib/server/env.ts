@@ -1,57 +1,50 @@
 import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
-import * as v from 'valibot'; // Valibot'u namespace olarak import etme
+import { ZodError, z } from 'zod';
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 
-const portNumberSchema = v.pipe(
-	v.unknown(), // 1. Herhangi bir girdi türünü kabul et
-	v.transform(Number), // 2. Dönüştürme işlemi
-	v.number('PORT sayısal bir değere dönüştürülebilmelidir.'), // 3. Dönüştürülmüş değerin geçerli bir sayı olduğunu (NaN olmadığını) doğrula
-	v.integer('PORT bir tam sayı olmalıdır.'),
-	v.minValue(1, 'PORT numarası en az 1 olmalıdır.'),
-	v.maxValue(65535, 'PORT numarası en fazla 65535 olmalıdır.')
-);
+const portNumber = z.coerce
+	.number()
+	.int()
+	.positive()
+	.refine((val) => val > 0 && val <= 65535, {
+		message: 'PORT must be a valid port number (1-65535).'
+	});
 
-const EnvSchema = v.object({
-	NODE_ENV: v.optional(v.string('NODE_ENV bir metin olmalıdır.'), 'development'),
-	TZ: v.string('TZ (Zaman Dilimi) gereklidir ve bir metin olmalıdır.'),
-	PB_BACKEND_URL: v.string('PB_BACKEND_URL gereklidir ve bir metin olmalıdır.'),
-	PORT: portNumberSchema,
-	ORIGIN: v.string('ORIGIN gereklidir ve bir metin olmalıdır.')
+const envSchema = z.object({
+	NODE_ENV: z.string().default('development'),
+	TZ: z.string(),
+	PB_BACKEND_URL: z.string(),
+	PORT: portNumber,
+	ORIGIN: z.string()
 });
 
-export type EnvSchemaType = v.InferOutput<typeof EnvSchema>;
+export type EnvSchemaType = z.infer<typeof envSchema>;
 
 const result = config({ path: envFile });
 if (result.error) {
-	console.warn(`Uyarı: ${envFile} dosyası bulunamadı veya yüklenemedi. Varsayılan ortam değişkenleri kullanılıyor.`);
+	console.warn(`Warning: ${envFile} file not found or could not be loaded. Using default environment variables.`);
 }
 expand(result);
 
 let validatedEnv: EnvSchemaType;
 
 try {
-	validatedEnv = v.parse(EnvSchema, process.env);
+	validatedEnv = envSchema.parse(process.env);
 } catch (error) {
-	if (error instanceof v.ValiError) {
-		// ValiError'a v. öneki ile erişim
-		let message = 'Ortam değişkeni doğrulaması başarısız oldu:\n';
+	if (error instanceof ZodError) {
+		let message = 'Environment variable validation failed:\n';
 		error.issues.forEach((issue) => {
-			const pathString =
-				issue.path
-					?.map((p: v.UnknownPathItem) => p.key)
-					.filter(Boolean)
-					.join('.') || 'Bilinmeyen alan';
-			message += `- ${pathString}: ${issue.message}\n`;
+			message += `- ${issue.path[0]}: ${issue.message}\n`;
 		});
 		const e = new Error(message);
-		e.stack = '';
+		e.stack = ''; // Stack trace'i temizle
 		throw e;
 	} else {
-		console.error('Beklenmedik bir hata oluştu:', error);
-		throw error;
+		console.error(error);
+		throw error; // Beklenmeyen hataları yeniden fırlat
 	}
 }
 
-export default validatedEnv;
+export default validatedEnv; // Doğrulanmış çevresel değişkenler dışa aktarılıyor
