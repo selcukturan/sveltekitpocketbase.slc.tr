@@ -2,13 +2,16 @@
 	import { Icons } from '$lib/components/icons';
 	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
 	import { AppLayout } from '$lib/components/base/app-layout/view';
-	import { setConfigStates } from '$lib/client/config.svelte';
+	import { initGlobalContext } from '$lib/client/app/global.svelte';
+	import { initConfigContext } from '$lib/client/app/config';
 
 	import { afterNavigate } from '$app/navigation';
 
 	let { children } = $props();
 
-	const config = setConfigStates({
+	initConfigContext();
+
+	const global = initGlobalContext({
 		pageTitle: 'SLC',
 		appName: 'SLC Web App',
 		pxMobileBreakpoint: 640,
@@ -24,7 +27,7 @@
 	});
 
 	$effect(() => {
-		config.isMobileBreakpoint = w < (config.pxMobileBreakpoint || 550); // medya sorgulari ile yapamadigimiz seyler icin
+		global.isMobileBreakpoint = w < (global.pxMobileBreakpoint || 550); // medya sorgulari ile yapamadigimiz seyler icin
 	});
 
 	let sidebarData: SidebarDataType[] = [

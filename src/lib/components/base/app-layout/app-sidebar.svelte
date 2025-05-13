@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getConfigStates } from '$lib/client/config.svelte';
+	import { getGlobalContext } from '$lib/client/app/global.svelte';
 	import tooltip from '$lib/client/actions/tooltip';
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
-	const config = getConfigStates();
+	const global = getGlobalContext();
 </script>
 
 <section class="flex h-full w-full flex-row overflow-hidden sm:flex-col">
@@ -37,7 +37,7 @@
 				href={`${d.href}`}
 				aria-label={d.title}
 				aria-current={d.href === '/' && page.url.pathname === '/' ? 'page' : d.href !== '/' && page.url.pathname.startsWith(`${d.href}`) ? 'page' : undefined}
-				use:tooltip={{ text: d.title, position: config.isMobileBreakpoint ? 'bottom' : 'right' }}
+				use:tooltip={{ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' }}
 				class="
 					hover:bg-surface-200
 					active:bg-surface-300
@@ -68,7 +68,7 @@
 					select-none"
 			>
 				<span>
-					<Icon name={`${d.icon}`} size={config.isMobileBreakpoint ? `18px` : `22px`} />
+					<Icon name={`${d.icon}`} size={global.isMobileBreakpoint ? `18px` : `22px`} />
 				</span>
 			</a>
 		{/each}
