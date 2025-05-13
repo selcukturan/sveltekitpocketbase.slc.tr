@@ -20,9 +20,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 	// ⌛🔒 Rota koruma ###############################################################################################################
 	if (event.url.pathname.startsWith('/login')) {
-		if (auth.user) redirect(303, '/');
+		if (auth.user) throw redirect(303, '/');
 	} else {
-		if (!auth.user) redirect(303, '/login');
+		if (!auth.user) throw redirect(303, '/login');
 	}
 	// 📡 Set locals.auth ##########################################################################################################
 	event.locals.auth = auth;
