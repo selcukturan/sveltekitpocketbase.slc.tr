@@ -4,7 +4,7 @@ import { getContext, setContext } from 'svelte';
 
 /* prettier-ignore */
 class Config {
-	#version: string = 'v0.0.1-build.8';
+	#version: string = 'v0.0.1-build.9';
 	get version(){return this.#version;}
 }
 
