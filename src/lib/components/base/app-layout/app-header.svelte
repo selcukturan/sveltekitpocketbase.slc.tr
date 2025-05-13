@@ -4,9 +4,8 @@
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { Icon } from '$lib/components/icons';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';
-	import { getConfigContext } from '$lib/client/app/config';
+	import { config } from '$lib/client/app';
 
-	const config = getConfigContext();
 	const global = getGlobalContext();
 
 	const handleClick = () => {

@@ -24,7 +24,7 @@ export const actions: Actions = {
 			}
 		}
 
-		if (authData !== null) {
+		if (authData != null) {
 			redirect(303, '/');
 		} else {
 			redirect(303, '/login');

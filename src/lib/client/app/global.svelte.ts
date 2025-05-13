@@ -4,9 +4,7 @@ import type { GlobalContext } from './types';
 // Application global reactive context
 
 const defaultGlobal: GlobalContext = {
-	pageTitle: 'SLC',
-	appName: 'SLC Web App',
-	pxMobileBreakpoint: 640,
+	mobileBreakpoint: 640,
 	isMobileBreakpoint: false,
 	hideSidebar: false,
 	hidePageSidebar: false

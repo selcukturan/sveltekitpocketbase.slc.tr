@@ -1,7 +1,5 @@
 export type GlobalContext = {
-	pageTitle?: string;
-	appName?: string;
-	pxMobileBreakpoint?: number;
+	mobileBreakpoint?: number;
 	isMobileBreakpoint?: boolean;
 	hideSidebar?: boolean;
 	hidePageSidebar?: boolean;

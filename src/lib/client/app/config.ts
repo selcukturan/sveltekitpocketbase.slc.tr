@@ -1,21 +1,11 @@
-import { getContext, setContext } from 'svelte';
+// Server'da ve client'da kullanılacak olan config dosyasıdır.
+// Bu dosya, uygulamanın genel ayarlarını ve yapılandırmalarını içerir.
+export const config = {
+	appName: 'SLC Web Applications',
+	version: 'v0.1.0-alpha.1',
+	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`,
+	defaultLanguage: 'tr',
+	supportedLanguages: ['tr', 'en']
+} as const; // `as const` eklemek, objenin değerlerini readonly ve türlerini daha spesifik yapar.
 
-// Application global non-reactive context
-
-/* prettier-ignore */
-class Config {
-	#version: string = 'v0.0.1-build.14';
-	get version(){return this.#version;}
-}
-
-// ################################## BEGIN Export Table Context ##############################################################################################################################
-
-const key: symbol = Symbol();
-
-export function initConfigContext() {
-	return setContext(key, new Config());
-}
-export function getConfigContext() {
-	return getContext<ReturnType<typeof initConfigContext>>(key);
-}
-// ################################## END Export Table Context ################################################################################################################################
+export type AppConfigType = typeof config;
