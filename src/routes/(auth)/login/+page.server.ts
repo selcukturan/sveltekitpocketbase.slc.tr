@@ -19,9 +19,18 @@ export const actions: Actions = {
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.clear();
-				locals.auth.error(err);
+				return fail(err.status, {
+					// Genellikle 400 veya 401 olur
+					email,
+					message: err.response?.message || 'E-posta veya şifre hatalı.', // PocketBase'den gelen mesajı kullan
+					incorrect: true
+				});
 			}
-			redirect(303, '/loginx');
+			// Diğer beklenmedik hatalar için genel bir hata sayfası veya loglama
+			console.error('Unexpected login error:', err);
+			return fail(500, { message: 'Sunucuda bir hata oluştu. Lütfen tekrar deneyin.' });
+			// Ya da yine de /loginx'e yönlendir
+			// redirect(303, '/loginx');
 		}
 	}
 };
