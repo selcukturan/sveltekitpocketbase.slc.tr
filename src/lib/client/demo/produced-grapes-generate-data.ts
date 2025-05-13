@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { ProducedGrapes } from './schemaProducedGrapes';
+import type { ProducedGrapes } from './produced-grapes-schema';
 
 export function generateProducedData(count: number) {
 	if (!browser) return [];

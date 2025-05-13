@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Head, Page, Header, Main, Footer } from '$lib/components/base/templates';
+	import { Head, Page } from '$lib/components/templates';
 </script>
 
 <Head>
@@ -8,7 +8,7 @@
 </Head>
 
 <Page>
-	<Header>Application Header</Header>
-	<Main>Application Root</Main>
-	<Footer>Application Footer</Footer>
+	<Page.Header>Application Header</Page.Header>
+	<Page.Main>Application Root</Page.Main>
+	<Page.Footer>Application Footer</Page.Footer>
 </Page>

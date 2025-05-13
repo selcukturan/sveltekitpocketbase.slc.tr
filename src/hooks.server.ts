@@ -2,6 +2,7 @@ import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { Auth } from '$lib/server/auth';
 import env from '$lib/server/env';
+import { Collections } from '$lib/client/types/pocketbase-types';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const isProduction = env.NODE_ENV === 'production';
@@ -10,7 +11,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// ⌛🔒 Token kontrolü ve yenileme ###############################################################################################
 	if (auth.isValid) {
 		try {
-			await auth.pb.collection('users').authRefresh();
+			await auth.pb.collection(Collections.Users).authRefresh();
 		} catch (err) {
 			auth.clear();
 		}

@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
+	import { getContext } from './context';
 
-	let {
-		children,
-		class: classes
-	}: {
-		children?: Snippet;
-		class?: string;
-	} = $props();
+	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+
+	// Get Context
+	const ctx = getContext();
+	console.log('Main', ctx.pageTitle);
 </script>
 
 <main class={classes} style="position:relative;flex: 1 1 0%;overflow-x:hidden;overflow-y:auto;">

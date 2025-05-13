@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
+	import { getContext } from './context';
 
-	let {
-		children,
-		class: classes
-	}: {
-		children?: Snippet;
-		class?: string;
-	} = $props();
+	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+
+	// Get Context
+	const ctx = getContext();
+	console.log('Header', ctx.pageTitle);
 </script>
 
 <header class={classes} style:border-top="0px" style:border-left="0px">

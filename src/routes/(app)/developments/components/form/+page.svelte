@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { Head, Page, Header, Main, Footer } from '$lib/components/base/templates';
 	import { goto } from '$app/navigation';
 	import { enhance, applyAction } from '$app/forms';
 	import { schema, type Schema } from './schema';
 	import { zodError } from '$lib/client/utils';
+	import { Page, Head } from '$lib/components/templates';
 
 	let { data, form }: PageProps = $props();
 </script>
@@ -15,8 +15,10 @@
 </Head>
 
 <Page>
-	<Header><p>Form Page Header</p></Header>
-	<Main>
+	<Page.Header>
+		<p>Form Page Header</p>
+	</Page.Header>
+	<Page.Main>
 		<form
 			method="POST"
 			action="?/update"
@@ -57,6 +59,8 @@
 			</label>
 			<button>Submit</button>
 		</form>
-	</Main>
-	<Footer><p>Form Page Footer</p></Footer>
+	</Page.Main>
+	<Page.Footer>
+		<p>Form Page Footer</p>
+	</Page.Footer>
 </Page>

@@ -1,15 +1,10 @@
-<svelte:options runes={true} />
-
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import { enhance } from '$app/forms';
-
-	let props: PageProps = $props();
 
 	let isLoading = false;
 </script>
 
-<!-- <span class="slc-screen-test fixed left-1/2 top-28 z-50 block -translate-x-1/2 -translate-y-1/2 bg-surface-900 font-extrabold text-surface-50"></span> -->
+<!-- <span class="slc-screen-test bg-surface-900 text-surface-50 fixed top-28 left-1/2 z-50 block -translate-x-1/2 -translate-y-1/2 font-extrabold"></span> -->
 
 <main class="flex min-h-[100dvh] flex-row">
 	<a href="/" class="contents">
@@ -42,7 +37,7 @@
 			sm:text-lg
 			md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl"
 		>
-			Merhaba, Hoşgeldiniz | build.0.0.2
+			Merhaba, Hoşgeldiniz | build.0.0.3
 		</h3>
 		<img
 			class="inline-block

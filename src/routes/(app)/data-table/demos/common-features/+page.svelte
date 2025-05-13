@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { DataTable } from '$lib/components/base/data-table';
 	import { createTable, type Sources } from '$lib/components/base/data-table/tables.svelte';
-	import { generateProducedData } from '$lib/client/demo/generateProducedData';
+	import { generateProducedData } from '$lib/client/demo/produced-grapes-generate-data';
 
-	import type { ProducedGrapes } from '$lib/client/demo/schemaProducedGrapes';
+	import type { ProducedGrapes } from '$lib/client/demo/produced-grapes-schema';
 
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {

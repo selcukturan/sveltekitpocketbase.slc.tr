@@ -1,13 +1,7 @@
-import type { Actions, PageServerLoad } from './$types';
+import type { Actions } from './$types';
 import { ClientResponseError } from 'pocketbase';
-
+import { Collections, type UsersResponse } from '$lib/client/types/pocketbase-types';
 import { redirect, fail } from '@sveltejs/kit';
-
-export const load: PageServerLoad = async ({ locals }) => {
-	return {
-		user: locals.auth.user
-	};
-};
 
 export const actions: Actions = {
 	default: async ({ locals, request }) => {
@@ -20,7 +14,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			await locals.auth.pb.collection('users').authWithPassword(email, password);
+			await locals.auth.pb.collection(Collections.Users).authWithPassword<UsersResponse>(email, password);
 			redirect(303, '/');
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
