@@ -15,13 +15,13 @@ export const actions: Actions = {
 
 		try {
 			await locals.auth.pb.collection(Collections.Users).authWithPassword<UsersResponse>(email, password);
-			throw redirect(303, '/');
+			redirect(303, '/');
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.clear();
 				locals.auth.error(err);
 			}
-			throw redirect(303, '/login');
+			redirect(303, '/loginx');
 		}
 	}
 };
