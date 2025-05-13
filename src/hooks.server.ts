@@ -22,7 +22,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/login')) {
 		if (auth.user) redirect(303, '/');
 	} else {
-		if (!auth.user) redirect(303, '/loginy');
+		if (!auth.user) redirect(303, '/login');
 	}
 	// 📡 Set locals.auth ##########################################################################################################
 	event.locals.auth = auth;

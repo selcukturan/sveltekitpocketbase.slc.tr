@@ -14,8 +14,9 @@ export const actions: Actions = {
 		}
 
 		try {
-			await locals.auth.pb.collection('users').authWithPassword(email, password);
-			redirect(303, '/');
+			const authData = await locals.auth.pb.collection(Collections.Users).authWithPassword(email, password);
+			return fail(500, { message: 'authData | ' + authData });
+			// redirect(303, '/');
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.clear();
