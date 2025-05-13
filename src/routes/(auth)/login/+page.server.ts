@@ -1,7 +1,7 @@
 import type { Actions } from './$types';
-import { ClientResponseError } from 'pocketbase';
+import { ClientResponseError, type RecordAuthResponse } from 'pocketbase';
 import { Collections, type UsersResponse } from '$lib/client/types/pocketbase-types';
-import { redirect, fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const actions: Actions = {
 	default: async ({ locals, request }) => {
@@ -13,27 +13,21 @@ export const actions: Actions = {
 			return fail(400, { email, missing: true });
 		}
 
+		let authData: RecordAuthResponse<UsersResponse> | null = null;
+
 		try {
-			const authData = await locals.auth.pb.collection(Collections.Users).authWithPassword(email, password);
-			if (authData) {
-				redirect(303, '/');
-			}
-			// redirect(303, '/');
+			authData = await locals.auth.pb.collection(Collections.Users).authWithPassword<UsersResponse>(email, password);
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.clear();
-				return fail(err.status, {
-					// Genellikle 400 veya 401 olur
-					email,
-					message: err.response?.message || 'E-posta veya şifre hatalı.', // PocketBase'den gelen mesajı kullan
-					incorrect: true
-				});
+				locals.auth.error(err);
 			}
-			// Diğer beklenmedik hatalar için genel bir hata sayfası veya loglama
-			console.error('Unexpected login error:', err);
-			return fail(500, { message: 'Sunucuda bir hata oluştu. Lütfen tekrar deneyin.' });
-			// Ya da yine de /loginx'e yönlendir
-			// redirect(303, '/loginx');
+		}
+
+		if (authData !== null) {
+			redirect(303, '/');
+		} else {
+			redirect(303, '/login');
 		}
 	}
 };
