@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getGlobalStates } from '$lib/client/global.svelte';
-	const globalStates = getGlobalStates();
+	import { getConfigStates } from '$lib/client/config.svelte';
+	const config = getConfigStates();
 </script>
 
 <div class="flex h-full w-full flex-col overflow-hidden">
@@ -10,7 +10,7 @@
 	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
 		<div class="p-4">
 			<div class="p-4">
-				mobile: {globalStates.isMobileBreakpoint}
+				mobile: {config.isMobileBreakpoint}
 			</div>
 			<div class="p-4">
 				<button type="button" onclick={() => localStorage.removeItem('slc:splitpane')}>Clear localStorage</button>

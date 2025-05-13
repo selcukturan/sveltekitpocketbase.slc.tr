@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageSidebarDataType, ChildrenPropsType } from '$lib/components/base/page-layout/types';
 	import { PageLayout } from '$lib/components/base/page-layout/view';
-	import { getGlobalStates } from '$lib/client/global.svelte';
+	/* import { getConfigStates } from '$lib/client/config.svelte'; */
 
 	let { children }: ChildrenPropsType = $props();
 
-	const globalStates = getGlobalStates();
+	/* const config = getConfigStates(); */
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{

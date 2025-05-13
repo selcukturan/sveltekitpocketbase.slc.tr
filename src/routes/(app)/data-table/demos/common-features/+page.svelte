@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { DataTable } from '$lib/components/base/data-table';
 	import { createTable, type Sources } from '$lib/components/base/data-table/tables.svelte';
-	import utils from '$lib/client/utils';
+	import { generateProducedData } from '$lib/client/demo/generateProducedData';
 
-	import type { ProducedGrapes } from '$lib/dev/schemaProducedGrapes';
+	import type { ProducedGrapes } from '$lib/client/demo/schemaProducedGrapes';
 
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',
-		data: utils.generateExampleData(1000),
+		data: generateProducedData(1000),
 		rowSelection: 'multiple-all',
 		rowAction: true,
 		actions: {

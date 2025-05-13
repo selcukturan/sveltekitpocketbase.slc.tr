@@ -2,18 +2,18 @@
 	import { SplitPane } from '$lib/components/base/split-pane';
 	import type { Length } from '$lib/components/base/split-pane/types';
 	import { PageSidebar, PageContainer } from '../';
-	import { getGlobalStates } from '$lib/client/global.svelte';
+	import { getConfigStates } from '$lib/client/config.svelte';
 	import { Icon } from '$lib/components/icons';
 	import type { PageLayoutPropsType } from '../types';
 
 	let { pageSidebardata, children }: PageLayoutPropsType = $props();
 
-	const globalStates = getGlobalStates();
+	const config = getConfigStates();
 
-	if (globalStates.hidePageSidebar) globalStates.hidePageSidebar = false;
+	if (config.hidePageSidebar) config.hidePageSidebar = false;
 
 	const handleClick = () => {
-		globalStates.hidePageSidebar = !globalStates.hidePageSidebar;
+		config.hidePageSidebar = !config.hidePageSidebar;
 	};
 
 	const item = localStorage.getItem('slc:splitpane');
@@ -22,15 +22,15 @@
 
 <SplitPane
 	id="main"
-	type={globalStates.isMobileBreakpoint ? 'vertical' : 'horizontal'}
+	type={config.isMobileBreakpoint ? 'vertical' : 'horizontal'}
 	onchange={(position) => {
 		localStorage.setItem('slc:splitpane', `{"position":"${position}"}`);
 		// pos = position;
 	}}
 	class="slc-app-page-layout"
-	min={globalStates.hidePageSidebar ? '0%' : '150px'}
+	min={config.hidePageSidebar ? '0%' : '150px'}
 	max="450px"
-	pos={globalStates.hidePageSidebar ? '0%' : initialPos}
+	pos={config.hidePageSidebar ? '0%' : initialPos}
 >
 	{#snippet slotA()}
 		<section
@@ -48,13 +48,13 @@
 			<button
 				type="button"
 				onclick={handleClick}
-				style:display={globalStates.hideSidebar ? 'none' : 'block'}
+				style:display={config.hideSidebar ? 'none' : 'block'}
 				class="bg-surface-50 absolute z-[52] inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full border text-center align-middle leading-none select-none"
-				class:mobile-position={globalStates.isMobileBreakpoint}
-				class:desktop-position={!globalStates.isMobileBreakpoint}
-				aria-label={globalStates.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
+				class:mobile-position={config.isMobileBreakpoint}
+				class:desktop-position={!config.isMobileBreakpoint}
+				aria-label={config.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
-				<Icon name={globalStates.hidePageSidebar ? `chevron-right` : `chevron-left`} size={globalStates.isMobileBreakpoint ? `14px` : `16px`} />
+				<Icon name={config.hidePageSidebar ? `chevron-right` : `chevron-left`} size={config.isMobileBreakpoint ? `14px` : `16px`} />
 			</button>
 			<PageSidebar {pageSidebardata} />
 		</section>

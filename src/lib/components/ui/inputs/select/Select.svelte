@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import utils from '$lib/client/utils';
+	import { randomString } from '$lib/client/utils';
 	import Popup from '../common/Popup.svelte';
 	import type { Props } from './types';
 
 	let { value = $bindable(undefined), data, label, class: classes, variant = undefined, size = undefined, errors, constraints, ...attributes }: Props = $props();
 
-	const uuid = `slc_${utils.randomString(8).toLowerCase()}`;
+	const uuid = `slc_${randomString(8).toLowerCase()}`;
 
 	let myPopover: HTMLDivElement;
 	const selectText = '-- Seçiniz --';

@@ -1,35 +1,45 @@
-// src/routes/your-form-route/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
+import { fail } from '@sveltejs/kit';
+import { schema, type Schema } from './schema';
 import { Collections, type TestFormResponse } from '$lib/client/types/pocketbase-types';
-import { schema } from './schema'; // Zod şeması
-import { handleFormAction } from '$lib/server/formAction'; // Yeni yardımcımız
+
+import { zodError, pbError, formDataError } from '$lib/client/utils';
 
 export const load = (async ({ locals }) => {
-	// Load fonksiyonu aynı kalabilir
 	const form = await locals.auth.pb.collection(Collections.TestForm).getOne<TestFormResponse>('30u6z6n70xxwinz');
 	return {
-		form // Başlangıç verisi
+		form
 	};
 }) satisfies PageServerLoad;
 
 export const actions = {
-	update: async (event) => {
-		// event nesnesini doğrudan al
-		return handleFormAction({
-			event,
-			schema,
-			// Asıl iş mantığı: PocketBase güncellemesi
-			action: async (updateData, { locals }) => {
-				const updatedRecord = await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', updateData);
-				return updatedRecord; // Başarı durumunda döndürülecek veri
-			},
-			// İsteğe bağlı: Başarı yanıtını formatlama
-			formatSuccess: (updatedRecord) => {
-				console.log('Update successful on server:', updatedRecord);
-				// Sadece başarı mesajı veya güncellenmiş kaydı döndürebilirsiniz
-				// İstemci tarafında 'form' prop'unu güncellemek için genellikle tüm kayıt döndürülür.
-				return { updatedFormData: updatedRecord };
+	update: async ({ locals, request }) => {
+		let formData: FormData;
+
+		try {
+			// 1. Client FormData
+			formData = await request.formData();
+			try {
+				// 2. Valid FormData
+				const updateData = schema.parse(formData);
+				try {
+					// 3. PB Update
+					const form = await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', updateData);
+					return { success: true, ...form };
+				} catch (error) {
+					// 3. error
+					const { status, errors } = pbError(error);
+					return fail(status, { success: false, errors });
+				}
+			} catch (error) {
+				// 2. error
+				const { status, errors } = zodError(error);
+				return fail(status, { success: false, errors });
 			}
-		});
+		} catch (error) {
+			// 1. error
+			const { status, errors } = formDataError(error);
+			return fail(status, { success: false, errors });
+		}
 	}
 } satisfies Actions;

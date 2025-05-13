@@ -3,16 +3,16 @@ import type { RequestEvent, ActionFailure } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { z, ZodError, type ZodSchema } from 'zod';
 import { ClientResponseError } from 'pocketbase';
-import { formatZodError, createGeneralFailure, type FieldErrors } from '$lib/client/formError';
+import { zodError } from '$lib/client/utils';
 
-interface FormActionOptions<T extends ZodSchema, R = unknown> {
+type FormActionOptions<T extends ZodSchema, R = unknown> = {
 	schema: T;
 	event: RequestEvent;
 	// Doğrulama başarılı olduğunda çalışacak asıl iş mantığı
 	action: (data: z.infer<T>, event: RequestEvent) => Promise<R>;
 	// İsteğe bağlı: Başarı durumunda döndürülecek veriyi formatlama
 	formatSuccess?: (result: R, parsedData: z.infer<T>) => Record<string, any>;
-}
+};
 
 /**
  * SvelteKit Actions için genel bir form işleyici.
@@ -22,7 +22,7 @@ interface FormActionOptions<T extends ZodSchema, R = unknown> {
 export async function handleFormAction<T extends ZodSchema, R>(options: FormActionOptions<T, R>): Promise<ReturnType<typeof fail> | ({ success: true } & Record<string, any>)> {
 	// SvelteKit'in beklediği dönüş tipleri
 	const { schema, event, action, formatSuccess } = options;
-	const { request, locals } = event;
+	const { request } = event;
 
 	let formData: FormData;
 
@@ -43,7 +43,7 @@ export async function handleFormAction<T extends ZodSchema, R>(options: FormActi
 		parsedData = schema.parse(formData);
 	} catch (error) {
 		if (error instanceof ZodError) {
-			const errors = formatZodError(error);
+			const errors = zodError(error);
 			console.warn('Server-side Zod Validation Error:', errors);
 			// `fail` otomatik olarak type: 'failure' ve status ekler
 			return fail(400, { errors, formData: Object.fromEntries(formData) }); // formData'yı geri gönderebiliriz

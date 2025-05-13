@@ -15,7 +15,7 @@
 // ```
 // ===================================================================
 
-import utils from '$lib/client/utils';
+import { isFocusable } from '$lib/client/utils';
 
 // tooltip element type [extended div]
 interface TooltipElementType extends HTMLDivElement {
@@ -179,7 +179,7 @@ export default function tooltip(node: HTMLElement, tooltipData: string | object)
 	node.addEventListener('mouseenter', showEventHandler);
 	node.addEventListener('mouseleave', hideEventHandler);
 	node.addEventListener('blur', hideEventHandler);
-	if (data.hideOnClick === true || (data.hideOnClick === null && utils.isFocusable(node))) {
+	if (data.hideOnClick === true || (data.hideOnClick === null && isFocusable(node))) {
 		node.addEventListener('click', hideEventHandler);
 	}
 
