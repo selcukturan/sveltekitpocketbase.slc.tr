@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Accordion } from 'bits-ui';
 	import type { PageProps } from './$types';
 	const props: PageProps = $props();
 </script>
@@ -10,40 +9,14 @@
 	</header>
 	<main class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
 		<h6>LOGS PAGE PROPS</h6>
-		<Accordion.Root type="single">
-			<Accordion.Item>
-				<Accordion.Header>
-					<Accordion.Trigger>######## USER ########</Accordion.Trigger>
-				</Accordion.Header>
-				<Accordion.Content>
-					<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
-				</Accordion.Content>
-			</Accordion.Item>
-			<Accordion.Item>
-				<Accordion.Header>
-					<Accordion.Trigger>######## COLLECTION ########</Accordion.Trigger>
-				</Accordion.Header>
-				<Accordion.Content>
-					<pre>{JSON.stringify(props.data.collection, null, 2)}</pre>
-				</Accordion.Content>
-			</Accordion.Item>
-			<Accordion.Item>
-				<Accordion.Header>
-					<Accordion.Trigger>######## COLLECTION TRANSFORMED ########</Accordion.Trigger>
-				</Accordion.Header>
-				<Accordion.Content>
-					<pre>{JSON.stringify(props.data.transformedData, null, 2)}</pre>
-				</Accordion.Content>
-			</Accordion.Item>
-			<Accordion.Item>
-				<Accordion.Header>
-					<Accordion.Trigger>######## envTest ########</Accordion.Trigger>
-				</Accordion.Header>
-				<Accordion.Content>
-					<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
-				</Accordion.Content>
-			</Accordion.Item>
-		</Accordion.Root>
+		<p>######## USER ########</p>
+		<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
+		<p>######## COLLECTION ########</p>
+		<pre>{JSON.stringify(props.data.collection, null, 2)}</pre>
+		<p>######## COLLECTION TRANSFORMED ########</p>
+		<pre>{JSON.stringify(props.data.transformedData, null, 2)}</pre>
+		######## envTest ########
+		<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
 
 		<div data-llm-ignore="" class="rounded-tl-card rounded-tr-card border-muted relative mt-6 border-2 bg-zinc-50 ring-transparent! dark:bg-neutral-900/50">
 			<label>

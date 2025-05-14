@@ -1,6 +1,7 @@
 # SLC ignore
 **/.slc-dev
 **/.svelte-kit
+**/build
 **/tests
 **/.eslintignore
 **/.npmrc
