@@ -42,8 +42,8 @@
 		"vite": "^6.3.5"
 	},
 	"dependencies": {
-		"@internationalized/date": "^3.8.0",
-		"bits-ui": "^1.4.7",
+		"@zag-js/svelte": "^1.12.2",
+		"@zag-js/toast": "^1.12.2",
 		"dotenv": "^16.5.0",
 		"dotenv-expand": "^12.0.2",
 		"pocketbase": "^0.26.0",

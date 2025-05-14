@@ -28,8 +28,8 @@
 		<div class="flex flex-1 items-center justify-center gap-4">
 			{#if PUBLIC_ENV_TEST === 'public.env.development'}
 				<a href="http://localhost:8099/_" target="_blank">Local Database</a>
+				<p>-</p>
 			{/if}
-			<p>-</p>
 			<p>{config.version}</p>
 		</div>
 		<div class="flex items-center gap-4">
