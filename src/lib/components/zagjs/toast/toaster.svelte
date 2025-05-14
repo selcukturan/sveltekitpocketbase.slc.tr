@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { normalizeProps, useMachine } from '@zag-js/svelte';
 	import * as toast from '@zag-js/toast';
-	import Toast from './toast-item.svelte';
+	import Toast from './toast.svelte';
 	import type { ToasterProps } from './types.js';
 
 	const {
@@ -33,10 +33,7 @@
 	}: ToasterProps = $props();
 
 	const id = $props.id();
-	const service = useMachine(toast.group.machine, () => ({
-		id: id,
-		store: toaster
-	}));
+	const service = useMachine(toast.group.machine, () => ({ id: id, store: toaster }));
 	const api = $derived(toast.group.connect(service, normalizeProps));
 </script>
 

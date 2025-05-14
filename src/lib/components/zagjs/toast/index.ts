@@ -1,3 +1,3 @@
-export { default as ToastProvider } from './toast-provider.svelte';
+export { default as Toaster } from './toaster.svelte';
 export { createToaster } from './create-toaster';
-export { toaster } from './toaster-svelte';
+export { appToaster } from './app-toaster';

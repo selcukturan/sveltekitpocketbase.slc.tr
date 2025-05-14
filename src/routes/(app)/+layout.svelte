@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Icons } from '$lib/components/icons';
-	import { ToastProvider, toaster } from '$lib/components/zagjs/toast';
+	import { Toaster, appToaster } from '$lib/components/zagjs/toast';
 	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
 	import { AppLayout } from '$lib/components/base/app-layout/view';
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
@@ -64,7 +64,8 @@
 
 <Icons />
 
-<ToastProvider {toaster}></ToastProvider>
+<Toaster toaster={appToaster} />
+
 <AppLayout {sidebarData}>
 	{@render children?.()}
 </AppLayout>
