@@ -5,7 +5,7 @@
 
 	const props: ToastProps = $props();
 	const service = useMachine(toast.machine, () => ({
-		...props.toast,
+		...props.newToastOptions,
 		parent: props.parent,
 		index: props.index
 	}));
@@ -25,17 +25,26 @@
 </script>
 
 <div class="{props.base} {props.width} {props.padding} {props.rounded} {rxState} {props.classes}" {...api.getRootProps()} data-testid="toast-root">
+	<span {...api.getGhostBeforeProps()}></span>
 	<!-- Text -->
 	<div class="{props.messageBase} {props.messageClasses}" data-testid="toast-message">
 		<!-- Title -->
 		<span class="{props.titleBase} {props.titleClasses}" {...api.getTitleProps()} data-testid="toast-title">{api.title}</span>
 		<!-- Description -->
 		<span class="{props.descriptionBase} {props.descriptionClasses}" {...api.getDescriptionProps()} data-testid="toast-description">{api.description}</span>
+		<div>
+			<!-- `api.action?.label` => normalde buradan ulaşılması lazım. surum bug'i olabilir. kontrol et. -->
+			{#if props.newToastOptions.action}
+				<button type="button" {...api.getActionTriggerProps()}>{props.newToastOptions.action.label}</button>
+			{/if}
+		</div>
 	</div>
+
 	{#if api.closable}
 		<!-- Dismiss Button -->
 		<button class="{props.btnDismissBase} {props.btnDismissClasses}" {...api.getCloseTriggerProps()} data-testid="toast-dismiss">&times;</button>
 	{/if}
+	<span {...api.getGhostAfterProps()}></span>
 </div>
 
 <style>
@@ -54,6 +63,12 @@
 			opacity 400ms;
 		transition-timing-function: cubic-bezier(0.21, 1.02, 0.73, 1);
 	}
+
+	/* Overlap'in arkasinda kalan ve tasma ihtimali olan uzun metinler icin toast'lara `overflow-hidden` uygular */
+	[data-scope='toast'][data-part='root'][data-sibling][data-overlap] {
+		overflow: hidden;
+	}
+
 	[data-part='root'][data-state='closed'] {
 		transition:
 			translate 400ms,

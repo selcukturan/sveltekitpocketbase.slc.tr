@@ -26,19 +26,21 @@
 		btnDismissBase = 'btn-icon hover:preset-tonal',
 		btnDismissClasses = '',
 		// State
-		stateInfo = 'preset-outlined-surface-200-800 preset-filled-surface-50-950',
-		stateSuccess = 'preset-filled-success-500',
-		stateWarning = 'preset-filled-warning-500',
-		stateError = 'preset-filled-error-500'
+		stateInfo = 'border-info-600 bg-info-400 text-info-950',
+		stateSuccess = 'border-success-600 bg-success-400 text-success-950',
+		stateWarning = 'border-warning-600 bg-warning-400 text-warning-950',
+		stateError = 'border-error-600 bg-error-400 text-error-950'
 	}: ToasterProps = $props();
 
 	const id = $props.id();
 	const service = useMachine(toast.group.machine, () => ({ id: id, store: toaster }));
 	const api = $derived(toast.group.connect(service, normalizeProps));
+
+	console.log(service);
 </script>
 
 <div {...api.getGroupProps()} data-testid="toaster-root">
-	{#each api.getToasts() as toast, index (toast.id)}
+	{#each api.getToasts() as newToastOptions, index (newToastOptions.id)}
 		<Toast
 			{base}
 			{width}
@@ -57,7 +59,7 @@
 			{stateError}
 			{stateWarning}
 			{stateSuccess}
-			{toast}
+			{newToastOptions}
 			{index}
 			parent={service}
 		></Toast>

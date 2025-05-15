@@ -2,7 +2,7 @@
 // Bu dosya, uygulamanın genel ayarlarını ve yapılandırmalarını içerir.
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.1.0-alpha.5',
+	version: 'v0.1.0-alpha.6',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`,
 	defaultLanguage: 'tr',
 	supportedLanguages: ['tr', 'en']

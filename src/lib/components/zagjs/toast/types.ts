@@ -52,7 +52,7 @@ export interface ToasterProps extends toast.StoreProps {
 }
 
 export interface ToastProps extends Omit<ToasterProps, 'toaster'> {
-	toast: toast.Options;
+	newToastOptions: toast.Options;
 	index: number;
 	parent: toast.GroupService;
 }
