@@ -104,7 +104,7 @@
 						autocorrect="off"
 						disabled={isLoading}
 						value="demo@slc.tr"
-						class="h-input rounded-10px border-border-input bg-background text-foreground w-full border pr-2 pl-2 text-base sm:text-sm"
+						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
 				</label>
 
@@ -119,14 +119,14 @@
 						autocorrect="off"
 						disabled={isLoading}
 						value="SLc1234567"
-						class="h-input rounded-10px border-border-input bg-background text-foreground w-full border pr-2 pl-2 text-base sm:text-sm"
+						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
 				</label>
 
 				<button
 					type="submit"
 					disabled={isLoading}
-					class="rounded-10px bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 flex h-10 w-full cursor-pointer items-center justify-center text-base font-bold text-gray-900 shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
+					class="bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 text-surface-token-900 flex h-10 w-full cursor-pointer items-center justify-center rounded-sm text-base font-bold shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
 				>
 					{#if isLoading}
 						<span class="animate-spin">♠</span>

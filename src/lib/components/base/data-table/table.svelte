@@ -300,7 +300,8 @@
 {/snippet}
 
 <!-- ############################################################ STYLE ############################################################ -->
-<style>
+<style lang="postcss">
+	@reference "tailwindcss";
 	/******************************************************/
 	.slc-table-main {
 		display: flex;
@@ -323,40 +324,40 @@
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
-		background-color: hsl(var(--surface-50));
+		background-color: var(--color-surface-50);
 	}
 	/******************************************************/
 	.slc-table-trh {
 		outline: none;
-		background-color: hsl(var(--surface-100));
+		background-color: var(--color-surface-100);
 	}
 	.slc-table-trd {
 		outline: none;
-		background-color: hsl(var(--surface-50));
+		background-color: var(--color-surface-50);
 	}
 	.slc-table-trf {
 		outline: none;
-		background-color: hsl(var(--surface-100));
+		background-color: var(--color-surface-100);
 	}
 	/******************************************************/
 	.slc-table-trd:hover {
-		background-color: color-mix(in srgb, hsl(var(--surface-200)) 70%, hsl(var(--surface-50)) 30%);
+		background-color: color-mix(in srgb, var(--color-surface-200) 70%, var(--color-surface-50) 30%);
 	}
 	.slc-table-trd-selected {
-		background-color: hsl(var(--primary-200)) !important;
+		background-color: var(--color-primary-200) !important;
 	}
 	.slc-table-trd-subtotal1 {
-		background-color: hsl(var(--success-50)) !important;
+		background-color: var(--color-success-50) !important;
 	}
 	.slc-table-trd-subtotal2 {
-		background-color: hsl(var(--info-50)) !important;
+		background-color: var(--color-info-50) !important;
 	}
 	.slc-table-trd-subtotal3 {
-		background-color: hsl(var(--error-50)) !important;
+		background-color: var(--color-error-50) !important;
 	}
 	/******************************************************/
 	.slc-table-th {
-		border-color: hsl(var(--surface-200));
+		border-color: var(--color-surface-200);
 		border-right-width: 1px;
 		border-bottom-width: 1px;
 		position: sticky;
@@ -373,7 +374,7 @@
 	}
 	.slc-table-td {
 		position: relative;
-		border-color: hsl(var(--surface-200));
+		border-color: var(--color-surface-200);
 		border-right-width: 1px;
 		border-bottom-width: 1px;
 		user-select: none;
@@ -385,7 +386,7 @@
 		background-color: inherit;
 	}
 	.slc-table-tf {
-		border-color: hsl(var(--surface-200));
+		border-color: var(--color-surface-200);
 		border-right-width: 1px;
 		border-top-width: 1px;
 		position: sticky;
@@ -401,7 +402,7 @@
 		outline-width: 2px;
 		outline-offset: -2px;
 		outline-style: solid;
-		outline-color: hsl(var(--secondary-800));
+		outline-color: var(--color-secondary-800);
 	}
 	/******************************************************/
 	.slc-table-th-selection {
@@ -460,15 +461,15 @@
 		margin: 0;
 		outline: none;
 		cursor: pointer;
-		background-color: hsl(var(--surface-200));
+		background-color: var(--color-surface-200);
 	}
 	/* [data-scope='th-action'][data-part='trigger']:focus-visible,
 	[data-scope='td-action'][data-part='trigger']:focus-visible {
-		background-color: hsl(var(--surface-400));
+		background-color: var(--color-surface-400);
 	} */
 	.slc-table-th-action-trigger:hover,
 	.slc-table-td-action-trigger:hover {
-		background-color: hsl(var(--surface-300));
+		background-color: var(--color-surface-300);
 	}
 	.slc-table-th-action-popup,
 	.slc-table-td-action-popup {
@@ -488,8 +489,8 @@
 		right: 100%;
 		bottom: auto;
 		left: auto;
-		border: 1px solid hsl(var(--surface-400));
-		/* background-color: hsl(var(--surface-50)); */
+		border: 1px solid var(--color-surface-400);
+		/* background-color: var(--color-surface-50); */
 		margin-right: 5px;
 		/* margin-top: -1px; */
 	}
@@ -501,17 +502,17 @@
 		padding: 0.5rem 1rem;
 		border: none;
 		cursor: pointer;
-		background-color: hsl(var(--surface-200));
+		background-color: var(--color-surface-200);
 	}
 	/* .slc-table-th-action-popup-item[data-action='delete_all'] {
-		background-color: hsl(var(--secondary-100));
+		background-color: var(--color-secondary-100);
 	} */
 	.slc-table-th-action-popup-item:hover,
 	.slc-table-td-action-popup-item:hover {
-		background-color: hsl(var(--surface-100));
+		background-color: var(--color-surface-100);
 	}
 	.slc-table-th-action-popup-item:active,
 	.slc-table-td-action-popup-item:active {
-		background-color: hsl(var(--surface-300));
+		background-color: var(--color-surface-300);
 	}
 </style>

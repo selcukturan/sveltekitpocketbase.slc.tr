@@ -635,19 +635,21 @@
 	/* ############################# END scrollbar ################################### */
 
 	/* # Mobile First. `tailwind screens breakpoints` */
-	/* ##### BEGIN `xs: 0px >  < 640px` - phone ################################################################################# */
-	.slc-screen-test::before {
-		content: 'CSS Screen Size: xs (0px >  < 640px) - phone';
-	}
-	:root {
-		--slc-site-header-size: 3.5rem;
-	}
-	/* ##### END `xs: 0px >  < 640px` ################################################################################### */
 
 	/* ##### BEGIN `sm: 640px >  < 768px` - tablet ############################################################################### */
-	@media (min-width: 640px) {
+	@media (width < 640px) {
 		.slc-screen-test::before {
-			content: 'CSS Screen Size: sm (640px >  < 768px) - tablet';
+			content: 'CSS Screen Size: (width < 640px) - bg-error-500 - (mobile)';
+		}
+		:root {
+			--slc-site-header-size: 3.5rem;
+		}
+	}
+	/* ##### END `sm: 640px >  < 768px` ################################################################################ */
+	/* ##### BEGIN `sm: 640px >  < 768px` - tablet ############################################################################### */
+	@media (width >= 640px) {
+		.slc-screen-test::before {
+			content: 'CSS Screen Size: (width >= 640px) - sm:bg-info-500';
 		}
 		:root {
 			--slc-site-header-size: 3.5rem;
@@ -656,9 +658,9 @@
 	/* ##### END `sm: 640px >  < 768px` ################################################################################ */
 
 	/* ##### BEGIN `md: 768px >  < 1024px` - tablet landscape ############################################################################# */
-	@media (min-width: 768px) {
+	@media (width >= 768px) {
 		.slc-screen-test::before {
-			content: 'CSS Screen Size: md (768px >  < 1024px) - tablet landscape';
+			content: 'CSS Screen Size: (width >= 768px) - md:bg-success-500';
 		}
 		:root {
 			--slc-site-header-size: 3.5rem;
@@ -667,26 +669,15 @@
 	/* ##### END `md: 768px >  < 1024px` ############################################################################### */
 
 	/* ##### BEGIN `lg: 1024px >  < 1280px` - laptop ################################################################################# */
-	@media (min-width: 1024px) {
+	@media (width >= 1140px) {
 		.slc-screen-test::before {
-			content: 'CSS Screen Size: lg (1024px >  < 1280px) - laptop';
+			content: 'CSS Screen Size: (width >= 1140px) - lg:bg-warning-500';
 		}
 		:root {
 			--slc-site-header-size: 3.5rem;
 		}
 	}
 	/* ##### END `lg: 1024px >  < 1280px` ################################################################################### */
-
-	/* ##### BEGIN `xl: 1280px >  < ∞` - desktop ################################################################################# */
-	@media (min-width: 1280px) {
-		.slc-screen-test::before {
-			content: 'CSS Screen Size: xl (1280px >  < ∞) - desktop';
-		}
-		:root {
-			--slc-site-header-size: 3.5rem;
-		}
-	}
-	/* ##### END `xl: 1280px >  < ∞` ################################################################################### */
 
 	/* ############################# BEGIN tooltip ################################### */
 	.slc-app-tooltip {

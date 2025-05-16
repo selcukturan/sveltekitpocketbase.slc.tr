@@ -5,15 +5,17 @@
 	import { Icon } from '$lib/components/icons';
 
 	const props: ToastProps = $props();
+
 	const service = useMachine(toast.machine, () => ({
 		...props.newToastOptions,
 		parent: props.parent,
 		index: props.index
 	}));
+
 	const api = $derived(toast.connect(service, normalizeProps));
 
 	const rootClasses = {
-		base: 'w-full break-words rounded-sm border p-2 shadow-lg sm:w-[420px]',
+		base: 'min-w-full sm:min-w-sm sm:max-w-lg break-words rounded-sm border p-2 shadow-lg',
 		info: 'bg-info-400 text-info-950 border-info-600 border',
 		success: 'bg-success-400 text-success-950 border-success-600 border',
 		warning: 'bg-warning-400 text-warning-950 border-warning-600 border',
@@ -65,7 +67,7 @@
 	});
 
 	const closeButtonClasses = {
-		base: 'inline-flex h-6 w-6 transform cursor-pointer items-center justify-center rounded-full text-center align-middle leading-none select-none',
+		base: 'inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full text-center align-middle leading-none select-none',
 		info: 'bg-info-500 text-info-50 hover:bg-info-700 active:bg-info-600',
 		success: 'bg-success-500 text-success-50 hover:bg-success-700 active:bg-success-600',
 		warning: 'bg-warning-500 text-warning-50 hover:bg-warning-700 active:bg-warning-600',
@@ -112,18 +114,18 @@
 			{/if}
 		</div>
 		<div class="flex-1">
-			<h3 {...api.getTitleProps()} class="text-sm font-bold">{api.title}</h3>
-			<p {...api.getDescriptionProps()}>{api.description}</p>
+			<h3 {...api.getTitleProps()} class="font-semibold">{api.title}</h3>
+			<p {...api.getDescriptionProps()} class="text-sm">{api.description}</p>
 		</div>
-		<div>
-			{#if props.newToastOptions.action}
+		{#if props.newToastOptions.action}
+			<div>
 				<button type="button" class={actionButtonClass} {...api.getActionTriggerProps()}>{props.newToastOptions.action.label}</button>
-			{/if}
-		</div>
+			</div>
+		{/if}
 		{#if api.closable}
 			<div class="self-start">
 				<button type="button" class={closeButtonClass} {...api.getCloseTriggerProps()} onclick={api.dismiss} aria-label="Kapat">
-					<Icon name="close" size="16px" />
+					<Icon name="close" size="12px" />
 				</button>
 			</div>
 		{/if}

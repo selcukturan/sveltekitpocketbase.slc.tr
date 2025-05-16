@@ -4,16 +4,11 @@
 	import Toast from './toast.svelte';
 	import type { ToasterProps } from './types.js';
 
-	const {
-		// Toaster
-		toaster
-	}: ToasterProps = $props();
+	const { toaster }: ToasterProps = $props();
 
 	const id = $props.id();
 	const service = useMachine(toast.group.machine, () => ({ id: id, store: toaster }));
 	const api = $derived(toast.group.connect(service, normalizeProps));
-
-	console.log(service);
 </script>
 
 <div {...api.getGroupProps()} data-testid="toaster-root">

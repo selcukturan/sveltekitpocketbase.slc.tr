@@ -12,23 +12,19 @@
 			<div class="p-4">
 				mobile: {global.isMobileBreakpoint}
 			</div>
-			<div class="p-4">
+			<!-- <div class="p-4">
 				<button type="button" onclick={() => localStorage.removeItem('slc:splitpane')}>Clear localStorage</button>
-			</div>
+			</div> -->
 			<div class="p-4">
-				<span class="slc-screen-test h-3 w-3 bg-red-500 sm:bg-amber-500 md:bg-green-500 lg:bg-blue-500 xl:bg-purple-500 2xl:bg-pink-500"></span>
+				<span class="slc-screen-test bg-error-500 sm:bg-info-500 md:bg-success-500 lg:bg-warning-500 h-3 w-3"></span>
 				<span>{@html `< ====== >`}</span>
-				<span class="h-3 w-3 bg-red-500">xs</span>
-				<span class="h-3 w-3 bg-amber-500">sm</span>
-				<span class="h-3 w-3 bg-green-500">md</span>
-				<span class="h-3 w-3 bg-blue-500">lg</span>
-				<span class="h-3 w-3 bg-purple-500">xl</span>
-				<span class="h-3 w-3 bg-pink-500">2xl</span>
+				<span class="bg-error-500 h-3 w-3">mobile</span>
+				<span class="bg-info-500 h-3 w-3">sm</span>
+				<span class="bg-success-500 h-3 w-3">md</span>
+				<span class="bg-warning-500 h-3 w-3">lg</span>
 			</div>
 
 			<span class="text-surface-950 p-4">surface</span>
-			<span class="text-surface-950 p-4" style="background-color:#ffbf00">Amber {@html `<---->`} ffbf00</span>
-			<span class="text-surface-950 p-4" style="background-color:#ffc600">PANTONE 7548 C {@html `<---->`} ffc600</span>
 			<div class="border-surface-950 m-4 flex flex-row border text-sm">
 				<div class="bg-surface-50 text-surface-950 p-4 whitespace-nowrap">50</div>
 				<div class="bg-surface-100 text-surface-900 p-4 whitespace-nowrap">100</div>
@@ -44,8 +40,6 @@
 			</div>
 
 			<span class="text-primary-950 p-4">primary</span>
-			<span class="text-primary-950 p-4" style="background-color:#c50">Burnt Orange {@html `<---->`} c50</span>
-			<span class="text-primary-950 p-4" style="background-color:#d45d00">PANTONE 717 C {@html `<---->`} d45d00</span>
 			<div class="border-primary-950 m-4 flex flex-row border text-sm">
 				<div class="bg-primary-50 text-primary-950 p-4 whitespace-nowrap">50</div>
 				<div class="bg-primary-100 text-primary-900 p-4 whitespace-nowrap">100</div>
@@ -61,8 +55,6 @@
 			</div>
 
 			<span class="text-secondary-950 p-4">secondary</span>
-			<span class="text-secondary-950 p-4" style="background-color:#4b5320">Thatch Green {@html `<---->`} 4b5320</span>
-			<span class="text-secondary-950 p-4" style="background-color:#546223">PANTONE 371 C {@html `<---->`} 546223</span>
 			<div class="border-secondary-950 m-4 flex flex-row border text-sm">
 				<div class="bg-secondary-50 text-secondary-950 p-4 whitespace-nowrap">50</div>
 				<div class="bg-secondary-100 text-secondary-900 p-4 whitespace-nowrap">100</div>
@@ -78,8 +70,6 @@
 			</div>
 
 			<span class="text-tertiary-950 p-4">tertiary</span>
-			<span class="text-tertiary-950 p-4" style="background-color:#556b2f">Costa Del Sol {@html `<---->`} 556b2f</span>
-			<span class="text-tertiary-950 p-4" style="background-color:#6d712e">PANTONE 5757 C {@html `<---->`} 6d712e</span>
 			<div class="border-tertiary-950 m-4 flex flex-row border text-sm">
 				<div class="bg-tertiary-50 text-tertiary-950 p-4 whitespace-nowrap">50</div>
 				<div class="bg-tertiary-100 text-tertiary-900 p-4 whitespace-nowrap">100</div>
@@ -95,8 +85,6 @@
 			</div>
 
 			<span class="text-quaternary-950 p-4">quaternary</span>
-			<span class="text-quaternary-50 p-4" style="background-color:#004225">Costa Del Sol {@html `<---->`} 004225</span>
-			<span class="text-quaternary-50 p-4" style="background-color:#004e42">PANTONE 5757 C {@html `<---->`} 004e42</span>
 			<div class="border-quaternary-950 m-4 flex flex-row border text-sm">
 				<div class="bg-quaternary-50 text-quaternary-950 p-4 whitespace-nowrap">50</div>
 				<div class="bg-quaternary-100 text-quaternary-900 p-4 whitespace-nowrap">100</div>

@@ -6,4 +6,4 @@ import { createToaster } from './create-toaster';
  * import { Toaster, appToaster } from '$lib/components/zagjs/toast';
  * <Toaster toaster={appToaster} />
  */
-export const appToaster = createToaster({ placement: 'bottom-end' });
+export const appToaster = createToaster({ overlap: true, placement: 'bottom-end' });

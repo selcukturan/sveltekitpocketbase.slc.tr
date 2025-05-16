@@ -48,13 +48,8 @@
 		onclick={() => {
 			pageToaster.warning({
 				title: 'Uyarı',
-				description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				action: {
-					label: 'Detay',
-					onClick: () => {
-						pageToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
-					}
-				}
+				description: 'Warning lorem ipsum dolor sit amet.',
+				closable: false
 			});
 		}}
 	>
@@ -128,7 +123,15 @@
 		style="background-color:#5499e8;color:#cee2f8;padding:5px;margin:5px;"
 		onclick={() => {
 			appToaster.info({
-				title: 'This is a APP toast!'
+				title: 'This is a APP toast!.',
+				description:
+					'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+				action: {
+					label: 'Detay',
+					onClick: () => {
+						appToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
+					}
+				}
 			});
 		}}>Info</button
 	>
@@ -136,7 +139,8 @@
 		style="background-color:#32ad84;color:#c4eedc;padding:5px;margin:5px;"
 		onclick={() => {
 			appToaster.success({
-				title: 'This is a APP toast!'
+				title: 'This is a APP toast!',
+				description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 			});
 		}}>Success</button
 	>
@@ -144,7 +148,8 @@
 		style="background-color:#ff944d;color:#ffd4b8;padding:5px;margin:5px;"
 		onclick={() => {
 			appToaster.warning({
-				title: 'This is a APP toast!'
+				title: 'This is a APP toast!',
+				description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 			});
 		}}>Warning</button
 	>
@@ -152,7 +157,8 @@
 		style="background-color:#e34562;color:#f7cad2;padding:5px;margin:5px;"
 		onclick={() => {
 			appToaster.error({
-				title: 'This is a APP toast!'
+				title: 'This is a APP toast!',
+				description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 			});
 		}}>Error</button
 	>
