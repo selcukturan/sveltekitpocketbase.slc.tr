@@ -678,55 +678,6 @@
 		}
 	}
 	/* ##### END `lg: 1024px >  < 1280px` ################################################################################### */
-
-	/* ############################# BEGIN tooltip ################################### */
-	.slc-app-tooltip {
-		position: fixed;
-		z-index: 999999;
-		top: 0;
-		left: 0;
-		display: inline-block;
-		vertical-align: top;
-		max-width: 275px;
-		padding: 3px 5px;
-		text-align: center;
-		font-size: theme(fontSize.xs);
-		font-weight: theme(fontWeight.semibold);
-		background-color: theme(backgroundColor.surface.950);
-		color: theme(textColor.surface.50);
-		border-radius: theme(borderRadius.md);
-		pointer-events: none;
-		user-select: none;
-		transition:
-			opacity 150ms,
-			visibility 150ms,
-			transform 150ms;
-		transform: translateY(1px);
-		backface-visibility: hidden;
-		white-space: pre-line;
-		word-break: break-word;
-		/* hide */
-		opacity: 0;
-		visibility: hidden;
-
-		/* styles */
-		&.code {
-			font-family: monospace;
-			white-space: pre-wrap;
-			text-align: left;
-			min-width: 150px;
-			max-width: 340px;
-		}
-
-		/* states */
-		&.active {
-			transform: scale(1);
-			/* show */
-			opacity: 1;
-			visibility: visible;
-		}
-	}
-	/* ############################# END tooltip ################################### */
 }
 
 @layer components {
