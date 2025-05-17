@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
-	/* import tooltip from '$lib/client/actions/tooltip'; */
-	/* use:tooltip={{ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' }} */
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
-	import { Tooltip } from '$lib/components/zagjs/tooltip';
+	import { Tooltip } from '$lib/components/bits/tooltip';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
