@@ -30,19 +30,12 @@
 	<!-- Snippet: Trigger -->
 	{#if trigger}
 		<button {...triggerProps} type="button">
-			{@render trigger()}
+			{@render trigger?.()}
 		</button>
 	{/if}
 	<!-- Tooltip Content -->
 	{#if api.open}
-		<div {...api.getPositionerProps()} transition:fade={{ duration: 100 }}>
-			<!-- Arrow -->
-			<!-- {#if arrow}
-				<div {...api.getArrowProps()}>
-					<div {...api.getArrowTipProps()} ></div>
-				</div>
-			{/if} -->
-			<!-- Snippet Content -->
+		<div {...api.getPositionerProps()}>
 			<div {...api.getContentProps()}>
 				{@render content?.()}
 			</div>
@@ -60,12 +53,23 @@
 		background-color: var(--color-surface-950);
 		color: var(--color-surface-50);
 		border-radius: var(--radius-md);
-		pointer-events: none;
-		user-select: none;
-		display: inline-block;
-		vertical-align: top;
 		max-width: 275px;
 		padding: 3px 5px;
-		text-align: center;
+
+		transition:
+			opacity 150ms,
+			visibility 150ms,
+			transform 150ms;
+		transform: scale(1);
+		/* show */
+		opacity: 1;
+		visibility: visible;
+
+		@starting-style {
+			transform: translateY(3px);
+			/* hide */
+			opacity: 0;
+			visibility: hidden;
+		}
 	}
 </style>
