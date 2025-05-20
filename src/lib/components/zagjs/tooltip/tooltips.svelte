@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-
 	import * as tooltip from '@zag-js/tooltip';
 	import { useMachine, normalizeProps, mergeProps } from '@zag-js/svelte';
 	import type { TooltipProps } from './types';
+	import { fade } from 'svelte/transition';
 
 	const {
+		arrow = false,
 		// Snippets
 		trigger,
 		content,
@@ -36,6 +36,11 @@
 	<!-- Tooltip Content -->
 	{#if api.open}
 		<div {...api.getPositionerProps()}>
+			{#if arrow}
+				<div {...api.getArrowProps()}>
+					<div {...api.getArrowTipProps()}></div>
+				</div>
+			{/if}
 			<div {...api.getContentProps()}>
 				{@render content?.()}
 			</div>
@@ -46,6 +51,28 @@
 <style lang="postcss">
 	@reference "tailwindcss";
 
+	[data-part='arrow'] {
+		z-index: 999998;
+		--arrow-size: 10px;
+		--arrow-background: var(--color-surface-950);
+
+		transition:
+			opacity 150ms,
+			visibility 150ms,
+			transform 150ms;
+		transform: translateY(0px);
+		/* show */
+		opacity: 1;
+		visibility: visible;
+
+		@starting-style {
+			transform: translateY(3px);
+			/* hide */
+			opacity: 0;
+			visibility: hidden;
+		}
+	}
+
 	[data-part='content'] {
 		z-index: 999999;
 		font-size: var(--text-sm);
@@ -54,13 +81,13 @@
 		color: var(--color-surface-50);
 		border-radius: var(--radius-md);
 		max-width: 275px;
-		padding: 3px 5px;
+		padding: 3px 7px;
 
 		transition:
 			opacity 150ms,
 			visibility 150ms,
 			transform 150ms;
-		transform: scale(1);
+		transform: translateY(0px);
 		/* show */
 		opacity: 1;
 		visibility: visible;

@@ -3,7 +3,7 @@
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
-	import { Tooltip } from '$lib/components/zagjs/tooltip';
+	import { Tooltip } from '$lib/components/bits/tooltip';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
@@ -33,7 +33,7 @@
 			sm:overflow-y-auto"
 	>
 		{#each sidebarData as d, i}
-			<Tooltip positioning={{ placement: global.isMobileBreakpoint ? 'bottom' : 'right' }} openDelay={0} closeDelay={0}>
+			<Tooltip contentProps={{ side: global.isMobileBreakpoint ? 'bottom' : 'right' }}>
 				{#snippet trigger()}
 					<a
 						href={`${d.href}`}
@@ -73,9 +73,7 @@
 						</span>
 					</a>
 				{/snippet}
-				{#snippet content()}
-					<p>{d.title}</p>
-				{/snippet}
+				{d.title}
 			</Tooltip>
 		{/each}
 	</nav>
