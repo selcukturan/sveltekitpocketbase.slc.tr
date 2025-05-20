@@ -6,27 +6,6 @@
 	import type { TooltipProps } from './types';
 
 	const {
-		arrow = false,
-		zIndex = 'auto',
-		// Base
-		base = '',
-		classes = '',
-		// Trigger
-		triggerBase = '',
-		triggerBackground = 'bg-error-500',
-		triggerClasses = '',
-		triggerAriaLabel = '',
-		// Positioner
-		positionerBase = '',
-		positionerClasses = '',
-		// Content
-		contentBase = '',
-		contentBackground = '',
-		contentClasses = '',
-		// Arrow
-		arrowBase = '',
-		arrowBackground = '!bg-white',
-		arrowClasses = '',
 		// Snippets
 		trigger,
 		content,
@@ -47,33 +26,46 @@
 	const triggerProps = $derived(mergeProps(api.getTriggerProps(), { onmouseover, onclick }));
 </script>
 
-<span class="{base} {classes}" data-testid="tooltip">
+<span data-testid="tooltip">
 	<!-- Snippet: Trigger -->
 	{#if trigger}
-		<button {...triggerProps} class="{triggerBase} {triggerBackground} {triggerClasses}" type="button" aria-label={triggerAriaLabel}>
+		<button {...triggerProps} type="button">
 			{@render trigger()}
 		</button>
 	{/if}
 	<!-- Tooltip Content -->
 	{#if api.open}
-		<div {...api.getPositionerProps()} transition:fade={{ duration: 100 }} class="{positionerBase} {positionerClasses}">
+		<div {...api.getPositionerProps()} transition:fade={{ duration: 100 }}>
 			<!-- Arrow -->
-			{#if arrow}
+			<!-- {#if arrow}
 				<div {...api.getArrowProps()}>
-					<div {...api.getArrowTipProps()} class="{arrowBase} {arrowBackground} {arrowClasses}"></div>
+					<div {...api.getArrowTipProps()} ></div>
 				</div>
-			{/if}
+			{/if} -->
 			<!-- Snippet Content -->
-			<div {...api.getContentProps()} class="{contentBase} {contentBackground} {contentClasses}" style="z-index: {zIndex};">
+			<div {...api.getContentProps()}>
 				{@render content?.()}
 			</div>
 		</div>
 	{/if}
 </span>
 
-<style>
-	:global([data-part='arrow']) {
-		--arrow-size: 10px;
-		--arrow-background: white;
+<style lang="postcss">
+	@reference "tailwindcss";
+
+	[data-part='content'] {
+		z-index: 999999;
+		font-size: var(--text-sm);
+		font-weight: var(--font-weight-semibold);
+		background-color: var(--color-surface-950);
+		color: var(--color-surface-50);
+		border-radius: var(--radius-md);
+		pointer-events: none;
+		user-select: none;
+		display: inline-block;
+		vertical-align: top;
+		max-width: 275px;
+		padding: 3px 5px;
+		text-align: center;
 	}
 </style>
