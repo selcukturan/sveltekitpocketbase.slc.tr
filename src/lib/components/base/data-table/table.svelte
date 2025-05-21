@@ -12,7 +12,7 @@
 <div {...t.attr_main}>
 	<div {...t.attr_container}>
 		<!-- TABLE -->
-		<div {...t.attr} bind:this={t.element} use:t.virtualScrollAction>
+		<div {...t.attr} bind:this={t.element} {@attach t.virtualScrollAttach()}>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.attr_trh}>
@@ -57,7 +57,7 @@
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD selection -->
-						<div {...t.attr_td_selection} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
+						<div {...t.attr_td_selection} role="gridcell" {@attach t.tdFocusAttach(originalCell)} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
 							{#if cancelEditable}
 								{@render selectionContent({ type: 'footer' })}
 							{:else}
@@ -73,7 +73,7 @@
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD -->
-						<div {...t.attr_td} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
+						<div {...t.attr_td} role="gridcell" {@attach t.tdFocusAttach(originalCell)} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
 							{#if isEditable}
 								{@render editableInput({ roi, coi, col })}
 							{:else}
@@ -86,7 +86,7 @@
 						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
 						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
 						<!-- TD action -->
-						<div {...t.attr_td_action} role="gridcell" use:t.tdFocusAction={originalCell} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
+						<div {...t.attr_td_action} role="gridcell" {@attach t.tdFocusAttach(originalCell)} class:slc-table-td-focused={isCellFocused} style:grid-row-start={rowStart} {tabindex}>
 							{#if cancelEditable}
 								{@render actionContent({ type: 'footer' })}
 							{:else}
@@ -140,7 +140,7 @@
 					type="text"
 					spellcheck="false"
 					autocomplete="off"
-					use:t.editInputAction={{ roi, coi, col }}
+					{@attach t.editInputAttach({ roi, coi, col })}
 					bind:this={t.editingCellInput}
 					bind:value={t.editingCellValue}
 					style:text-align={col.align || 'left'}
@@ -192,7 +192,7 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 	{#if type === 'header' && col.resizeable}
-		<div {...t.attr_th_resize} use:t.colResizePointerAction={(e) => t.colResizeUpdate(e, coi, col.field)}></div>
+		<div {...t.attr_th_resize} {@attach t.colResizePointerAttach((e) => t.colResizeUpdate(e, coi, col.field))}></div>
 	{/if}
 {/snippet}
 
@@ -209,7 +209,7 @@
 						id={`slcTableSelectionCheckboxHeaderInput${roi}`}
 						type="checkbox"
 						class="slc-table-selection-checkbox"
-						use:t.selectAction={{ type }}
+						{@attach t.selectAttach({ type })}
 						checked={t.headerIsIndeterminate ? false : t.headerIsChecked}
 					/>
 				{:else if type === 'data' && roi != null}
@@ -219,7 +219,7 @@
 						tabindex="-1"
 						id={`slcTableSelectionCheckboxDataInput${roi}`}
 						type="checkbox"
-						use:t.selectAction={{ type, roi }}
+						{@attach t.selectAttach({ type, roi })}
 						{checked}
 					/>
 				{:else if type === 'footer'}
@@ -240,7 +240,7 @@
 			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
 					<div class="slc-table-th-action-container" tabindex="-1">
-						<button class="slc-table-th-action-trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
+						<button class="slc-table-th-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
@@ -266,7 +266,7 @@
 					</div>
 				{:else if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
 					<div class="slc-table-td-action-container" tabindex="-1">
-						<button class="slc-table-td-action-trigger" use:t.actionAction={{ type, roi }} type="button" tabindex="-1">
+						<button class="slc-table-td-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>

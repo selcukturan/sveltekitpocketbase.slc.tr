@@ -18,6 +18,7 @@ import type {
 import { getContext, setContext } from 'svelte';
 import { tick, flushSync } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
+import type { Attachment } from 'svelte/attachments';
 
 class Table<TData extends Row> {
 	// ################################## BEGIN Default Sources #####################################################################################################################
@@ -343,39 +344,42 @@ class Table<TData extends Row> {
 		return processedData;
 	});
 
-	readonly virtualScrollAction = (tableNode: HTMLDivElement) => {
+	readonly virtualScrollAttach = (): Attachment => {
+		// Tablo DOM'a monte edildi
 		let ticking = false;
 
-		this.cachedClientHeight = Math.round(tableNode.clientHeight);
-		this.cachedScrollTop = Math.round(tableNode.scrollTop);
+		return (tableNode) => {
+			// Tablo virtual scroll kurulumu
+			this.cachedClientHeight = Math.round(tableNode.clientHeight);
+			this.cachedScrollTop = Math.round(tableNode.scrollTop);
 
-		const handleScroll = () => {
-			if (!ticking) {
-				const newScrollTop = Math.round(tableNode.scrollTop);
-				const cachedScrollTop = this.cachedScrollTop ?? 0;
-				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-				const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
-				const scrollThreshold = this.srcTbodyRowHeight * overscan;
+			const handleScroll = () => {
+				if (!ticking) {
+					const newScrollTop = Math.round(tableNode.scrollTop);
+					const cachedScrollTop = this.cachedScrollTop ?? 0;
+					const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
+					const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
+					const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
-				if (scrollDelta > scrollThreshold) {
-					ticking = true;
-					/* requestAnimationFrame(() => { */
-					this.cachedScrollTop = newScrollTop;
-					this.updateVisibleIndexes();
-					tick().then(() => {
-						ticking = false;
-					});
-					/* }); */
+					if (scrollDelta > scrollThreshold) {
+						ticking = true;
+						/* requestAnimationFrame(() => { */
+						this.cachedScrollTop = newScrollTop;
+						this.updateVisibleIndexes();
+						tick().then(() => {
+							ticking = false;
+						});
+						/* }); */
+					}
 				}
-			}
-		};
+			};
 
-		tableNode.addEventListener('scroll', handleScroll, { passive: true });
+			tableNode.addEventListener('scroll', handleScroll, { passive: true });
 
-		return {
-			destroy() {
+			return () => {
+				// Tablo DOM'dan kaldırıldı
 				tableNode.removeEventListener('scroll', handleScroll);
-			}
+			};
 		};
 	};
 	// ################################## END Vertical Virtual Data #######################################################################################################################
@@ -408,26 +412,31 @@ class Table<TData extends Row> {
 		/* alert('Item clicked: ' + params.action); */
 	};
 
-	readonly actionAction = (buttonNode: HTMLButtonElement, params: { roi: number; type: 'header' | 'footer' | 'data' }) => {
+	readonly actionAttach = (params: { roi: number; type: 'header' | 'footer' | 'data' }): Attachment => {
+		// düğüm DOM'a monte edilmiştir
 		const { roi, type } = params;
-		const click = (e: Event) => {
-			const target = e.currentTarget as HTMLElement;
-			const parentContainer = target.parentElement;
-			if (!parentContainer || !(parentContainer instanceof HTMLElement)) return;
 
-			this.#actionActiveContainerNode = parentContainer;
+		return (buttonNode) => {
+			if (!(buttonNode instanceof HTMLButtonElement)) return;
+			// kurulum buraya gidiyor
+			const click = (e: Event) => {
+				const target = e.currentTarget as HTMLElement;
+				const parentContainer = target.parentElement;
+				if (!parentContainer || !(parentContainer instanceof HTMLElement)) return;
 
-			if (type === 'header' || type === 'data') {
-				this.toggleActionPopup(roi);
-			}
-		};
+				this.#actionActiveContainerNode = parentContainer;
 
-		buttonNode.addEventListener('click', click);
+				if (type === 'header' || type === 'data') {
+					this.toggleActionPopup(roi);
+				}
+			};
 
-		return {
-			destroy() {
+			buttonNode.addEventListener('click', click);
+
+			return () => {
+				// söküm buraya gidiyor
 				buttonNode.removeEventListener('click', click);
-			}
+			};
 		};
 	};
 
@@ -520,27 +529,31 @@ class Table<TData extends Row> {
 		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
 	};
 
-	readonly selectAction = (checkInput: HTMLInputElement, params: { roi?: number; type: 'header' | 'footer' | 'data' }) => {
+	readonly selectAttach = (params: { roi?: number; type: 'header' | 'footer' | 'data' }): Attachment => {
+		// düğüm DOM'a monte edilmiştir
 		const { roi, type } = params;
-		const change = (e: Event) => {
-			// e.preventDefault();
+		return (checkInput) => {
+			if (!(checkInput instanceof HTMLInputElement)) return;
+			// kurulum buraya gidiyor
+			const change = (e: Event) => {
+				// e.preventDefault();
 
-			if (type === 'header') {
-				const allSelected = this.#selectedRows.size === this.srcData.length;
-				this.toggleAllRows(!allSelected);
-			} else if (roi != null) {
-				this.toggleRowSelection(roi);
-			}
-		};
+				if (type === 'header') {
+					const allSelected = this.#selectedRows.size === this.srcData.length;
+					this.toggleAllRows(!allSelected);
+				} else if (roi != null) {
+					this.toggleRowSelection(roi);
+				}
+			};
 
-		checkInput.addEventListener('change', change);
-
-		return {
-			destroy() {
+			checkInput.addEventListener('change', change);
+			return () => {
+				// söküm buraya gidiyor
 				checkInput.removeEventListener('change', change);
-			}
+			};
 		};
 	};
+
 	// ################################## END Row Selection Methods ########################################################################################################################
 
 	// ################################## BEGIN Cell Edit ##################################################################################################################################
@@ -579,39 +592,41 @@ class Table<TData extends Row> {
 			console.error(`Type mismatch: Field ${field} expects ${typeof this.#src.data?.[rowIndex][field]}, but got ${typeof newValue}`);
 		}
 	};
-	readonly editInputAction = (input: HTMLInputElement, params: { roi: number; coi: number; col: Column<TData> }) => {
+	readonly editInputAttach = (params: { roi: number; coi: number; col: Column<TData> }): Attachment => {
+		// düğüm DOM'a monte edilmiştir
 		const { roi, coi, col } = params;
+		return (input) => {
+			if (!(input instanceof HTMLInputElement)) return;
+			// kurulum buraya gidiyor
+			input.focus();
+			// input.select();
 
-		input.focus();
-		// input.select();
+			const blur = (e: FocusEvent) => {
+				const newValue = this.editingCellValue;
+				const oldValue = this.#editingCellOldValue;
 
-		const blur = (e: FocusEvent) => {
-			const newValue = this.editingCellValue;
-			const oldValue = this.#editingCellOldValue;
+				this.removeCellInput();
 
-			this.removeCellInput();
+				if (newValue === oldValue) return;
 
-			if (newValue === oldValue) return;
+				this.setCellValue(newValue, oldValue, roi, coi, col.field);
+			};
+			/* const click = (e: MouseEvent) => {
+				e.stopPropagation();
+			};
+			const mousedown = (e: MouseEvent) => {
+				e.stopPropagation();
+			}; */
 
-			this.setCellValue(newValue, oldValue, roi, coi, col.field);
-		};
-		/* const click = (e: MouseEvent) => {
-			e.stopPropagation();
-		};
-		const mousedown = (e: MouseEvent) => {
-			e.stopPropagation();
-		}; */
-
-		input.addEventListener('blur', blur);
-		/* input.addEventListener('click', click);
-		input.addEventListener('mousedown', mousedown); */
-
-		return {
-			destroy() {
+			input.addEventListener('blur', blur);
+			/* input.addEventListener('click', click);
+			input.addEventListener('mousedown', mousedown); */
+			return () => {
+				// söküm buraya gidiyor
 				input.removeEventListener('blur', blur);
 				/* input.removeEventListener('click', click);
 				input.removeEventListener('mousedown', mousedown); */
-			}
+			};
 		};
 	};
 	// ################################## END Cell Edit ####################################################################################################################################
@@ -645,229 +660,258 @@ class Table<TData extends Row> {
 		}
 	};
 
-	readonly colResizePointerAction = (node: HTMLElement, callback: (event: PointerEvent) => void) => {
-		const pointerdown = (event: PointerEvent) => {
-			if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
+	readonly colResizePointerAttach = (callback: (event: PointerEvent) => void): Attachment => {
+		// düğüm DOM'a monte edilmiştir
+		return (node) => {
+			if (!(node instanceof HTMLElement)) return;
+			// kurulum buraya gidiyor
+			const pointerdown = (event: PointerEvent) => {
+				if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
 
-			const parentNode = node.parentNode;
-			if (!parentNode || !(parentNode instanceof HTMLElement)) return;
+				const parentNode = node.parentNode;
+				if (!parentNode || !(parentNode instanceof HTMLElement)) return;
 
-			this.#colResizePointerDownClientX = event.clientX;
-			this.#colResizePointerDownWidth = parentNode.getBoundingClientRect().width;
+				this.#colResizePointerDownClientX = event.clientX;
+				this.#colResizePointerDownWidth = parentNode.getBoundingClientRect().width;
 
-			node.setPointerCapture(event.pointerId);
-			event.preventDefault();
-			// this.#colResizeDragging = true;
-
-			const onpointerup = () => {
-				// this.#colResizeDragging = false;
 				node.setPointerCapture(event.pointerId);
-				window.removeEventListener('pointermove', callback, false);
-				window.removeEventListener('pointerup', onpointerup, false);
+				event.preventDefault();
+				// this.#colResizeDragging = true;
+
+				const onpointerup = () => {
+					// this.#colResizeDragging = false;
+					node.setPointerCapture(event.pointerId);
+					window.removeEventListener('pointermove', callback, false);
+					window.removeEventListener('pointerup', onpointerup, false);
+				};
+
+				window.addEventListener('pointermove', callback, false);
+				window.addEventListener('pointerup', onpointerup, false);
 			};
 
-			window.addEventListener('pointermove', callback, false);
-			window.addEventListener('pointerup', onpointerup, false);
-		};
+			node.addEventListener('pointerdown', pointerdown, { capture: true, passive: false });
 
-		node.addEventListener('pointerdown', pointerdown, { capture: true, passive: false });
-
-		return {
-			destroy() {
+			return () => {
+				// söküm buraya gidiyor
 				node.removeEventListener('pointerdown', pointerdown);
-			}
+			};
 		};
 	};
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	readonly tdFocusAction = (node: HTMLDivElement, params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }) => {
-		const mousedown = (e: Event) => {
-			const cellToFocus: Required<FocucedCell> = {
-				rowIndex: params.rowIndex,
-				colIndex: params.colIndex,
-				originalCell: `${params.rowIndex}_${params.colIndex}`,
-				tabIndex: 0
+	/* // argümanlı attach
+	readonly myAttach = (data: string): Attachment => {
+		// düğüm DOM'a monte edilmiştir
+		return (element) => {
+			// kurulum buraya gidiyor
+			element.addEventListener('scroll', handleScroll);
+			return () => {
+				// söküm buraya gidiyor
+				element.removeEventListener('scroll', handleScroll);
 			};
-
-			if (cellToFocus.originalCell === this.focusedCellState?.originalCell) return;
-
-			this.#focusedCellState = cellToFocus;
-			this.updateVisibleIndexes();
-			tick().then(() => {
-				node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-				node.focus({ preventScroll: true });
-				this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
-			});
 		};
-
-		const click = (e: MouseEvent) => {
-			/* e.stopPropagation();
-			e.preventDefault(); */
+	}; */
+	/* // argümansız attach
+	readonly myAttach: Attachment = (element) => {
+		// düğüm DOM'a monte edilmiştir
+		// kurulum buraya gidiyor
+		return () => {
+			// söküm buraya gidiyor
+			element.removeEventListener('scroll', handleScroll);
 		};
+	}; */
+	readonly tdFocusAttach = (params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }): Attachment => {
+		// düğüm DOM'a monte edilmiştir
+		return (node) => {
+			if (!(node instanceof HTMLDivElement)) return;
 
-		let ticking = false;
-		const keydown = (e: KeyboardEvent) => {
-			const { key } = e;
-			const typableNumber = '1234567890';
-			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
-			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+			// kurulum buraya gidiyor
+			const mousedown = (e: Event) => {
+				const cellToFocus: Required<FocucedCell> = {
+					rowIndex: params.rowIndex,
+					colIndex: params.colIndex,
+					originalCell: `${params.rowIndex}_${params.colIndex}`,
+					tabIndex: 0
+				};
 
-			// --- İzin Verilmeyen Tuşları Filtrele ---
-			const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
-			const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
-			const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
-
-			// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
-			if (!isNavigationKey && !isActionKey && !isTypable) {
-				if (!((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C' || key === 'v' || key === 'V'))) {
-					return; // İzin verilmeyen tuş
-				}
-			}
-
-			const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
-			if (rowIndex == null || colIndex == null || originalCell == null) {
-				return; // Odak yoksa (şimdilik) çık
-			}
-
-			const field = params.field;
-			const cancelEditable = params.cancelEditable ?? false;
-
-			// --- Anlık Eylemler ---
-			// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
-			if (
-				(key === 'Escape' && !cancelEditable) ||
-				(key === 'F2' && !cancelEditable) ||
-				(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
-				(key === ' ' && this.srcRowAction && colIndex === this.visibleColumns.length) ||
-				((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
-				((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-				(!e.ctrlKey && !e.metaKey && isTypable && !this.#editingCell && !cancelEditable)
-			) {
-				if (key === 'Escape' && this.#editingCell) {
-					e.preventDefault();
-					this.removeCellInput();
-					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-					node.focus({ preventScroll: true });
-					this.onCellFocusChangeRun?.({ rowIndex, colIndex });
-				} else if (isTypable || key === 'F2') {
-					if (this.#editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
-					e.preventDefault();
-					this.createCellInput(key, rowIndex, colIndex, field);
-				} else if (key === ' ') {
-					e.preventDefault();
-					if (this.srcRowSelection !== 'none' && colIndex === -1 && !cancelEditable) {
-						this.toggleRowSelection(rowIndex);
-					} else if (this.srcRowAction && colIndex === this.visibleColumns.length && !cancelEditable) {
-						this.toggleActionPopup(rowIndex);
-					} else {
-						// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
-					}
-				}
-				return; // Anlık eylemden sonra çık
-			}
-
-			// --- Gezinme Eylemleri ---
-			if (!ticking && isNavigationKey) {
-				e.preventDefault();
-				ticking = true;
-
-				let cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
-				const initialOriginalCell = cellToFocus.originalCell;
-
-				const rowFirstIndex = 0;
-				const rowLastIndex = this.srcData.length - 1;
-				const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
-				const colLastIndex = this.srcRowAction ? this.visibleColumns.length : this.visibleColumns.length - 1;
-
-				let forceUpdate = false;
-
-				if (key === 'ArrowUp') {
-					cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
-				} else if (key === 'ArrowDown' || key === 'Enter') {
-					cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
-				} else if (key === 'ArrowLeft' || (e.shiftKey && key === 'Tab')) {
-					cellToFocus.colIndex = cellToFocus.colIndex - 1;
-					if (key === 'Tab' && cellToFocus.colIndex < colFirstIndex) {
-						cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
-						cellToFocus.colIndex = colLastIndex;
-					} else {
-						cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex);
-					}
-				} else if (key === 'ArrowRight' || (!e.shiftKey && key === 'Tab')) {
-					cellToFocus.colIndex = cellToFocus.colIndex + 1;
-					if (key === 'Tab' && cellToFocus.colIndex > colLastIndex) {
-						cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
-						cellToFocus.colIndex = colFirstIndex;
-					} else {
-						cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex);
-					}
-				} else if (key === 'Home') {
-					if (e.ctrlKey || e.metaKey) {
-						cellToFocus.rowIndex = rowFirstIndex;
-						cellToFocus.colIndex = colFirstIndex;
-						forceUpdate = true;
-					} else {
-						cellToFocus.colIndex = colFirstIndex;
-					}
-				} else if (key === 'End') {
-					if (e.ctrlKey || e.metaKey) {
-						cellToFocus.rowIndex = rowLastIndex;
-						cellToFocus.colIndex = colLastIndex;
-						forceUpdate = true;
-					} else {
-						cellToFocus.colIndex = colLastIndex;
-					}
-				} else if (key === 'PageUp') {
-					const visibleEnd = this.#rowIndices.visibleEnd;
-					const visibleStart = this.#rowIndices.visibleStart;
-					if (visibleEnd == null || visibleStart == null) return;
-
-					const index = cellToFocus.rowIndex - (visibleEnd - visibleStart);
-					cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
-					forceUpdate = true;
-				} else if (key === 'PageDown') {
-					const visibleEnd = this.#rowIndices.visibleEnd;
-					const visibleStart = this.#rowIndices.visibleStart;
-					if (visibleEnd == null || visibleStart == null) return;
-
-					const index = cellToFocus.rowIndex + (visibleEnd - visibleStart);
-					cellToFocus.rowIndex = Math.min(rowLastIndex, index);
-					forceUpdate = true;
-				}
-
-				cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
-
-				if (cellToFocus.originalCell === initialOriginalCell) {
-					ticking = false;
-					return; // Odaklanmış hücre değişmedi, çık
-				}
+				if (cellToFocus.originalCell === this.focusedCellState?.originalCell) return;
 
 				this.#focusedCellState = cellToFocus;
-				this.updateVisibleIndexes(forceUpdate);
+				this.updateVisibleIndexes();
 				tick().then(() => {
-					const nextFocusedCellNode = this.element?.querySelector<HTMLDivElement>('.slc-table-td-focused');
-					if (nextFocusedCellNode != null) {
-						nextFocusedCellNode.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-						nextFocusedCellNode.focus({ preventScroll: true });
-						this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
-					}
-					ticking = false;
+					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+					node.focus({ preventScroll: true });
+					this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
 				});
-			}
-		};
+			};
 
-		node.addEventListener('keydown', keydown);
-		node.addEventListener('mousedown', mousedown);
-		node.addEventListener('click', click);
+			const click = (e: MouseEvent) => {
+				/* e.stopPropagation();
+			e.preventDefault(); */
+			};
 
-		return {
-			destroy() {
+			let ticking = false;
+			const keydown = (e: KeyboardEvent) => {
+				const { key } = e;
+				const typableNumber = '1234567890';
+				const typableLower = 'abcdefghijklmnopqrstuvwxyz';
+				const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+				const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+
+				// --- İzin Verilmeyen Tuşları Filtrele ---
+				const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
+				const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
+				const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
+
+				// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
+				if (!isNavigationKey && !isActionKey && !isTypable) {
+					if (!((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C' || key === 'v' || key === 'V'))) {
+						return; // İzin verilmeyen tuş
+					}
+				}
+
+				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+				if (rowIndex == null || colIndex == null || originalCell == null) {
+					return; // Odak yoksa (şimdilik) çık
+				}
+
+				const field = params.field;
+				const cancelEditable = params.cancelEditable ?? false;
+
+				// --- Anlık Eylemler ---
+				// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
+				if (
+					(key === 'Escape' && !cancelEditable) ||
+					(key === 'F2' && !cancelEditable) ||
+					(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
+					(key === ' ' && this.srcRowAction && colIndex === this.visibleColumns.length) ||
+					((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
+					((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
+					(!e.ctrlKey && !e.metaKey && isTypable && !this.#editingCell && !cancelEditable)
+				) {
+					if (key === 'Escape' && this.#editingCell) {
+						e.preventDefault();
+						this.removeCellInput();
+						node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+						node.focus({ preventScroll: true });
+						this.onCellFocusChangeRun?.({ rowIndex, colIndex });
+					} else if (isTypable || key === 'F2') {
+						if (this.#editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
+						e.preventDefault();
+						this.createCellInput(key, rowIndex, colIndex, field);
+					} else if (key === ' ') {
+						e.preventDefault();
+						if (this.srcRowSelection !== 'none' && colIndex === -1 && !cancelEditable) {
+							this.toggleRowSelection(rowIndex);
+						} else if (this.srcRowAction && colIndex === this.visibleColumns.length && !cancelEditable) {
+							this.toggleActionPopup(rowIndex);
+						} else {
+							// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
+						}
+					}
+					return; // Anlık eylemden sonra çık
+				}
+
+				// --- Gezinme Eylemleri ---
+				if (!ticking && isNavigationKey) {
+					e.preventDefault();
+					ticking = true;
+
+					let cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
+					const initialOriginalCell = cellToFocus.originalCell;
+
+					const rowFirstIndex = 0;
+					const rowLastIndex = this.srcData.length - 1;
+					const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
+					const colLastIndex = this.srcRowAction ? this.visibleColumns.length : this.visibleColumns.length - 1;
+
+					let forceUpdate = false;
+
+					if (key === 'ArrowUp') {
+						cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
+					} else if (key === 'ArrowDown' || key === 'Enter') {
+						cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
+					} else if (key === 'ArrowLeft' || (e.shiftKey && key === 'Tab')) {
+						cellToFocus.colIndex = cellToFocus.colIndex - 1;
+						if (key === 'Tab' && cellToFocus.colIndex < colFirstIndex) {
+							cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
+							cellToFocus.colIndex = colLastIndex;
+						} else {
+							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex);
+						}
+					} else if (key === 'ArrowRight' || (!e.shiftKey && key === 'Tab')) {
+						cellToFocus.colIndex = cellToFocus.colIndex + 1;
+						if (key === 'Tab' && cellToFocus.colIndex > colLastIndex) {
+							cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
+							cellToFocus.colIndex = colFirstIndex;
+						} else {
+							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex);
+						}
+					} else if (key === 'Home') {
+						if (e.ctrlKey || e.metaKey) {
+							cellToFocus.rowIndex = rowFirstIndex;
+							cellToFocus.colIndex = colFirstIndex;
+							forceUpdate = true;
+						} else {
+							cellToFocus.colIndex = colFirstIndex;
+						}
+					} else if (key === 'End') {
+						if (e.ctrlKey || e.metaKey) {
+							cellToFocus.rowIndex = rowLastIndex;
+							cellToFocus.colIndex = colLastIndex;
+							forceUpdate = true;
+						} else {
+							cellToFocus.colIndex = colLastIndex;
+						}
+					} else if (key === 'PageUp') {
+						const visibleEnd = this.#rowIndices.visibleEnd;
+						const visibleStart = this.#rowIndices.visibleStart;
+						if (visibleEnd == null || visibleStart == null) return;
+
+						const index = cellToFocus.rowIndex - (visibleEnd - visibleStart);
+						cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
+						forceUpdate = true;
+					} else if (key === 'PageDown') {
+						const visibleEnd = this.#rowIndices.visibleEnd;
+						const visibleStart = this.#rowIndices.visibleStart;
+						if (visibleEnd == null || visibleStart == null) return;
+
+						const index = cellToFocus.rowIndex + (visibleEnd - visibleStart);
+						cellToFocus.rowIndex = Math.min(rowLastIndex, index);
+						forceUpdate = true;
+					}
+
+					cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
+
+					if (cellToFocus.originalCell === initialOriginalCell) {
+						ticking = false;
+						return; // Odaklanmış hücre değişmedi, çık
+					}
+
+					this.#focusedCellState = cellToFocus;
+					this.updateVisibleIndexes(forceUpdate);
+					tick().then(() => {
+						const nextFocusedCellNode = this.element?.querySelector<HTMLDivElement>('.slc-table-td-focused');
+						if (nextFocusedCellNode != null) {
+							nextFocusedCellNode.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+							nextFocusedCellNode.focus({ preventScroll: true });
+							this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
+						}
+						ticking = false;
+					});
+				}
+			};
+
+			node.addEventListener('keydown', keydown);
+			node.addEventListener('mousedown', mousedown);
+			node.addEventListener('click', click);
+
+			return () => {
 				node.removeEventListener('keydown', keydown);
 				node.removeEventListener('mousedown', mousedown);
 				node.removeEventListener('click', click);
-			}
+			};
 		};
 	};
 	// ################################## END Actions ######################################################################################################################################
