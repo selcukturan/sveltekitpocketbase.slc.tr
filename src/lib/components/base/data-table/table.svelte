@@ -47,6 +47,7 @@
 				<!-- ********** TRD ********** -->
 				<div
 					{...t.attr_trd}
+					class:slc-table-trd-even={t.srcZebra && roi % 2}
 					class:slc-table-trd-selected={checked}
 					class:slc-table-trd-subtotal1={row.order === 3}
 					class:slc-table-trd-subtotal2={row.order === 4}
@@ -246,7 +247,7 @@
 							</span>
 						</button>
 						{#if t.actionActiveRowIndex === roi}
-							<div class="slc-table-th-action-popup" transition:fly={{ y: 0, duration: 150 }}>
+							<div class="slc-table-th-action-popup" transition:fly={{ y: 3, duration: 300 }}>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.tableActions as item}
 										<button
@@ -272,7 +273,7 @@
 							</span>
 						</button>
 						{#if t.actionActiveRowIndex === roi}
-							<div class="slc-table-td-action-popup" transition:fly={{ y: 0, duration: 150 }}>
+							<div class="slc-table-td-action-popup" transition:fly={{ y: 5, duration: 300 }}>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.rowActions as item}
 										<button
@@ -341,10 +342,14 @@
 	}
 	/******************************************************/
 	.slc-table-trd:hover {
-		background-color: color-mix(in srgb, var(--color-surface-200) 70%, var(--color-surface-50) 30%);
+		/* background-color: color-mix(in srgb, var(--color-surface-200) 70%, var(--color-surface-50) 30%); */
+		background-color: var(--color-surface-200);
 	}
 	.slc-table-trd-selected {
 		background-color: var(--color-primary-200) !important;
+	}
+	.slc-table-trd-even {
+		background-color: var(--color-surface-100);
 	}
 	.slc-table-trd-subtotal1 {
 		background-color: var(--color-success-50) !important;

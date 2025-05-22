@@ -22,7 +22,7 @@
 			{#snippet child({ wrapperProps, props, open })}
 				{#if open}
 					<div {...wrapperProps}>
-						<div {...props} transition:fly={{ duration: 300 }}>
+						<div {...props} transition:fly={{ y: 3, duration: 150 }}>
 							<div class="bg-surface-950 text-surface-50 rounded-sm px-1.5 py-1 text-sm font-semibold">
 								{@render children?.()}
 							</div>

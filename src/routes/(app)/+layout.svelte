@@ -5,6 +5,8 @@
 	import { AppLayout } from '$lib/components/base/app-layout/view';
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
 	import { Tooltip } from 'bits-ui';
+	import { navigating } from '$app/state';
+	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 
 	import { afterNavigate } from '$app/navigation';
 
@@ -64,6 +66,8 @@
 <svelte:window bind:innerWidth={w} />
 
 <Icons />
+
+<ProgressBar navigate={navigating} />
 
 <Toaster toaster={appToaster} />
 

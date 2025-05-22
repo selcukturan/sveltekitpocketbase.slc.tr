@@ -32,6 +32,7 @@ class Table<TData extends Row> {
 		rowSelectionColumnWidth: 50,
 		rowAction: true,
 		rowActionColumnWidth: 50,
+		zebra: false,
 		theadRowHeight: 40,
 		tbodyRowHeight: 35,
 		tfootRowHeight: 35,
@@ -115,6 +116,7 @@ class Table<TData extends Row> {
 	readonly srcActions = $derived(this.#src.actions || this.#defSrc.actions);
 	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
 	readonly srcRowActionColumnWidth = $derived(this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth);
+	readonly srcZebra = $derived(this.#src.zebra || this.#defSrc.zebra);
 	readonly srcTheadRowHeight = $derived(this.#src.theadRowHeight || this.#defSrc.theadRowHeight);
 	readonly srcTbodyRowHeight = $derived(this.#src.tbodyRowHeight || this.#defSrc.tbodyRowHeight);
 	readonly srcTfootRowHeight = $derived(this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight);
@@ -700,24 +702,24 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	/* // argümanlı attach
+	/* // argümanlı Attachment
 	readonly myAttach = (data: string): Attachment => {
-		// düğüm DOM'a monte edilmiştir
+		// element DOM'a monte edilmiştir
 		return (element) => {
-			// kurulum buraya gidiyor
+			// setup buraya
 			element.addEventListener('scroll', handleScroll);
 			return () => {
-				// söküm buraya gidiyor
+				// destroy buraya
 				element.removeEventListener('scroll', handleScroll);
 			};
 		};
 	}; */
 	/* // argümansız attach
 	readonly myAttach: Attachment = (element) => {
-		// düğüm DOM'a monte edilmiştir
-		// kurulum buraya gidiyor
+		// element DOM'a monte edilmiştir
+		// setup buraya
 		return () => {
-			// söküm buraya gidiyor
+			// destroy buraya
 			element.removeEventListener('scroll', handleScroll);
 		};
 	}; */

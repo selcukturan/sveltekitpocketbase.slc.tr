@@ -34,6 +34,7 @@ export type Sources<TData> = {
 	};
 	rowAction?: boolean;
 	rowActionColumnWidth?: number;
+	zebra?: boolean;
 	theadRowHeight?: number;
 	tbodyRowHeight?: number;
 	tfootRowHeight?: number;

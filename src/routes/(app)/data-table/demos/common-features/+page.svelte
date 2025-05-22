@@ -11,6 +11,7 @@
 		data: generateProducedData(1000),
 		rowSelection: 'multiple-all',
 		rowAction: true,
+		zebra: true,
 		actions: {
 			tableActions: [
 				{ label: 'Ekle', action: 'add' },
