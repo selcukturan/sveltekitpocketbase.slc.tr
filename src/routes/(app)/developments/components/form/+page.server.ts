@@ -17,27 +17,27 @@ export const actions = {
 		let formData: FormData;
 
 		try {
-			// 1. Client FormData
+			// 1. FormData
 			formData = await request.formData();
 			try {
 				// 2. Valid FormData
 				const updateData = schema.parse(formData);
 				try {
-					// 3. PB Update
+					// 3. PB Run
 					const form = await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', updateData);
 					return { success: true, ...form };
 				} catch (error) {
-					// 3. error
+					// 3. PB error
 					const { status, errors } = pbError(error);
 					return fail(status, { success: false, errors });
 				}
 			} catch (error) {
-				// 2. error
+				// 2. Valid error
 				const { status, errors } = zodError(error);
 				return fail(status, { success: false, errors });
 			}
 		} catch (error) {
-			// 1. error
+			// 1. FormData error
 			const { status, errors } = formDataError(error);
 			return fail(status, { success: false, errors });
 		}

@@ -2,10 +2,9 @@
 	import * as tooltip from '@zag-js/tooltip';
 	import { useMachine, normalizeProps, mergeProps } from '@zag-js/svelte';
 	import type { TooltipProps } from './types';
-	import { fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
 	const {
-		arrow = false,
 		// Snippets
 		trigger,
 		content,
@@ -36,67 +35,9 @@
 	<!-- Tooltip Content -->
 	{#if api.open}
 		<div {...api.getPositionerProps()}>
-			{#if arrow}
-				<div {...api.getArrowProps()}>
-					<div {...api.getArrowTipProps()}></div>
-				</div>
-			{/if}
-			<div {...api.getContentProps()}>
+			<div {...api.getContentProps()} transition:fly={{ y: 3, duration: 150 }} class="bg-surface-950 text-surface-50 z-999999 rounded-sm px-1.5 py-1 text-sm font-semibold">
 				{@render content?.()}
 			</div>
 		</div>
 	{/if}
 </span>
-
-<style lang="postcss">
-	@reference "tailwindcss";
-
-	[data-part='arrow'] {
-		z-index: 999998;
-		--arrow-size: 10px;
-		--arrow-background: var(--color-surface-950);
-
-		transition:
-			opacity 150ms,
-			visibility 150ms,
-			transform 150ms;
-		transform: translateY(0px);
-		/* show */
-		opacity: 1;
-		visibility: visible;
-
-		@starting-style {
-			transform: translateY(3px);
-			/* hide */
-			opacity: 0;
-			visibility: hidden;
-		}
-	}
-
-	[data-part='content'] {
-		z-index: 999999;
-		font-size: var(--text-sm);
-		font-weight: var(--font-weight-semibold);
-		background-color: var(--color-surface-950);
-		color: var(--color-surface-50);
-		border-radius: var(--radius-md);
-		max-width: 275px;
-		padding: 3px 7px;
-
-		transition:
-			opacity 150ms,
-			visibility 150ms,
-			transform 150ms;
-		transform: translateY(0px);
-		/* show */
-		opacity: 1;
-		visibility: visible;
-
-		@starting-style {
-			transform: translateY(3px);
-			/* hide */
-			opacity: 0;
-			visibility: hidden;
-		}
-	}
-</style>
