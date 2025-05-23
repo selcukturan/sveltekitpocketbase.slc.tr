@@ -1,4 +1,4 @@
-<script lang="ts" generics="TField">
+<script lang="ts">
 	import type { AnyFieldApi } from '@tanstack/svelte-form';
 
 	let { field }: { field: AnyFieldApi } = $props();

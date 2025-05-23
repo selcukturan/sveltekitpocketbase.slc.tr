@@ -1,11 +1,10 @@
-import { dev } from '$app/environment';
-import * as v from 'valibot';
+import { safeParse, type BaseSchema, type BaseIssue } from 'valibot';
 
 // https://jovianmoon.io/posts/sveltekit-form-validation-with-valibot
 
 export const extractFormData = async <TInput = unknown, TOutput = TInput>(
 	request: Request,
-	schema: v.BaseSchema<TInput, TOutput, v.BaseIssue<unknown>>
+	schema: BaseSchema<TInput, TOutput, BaseIssue<unknown>>
 ): Promise<{
 	data: TOutput | undefined;
 	error: string | null;
@@ -13,29 +12,25 @@ export const extractFormData = async <TInput = unknown, TOutput = TInput>(
 	try {
 		const formData = await request.formData();
 		const result: Record<string, any> = {};
-		// Convert form data to an object with proper handling of multiple values
+		// Form verilerini, birden fazla değeri uygun şekilde işleyen bir nesneye dönüştürme
 		formData.forEach((value, key) => {
-			// Case 1: First time encountering this key
+			// Case 1: Bu key ile ilk kez karşılaşıldı
 			if (result[key] === undefined) {
 				result[key] = value;
 			}
-			// Case 2: Key exists and is already an array, add new value
+			// Case 2: Key var ve zaten bir array, yeni değer ekleyin
 			else if (Array.isArray(result[key])) {
 				result[key].push(value);
 			}
-			// Case 3: Key exists but isn't an array yet, convert to array with both values
+			// Case 3: Anahtar var ancak henüz bir array değil, her iki değeri de içeren diziye dönüştür
 			else {
 				result[key] = [result[key], value];
 			}
 		});
-		const validation = v.safeParse(schema, result);
+
+		const validation = safeParse(schema, result);
+
 		if (!validation.success) {
-			if (dev) {
-				console.error('Validation errors:');
-				for (const error of validation.issues) {
-					console.error(`- ${error.message}`);
-				}
-			}
 			if (validation.issues && validation.issues.length > 0) {
 				return {
 					data: undefined,
@@ -44,15 +39,11 @@ export const extractFormData = async <TInput = unknown, TOutput = TInput>(
 			}
 			return {
 				data: undefined,
-				error: 'Error validating form submission, please check everything carefully.'
+				error: 'Form gönderimi doğrulanırken hata oluştu, lütfen her şeyi dikkatlice kontrol edin.'
 			};
 		}
 		return { data: validation.output as TOutput, error: null };
 	} catch (error) {
-		// if (dev && config.verbose_formaction_logging) {
-		if (dev) {
-			console.error(`Error extracting form data: ${error}`);
-		}
-		return { data: undefined, error: `Error extracting form data: ${error}` };
+		return { data: undefined, error: `Form verileri çıkarılırken hata oluştu: ${error}` };
 	}
 };
