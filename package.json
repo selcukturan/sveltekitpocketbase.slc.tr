@@ -41,6 +41,7 @@
 		"vite": "^6.3.5"
 	},
 	"dependencies": {
+		"@tanstack/svelte-form": "^1.11.3",
 		"@zag-js/svelte": "^1.12.4",
 		"@zag-js/toast": "^1.12.4",
 		"@zag-js/tooltip": "^1.12.4",

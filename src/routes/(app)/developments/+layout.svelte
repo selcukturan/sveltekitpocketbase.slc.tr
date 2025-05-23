@@ -33,6 +33,11 @@
 					icon: 'file-symlink'
 				},
 				{
+					title: 'Form (Tanstack)',
+					href: `/developments/components/form-tanstack`,
+					icon: 'file-symlink'
+				},
+				{
 					title: 'Tree',
 					href: `/developments/components/tree`,
 					icon: 'file-symlink'
