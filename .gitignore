@@ -26,3 +26,5 @@ vite.config.ts.timestamp-*
 /.slc-local/pocketbase/pb_data
 /.slc-local/pocketbase/pb_migrations
 /.slc-local/pocketbase/pb_public
+/.slc-development/hetzner.yaml
+/.slc-development/server_note.md
