@@ -326,6 +326,11 @@ export function generateProducedData(count: number) {
 		const randomProducerSurname = producerSurname[Math.floor(Math.random() * producerSurname.length)];
 		const randomRegionAndGrape = regionAndGrape[Math.floor(Math.random() * regionAndGrape.length)];
 
+		let subtotal: string = '';
+		if (i % 6 === 0) {
+			const subtotals = ['subtotal1', 'subtotal2', 'subtotal3'];
+			subtotal = subtotals[Math.floor(Math.random() * subtotals.length)];
+		}
 		const order = i;
 		const producer = `${randomProducerName} ${randomProducerSurname}`;
 		const province = randomRegionAndGrape.province;
@@ -339,7 +344,7 @@ export function generateProducedData(count: number) {
 		const price = calcPrice < 1 ? 10 : calcPrice;
 		const amount = parseFloat((quantity * price).toFixed(2));
 
-		data.push({ order, producer, province, district, village, grape, grapeColor, quantity, price, amount });
+		data.push({ subtotal, order, producer, province, district, village, grape, grapeColor, quantity, price, amount });
 	}
 
 	return data;

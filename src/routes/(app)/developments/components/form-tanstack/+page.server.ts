@@ -22,6 +22,7 @@ export const actions = {
 		const { data, error } = await extractFormData(request, formSchema);
 
 		if (data != null) {
+			// Valid Form
 			try {
 				const form = await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', data);
 				return { success: true, ...form };
@@ -30,6 +31,7 @@ export const actions = {
 				return fail(status, { success: false, errors });
 			}
 		} else {
+			// Invalid Form
 			return fail(400, { success: false, error });
 		}
 	}

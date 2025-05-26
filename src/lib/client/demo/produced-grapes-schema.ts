@@ -1,4 +1,5 @@
 export type ProducedGrapes = {
+	subtotal: string;
 	order: number;
 	producer: string;
 	province: string;

@@ -25,7 +25,8 @@
 			]
 		},
 		columns: [
-			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)', hidden: true },
+			{ field: 'subtotal', label: 'Sub Total', width: 'minmax(75px,1fr)', hidden: true },
+			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)', hidden: false },
 			{ field: 'producer', label: 'Producer', width: 'minmax(75px,1fr)', editable: true, hidden: false },
 			{ field: 'province', label: 'Province', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
 			{ field: 'district', label: 'District', width: 'minmax(75px,1fr)', resizeable: true, hidden: true },

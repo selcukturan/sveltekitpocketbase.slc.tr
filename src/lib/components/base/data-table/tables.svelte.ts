@@ -286,7 +286,9 @@ class Table<TData extends Row> {
 
 		// 9. Mevcut Odaklanmış Satır, Yeni Index Aralığında mı?
 		const isFocusedRowAlreadyIncluded =
-			currentIndices.focusedCellRowIndex && currentIndices.focusedCellRowIndex >= overscanStartIndex && currentIndices.focusedCellRowIndex <= overscanEndIndex;
+			currentIndices.focusedCellRowIndex &&
+			currentIndices.focusedCellRowIndex >= overscanStartIndex &&
+			currentIndices.focusedCellRowIndex <= overscanEndIndex;
 
 		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa VEYA Odaklanmış Satır Değiştiyse ve Yeni Aralıkta Değilse
 		if (indicesChanged || force || (focusedChanged && !isFocusedRowAlreadyIncluded)) {
@@ -517,11 +519,11 @@ class Table<TData extends Row> {
 		this.clearSelectedRows();
 		if (select) {
 			// Tüm indeksleri Set'e ekle
-			for (let i = 0; i < this.srcData.length; i++) {
-				// if (!this.#selectedRows.has(i)) {
-				this.#selectedRows.add(i);
-				// }
-			}
+			this.srcData.forEach((row, index) => {
+				if (typeof row.subtotal !== 'string' || !row.subtotal.startsWith('subtotal')) {
+					this.#selectedRows.add(index);
+				}
+			});
 		}
 
 		this.#headerIsIndeterminate = false;
@@ -541,7 +543,13 @@ class Table<TData extends Row> {
 				// e.preventDefault();
 
 				if (type === 'header') {
-					const allSelected = this.#selectedRows.size === this.srcData.length;
+					const countableRowsLength = this.srcData.filter((row) => {
+						if (row && typeof row.subtotal === 'string') {
+							return !row.subtotal.startsWith('subtotal');
+						}
+						return true; // subtotal yoksa veya string değilse, sayıma dahil et
+					}).length;
+					const allSelected = this.#selectedRows.size === countableRowsLength;
 					this.toggleAllRows(!allSelected);
 				} else if (roi != null) {
 					this.toggleRowSelection(roi);
@@ -762,7 +770,9 @@ class Table<TData extends Row> {
 				const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 
 				// --- İzin Verilmeyen Tuşları Filtrele ---
-				const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(key);
+				const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(
+					key
+				);
 				const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
 				const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
 
@@ -919,7 +929,10 @@ class Table<TData extends Row> {
 	// ################################## END Actions ######################################################################################################################################
 
 	// ################################## BEGIN Utils #######################################################################################################################################
-	readonly debounce = <This, Args extends unknown[]>(func: (this: This, ...args: Args) => void, delay: number): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
+	readonly debounce = <This, Args extends unknown[]>(
+		func: (this: This, ...args: Args) => void,
+		delay: number
+	): ((this: This, ...args: Args) => void) & { cancel: () => void } => {
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
 		const debounced = function (this: This, ...args: Args): void {
 			const context = this;
@@ -968,17 +981,17 @@ class Table<TData extends Row> {
 	// ################################## END General Methods ################################################################################################################################
 
 	// ################################## BEGIN Attr ########################################################################################################################################
-	attr_main = $derived({
+	mainProps = $derived({
 		class: 'slc-table-main',
 		style: `
 			width: ${this.srcWidth};
 			height: ${this.srcHeight};
 		`
 	});
-	attr_container = {
+	containerProps = {
 		class: 'slc-table-container'
 	};
-	attr = $derived({
+	tableProps = $derived({
 		role: 'grid',
 		class: 'slc-table',
 		style: `
@@ -992,12 +1005,12 @@ class Table<TData extends Row> {
 		'aria-colcount': this.visibleColumns.length,
 		'aria-rowcount': this.srcData.length + this.srcFooters.length + this.headerRowsCountState
 	});
-	attr_trh = {
+	trhProps = {
 		role: 'row',
 		class: 'slc-table-trh',
 		style: `display: contents;`
 	};
-	attr_th = {
+	thProps = {
 		role: 'columnheader',
 		class: 'slc-table-th',
 		style: `grid-row-start: 1;`
@@ -1006,47 +1019,47 @@ class Table<TData extends Row> {
 		class: 'slc-table-th-resize',
 		style: `position: absolute; touch-action: none !important; background-color: red; top: 0px; right: 0px; bottom: 0px; width: 8px; opacity: 0; cursor: col-resize;`
 	};
-	attr_th_selection = {
+	thSelectionProps = {
 		role: 'columnheader',
 		class: 'slc-table-th slc-table-th-selection',
 		style: `grid-row-start: 1;`
 	};
-	attr_th_action = {
+	thActionProps = {
 		role: 'columnheader',
 		class: 'slc-table-th slc-table-th-action',
 		style: `grid-row-start: 1;`
 	};
-	attr_trd = {
+	trdProps = {
 		role: 'row',
 		class: 'slc-table-trd',
 		style: `display: contents;`
 	};
-	attr_td = {
+	tdProps = {
 		/* role: 'gridcell', */
 		class: 'slc-table-td'
 	};
-	attr_td_selection = {
+	tdSelectionProps = {
 		/* role: 'gridcell', */
 		class: 'slc-table-td slc-table-td-selection'
 	};
-	attr_td_action = {
+	tdActionProps = {
 		/* role: 'gridcell', */
 		class: 'slc-table-td slc-table-td-action'
 	};
-	attr_trf = {
+	trfProps = {
 		role: 'row',
 		class: 'slc-table-trf',
 		style: `display: contents;`
 	};
-	attr_tf = {
+	tfProps = {
 		role: 'gridcell',
 		class: 'slc-table-tf'
 	};
-	attr_tf_selection = {
+	tfSelectionProps = {
 		role: 'gridcell',
 		class: 'slc-table-tf slc-table-tf-selection'
 	};
-	attr_tf_action = {
+	tfActionProps = {
 		role: 'gridcell',
 		class: 'slc-table-tf slc-table-tf-action'
 	};
