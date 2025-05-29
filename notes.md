@@ -52,3 +52,24 @@ LEFT JOIN bao00 t3 ON t2.bao00_parent = t3.bao00_id
 LEFT JOIN bao00 t4 ON t3.bao00_parent = t4.bao00_id
 LEFT JOIN bao00 t5 ON t4.bao00_parent = t5.bao00_id
 ```
+
+```sveltekit
+<Form>
+	<Form.iTextbox />
+    <Form.iNumberbox />
+
+    <Form.iDate />
+    <Form.iDatetime />
+
+    <Form.iSelect />
+    <Form.iCombobox />
+
+    <Form.iRadio />
+    <Form.iCheckbox />
+    <Form.iSwitch />
+
+    <Form.iSlider />
+
+    <Form.iSubmit />
+</Form>
+```

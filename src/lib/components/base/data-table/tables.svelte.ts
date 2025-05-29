@@ -506,7 +506,14 @@ class Table<TData extends Row> {
 			}
 		}
 
-		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.srcData.length ? true : false;
+		const countableRowsLength = this.srcData.filter((row) => {
+			if (row && typeof row.subtotal === 'string') {
+				return !row.subtotal.startsWith('subtotal');
+			}
+			return true; // subtotal yoksa veya string değilse, sayıma dahil et
+		}).length;
+
+		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < countableRowsLength ? true : false;
 
 		await tick();
 		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
