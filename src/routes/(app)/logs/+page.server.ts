@@ -1,11 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { PUBLIC_ENV_TEST } from '$env/static/public';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ request, locals }) => {
 	const auth = locals.auth;
 	const userRole = auth.user?.role || '';
 
 	const collection = await auth.pb.collection('acl_roles_perms').getFullList({
+		headers: {
+			'cf-connecting-ip': `${request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')}`
+		},
 		fields: `*,expand.perm.type`,
 		expand: `perm`,
 		filter: auth.pb.filter(`perm.type = 'system' && role = {:userRole} && created > '2025-03-14'`, { userRole }),
