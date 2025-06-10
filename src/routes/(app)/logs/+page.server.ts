@@ -7,8 +7,8 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 	const collection = await auth.pb.collection('acl_roles_perms').getFullList({
 		headers: {
-			'cf-connecting-ip': `${request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')} || 'unknown'`,
-			'user-agent': `${request.headers.get('user-agent') || 'unknown'}`
+			'cf-connecting-ip': `${request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')}`,
+			'user-agent': `${request.headers.get('user-agent')}`
 		},
 		fields: `*,expand.perm.type`,
 		expand: `perm`,

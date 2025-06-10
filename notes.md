@@ -73,3 +73,7 @@ LEFT JOIN bao00 t5 ON t4.bao00_parent = t5.bao00_id
     <Form.iSubmit />
 </Form>
 ```
+
+# İstek akışı:
+
+Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması (s_app) → PocketBase (s_pocketbase)
