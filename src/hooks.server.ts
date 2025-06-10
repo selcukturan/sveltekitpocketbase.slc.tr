@@ -5,6 +5,10 @@ import env from '$lib/server/env';
 import { Collections } from '$lib/client/types/pocketbase-types';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// TEST İÇİN BU SATIRI EKLEYİN
+	console.log('x-forwarded-for başlığı:', event.request.headers.get('x-forwarded-for'));
+	console.log('event.request.headers:', event.request.headers);
+
 	const isProduction = env.NODE_ENV === 'production';
 	// 🚀 `auth.pb.authStore` ve `auth` aynı nesneyi işaret eder ####################################################################
 	const auth = new Auth(event);
@@ -37,7 +41,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// ⌛🍪 Set Cookie ################################################################################################################
 	response.headers.append(
 		'set-cookie',
-		event.locals.auth.exportToCookie({ expires: auth.getCookieExpDate(event.locals.auth.token), httpOnly: true, secure: isProduction, sameSite: 'strict', priority: 'High' })
+		event.locals.auth.exportToCookie({
+			expires: auth.getCookieExpDate(event.locals.auth.token),
+			httpOnly: true,
+			secure: isProduction,
+			sameSite: 'strict',
+			priority: 'High'
+		})
 	);
 	// 🏆 ###########################################################################################################################
 	return response;
