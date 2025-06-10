@@ -36,6 +36,15 @@ export class Auth extends LocalAuthStore {
 		this.#storageKey = storageKey;
 		this.#pb = new PocketBase(env.PB_BACKEND_URL, this, 'tr-TR');
 
+		this.#pb.beforeSend = function (url, options) {
+			options.headers = Object.assign({}, options.headers, {
+				'cf-connecting-ip': `${event.request.headers.get('cf-connecting-ip') || event.request.headers.get('x-forwarded-for')}`,
+				'user-agent': `${event.request.headers.get('user-agent')}`
+			});
+
+			return { url, options };
+		};
+
 		this.loadFromCookie(event.request.headers.get('cookie') || '');
 	}
 
