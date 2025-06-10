@@ -28,6 +28,7 @@ export type Sources<TData> = {
 	height?: string;
 	rowSelection?: 'none' | 'single' | 'multiple' | 'multiple-all';
 	rowSelectionColumnWidth?: number;
+	subtotal?: boolean;
 	actions?: {
 		tableActions?: { label: string; action: string }[];
 		rowActions?: { label: string; action: string }[];

@@ -30,6 +30,7 @@ class Table<TData extends Row> {
 		actions: {},
 		rowSelection: 'none',
 		rowSelectionColumnWidth: 50,
+		subtotal: false,
 		rowAction: true,
 		rowActionColumnWidth: 50,
 		zebra: false,
@@ -113,6 +114,7 @@ class Table<TData extends Row> {
 	readonly srcHeight = $derived(this.#src.height || this.#defSrc.height);
 	readonly srcRowSelection = $derived(this.#src.rowSelection || this.#defSrc.rowSelection);
 	readonly srcRowSelectionColumnWidth = $derived(this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth);
+	readonly srcSubtotal = $derived(this.#src.subtotal || this.#defSrc.subtotal);
 	readonly srcActions = $derived(this.#src.actions || this.#defSrc.actions);
 	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
 	readonly srcRowActionColumnWidth = $derived(this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth);
@@ -506,14 +508,7 @@ class Table<TData extends Row> {
 			}
 		}
 
-		const countableRowsLength = this.srcData.filter((row) => {
-			if (row && typeof row.subtotal === 'string') {
-				return !row.subtotal.startsWith('subtotal');
-			}
-			return true; // subtotal yoksa veya string değilse, sayıma dahil et
-		}).length;
-
-		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < countableRowsLength ? true : false;
+		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.countableRowsLength() ? true : false;
 
 		await tick();
 		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
@@ -550,13 +545,7 @@ class Table<TData extends Row> {
 				// e.preventDefault();
 
 				if (type === 'header') {
-					const countableRowsLength = this.srcData.filter((row) => {
-						if (row && typeof row.subtotal === 'string') {
-							return !row.subtotal.startsWith('subtotal');
-						}
-						return true; // subtotal yoksa veya string değilse, sayıma dahil et
-					}).length;
-					const allSelected = this.#selectedRows.size === countableRowsLength;
+					const allSelected = this.#selectedRows.size === this.countableRowsLength();
 					this.toggleAllRows(!allSelected);
 				} else if (roi != null) {
 					this.toggleRowSelection(roi);
@@ -570,7 +559,21 @@ class Table<TData extends Row> {
 			};
 		};
 	};
-
+	// Eğer veritabanından gelen `subtotal`'ler varsa, bu metot `subtotal` kolonundaki `subtotal` ile başlayan içeriği tespit eder ve multiselect seçimini optimize eder.
+	// Bu şekilde subtotal kullanırken, grid başlangıç ayarlarında `subtotal: true` olarak ayarlanmalı.
+	// Subtotal kullanılmadığında multiselect performansını arttırır.
+	private countableRowsLength = () => {
+		if (this.srcSubtotal === true) {
+			return this.srcData.filter((row) => {
+				if (row && typeof row.subtotal === 'string') {
+					return !row.subtotal.startsWith('subtotal');
+				}
+				return true; // subtotal yoksa veya string değilse, sayıma dahil et
+			}).length;
+		} else {
+			return this.srcData.length;
+		}
+	};
 	// ################################## END Row Selection Methods ########################################################################################################################
 
 	// ################################## BEGIN Cell Edit ##################################################################################################################################

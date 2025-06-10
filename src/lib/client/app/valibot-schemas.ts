@@ -51,7 +51,7 @@ const FlexibleCommaSeparatedStringToArraySchema = v.pipe(
 // https://valibot.dev/api/isoTimestamp/
 const IsoTimestampSchema = v.pipe(v.string(), v.isoTimestamp('The timestamp is badly formatted.'));
 
-const ValidIsoTimestampSchema = v.pipe(
+export const ValidIsoTimestampSchema = v.pipe(
 	v.string('Giriş bir string olmalıdır.'), // 1. String mi?
 	v.isoTimestamp('Timestamp formatı hatalı. (Örn: YYYY-MM-DDTHH:mm:ss.sssZ)'), // 2. ISO formatı doğru mu?
 	v.custom(

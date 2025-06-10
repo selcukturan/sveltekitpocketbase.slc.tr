@@ -11,6 +11,7 @@
 		data: generateProducedData(1000),
 		rowSelection: 'multiple-all',
 		rowAction: true,
+		subtotal: true,
 		zebra: true,
 		actions: {
 			tableActions: [

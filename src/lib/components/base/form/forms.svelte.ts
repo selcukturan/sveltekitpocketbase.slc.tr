@@ -10,10 +10,10 @@ class Form<TInput = unknown, TOutput = TInput, TIssue extends BaseIssue<unknown>
 		return this.#test;
 	}
 
-	private readonly schema: BaseSchema<TInput, TOutput, TIssue>;
+	public readonly schema: BaseSchema<TInput, TOutput, TIssue>;
 	public readonly tanstackForm;
 
-	constructor(schema: BaseSchema<TInput, TOutput, TIssue>, defaultValues: TInput) {
+	constructor(schema: BaseSchema<TInput, TOutput, TIssue>, defaultValues?: TInput) {
 		this.schema = schema;
 
 		this.tanstackForm = createTanstackForm(() => ({
@@ -23,6 +23,20 @@ class Form<TInput = unknown, TOutput = TInput, TIssue extends BaseIssue<unknown>
 			}
 		}));
 	}
+
+	readonly getFieldDefaultValue = <T extends Record<string, unknown>, K extends keyof T>(fieldName: K | unknown): T[K] | null => {
+		// Type guard: fieldName string mi kontrol et
+		if (typeof fieldName !== 'string') return null;
+
+		const defaults = this.tanstackForm.options.defaultValues as T | undefined;
+		if (!defaults || typeof defaults !== 'object') return null;
+
+		// Runtime type check: fieldName defaults objesinde var mı?
+		if (!(fieldName in defaults)) return null;
+
+		return (defaults[fieldName as K] ?? null) as T[K] | null;
+	};
+
 	// ################################## END Constructor ##########################################################################################################################
 }
 

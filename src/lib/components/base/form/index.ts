@@ -10,7 +10,9 @@ import iSlider from './iSlider.svelte';
 import iSubmit from './iSubmit.svelte';
 import iSwitch from './iSwitch.svelte'; */
 import iTextbox from './iTextbox.svelte';
+import iDatetime from './iDatetime.svelte';
 
 export default Object.assign(Form, {
-	/* iCheckbox, iCombobox, iDate, iDatetime, iNumberbox, iRadio, iSelect, iSlider, iSubmit, iSwitch, */ iTextbox
+	/* iCheckbox, iCombobox, iDate, iDatetime, iNumberbox, iRadio, iSelect, iSlider, iSubmit, iSwitch, */ iTextbox,
+	iDatetime
 });

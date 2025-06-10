@@ -9,5 +9,7 @@
 
 <Form schema={formSchema} defaultValues={data.formInitialData}>
 	<Form.iTextbox name="text_optional" />
+	<Form.iDatetime name="datetime_optional" />
 	<button type="submit">Submit</button>
+	<div>{data.formInitialData.datetime_optional}</div>
 </Form>
