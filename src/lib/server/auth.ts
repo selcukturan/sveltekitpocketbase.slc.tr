@@ -35,6 +35,7 @@ export class Auth extends LocalAuthStore {
 		super(storageKey);
 		this.#storageKey = storageKey;
 		this.#pb = new PocketBase(env.PB_BACKEND_URL, this, 'tr-TR');
+
 		this.loadFromCookie(event.request.headers.get('cookie') || '');
 	}
 
