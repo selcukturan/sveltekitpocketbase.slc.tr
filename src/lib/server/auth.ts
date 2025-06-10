@@ -6,6 +6,11 @@ import env from '$lib/server/env';
  * Oturum geçerlilik süresi kontrolü:(token üzerinden kontrol edilir. çerez üzerinden kontrol edilmez.)
  *
  * -Çerezin geçerlilik süresi kontrol edilmez. (Expires / Max -Age)
+ * 		Bu, tarayıcıya (browser) yönelik bir talimattır.
+ * 		Tarayıcıya "Bu çerezi şu tarihe kadar sakla ve her istekte bana geri gönder.
+ * 		O tarih geçtiğinde ise bu çerezi sil ve bir daha gönderme." dersiniz.
+ * 		Yani süresi dolmuş bir çerez, tarayıcı tarafından sunucuya hiç gönderilmez.
+ * 		Dolayısıyla sunucunun bunu kontrol etme şansı veya gerekliliği yoktur. Bu iş tarayıcının sorumluluğundadır.
  * -Çerezin içindeki tokenın geçerlilik süresinin dolup dolmadığı kontrol edilir.
  * 		Aşağıdaki işlemler --her istekte(Request)-- `hooks.server.ts` içinde yapılır. Token geçerlilik süresi ile çerez geçerlilik süresi eşitlenmiş olur.
  *
@@ -13,7 +18,6 @@ import env from '$lib/server/env';
  * 		2.aşama: `auth.isValid === true` ise `.authRefresh()` ile geçerlilik süresi yenilenmiş yeni bir token üretilir.
  * 		3.aşama: `.getCookieExpDate()` ile geçerlilik süresi yenilenmiş yeni bir token --dönen cevaba(Response)-- yazılır.
  *
- * SORU: Bir noktada çerezin de `Expires / Max -Age`ini kontrol etmek gerekir mi?
  */
 
 export class Auth extends LocalAuthStore {
@@ -34,15 +38,41 @@ export class Auth extends LocalAuthStore {
 	constructor(event: RequestEvent, storageKey = 'sess') {
 		super(storageKey);
 		this.#storageKey = storageKey;
+
 		this.#pb = new PocketBase(env.PB_BACKEND_URL, this, 'tr-TR');
 
-		this.#pb.beforeSend = function (url, options) {
-			options.headers = Object.assign({}, options.headers, {
-				'cf-connecting-ip': `${event.request.headers.get('cf-connecting-ip') || event.request.headers.get('x-forwarded-for')}`,
-				'user-agent': `${event.request.headers.get('user-agent')}`
-			});
+		this.#pb.beforeSend = (url, options) => {
+			// 1. IP adresini bulmak için öncelik sırasına göre başlıkları kontrol et.
+			const userIp =
+				event.request.headers.get('cf-connecting-ip') ||
+				event.request.headers.get('x-forwarded-for') ||
+				event.request.headers.get('x-real-ip') ||
+				null; // Hiçbiri bulunamazsa null yap.
 
-			return { url, options };
+			// 2. User-agent'ı al.
+			const userAgent = event.request.headers.get('user-agent');
+
+			// 3. Mevcut başlıkları koru ve yeni başlıkları eklemek için bir kopya oluştur.
+			const newHeaders = { ...options.headers };
+
+			// 4. SADECE geçerli bir IP bulunduysa başlığa ekle.
+			if (userIp) {
+				newHeaders['cf-connecting-ip'] = userIp; // PocketBase'in güvendiği başlık adını kullan
+			}
+
+			// 5. SADECE geçerli bir user-agent bulunduysa başlığa ekle.
+			if (userAgent) {
+				newHeaders['user-agent'] = userAgent;
+			}
+
+			// 6. Güncellenmiş seçeneklerle geri dön.
+			return {
+				url,
+				options: {
+					...options,
+					headers: newHeaders
+				}
+			};
 		};
 
 		this.loadFromCookie(event.request.headers.get('cookie') || '');
