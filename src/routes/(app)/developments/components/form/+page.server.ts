@@ -1,31 +1,32 @@
 import { fail } from '@sveltejs/kit';
 import { superValidate, message } from 'sveltekit-superforms';
 import { valibot } from 'sveltekit-superforms/adapters';
-import { formSchema, type FormSchema } from './schema';
+import { myFirstFormSchema } from './schema';
 import { Collections, type TestFormResponse } from '$lib/client/types/pocketbase-types';
 
 export const load = async ({ locals }) => {
-	const formInitialData = await locals.auth.pb.collection(Collections.TestForm).getOne<TestFormResponse>('30u6z6n70xxwinz');
+	console.log('form load function called');
+	const myFirstFormInitialData = await locals.auth.pb.collection(Collections.TestForm).getOne<TestFormResponse>('30u6z6n70xxwinz');
 
-	const form = await superValidate(formInitialData, valibot(formSchema), { id: 'form22' });
+	const myFirstForm = await superValidate(myFirstFormInitialData, valibot(myFirstFormSchema), { id: 'myFirstForm' });
 
 	// Always return { form } in load functions
-	return { form };
+	return { myFirstForm };
 };
 
 export const actions = {
 	default: async ({ request, locals }) => {
-		const form = await superValidate(request, valibot(formSchema), { id: 'form22' });
+		const myFirstForm = await superValidate(request, valibot(myFirstFormSchema), { id: 'myFirstForm' });
 
-		if (!form.valid) {
+		if (!myFirstForm.valid) {
 			// Return { form } and things will just work.
-			return fail(400, { form });
+			return fail(400, { myFirstForm });
 		}
 
 		// TODO: Do something with the validated form.data
-		await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', form.data);
+		await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', myFirstForm.data);
 
 		// Return the form with a status message
-		return message(form, 'Form posted successfully!');
+		return message(myFirstForm, 'Form posted successfully!');
 	}
 };

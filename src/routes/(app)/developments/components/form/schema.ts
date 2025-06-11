@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 
-export const formSchema = v.pipe(
+export const myFirstFormSchema = v.pipe(
 	v.object({
 		text_optional: v.pipe(
 			v.string('You must enter a text_optional.'),
@@ -10,4 +10,6 @@ export const formSchema = v.pipe(
 	})
 );
 
-export type FormSchema = v.InferInput<typeof formSchema>;
+export type MyFirstForm = typeof myFirstFormSchema;
+
+export type MyFirstFormx = v.InferInput<typeof myFirstFormSchema>;
