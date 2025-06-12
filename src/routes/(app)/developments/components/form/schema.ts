@@ -2,7 +2,7 @@ import * as v from 'valibot';
 
 export const myFirstFormSchema = v.pipe(
 	v.object({
-		text_optional: v.optional(v.string()),
+		text_optional: v.optional(v.pipe(v.string(), v.maxLength(15, 'Alan en fazla 15 karakter olmalıdır.'))),
 		text_required: v.pipe(
 			v.string('Alan gereklidir.1'), // undefined ise burası çalışır.
 			v.nonEmpty('Alan gereklidir.2'), // "" ise burası çalışır.

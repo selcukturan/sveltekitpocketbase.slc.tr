@@ -17,8 +17,7 @@
 
 	const proxyValue = stringProxy(frm, field, { empty: 'undefined' });
 
-	let valueStore = $derived($constraints?.required ? proxyValue : value);
-	console.log(frm);
+	const valueStore = $constraints?.required ? proxyValue : value;
 </script>
 
 <label>
@@ -36,4 +35,4 @@
 
 	<br />
 </label>
-{#if $errors}<span class="invalid">{$errors}</span>{/if}
+<!-- {#if $errors}<span class="invalid">{$errors}</span>{/if} -->
