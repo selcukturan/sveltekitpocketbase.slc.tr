@@ -3,7 +3,6 @@ import * as v from 'valibot';
 export const myFirstFormSchema = v.pipe(
 	v.object({
 		text_optional: v.optional(v.string()),
-		text_optional_default: v.optional(v.string(), 'default value'),
 		text_required: v.pipe(
 			v.string('Alan gereklidir.1'), // undefined ise burası çalışır.
 			v.nonEmpty('Alan gereklidir.2'), // "" ise burası çalışır.

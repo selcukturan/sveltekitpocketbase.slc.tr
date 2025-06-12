@@ -37,7 +37,6 @@
 
 <Form {frm}>
 	<TextInput field="text_optional" {frm} />
-	<TextInput field="text_optional_default" {frm} />
 	<TextInput field="text_required" {frm} />
 	<Submit {frm} />
 	<Message {frm} />
