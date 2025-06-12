@@ -26,14 +26,21 @@
 		autoFocusOnError: 'detect',
 		resetForm: false,
 		delayMs: 500,
-		timeoutMs: 2000
+		timeoutMs: 2000,
+		taintedMessage: () => {
+			return new Promise((resolve) => {
+				alert(`confirm - Do you want to leave? - Changes you made may not be saved. resolve:${resolve}`);
+			});
+		}
 	});
 </script>
 
 <Form {frm}>
 	<TextInput field="text_optional" {frm} />
+	<TextInput field="text_optional_default" {frm} />
+	<TextInput field="text_required" {frm} />
 	<Submit {frm} />
 	<Message {frm} />
 </Form>
 
-<Debug {frm} />
+<Debug {frm} label="My First Form Data" />

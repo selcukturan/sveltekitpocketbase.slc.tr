@@ -13,10 +13,15 @@
 
 	let { label = 'Gönder', frm, ...rest }: Props = $props();
 
-	const { submitting, delayed, timeout } = frm;
+	const { submitting, delayed, timeout, tainted, isTainted } = frm;
 </script>
 
-<button type="submit" disabled={$delayed} {...rest}>
+<button
+	type="submit"
+	disabled={$submitting || !isTainted($tainted)}
+	{...rest}
+	class="bg-secondary-200 text-surface-800 disabled:bg-error-500 cursor-pointer"
+>
 	{#if $submitting && !$delayed}
 		<!-- <Icon name={`rotate-cw`} size={`18px`} class="animate-spin" /> -->
 		<span class="animate-spin">♠</span>

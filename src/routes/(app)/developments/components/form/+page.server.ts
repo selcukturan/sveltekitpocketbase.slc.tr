@@ -22,7 +22,7 @@ export const actions = {
 			// Return { form } and things will just work.
 			return fail(400, { myFirstForm });
 		}
-
+		console.log(myFirstForm.data);
 		// TODO: Do something with the validated form.data
 		await locals.auth.pb.collection(Collections.TestForm).update<TestFormResponse>('30u6z6n70xxwinz', myFirstForm.data);
 

@@ -1,4 +1,8 @@
 <script lang="ts" module>
+	/**
+	 * Bu blok içindeki kod, tarayıcı veya sunucu Debug.svelte dosyasını ilk kez yüklediğinde sadece bir kez çalışır.
+	 * Bu blokta tanımlanan şeyler, o bileşenin tüm örnekleri arasında paylaşılır.
+	 */
 	type T = Record<string, unknown>;
 </script>
 
@@ -6,12 +10,13 @@
 	import SuperDebug, { type SuperForm } from 'sveltekit-superforms';
 
 	type Props = {
+		label?: string;
 		frm: SuperForm<T>;
 	};
 
-	let { frm, ...rest }: Props = $props();
+	let { label, frm }: Props = $props();
 
 	const { form } = frm;
 </script>
 
-<SuperDebug data={$form} />
+<SuperDebug data={$form} {label} />

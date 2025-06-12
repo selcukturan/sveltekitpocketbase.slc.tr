@@ -15,7 +15,9 @@
 		<p>Form Page Header</p>
 	</Page.Header>
 	<Page.Main>
-		<MyFirstForm data={data.myFirstForm} />
+		<Page.Main.Panel>
+			<MyFirstForm data={data.myFirstForm} />
+		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>Footer</Page.Footer>
 </Page>
