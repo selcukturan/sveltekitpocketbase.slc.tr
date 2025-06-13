@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
 	import { DataTable } from '$lib/components/base/data-table';
 	import { createTable, type Sources } from '$lib/components/base/data-table/tables.svelte';
 	import { generateProducedData } from '$lib/client/demo/produced-grapes-generate-data';
@@ -68,4 +69,21 @@
 	// $inspect('$inspect-rowIndices', table.rowIndices);
 </script>
 
-<DataTable {sources} />
+<Head>
+	<title>Data Table - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
+
+<Page>
+	<!-- <Page.Header>
+		<p>Header</p>
+	</Page.Header> -->
+	<Page.Main>
+		<Page.Main.Table>
+			<DataTable {sources} />
+		</Page.Main.Table>
+	</Page.Main>
+	<!-- <Page.Footer>
+		<p>Footer</p>
+	</Page.Footer> -->
+</Page>
