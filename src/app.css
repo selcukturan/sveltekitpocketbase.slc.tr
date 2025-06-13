@@ -598,8 +598,35 @@
 	}
 
 	::selection {
-		background: var(--color-primary-200);
+		background-color: color-mix(in srgb, var(--color-primary-200) 50%, transparent);
 	}
+
+	/* States --- */
+
+	*:disabled,
+	.disabled {
+		opacity: 0.5;
+		& > * {
+			pointer-events: none;
+		}
+	}
+
+	/* Outlines and Focus --- */
+	/*
+		REMINDER: Never disabled focus and outlines
+		as this would be harmful to accessibility!
+		Source: http://www.outlinenone.com/
+
+		EXAMPLE: Set a global focus style.
+		Apply this in your app's global stylesheet: */
+	:focus {
+		@apply focus:outline-primary-800;
+	}
+
+	/* Component Focus Utility */
+	/* .focused {
+		@apply ring-[2px] ring-surface-950 dark:ring-surface-50 ring-inset;
+	} */
 
 	/* ############################# BEGIN scrollbar ################################# */
 	/* sm: 640px >  < ∞ */

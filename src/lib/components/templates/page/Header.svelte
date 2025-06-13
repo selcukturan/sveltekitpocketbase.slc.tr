@@ -9,7 +9,7 @@
 	console.log('Header', ctx.pageTitle);
 </script>
 
-<header class={classes} style:border-top="0px" style:border-left="0px">
+<header class="{classes} {`bg-surface-100/80`}" style:border-top="0px" style:border-left="0px">
 	{#if children}
 		{@render children()}
 	{:else}

@@ -9,7 +9,7 @@
 </script>
 
 <div class="{classes} {`wrapper relative mx-auto w-4xl max-w-full p-6`}">
-	<div class="panel bg-surface-200 shadow-surface-400 rounded-xl p-6 shadow-md/30">
+	<div class="panel bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40">
 		{#if children}
 			{@render children()}
 		{:else}
