@@ -3,34 +3,34 @@
 - Geliştirme ortamını ayağa kaldırma
 
 ```bash
-npm run dev
-npm run pb
+pnpm dev
+pnpm pb
 ```
 
 - Geliştirme ortamını build etme ve ön izleme
 
 ```bash
-npm run build
-npm run preview
+pnpm build
+pnpm preview
 ```
 
 - Kök dizinde bulunan `docker-compose-local.yml` dosyasını ayağa kaldırma. (local production test)
 
 ```bash
-npm run slc:local:docker
+pnpm slc:local:docker
 ```
 
 # Pocketbase tip çıkarımı
 
 ```bash
 npm install -D pocketbase-typegen
-npm run pb:typegen
+pnpm pb:typegen
 ```
 
 # Paket güncellemeleri
 
 ```bash
-npm install -g npm-check
+pnpm add -g npm-check
 npm-check -u
 ```
 
