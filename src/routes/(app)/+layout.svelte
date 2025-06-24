@@ -8,26 +8,9 @@
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 
-	import { afterNavigate } from '$app/navigation';
-
 	let { children } = $props();
 
-	const global = initGlobalContext({
-		mobileBreakpoint: 640,
-		isMobileBreakpoint: false,
-		hideSidebar: false,
-		hidePageSidebar: false
-	});
-
-	let w = $state(1000);
-
-	afterNavigate(() => {
-		w = window.innerWidth;
-	});
-
-	$effect(() => {
-		global.isMobileBreakpoint = w < (global.mobileBreakpoint || 550); // medya sorgulari ile yapamadigimiz seyler icin
-	});
+	const global = initGlobalContext();
 
 	let sidebarData: SidebarDataType[] = [
 		{
@@ -63,7 +46,7 @@
 	];
 </script>
 
-<svelte:window bind:innerWidth={w} />
+<svelte:window bind:innerWidth={global.windowWidth} />
 
 <Icons />
 

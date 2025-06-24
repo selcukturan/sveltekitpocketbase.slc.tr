@@ -1,23 +1,33 @@
-import { setContext, getContext } from 'svelte';
-import type { GlobalContext } from './types';
+import { getContext, setContext } from 'svelte';
 
-// Application global reactive context
+class Globals {
+	mobileBreakpoint = $state(640);
+	hideSidebar = $state(false);
+	hidePageSidebar = $state(false);
+	windowWidth = $state(1000);
+	isMobileBreakpoint = $derived(this.windowWidth < this.mobileBreakpoint);
 
-const defaultGlobal: GlobalContext = {
-	mobileBreakpoint: 640,
-	isMobileBreakpoint: false,
-	hideSidebar: false,
-	hidePageSidebar: false
-};
+	/* #test = $state('test');
+	get test() {
+		return this.#test;
+	}
+	set test(value: string) {
+		this.#test = value;
+	} */
+	// ################################## BEGIN Constructor ################################################################
+	/* constructor() {
+		this.sources(sources);
+	} */
+	// ################################## END Constructor #################################################################
+}
 
-const key: symbol = Symbol();
+// ################################## BEGIN Export Context ###############################################################
+const SLC_GLOBAL_CTX = Symbol('SLC_GLOBAL_CTX');
 
-export const initGlobalContext = (initialData: GlobalContext = defaultGlobal) => {
-	const globalContext = $state(initialData);
-	setContext(key, globalContext);
-	return globalContext;
-};
-
-export const getGlobalContext = () => {
-	return getContext<ReturnType<typeof initGlobalContext>>(key);
-};
+export function initGlobalContext() {
+	return setContext(SLC_GLOBAL_CTX, new Globals());
+}
+export function getGlobalContext() {
+	return getContext<ReturnType<typeof initGlobalContext>>(SLC_GLOBAL_CTX);
+}
+// ################################## END Export Context #################################################################

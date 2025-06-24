@@ -38,7 +38,11 @@
 					<a
 						href={`${d.href}`}
 						aria-label={d.title}
-						aria-current={d.href === '/' && page.url.pathname === '/' ? 'page' : d.href !== '/' && page.url.pathname.startsWith(`${d.href}`) ? 'page' : undefined}
+						aria-current={d.href === '/' && page.url.pathname === '/'
+							? 'page'
+							: d.href !== '/' && page.url.pathname.startsWith(`${d.href}`)
+								? 'page'
+								: undefined}
 						class="
 						hover:bg-surface-200
 						active:bg-surface-300

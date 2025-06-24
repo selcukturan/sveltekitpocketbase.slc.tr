@@ -29,9 +29,20 @@ pnpm pb:typegen
 
 # Paket güncellemeleri
 
+## 2A: Güvenli Güncelleme (Tavsiye Edilen Başlangıç)
+
+- Eğer bir paket package.json dosyanızda ^1.5.0 olarak belirtilmişse, bu komut onu 1.6.0 veya 1.7.5 gibi sürümlere günceller, ancak asla 2.0.0 gibi ana sürüm (major version) atlaması yapmaz. Bu, genellikle "kırılma" (breaking change) riski olmadan yapılan en güvenli toplu güncellemedir.
+
 ```bash
-pnpm add -g npm-check
-npm-check -u
+pnpm up
+```
+
+## 2B: En Son Sürüme Zorla Güncelleme (Dikkatli Olun!)
+
+- Tüm paketleri, package.json kurallarını hiçe sayarak mevcut en son sürümlerine (major versiyonlar dahil) güncellemek için:
+
+```bash
+pnpm up -L
 ```
 
 ##############################################################################################################################
