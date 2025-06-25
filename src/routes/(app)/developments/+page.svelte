@@ -18,7 +18,7 @@
 			<div class="flex h-full w-full flex-col overflow-hidden">
 				<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
 					<div class="p-4">
-						<div class="p-4">isMobileSize: {global.isMobileBreakpoint}</div>
+						<div class="p-4">isMobileBreakpoint: {global.isMobileBreakpoint}</div>
 						<!-- <div class="p-4">
 				<button type="button" onclick={() => localStorage.removeItem('slc:splitpane')}>Clear localStorage</button>
 			</div> -->
