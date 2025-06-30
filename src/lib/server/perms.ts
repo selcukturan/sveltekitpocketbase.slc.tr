@@ -9,5 +9,62 @@ export async function checkPermission(auth: Auth, permission: string): Promise<b
 		filter: `user_id = "${auth.user.id}" && permission = "${permission}"`
 	});
 
+	const testUserGroupPermission = {
+		company: {
+			company1: {
+				access: true,
+				storage: {
+					storage1: {
+						access: true
+					},
+					storage2: {
+						access: true
+					}
+				},
+				year: {
+					year1: {
+						access: true
+					},
+					year2: {
+						access: true
+					}
+				}
+			},
+			company2: {
+				access: true,
+				storage: {
+					storage1: {
+						access: true
+					},
+					storage2: {
+						access: true
+					}
+				},
+				year: {
+					year1: {
+						access: true
+					},
+					year2: {
+						access: true
+					}
+				}
+			}
+		},
+		menu: {
+			'/': {
+				permission: ['read', 'write']
+			},
+			'/settings': {
+				permission: ['read']
+			},
+			'/admin': {
+				permission: ['read', 'write', 'delete']
+			},
+			'/admin/users': {
+				permission: ['read', 'write']
+			}
+		}
+	};
+
 	return userPermissions.totalItems > 0;
 }

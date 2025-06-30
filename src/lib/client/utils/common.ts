@@ -93,7 +93,17 @@ export function validTC(tc: string): boolean {
 	let sum_2_4_6_8 = 0;
 	let sum_first_10_char = 0;
 
-	const impossible = ['11111111110', '22222222220', '33333333330', '44444444440', '55555555550', '66666666660', '77777777770', '88888888880', '99999999990'];
+	const impossible = [
+		'11111111110',
+		'22222222220',
+		'33333333330',
+		'44444444440',
+		'55555555550',
+		'66666666660',
+		'77777777770',
+		'88888888880',
+		'99999999990'
+	];
 
 	const digits = tc.split('').map(Number);
 
@@ -113,9 +123,7 @@ export function validTC(tc: string): boolean {
 	// mod_2 11. karaktere esit olmali
 	if (mod_2 !== digits[10]) return false;
 
-	if (impossible.some((item) => tc === item)) {
-		return false;
-	}
+	if (impossible.some((item) => tc === item)) return false;
 
 	return true;
 }

@@ -11,14 +11,15 @@
 		<h6>LOGS PAGE PROPS</h6>
 		<p>######## USER ########</p>
 		<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
-		<p>######## COLLECTION ########</p>
-		<pre>{JSON.stringify(props.data.collection, null, 2)}</pre>
-		<p>######## COLLECTION TRANSFORMED ########</p>
-		<pre>{JSON.stringify(props.data.transformedData, null, 2)}</pre>
+		<p>######## acl_roles_perms_menu ########</p>
+		<pre>{JSON.stringify(props.data.acl_roles_perms_menu, null, 2)}</pre>
 		######## envTest ########
 		<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
 
-		<div data-llm-ignore="" class="rounded-tl-card rounded-tr-card border-muted relative mt-6 border-2 bg-zinc-50 ring-transparent! dark:bg-neutral-900/50">
+		<div
+			data-llm-ignore=""
+			class="rounded-tl-card rounded-tr-card border-muted relative mt-6 border-2 bg-zinc-50 ring-transparent! dark:bg-neutral-900/50"
+		>
 			<label>
 				E-Posta
 				<input

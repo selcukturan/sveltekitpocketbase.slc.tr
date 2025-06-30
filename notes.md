@@ -51,17 +51,19 @@ pnpm up -L
 
 ```sql
 SELECT
-t1.bao00_id AS bam00_bao00_id,
-t5.bao00_name_t AS bam00_bao00_bolge,
-t4.bao00_name_t AS bam00_bao00_il,
-t3.bao00_name_t AS bam00_bao00_ilce,
-t2.bao00_name_t AS bam00_bao00_koy,
-t1.bao00_name_t AS bam00_bao00_mevkii
-FROM bao00 t1
-LEFT JOIN bao00 t2 ON t1.bao00_parent = t2.bao00_id
-LEFT JOIN bao00 t3 ON t2.bao00_parent = t3.bao00_id
-LEFT JOIN bao00 t4 ON t3.bao00_parent = t4.bao00_id
-LEFT JOIN bao00 t5 ON t4.bao00_parent = t5.bao00_id
+  (ROW_NUMBER() OVER()) as id,
+  t5.id AS region_id, t5.caption AS region,
+  t4.id AS province_id, t4.caption AS province,
+  t3.id AS district_id, t3.caption AS district,
+  t2.id AS village_id, t2.caption AS village,
+  t1.id AS location_id, t1.caption AS location
+FROM acl_perms_region t1
+  JOIN acl_perms_region t2 ON t1.parent_id = t2.id AND t2.status="active"
+  JOIN acl_perms_region t3 ON t2.parent_id = t3.id AND t3.status="active"
+  JOIN acl_perms_region t4 ON t3.parent_id = t4.id AND t4.status="active"
+  JOIN acl_perms_region t5 ON t4.parent_id = t5.id AND t5.status="active"
+WHERE
+  t1.status="active"
 ```
 
 ```sveltekit
