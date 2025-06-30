@@ -3,28 +3,28 @@
 - Geliştirme ortamını ayağa kaldırma
 
 ```bash
-pnpm dev
-pnpm pb
+npm run dev
+npm run pb
 ```
 
 - Geliştirme ortamını build etme ve ön izleme
 
 ```bash
-pnpm build
-pnpm preview
+npm run build
+npm run preview
 ```
 
 - Kök dizinde bulunan `docker-compose-local.yml` dosyasını ayağa kaldırma. (local production test)
 
 ```bash
-pnpm slc:local:docker
+npm run slc:local:docker
 ```
 
 # Pocketbase tip çıkarımı
 
 ```bash
 npm install -D pocketbase-typegen
-pnpm pb:typegen
+npm run pb:typegen
 ```
 
 # Pocketbase migrations
@@ -39,20 +39,9 @@ Varsayılan olarak collections anlık görüntüsü genişletme modunda içe akt
 
 # Paket güncellemeleri
 
-## 2A: Güvenli Güncelleme (Tavsiye Edilen Başlangıç)
-
-- Eğer bir paket package.json dosyanızda ^1.5.0 olarak belirtilmişse, bu komut onu 1.6.0 veya 1.7.5 gibi sürümlere günceller, ancak asla 2.0.0 gibi ana sürüm (major version) atlaması yapmaz. Bu, genellikle "kırılma" (breaking change) riski olmadan yapılan en güvenli toplu güncellemedir.
-
 ```bash
-pnpm up
-```
-
-## 2B: En Son Sürüme Zorla Güncelleme (Dikkatli Olun!)
-
-- Tüm paketleri, package.json kurallarını hiçe sayarak mevcut en son sürümlerine (major versiyonlar dahil) güncellemek için:
-
-```bash
-pnpm up -L
+npm install -g npm-check
+npm-check --update
 ```
 
 ##############################################################################################################################
