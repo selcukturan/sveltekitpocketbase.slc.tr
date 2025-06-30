@@ -27,6 +27,16 @@ npm install -D pocketbase-typegen
 pnpm pb:typegen
 ```
 
+# Pocketbase migrations
+
+migrate collections komutu, manuel olarak yazmanıza gerek kalmadan mevcut collections yapılandırmanızın tam bir anlık görüntüsünü oluşturur. migrate create komutuna benzer şekilde, bu pb_migrations dizininde yeni bir geçiş dosyası oluşturacaktır.
+
+```bash
+./pocketbase migrate collections
+```
+
+Varsayılan olarak collections anlık görüntüsü genişletme modunda içe aktarılır, yani anlık görüntüde bulunmayan koleksiyonlar ve alanlar korunur. Anlık görüntünün eksik koleksiyonları ve alanları silmesini istiyorsanız, oluşturulan dosyayı düzenleyebilir ve importCollections öğesinin son bağımsız değişkenini true olarak değiştirebilirsiniz.
+
 # Paket güncellemeleri
 
 ## 2A: Güvenli Güncelleme (Tavsiye Edilen Başlangıç)
