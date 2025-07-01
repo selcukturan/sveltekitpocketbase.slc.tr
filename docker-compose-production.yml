@@ -23,7 +23,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./pocketbase/pb_data:/pb/pb_data
-      # - ./pocketbase/pb_migrations:/pb/pb_migrations
     ports:
       - ${PB_PORT}:${PB_PORT}
     depends_on:
