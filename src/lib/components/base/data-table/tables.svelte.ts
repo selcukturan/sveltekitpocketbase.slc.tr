@@ -625,27 +625,34 @@ class Table<TData extends Row> {
 				const newValue = this.editingCellValue;
 				const oldValue = this.#editingCellOldValue;
 
-				this.removeCellInput();
+				tick().then(() => {
+					this.removeCellInput();
+				});
 
 				if (newValue === oldValue) return;
 
 				this.setCellValue(newValue, oldValue, roi, coi, col.field);
 			};
-			/* const click = (e: MouseEvent) => {
+			const click = (e: MouseEvent) => {
+				e.stopPropagation();
+			};
+			const dblclick = (e: MouseEvent) => {
 				e.stopPropagation();
 			};
 			const mousedown = (e: MouseEvent) => {
 				e.stopPropagation();
-			}; */
+			};
 
 			input.addEventListener('blur', blur);
-			/* input.addEventListener('click', click);
-			input.addEventListener('mousedown', mousedown); */
+			input.addEventListener('click', click);
+			input.addEventListener('dblclick', dblclick);
+			input.addEventListener('mousedown', mousedown);
 			return () => {
 				// söküm buraya gidiyor
 				input.removeEventListener('blur', blur);
-				/* input.removeEventListener('click', click);
-				input.removeEventListener('mousedown', mousedown); */
+				input.removeEventListener('click', click);
+				input.removeEventListener('dblclick', dblclick);
+				input.removeEventListener('mousedown', mousedown);
 			};
 		};
 	};
@@ -767,26 +774,27 @@ class Table<TData extends Row> {
 			};
 
 			const dblclick = (e: MouseEvent) => {
-				if (this.#editingCell) return;
+				console.log('object');
+				e.stopPropagation();
+				e.preventDefault();
+
+				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+				if (rowIndex == null || colIndex == null || originalCell == null) return;
+
+				if (this.#editingCell || !this.visibleColumns[colIndex].data.editable) return;
 
 				const cancelEditable = params.cancelEditable ?? false;
 				const field = params.field;
 				if (cancelEditable || field == null) return;
 
-				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
-				if (rowIndex == null || colIndex == null || originalCell == null) return;
-
 				const key = 'F2'; // F2 tuşu ile düzenleme başlatılacak
-
-				/* e.stopPropagation();
-				e.preventDefault(); */
 
 				this.createCellInput(key, rowIndex, colIndex, field);
 			};
 
 			const click = (e: MouseEvent) => {
-				e.stopPropagation();
-				e.preventDefault();
+				/* e.stopPropagation();
+				e.preventDefault(); */
 			};
 
 			let ticking = false;
