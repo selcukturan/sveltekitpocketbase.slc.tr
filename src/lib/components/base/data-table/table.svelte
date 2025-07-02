@@ -49,6 +49,7 @@
 					{...t.trdProps}
 					class:slc-table-trd-even={t.srcZebra && roi % 2}
 					class:slc-table-trd-selected={checked}
+					class:slc-table-trd-hoverable={t.srcHoverableRows}
 					class:slc-table-trd-subtotal1={row.subtotal === 'subtotal1'}
 					class:slc-table-trd-subtotal2={row.subtotal === 'subtotal2'}
 					class:slc-table-trd-subtotal3={row.subtotal === 'subtotal3'}
@@ -376,7 +377,7 @@
 		background-color: var(--color-surface-100);
 	}
 	/******************************************************/
-	.slc-table-trd:hover {
+	.slc-table-trd-hoverable:hover {
 		/* background-color: color-mix(in srgb, var(--color-surface-200) 70%, var(--color-surface-50) 30%); */
 		background-color: var(--color-surface-200);
 	}

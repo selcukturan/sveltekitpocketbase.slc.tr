@@ -13,7 +13,8 @@
 		rowSelection: 'multiple-all',
 		rowAction: true,
 		subtotal: true,
-		zebra: true,
+		zebra: false,
+		hoverableRows: false,
 		actions: {
 			tableActions: [
 				{ label: 'Ekle', action: 'add' },

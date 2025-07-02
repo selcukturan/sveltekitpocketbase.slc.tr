@@ -34,6 +34,7 @@ class Table<TData extends Row> {
 		rowAction: true,
 		rowActionColumnWidth: 50,
 		zebra: false,
+		hoverableRows: false,
 		theadRowHeight: 40,
 		tbodyRowHeight: 35,
 		tfootRowHeight: 35,
@@ -119,6 +120,7 @@ class Table<TData extends Row> {
 	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
 	readonly srcRowActionColumnWidth = $derived(this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth);
 	readonly srcZebra = $derived(this.#src.zebra || this.#defSrc.zebra);
+	readonly srcHoverableRows = $derived(this.#src.hoverableRows || this.#defSrc.hoverableRows);
 	readonly srcTheadRowHeight = $derived(this.#src.theadRowHeight || this.#defSrc.theadRowHeight);
 	readonly srcTbodyRowHeight = $derived(this.#src.tbodyRowHeight || this.#defSrc.tbodyRowHeight);
 	readonly srcTfootRowHeight = $derived(this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight);
@@ -774,14 +776,15 @@ class Table<TData extends Row> {
 			};
 
 			const dblclick = (e: MouseEvent) => {
-				console.log('object');
 				e.stopPropagation();
 				e.preventDefault();
 
 				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
 				if (rowIndex == null || colIndex == null || originalCell == null) return;
 
-				if (this.#editingCell || !this.visibleColumns[colIndex].data.editable) return;
+				const column = this.visibleColumns[colIndex];
+				if (!column) return;
+				if (this.#editingCell || !column || !column.data.editable) return;
 
 				const cancelEditable = params.cancelEditable ?? false;
 				const field = params.field;
@@ -793,8 +796,8 @@ class Table<TData extends Row> {
 			};
 
 			const click = (e: MouseEvent) => {
-				/* e.stopPropagation();
-				e.preventDefault(); */
+				e.stopPropagation();
+				// e.preventDefault();
 			};
 
 			let ticking = false;
