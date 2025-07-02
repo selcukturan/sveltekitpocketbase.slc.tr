@@ -44,6 +44,7 @@ class Table<TData extends Row> {
 	// ################################## END Default Sources #######################################################################################################################
 
 	// ################################## BEGIN Constructor #########################################################################################################################
+	version = 'v0.0.1-alpha.151';
 	element?: HTMLDivElement = $state();
 	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
@@ -776,14 +777,13 @@ class Table<TData extends Row> {
 			};
 
 			const dblclick = (e: MouseEvent) => {
-				e.stopPropagation();
-				e.preventDefault();
+				// e.stopPropagation();
+				// e.preventDefault();
 
 				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
 				if (rowIndex == null || colIndex == null || originalCell == null) return;
 
 				const column = this.visibleColumns[colIndex];
-				if (!column) return;
 				if (this.#editingCell || !column || !column.data.editable) return;
 
 				const cancelEditable = params.cancelEditable ?? false;
@@ -796,7 +796,7 @@ class Table<TData extends Row> {
 			};
 
 			const click = (e: MouseEvent) => {
-				e.stopPropagation();
+				// e.stopPropagation();
 				// e.preventDefault();
 			};
 
