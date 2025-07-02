@@ -766,9 +766,27 @@ class Table<TData extends Row> {
 				});
 			};
 
-			const click = (e: MouseEvent) => {
+			const dblclick = (e: MouseEvent) => {
+				if (this.#editingCell) return;
+
+				const cancelEditable = params.cancelEditable ?? false;
+				const field = params.field;
+				if (cancelEditable || field == null) return;
+
+				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+				if (rowIndex == null || colIndex == null || originalCell == null) return;
+
+				const key = 'F2'; // F2 tuşu ile düzenleme başlatılacak
+
 				/* e.stopPropagation();
-			e.preventDefault(); */
+				e.preventDefault(); */
+
+				this.createCellInput(key, rowIndex, colIndex, field);
+			};
+
+			const click = (e: MouseEvent) => {
+				e.stopPropagation();
+				e.preventDefault();
 			};
 
 			let ticking = false;
@@ -837,7 +855,7 @@ class Table<TData extends Row> {
 
 				// --- Gezinme Eylemleri ---
 				if (!ticking && isNavigationKey) {
-					e.preventDefault();
+					// e.preventDefault();
 					ticking = true;
 
 					let cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
@@ -851,42 +869,65 @@ class Table<TData extends Row> {
 					let forceUpdate = false;
 
 					if (key === 'ArrowUp') {
+						e.preventDefault();
 						cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
 					} else if (key === 'ArrowDown' || key === 'Enter') {
+						e.preventDefault();
 						cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
-					} else if (key === 'ArrowLeft' || (e.shiftKey && key === 'Tab')) {
+					} else if (key === 'ArrowLeft') {
+						if (!this.#editingCell) {
+							e.preventDefault();
+							cellToFocus.colIndex = cellToFocus.colIndex - 1;
+							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex); // LEFT
+						}
+					} else if (e.shiftKey && key === 'Tab') {
+						e.preventDefault();
 						cellToFocus.colIndex = cellToFocus.colIndex - 1;
-						if (key === 'Tab' && cellToFocus.colIndex < colFirstIndex) {
+						if (cellToFocus.colIndex < colFirstIndex) {
 							cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
 							cellToFocus.colIndex = colLastIndex;
 						} else {
-							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex);
+							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex); // LEFT
 						}
-					} else if (key === 'ArrowRight' || (!e.shiftKey && key === 'Tab')) {
+					} else if (key === 'ArrowRight') {
+						if (!this.#editingCell) {
+							e.preventDefault();
+							cellToFocus.colIndex = cellToFocus.colIndex + 1;
+							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
+						}
+					} else if (!e.shiftKey && key === 'Tab') {
+						e.preventDefault();
 						cellToFocus.colIndex = cellToFocus.colIndex + 1;
-						if (key === 'Tab' && cellToFocus.colIndex > colLastIndex) {
+						if (cellToFocus.colIndex > colLastIndex) {
 							cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
 							cellToFocus.colIndex = colFirstIndex;
 						} else {
-							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex);
+							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
 						}
 					} else if (key === 'Home') {
-						if (e.ctrlKey || e.metaKey) {
-							cellToFocus.rowIndex = rowFirstIndex;
-							cellToFocus.colIndex = colFirstIndex;
-							forceUpdate = true;
-						} else {
-							cellToFocus.colIndex = colFirstIndex;
+						if (!this.#editingCell) {
+							e.preventDefault();
+							if (e.ctrlKey || e.metaKey) {
+								cellToFocus.rowIndex = rowFirstIndex;
+								cellToFocus.colIndex = colFirstIndex;
+								forceUpdate = true;
+							} else {
+								cellToFocus.colIndex = colFirstIndex;
+							}
 						}
 					} else if (key === 'End') {
-						if (e.ctrlKey || e.metaKey) {
-							cellToFocus.rowIndex = rowLastIndex;
-							cellToFocus.colIndex = colLastIndex;
-							forceUpdate = true;
-						} else {
-							cellToFocus.colIndex = colLastIndex;
+						if (!this.#editingCell) {
+							e.preventDefault();
+							if (e.ctrlKey || e.metaKey) {
+								cellToFocus.rowIndex = rowLastIndex;
+								cellToFocus.colIndex = colLastIndex;
+								forceUpdate = true;
+							} else {
+								cellToFocus.colIndex = colLastIndex;
+							}
 						}
 					} else if (key === 'PageUp') {
+						e.preventDefault();
 						const visibleEnd = this.#rowIndices.visibleEnd;
 						const visibleStart = this.#rowIndices.visibleStart;
 						if (visibleEnd == null || visibleStart == null) return;
@@ -895,6 +936,7 @@ class Table<TData extends Row> {
 						cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
 						forceUpdate = true;
 					} else if (key === 'PageDown') {
+						e.preventDefault();
 						const visibleEnd = this.#rowIndices.visibleEnd;
 						const visibleStart = this.#rowIndices.visibleStart;
 						if (visibleEnd == null || visibleStart == null) return;
@@ -927,11 +969,13 @@ class Table<TData extends Row> {
 
 			node.addEventListener('keydown', keydown);
 			node.addEventListener('mousedown', mousedown);
+			node.addEventListener('dblclick', dblclick);
 			node.addEventListener('click', click);
 
 			return () => {
 				node.removeEventListener('keydown', keydown);
 				node.removeEventListener('mousedown', mousedown);
+				node.removeEventListener('dblclick', dblclick);
 				node.removeEventListener('click', click);
 			};
 		};
@@ -1025,7 +1069,7 @@ class Table<TData extends Row> {
 		class: 'slc-table-th',
 		style: `grid-row-start: 1;`
 	};
-	attr_th_resize = {
+	thResizeProps = {
 		class: 'slc-table-th-resize',
 		style: `position: absolute; touch-action: none !important; background-color: red; top: 0px; right: 0px; bottom: 0px; width: 8px; opacity: 0; cursor: col-resize;`
 	};

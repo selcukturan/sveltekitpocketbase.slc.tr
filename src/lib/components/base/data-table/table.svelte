@@ -228,7 +228,7 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 	{#if type === 'header' && col.resizeable}
-		<div {...t.attr_th_resize} {@attach t.colResizePointerAttach((e) => t.colResizeUpdate(e, coi, col.field))}></div>
+		<div {...t.thResizeProps} {@attach t.colResizePointerAttach((e) => t.colResizeUpdate(e, coi, col.field))}></div>
 	{/if}
 {/snippet}
 
