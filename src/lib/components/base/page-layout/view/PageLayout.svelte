@@ -34,8 +34,7 @@
 >
 	{#snippet slotA()}
 		<section
-			class="border-surface-300
-			bg-surface-50
+			class="bg-surface-50
 			text-surface-700
 			h-full
 			w-full

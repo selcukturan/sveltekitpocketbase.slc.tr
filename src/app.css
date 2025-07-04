@@ -582,7 +582,7 @@
 	}
 
 	* {
-		@apply border-surface-300;
+		@apply border-surface-200;
 	}
 	html {
 		-webkit-tap-highlight-color: color-mix(in oklab, var(--color-primary-500) 30%, transparent);
@@ -635,7 +635,7 @@
 		@supports (scrollbar-width: auto) {
 			html {
 				/* scrollbar-color: <thumb> <track>; */
-				scrollbar-color: var(--color-surface-500) transparent;
+				scrollbar-color: var(--color-surface-200) transparent;
 				scrollbar-width: thin;
 				scroll-behavior: smooth;
 			}
@@ -651,7 +651,7 @@
 				background: transparent;
 			}
 			::-webkit-scrollbar-thumb {
-				background-color: var(--color-surface-500);
+				background-color: var(--color-surface-200);
 			}
 			::-webkit-scrollbar {
 				max-width: 8px;
