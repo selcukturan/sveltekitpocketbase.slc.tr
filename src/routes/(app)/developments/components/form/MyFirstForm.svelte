@@ -8,11 +8,9 @@
 	import { myFirstFormSchema } from './schema';
 
 	// inputs
-	import Form from '$lib/components/inputs/Form.svelte';
-	import TextInput from '$lib/components/inputs/TextInput.svelte';
-	import Submit from '$lib/components/inputs/Submit.svelte';
-	import Message from '$lib/components/inputs/Message.svelte';
-	import Debug from '$lib/components/inputs/Debug.svelte';
+	import Form from '$lib/components/base/form';
+	import Message from '$lib/components/base/form/Message.svelte';
+	import Debug from '$lib/components/base/form/Debug.svelte';
 
 	// props
 	let { data }: { data: SuperValidated<Infer<typeof myFirstFormSchema>> } = $props();
@@ -36,9 +34,11 @@
 </script>
 
 <Form {frm}>
-	<TextInput field="text_optional" {frm} />
-	<TextInput field="text_required" {frm} />
-	<Submit {frm} />
+	<Form.iText field="text_optional" {frm} />
+	<Form.iText field="text_required" {frm} />
+	<Form.iDate field="date_optional" {frm} />
+	<Form.iDatetime field="datetime_optional" {frm} />
+	<Form.iSubmit {frm} />
 	<Message {frm} />
 </Form>
 

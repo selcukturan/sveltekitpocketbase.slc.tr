@@ -4,7 +4,8 @@
 
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { formFieldProxy, stringProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
+	import ProxyDatetime from './ProxyDatetime.svelte';
 
 	type Props = HTMLInputAttributes & {
 		frm: SuperForm<T>;
@@ -14,25 +15,21 @@
 	let { frm, field, ...rest }: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(frm, field);
-
-	const proxyValue = stringProxy(frm, field, { empty: 'undefined' });
-
-	const valueStore = $constraints?.required ? proxyValue : value;
 </script>
 
 <label>
 	{field}
 	<br />
-	<input
+	<ProxyDatetime
 		name={field}
-		type="text"
 		aria-invalid={$errors ? 'true' : undefined}
-		bind:value={$valueStore}
+		bind:value={$value}
 		{...$constraints}
 		{...rest}
+		min={$constraints?.min?.toString().slice(0, 16)}
+		max={$constraints?.max?.toString().slice(0, 16)}
 		class="bg-primary-200 text-surface-800"
 	/>
-
 	<br />
 </label>
 <!-- {#if $errors}<span class="invalid">{$errors}</span>{/if} -->

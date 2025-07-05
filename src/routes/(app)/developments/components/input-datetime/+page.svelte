@@ -1,5 +1,5 @@
 <script lang="ts">
-	import InputDateTime from '$lib/components/inputs/InputDateTime.svelte';
+	import InputDateTime from '$lib/components/base/form/InputDateTime.svelte';
 	let value = $state(new Date());
 </script>
 
