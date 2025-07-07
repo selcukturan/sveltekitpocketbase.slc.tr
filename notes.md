@@ -17,7 +17,7 @@ npm run preview
 - Kök dizinde bulunan `docker-compose-local.yml` dosyasını ayağa kaldırma. (local production test)
 
 ```bash
-npm run slc:local:docker
+npm run slc:production:docker
 ```
 
 # Pocketbase tip çıkarımı

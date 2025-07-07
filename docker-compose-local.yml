@@ -19,14 +19,14 @@ services:
   # POCKETBASE SQLITE DB
   s_pocketbase:
     build:
-      context: ./.slc-local/pocketbase
+      context: ./.slc-production/pocketbase
       dockerfile: Dockerfile
     container_name: c_pocketbase_slcapplocal
     restart: unless-stopped
     volumes:
-      - ./.slc-local/pocketbase/pb_data:/pb/pb_data
-      - ./.slc-local/pocketbase/pb_hooks:/pb/pb_hooks
-      - ./.slc-local/pocketbase/pb_migrations:/pb/pb_migrations
+      - ./.slc-production/pocketbase/pb_data:/pb/pb_data
+      - ./.slc-production/pocketbase/pb_hooks:/pb/pb_hooks
+      - ./.slc-production/pocketbase/pb_migrations:/pb/pb_migrations
     ports:
       - ${PB_PORT}:${PB_PORT}
     depends_on:
