@@ -27,6 +27,7 @@ services:
       - ./.slc-production/pocketbase/pb_data:/pb/pb_data
       - ./.slc-production/pocketbase/pb_hooks:/pb/pb_hooks
       - ./.slc-production/pocketbase/pb_migrations:/pb/pb_migrations
+      - ./.slc-production/pocketbase/pb_public:/pb/pb_public
     ports:
       - ${PB_PORT}:${PB_PORT}
     depends_on:
