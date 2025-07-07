@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLC Web Applications</title>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Welcome to SLC Web Application</h1>
+        <p>Copyright © SLC Web Development 2010 - {{ new Date().getFullYear() }}</p>
+    </div>
+    <script>
+        // This script can be used to dynamically update the year in the copyright notice
+        document.querySelector('p').textContent = `Copyright © SLC Web Development 2010 - ${new Date().getFullYear()}`;
+    </script>
+</body>
+
+</html>
