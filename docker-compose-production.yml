@@ -3,7 +3,7 @@ services:
   s_app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.app
     container_name: c_node_slcapp
     restart: unless-stopped
     environment:
@@ -17,8 +17,8 @@ services:
   # POCKETBASE SQLITE DB
   s_pocketbase:
     build:
-      context: ./.slc-production/pocketbase
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.pb
     container_name: c_pocketbase_slcapp
     restart: unless-stopped
     volumes:

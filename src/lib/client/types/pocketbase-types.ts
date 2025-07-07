@@ -237,7 +237,7 @@ export type AclRolesRecord = {
 	id: string
 	status: AclRolesStatusOptions
 	title: string
-	type?: AclRolesTypeOptions
+	type: AclRolesTypeOptions
 	updated?: IsoDateString
 }
 
@@ -330,9 +330,12 @@ export type AppVineyardsRecord = {
 
 export type TestFormRecord = {
 	created?: IsoDateString
+	date_optional?: IsoDateString
+	date_required: IsoDateString
 	datetime_optional?: IsoDateString
 	datetime_required: IsoDateString
 	id: string
+	number_optional?: number
 	text_optional?: string
 	text_required: string
 	updated?: IsoDateString

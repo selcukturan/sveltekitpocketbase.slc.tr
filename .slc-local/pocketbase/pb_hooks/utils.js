@@ -1,5 +1,5 @@
 module.exports = {
     hello: (name) => {
-        console.log("Selam " + name);
+        console.log("Hello 2222 " + name);
     }
 };

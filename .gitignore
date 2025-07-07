@@ -24,7 +24,7 @@ vite.config.ts.timestamp-*
 
 # SLC ignore
 /.slc-local/pocketbase/pb_data
-/.slc-local/pocketbase/pb_migrations
+# /.slc-local/pocketbase/pb_migrations
 /.slc-local/pocketbase/pb_public
 .vscode
 package-lock.json

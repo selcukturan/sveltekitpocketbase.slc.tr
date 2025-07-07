@@ -2,7 +2,7 @@
 
 onBootstrap((e) => {
     const utils = require(`${__hooks}/utils.js`);
-    utils.hello("world - local production");
-    console.log("App initialized! - local production");
+    utils.hello("world - production 2222");
+    console.log("App initialized! - production 2222");
     e.next();
 });
