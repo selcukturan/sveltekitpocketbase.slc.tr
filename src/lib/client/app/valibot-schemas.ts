@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 
 // String'i array'e dönüştürme ve array'i valide etme şeması
-const CommaSeparatedStringToArraySchema = v.pipe(
+const commaSeparatedStringToArraySchema = v.pipe(
 	// 1. Adım: String giriş validasyonu
 	v.string(),
 	v.minLength(1, 'Lütfen en az bir karakter girin.'),
@@ -21,7 +21,7 @@ const CommaSeparatedStringToArraySchema = v.pipe(
 );
 
 // Daha esnek bir transform (boş stringleri filtreleyebilir)
-const FlexibleCommaSeparatedStringToArraySchema = v.pipe(
+const flexibleCommaSeparatedStringToArraySchema = v.pipe(
 	// 1. Adım: String giriş validasyonu
 	v.string(),
 	v.minLength(1, 'Lütfen en az bir karakter girin.'),
@@ -48,12 +48,9 @@ const FlexibleCommaSeparatedStringToArraySchema = v.pipe(
 	)
 );
 
-// https://valibot.dev/api/isoTimestamp/
-const IsoTimestampSchema = v.pipe(v.string(), v.isoTimestamp('The timestamp is badly formatted.'));
-
-export const ValidIsoTimestampSchema = v.pipe(
-	v.string('Giriş bir string olmalıdır.'), // 1. String mi?
-	v.isoTimestamp('Timestamp formatı hatalı. (Örn: YYYY-MM-DDTHH:mm:ss.sssZ)'), // 2. ISO formatı doğru mu?
+const isoTimestampSchema = v.pipe(
+	v.string('Giriş bir string olmalı.'), // 1. String mi?
+	v.isoTimestamp('Timestamp formatı hatalı (Örn: YYYY-MM-DD HH:mm:ss.sssZ).'), // 2. ISO formatı doğru mu?
 	v.custom(
 		(input) => {
 			if (typeof input !== 'string') {
@@ -70,7 +67,7 @@ export const ValidIsoTimestampSchema = v.pipe(
 			}
 
 			// ISO string'den yıl, ay, gün değerlerini alalım
-			// Format: YYYY-MM-DDTHH:mm:ss.sssZ
+			// Format: YYYY-MM-DD HH:mm:ss.sssZ
 			const yearFromInput = parseInt(input.substring(0, 4), 10);
 			const monthFromInput = parseInt(input.substring(5, 7), 10); // 1-12
 			const dayFromInput = parseInt(input.substring(8, 10), 10);
@@ -79,12 +76,26 @@ export const ValidIsoTimestampSchema = v.pipe(
 			// Date.getUTCMonth() 0-indexed olduğu için +1 ekliyoruz.
 			return dateObj.getUTCFullYear() === yearFromInput && dateObj.getUTCMonth() + 1 === monthFromInput && dateObj.getUTCDate() === dayFromInput;
 		},
-		'Tarih geçerli bir takvim tarihi değil (örn: 31 Haziran).' // Hata mesajı
+		'Tarih geçerli bir takvim tarihi değil (Örn: 31 Haziran).' // Hata mesajı
 	)
 );
 
+export const validIsoTimestampSchema = v.union([isoTimestampSchema, v.literal('')], (issue) => {
+	// issue.issues dizisi, union içindeki her bir şemanın
+	// hata detayını içerir.
+	// [ {validation: 'pipe', ...}, {validation: 'literal', ...} ] gibi.
+
+	// Bizim için önemli olan `validIsoTimestampSchema`'dan (yani pipe'tan)
+	// gelen hatadır. Onu buluyoruz.
+	const timestampIssue = issue.issues?.find((subIssue: any) => subIssue.validation !== 'literal');
+
+	// Eğer timestamp hatasını bulduysak onun mesajını,
+	// bulamadıysak genel bir mesaj döndürüyoruz.
+	return timestampIssue?.message || 'Geçersiz bir değer girildi.';
+});
+
 // İsteğe bağlı: Doğrulanmış string'i Date nesnesine dönüştürmek isterseniz:
-const ValidIsoTimestampToDateObjectSchema = v.pipe(
-	ValidIsoTimestampSchema, // Önceki tüm validasyonları uygula
+const validIsoTimestampToDateObjectSchema = v.pipe(
+	validIsoTimestampSchema, // Önceki tüm validasyonları uygula
 	v.transform((input) => new Date(input)) // Sonra Date nesnesine çevir
 );

@@ -20,7 +20,7 @@
 		dataType: 'json',
 		validators: valibot(myFirstFormSchema),
 		validationMethod: 'auto',
-		customValidity: false,
+		customValidity: true,
 		autoFocusOnError: 'detect',
 		resetForm: false,
 		delayMs: 500,

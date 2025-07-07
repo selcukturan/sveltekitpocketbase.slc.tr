@@ -5,6 +5,7 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { formFieldProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
+	import ProxyDate from './ProxyDate.svelte';
 
 	type Props = HTMLInputAttributes & {
 		frm: SuperForm<T>;
@@ -19,9 +20,9 @@
 <label>
 	{field}
 	<br />
-	<input
+
+	<ProxyDate
 		name={field}
-		type="date"
 		aria-invalid={$errors ? 'true' : undefined}
 		bind:value={$value}
 		{...$constraints}
