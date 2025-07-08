@@ -1,13 +1,12 @@
-import Form from './Form.svelte';
-/* import iCheckbox from './iCheckbox.svelte';
+/*
+import iCheckbox from './iCheckbox.svelte';
 import iCombobox from './iCombobox.svelte';
-import iDate from './iDate.svelte';
-import iDatetime from './iDatetime.svelte';
-import iNumberbox from './iNumberbox.svelte';
 import iRadio from './iRadio.svelte';
 import iSelect from './iSelect.svelte';
 import iSlider from './iSlider.svelte';
-import iSwitch from './iSwitch.svelte'; */
+import iSwitch from './iSwitch.svelte'; 
+*/
+import Form from './Form.svelte';
 import iText from './iText.svelte';
 import iNumberInteger from './iNumberInteger.svelte';
 import iNumberDecimal from './iNumberDecimal.svelte';
@@ -21,8 +20,8 @@ export default Object.assign(Form, {
 	iText,
 	iNumberInteger,
 	iNumberDecimal,
-	iDateTime,
 	iDate,
+	iDateTime,
 	iSubmit,
 	Debug,
 	Message
