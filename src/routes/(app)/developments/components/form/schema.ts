@@ -1,17 +1,25 @@
 import * as v from 'valibot';
-import { validIsoTimestampSchema } from '$lib/client/app/valibot-schemas';
+import {
+	validText,
+	validDatetime,
+	validInteger,
+	validIntegerNonZero,
+	validTwoDecimal,
+	validTwoDecimalNonZero
+} from '$lib/client/app/valibot-schemas';
 
 export const myFirstFormSchema = v.pipe(
 	v.object({
-		text_optional: v.optional(v.pipe(v.string(), v.maxLength(15, 'Alan en fazla 15 karakter olmalıdır.'))),
-		text_required: v.pipe(
-			v.string('Alan gereklidir.'), // undefined ise burası çalışır.
-			v.nonEmpty('Alan boş olamaz.'), // "" ise burası çalışır.
-			v.minLength(3, 'Alan en az 3 karakter olmalıdır.'),
-			v.maxLength(15, 'Alan en fazla 15 karakter olmalıdır.')
-		),
-		date_optional: v.optional(validIsoTimestampSchema),
-		datetime_optional: v.optional(validIsoTimestampSchema)
+		text_optional: v.optional(validText),
+		text_required: validText,
+		date_optional: v.optional(validDatetime),
+		date_required: validDatetime,
+		datetime_optional: v.optional(validDatetime),
+		datetime_required: validDatetime,
+		integer_number_optional: v.optional(validInteger),
+		integer_number_required: validIntegerNonZero,
+		decimal_number_optional: v.optional(validTwoDecimal),
+		decimal_number_required: validTwoDecimalNonZero
 	})
 );
 

@@ -9,8 +9,6 @@
 
 	// inputs
 	import Form from '$lib/components/base/form';
-	import Message from '$lib/components/base/form/Message.svelte';
-	import Debug from '$lib/components/base/form/Debug.svelte';
 
 	// props
 	let { data }: { data: SuperValidated<Infer<typeof myFirstFormSchema>> } = $props();
@@ -19,11 +17,11 @@
 	const frm = superForm(data, {
 		dataType: 'json',
 		validators: valibot(myFirstFormSchema),
-		validationMethod: 'auto',
+		validationMethod: 'onblur',
 		customValidity: true,
 		autoFocusOnError: 'detect',
 		resetForm: false,
-		delayMs: 500,
+		delayMs: 0,
 		timeoutMs: 2000,
 		taintedMessage: () => {
 			return new Promise((resolve) => {
@@ -34,12 +32,18 @@
 </script>
 
 <Form {frm}>
-	<Form.iText field="text_optional" {frm} />
-	<Form.iText field="text_required" {frm} />
-	<Form.iDate field="date_optional" {frm} />
-	<Form.iDatetime field="datetime_optional" {frm} />
+	<Form.iText {frm} field="text_optional" />
+	<Form.iText {frm} field="text_required" />
+	<Form.iDate {frm} field="date_optional" />
+	<Form.iDate {frm} field="date_required" />
+	<Form.iDateTime {frm} field="datetime_optional" />
+	<Form.iDateTime {frm} field="datetime_required" />
+	<Form.iNumberInteger {frm} field="integer_number_optional" />
+	<Form.iNumberInteger {frm} field="integer_number_required" />
+	<Form.iNumberDecimal {frm} field="decimal_number_optional" />
+	<Form.iNumberDecimal {frm} field="decimal_number_required" />
 	<Form.iSubmit {frm} />
-	<Message {frm} />
 </Form>
 
-<Debug {frm} label="My First Form Data" />
+<Form.Message {frm} />
+<Form.Debug {frm} label="My First Form Data" />

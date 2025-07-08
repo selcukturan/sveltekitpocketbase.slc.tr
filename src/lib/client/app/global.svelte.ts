@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-
+// Client'da kullanılacak global reaktif değişkenlerdir.
 class Globals {
 	mobileBreakpoint = $state(640);
 	hideSidebar = $state(false);
@@ -7,17 +7,21 @@ class Globals {
 	windowWidth = $state(1000);
 	isMobileBreakpoint = $derived(this.windowWidth < this.mobileBreakpoint);
 
-	/* #test = $state('test');
+	/* 
+	#test = $state('test-1');
 	get test() {
 		return this.#test;
 	}
 	set test(value: string) {
 		this.#test = value;
-	} */
+	}
+	*/
 	// ################################## BEGIN Constructor ################################################################
-	/* constructor() {
-		this.sources(sources);
-	} */
+	/*
+	constructor() {
+		this.#test = "test-2";
+	}
+	*/
 	// ################################## END Constructor #################################################################
 }
 

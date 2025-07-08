@@ -2,11 +2,11 @@
 	// ######################## IMPORTS #################################################################################################
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<HTMLInputAttributes, 'value'> & { value: string };
+	type Props = Omit<HTMLInputAttributes, 'value'> & { value: number };
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(''), class: classes, ...attributes }: Props = $props();
+	let { value = $bindable(0), class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
-	let inputValue = $state(value ? value : ''); // initial value
+	let inputValue = $state(value ? value : 0); // initial value
 	// ######################## PROXY ###################################################################################################
 	const proxy = {
 		get value() {
@@ -14,9 +14,24 @@
 		},
 		set value(newValue) {
 			inputValue = newValue;
-			value = newValue ? newValue : '';
+			value = newValue ? newValue : 0;
 		}
 	};
 </script>
 
-<input type="text" bind:value={proxy.value} class={classes} {...attributes} />
+<input type="number" bind:value={proxy.value} class={classes} {...attributes} />
+
+<style>
+	/* Webkit tabanlı tarayıcılar için (Chrome, Safari, Edge, Opera) */
+	input[type='number']::-webkit-outer-spin-button,
+	input[type='number']::-webkit-inner-spin-button {
+		-webkit-appearance: none; /* Okları gizle */
+	}
+
+	/* Firefox için */
+	input[type='number'] {
+		-moz-appearance: textfield; /* Firefox'ta okları gizle */
+		appearance: textfield; /* Standart özellik */
+		text-align: right;
+	}
+</style>
