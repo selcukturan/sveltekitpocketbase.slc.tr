@@ -16,13 +16,4 @@ import iSubmit from './iSubmit.svelte';
 import Debug from './Debug.svelte';
 import Message from './Message.svelte';
 
-export default Object.assign(Form, {
-	iText,
-	iNumberInteger,
-	iNumberDecimal,
-	iDate,
-	iDateTime,
-	iSubmit,
-	Debug,
-	Message
-});
+export default Object.assign(Form, { iText, iNumberInteger, iNumberDecimal, iDate, iDateTime, iSubmit, Debug, Message });
