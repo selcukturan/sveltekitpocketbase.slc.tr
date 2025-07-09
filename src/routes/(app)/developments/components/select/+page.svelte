@@ -1,28 +1,42 @@
 <script lang="ts">
-	/* import { Select } from '$lib/components/ui/inputs'; */
+	import { Head, Page } from '$lib/components/templates';
+	import { Select } from '$lib/components/bits/select';
+
+	const items = [
+		{ value: 'apple', label: 'Apple' },
+		{ value: 'banana', label: 'Banana' },
+		{ value: 'cherry', label: 'Cherry' },
+		{ value: 'date', label: 'Date' },
+		{ value: 'elderberry', label: 'Elderberry' },
+		{ value: 'fig', label: 'Fig' },
+		{ value: 'grape', label: 'Grape' },
+		{ value: 'honeydew', label: 'Honeydew' },
+		{ value: 'kiwi', label: 'Kiwi' },
+		{ value: 'lemon', label: 'Lemon' },
+		{ value: 'mango', label: 'Mango' },
+		{ value: 'nectarine', label: 'Nectarine' },
+		{ value: 'orange', label: 'Orange' },
+		{ value: 'papaya', label: 'Papaya' },
+		{ value: 'quince', label: 'Quince' },
+		{ value: 'raspberry', label: 'Raspberry' },
+		{ value: 'strawberry', label: 'Strawberry' },
+		{ value: 'tangerine', label: 'Tangerine' }
+	];
+
+	let fruit = $state<string>('');
 </script>
 
-<div class="flex h-full w-full flex-col overflow-hidden">
-	<div class="bg-success-100 p-1">
-		<h6>Toggler</h6>
-	</div>
-	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1 pt-52">
-		<div class="flex flex-row gap-1">
-			<!-- <Select
-				data={[
-					{ label: '20', value: '20' },
-					{ label: '21', value: '21' }
-				]}
-			/> -->
-			<!-- <Select
-				data={[
-					{ label: '24', value: '24' },
-					{ label: '25', value: '25' }
-				]}
-			/> -->
-		</div>
-	</div>
-	<div class="bg-warning-100 p-1">
-		<h6>footer</h6>
-	</div>
-</div>
+<Head>
+	<title>Select Component Root - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
+
+<Page>
+	<Page.Header>Components Header</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<Select {items} type="single" bind:value={fruit} />
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>Components Footer</Page.Footer>
+</Page>
