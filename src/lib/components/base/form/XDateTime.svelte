@@ -5,7 +5,7 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { formFieldProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
-	import ProxyDateTime from './ProxyDateTime.svelte';
+	import ProxyDateTime from './XProxyDateTime.svelte';
 
 	type Props = HTMLInputAttributes & {
 		frm: SuperForm<T>;
