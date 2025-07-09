@@ -3,8 +3,7 @@
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
-	import { Tooltip } from '$lib/components/bits/tooltip';
-	/* import { Tooltip as TooltipZag } from '$lib/components/zagjs/tooltip'; */
+	import tooltip from '$lib/client/actions/tooltip';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
@@ -34,18 +33,16 @@
 			sm:overflow-y-auto"
 	>
 		{#each sidebarData as d, i}
-			<Tooltip contentProps={{ side: global.isMobileBreakpoint ? 'bottom' : 'right' }}>
-				<!-- <TooltipZag positioning={{ placement: global.isMobileBreakpoint ? 'bottom' : 'right' }} openDelay={0} closeDelay={0}> -->
-				{#snippet trigger()}
-					<a
-						href={`${d.href}`}
-						aria-label={d.title}
-						aria-current={d.href === '/' && page.url.pathname === '/'
-							? 'page'
-							: d.href !== '/' && page.url.pathname.startsWith(`${d.href}`)
-								? 'page'
-								: undefined}
-						class="
+			<a
+				href={`${d.href}`}
+				aria-label={d.title}
+				use:tooltip={{ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' }}
+				aria-current={d.href === '/' && page.url.pathname === '/'
+					? 'page'
+					: d.href !== '/' && page.url.pathname.startsWith(`${d.href}`)
+						? 'page'
+						: undefined}
+				class="
 						hover:bg-surface-200
 						active:bg-surface-300
 						aria-[current]:border-primary-900
@@ -73,17 +70,11 @@
 						transition-colors
 						duration-150
 						select-none"
-					>
-						<span>
-							<Icon name={`${d.icon}`} size={global.isMobileBreakpoint ? `18px` : `22px`} />
-						</span>
-					</a>
-				{/snippet}
-				{d.title}
-				<!-- {#snippet content()}
-					<p>{d.title}</p>
-				{/snippet} -->
-			</Tooltip>
+			>
+				<span>
+					<Icon name={`${d.icon}`} size={global.isMobileBreakpoint ? `18px` : `22px`} />
+				</span>
+			</a>
 		{/each}
 	</nav>
 	<footer class="flex items-center justify-center px-2 sm:py-2">

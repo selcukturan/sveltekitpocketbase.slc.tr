@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Head, Page } from '$lib/components/templates';
-	import { Select } from '$lib/components/bits/select';
+	import { Select } from '$lib/components/zagjs/select';
 
 	const items = [
 		{ value: 'apple', label: 'Apple' },
@@ -35,7 +35,7 @@
 	<Page.Header>Components Header</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<Select {items} type="single" bind:value={fruit} />
+			<Select />
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>Components Footer</Page.Footer>

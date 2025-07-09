@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as toast from '@zag-js/toast';
-	import type { ToastProps } from './types.js';
+	import type { ToastProps } from './types';
 	import { normalizeProps, useMachine } from '@zag-js/svelte';
 	import { Icon } from '$lib/components/icons';
 

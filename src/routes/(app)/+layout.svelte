@@ -4,7 +4,6 @@
 	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
 	import { AppLayout } from '$lib/components/base/app-layout/view';
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
-	import { Tooltip } from 'bits-ui';
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 
@@ -54,8 +53,6 @@
 
 <Toaster toaster={appToaster} />
 
-<Tooltip.Provider delayDuration={0} disableHoverableContent={true}>
-	<AppLayout {sidebarData}>
-		{@render children?.()}
-	</AppLayout>
-</Tooltip.Provider>
+<AppLayout {sidebarData}>
+	{@render children?.()}
+</AppLayout>

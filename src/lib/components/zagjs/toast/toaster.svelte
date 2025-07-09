@@ -2,7 +2,7 @@
 	import { normalizeProps, useMachine } from '@zag-js/svelte';
 	import * as toast from '@zag-js/toast';
 	import Toast from './toast.svelte';
-	import type { ToasterProps } from './types.js';
+	import type { ToasterProps } from './types';
 
 	const { toaster }: ToasterProps = $props();
 

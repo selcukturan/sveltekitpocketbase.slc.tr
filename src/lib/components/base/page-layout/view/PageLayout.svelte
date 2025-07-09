@@ -48,7 +48,7 @@
 				type="button"
 				onclick={handleClick}
 				style:display={global.hideSidebar ? 'none' : 'block'}
-				class="bg-surface-50 absolute z-[52] inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full border text-center align-middle leading-none select-none"
+				class="bg-surface-50 absolute z-52 inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full border text-center align-middle leading-none select-none"
 				class:mobile-position={global.isMobileBreakpoint}
 				class:desktop-position={!global.isMobileBreakpoint}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
