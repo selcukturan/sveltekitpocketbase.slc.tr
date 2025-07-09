@@ -11,7 +11,7 @@ import iText from './iText.svelte';
 import iNumberInteger from './iNumberInteger.svelte';
 import iNumberDecimal from './iNumberDecimal.svelte';
 import iDate from './iDate.svelte';
-import iDateTime from './XDateTime.svelte';
+import iDateTime from './iDateTime.svelte';
 import iSubmit from './iSubmit.svelte';
 import Debug from './Debug.svelte';
 import Message from './Message.svelte';
