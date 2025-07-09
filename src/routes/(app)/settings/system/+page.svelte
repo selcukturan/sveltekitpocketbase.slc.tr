@@ -8,7 +8,7 @@
 </Head>
 
 <Page>
-	<Page.Header>System Header</Page.Header>
+	<Page.Header>SystemX Header</Page.Header>
 	<Page.Main>System Root</Page.Main>
 	<Page.Footer>System Footer</Page.Footer>
 </Page>

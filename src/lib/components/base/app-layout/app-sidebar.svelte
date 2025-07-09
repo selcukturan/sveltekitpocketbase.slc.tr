@@ -4,6 +4,7 @@
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
 	import { Tooltip } from '$lib/components/bits/tooltip';
+	/* import { Tooltip as TooltipZag } from '$lib/components/zagjs/tooltip'; */
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
@@ -34,6 +35,7 @@
 	>
 		{#each sidebarData as d, i}
 			<Tooltip contentProps={{ side: global.isMobileBreakpoint ? 'bottom' : 'right' }}>
+				<!-- <TooltipZag positioning={{ placement: global.isMobileBreakpoint ? 'bottom' : 'right' }} openDelay={0} closeDelay={0}> -->
 				{#snippet trigger()}
 					<a
 						href={`${d.href}`}
@@ -78,6 +80,9 @@
 					</a>
 				{/snippet}
 				{d.title}
+				<!-- {#snippet content()}
+					<p>{d.title}</p>
+				{/snippet} -->
 			</Tooltip>
 		{/each}
 	</nav>
