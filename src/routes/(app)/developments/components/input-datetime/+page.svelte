@@ -1,5 +1,4 @@
 <script lang="ts">
-	import InputDateTime from '$lib/components/base/form/InputDateTime.svelte';
 	let value = $state(new Date());
 </script>
 
@@ -8,14 +7,6 @@
 		<h6>Tests Root Header</h6>
 	</div>
 	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
-		<InputDateTime
-			bind:value
-			onchange={() => {
-				console.log('onchange');
-			}}
-			class="border-1 border-amber-600"
-		/>
-
 		<button
 			onclick={() => {
 				value = new Date();
