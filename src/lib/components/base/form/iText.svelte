@@ -25,7 +25,7 @@
 	// const valueStore = $constraints?.required ? proxyValue : value;
 </script>
 
-<Field {field}>
+<Field {field} required={$constraints?.required}>
 	{#snippet input(inputClass)}
 		<ProxyText
 			name={field}

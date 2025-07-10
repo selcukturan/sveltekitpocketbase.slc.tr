@@ -18,7 +18,7 @@
 	const { value, errors, constraints } = formFieldProxy(frm, field);
 </script>
 
-<Field {field}>
+<Field {field} required={$constraints?.required}>
 	{#snippet input(inputClass)}
 		<ProxyDateTime
 			name={field}

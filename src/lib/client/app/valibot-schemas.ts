@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 // ######################################## BEGIN DATE VALIDATION SCHEMAS ########################################
 const MIN_DATE = new Date('1900-01-01T00:00:00.000Z');
-const MAX_DATE = new Date('2100-12-31T23:59:59.999Z'); // Günün sonunu da dahil etmek için
+const MAX_DATE = new Date('2200-12-31T23:59:59.999Z'); // Günün sonunu da dahil etmek için
 
 const isoTimestampSchema = v.pipe(
 	v.string('Girdi string olmalı.'), // String mi?
