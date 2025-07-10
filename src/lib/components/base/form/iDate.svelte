@@ -6,6 +6,7 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { formFieldProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
 	import ProxyDate from './ProxyDate.svelte';
+	import Field from './Field.svelte';
 
 	type Props = HTMLInputAttributes & {
 		frm: SuperForm<T>;
@@ -17,21 +18,18 @@
 	const { value, errors, constraints } = formFieldProxy(frm, field);
 </script>
 
-<label>
-	{field}
-	<br />
-
-	<ProxyDate
-		name={field}
-		aria-invalid={$errors ? 'true' : undefined}
-		bind:value={$value}
-		{...$constraints}
-		{...rest}
-		min={$constraints?.min?.toString().slice(0, 10)}
-		max={$constraints?.max?.toString().slice(0, 10)}
-		class="bg-primary-200 text-surface-800"
-	/>
-
-	<br />
-</label>
-<!-- {#if $errors}<span class="invalid">{$errors}</span>{/if} -->
+<Field {field}>
+	{#snippet input(inputClass)}
+		<ProxyDate
+			name={field}
+			id={field}
+			aria-invalid={$errors ? 'true' : undefined}
+			bind:value={$value}
+			{...$constraints}
+			{...rest}
+			min={$constraints?.min?.toString().slice(0, 10)}
+			max={$constraints?.max?.toString().slice(0, 10)}
+			class={inputClass}
+		/>
+	{/snippet}
+</Field>

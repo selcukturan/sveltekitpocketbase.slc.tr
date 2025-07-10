@@ -6,6 +6,7 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { formFieldProxy, type SuperForm, type FormPathLeaves } from 'sveltekit-superforms';
 	import ProxyNumberDecimal from './ProxyNumberDecimal.svelte';
+	import Field from './Field.svelte';
 
 	type Props = HTMLInputAttributes & {
 		frm: SuperForm<T>;
@@ -17,18 +18,16 @@
 	const { value, errors, constraints } = formFieldProxy(frm, field);
 </script>
 
-<label>
-	{field}
-	<br />
-	<ProxyNumberDecimal
-		name={field}
-		aria-invalid={$errors ? 'true' : undefined}
-		bind:value={$value}
-		{...$constraints}
-		{...rest}
-		class="bg-primary-200 text-surface-800"
-	/>
-
-	<br />
-</label>
-<!-- {#if $errors}<span class="invalid">{$errors}</span>{/if} -->
+<Field {field}>
+	{#snippet input(inputClass)}
+		<ProxyNumberDecimal
+			name={field}
+			id={field}
+			aria-invalid={$errors ? 'true' : undefined}
+			bind:value={$value}
+			{...$constraints}
+			{...rest}
+			class={inputClass}
+		/>
+	{/snippet}
+</Field>

@@ -29,7 +29,7 @@
 <div {...api.getRootProps()}>
 	<div {...api.getControlProps()}>
 		<label {...api.getLabelProps()}>Label</label>
-		<button {...api.getTriggerProps()}>
+		<button class="form-select" {...api.getTriggerProps()}>
 			{api.valueAsString || 'Select option'}
 		</button>
 	</div>

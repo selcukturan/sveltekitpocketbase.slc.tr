@@ -32,6 +32,5 @@
 	input[type='number'] {
 		-moz-appearance: textfield; /* Firefox'ta okları gizle */
 		appearance: textfield; /* Standart özellik */
-		text-align: right;
 	}
 </style>
