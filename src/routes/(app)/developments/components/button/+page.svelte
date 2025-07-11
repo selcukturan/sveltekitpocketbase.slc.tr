@@ -1,44 +1,52 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { tick } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
 
-	let closeButton: HTMLButtonElement;
-	let openButton: HTMLButtonElement;
-	let dialog: HTMLDialogElement;
-
+	let drawer: HTMLElement | null = $state(null);
 	let firstFocusableElement: HTMLElement;
 	let lastFocusableElement: HTMLElement;
 
-	let { open = false }: { open: boolean } = $props();
+	// Sadece drawer'ın açık/kapalı durumunu tutuyoruz.
+	let open = $state(false);
+
+	// Drawer'ı kapatmak için bir fonksiyon
+	function close() {
+		open = false;
+	}
+
+	// Drawer'ı açmak için bir fonksiyon
+	function show() {
+		open = true;
+	}
 
 	$effect(() => {
-		if (open) {
-			dialog.showModal();
-		} else {
-			dialog.close();
-		}
-	});
-
-	onMount(() => {
+		if (!drawer) return;
 		let focusableElements = Array.from(
-			dialog.querySelectorAll(
+			drawer.querySelectorAll(
 				'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select, [contenteditable], [tabindex]:not([tabindex="-1"])'
 			)
 		).map((element) => element as HTMLElement);
 		focusableElements = focusableElements.filter((element) => !element.hasAttribute('disabled'));
 		firstFocusableElement = focusableElements[0];
 		lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+		tick().then(() => {
+			if (firstFocusableElement) {
+				firstFocusableElement.focus();
+			}
+		});
 	});
 
 	function focusTrap(e: KeyboardEvent) {
 		if (e.key === 'Tab') {
 			if (e.shiftKey) {
-				/* shift + tab */
+				// shift + tab
 				if (document.activeElement === firstFocusableElement) {
 					lastFocusableElement.focus();
 					e.preventDefault();
 				}
 			} else {
-				/* tab */
+				// tab
 				if (document.activeElement === lastFocusableElement) {
 					firstFocusableElement.focus();
 					e.preventDefault();
@@ -47,65 +55,74 @@
 		}
 	}
 
-	const handleBackdropClick = (e: MouseEvent) => {
-		const target = e.target as HTMLElement;
-		if (target === dialog) {
-			open = false;
-		}
-	};
-	const handleOpen = (e: MouseEvent) => {
-		open = true;
-		e.preventDefault();
-	};
-
-	const handleClose = (e: Event) => {
-		open = false;
-		e.preventDefault();
-	};
+	// Portal Action: Drawer'ı body'ye taşır
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				if (node.parentNode) {
+					node.parentNode.removeChild(node);
+				}
+			}
+		};
+	}
 </script>
 
-<div class="flex h-full w-full flex-col overflow-hidden">
-	<div class="bg-success-100 p-1">
-		<h6>Dialog Header</h6>
-	</div>
-	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1 pt-52">
-		<dialog bind:this={dialog} onclose={handleClose} onclick={handleBackdropClick} onkeydown={focusTrap}>
-			<!-- İçeriği saran div'e yeni bir class ekledik -->
-			<div class="dialog-content">
-				<button bind:this={closeButton} onclick={handleClose} class="bg-yellow-500">Close</button>
-				<p>This modal dialog has a groovy backdrop!</p>
+<!-- #if bloğu, portal'ı da içine alarak DOM'a ekleme/kaldırma işini yönetir -->
+{#if open}
+	<!-- Portal action'ı ile drawer'ı body'ye ışınlıyoruz -->
+	<div use:portal>
+		<!-- Backdrop (Arka Plan) -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="bg-surface-300/50 fixed inset-0 z-55" onclick={close} transition:fade={{ duration: 150 }}></div>
 
-				<input type="text" class="bg-transparent" />
+		<!-- Drawer Panel -->
+		<!-- svelte-ignore a11y_interactive_supports_focus -->
+		<div
+			bind:this={drawer}
+			onkeydown={focusTrap}
+			class="bg-surface-50 fixed top-0 right-0 z-56 h-full w-full max-w-2xl bg-white shadow-xl"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="drawer-title"
+			in:fly={{ duration: 150, x: 50 }}
+			out:fly={{ duration: 150, x: 50 }}
+		>
+			<div class="flex h-full flex-col">
+				<!-- Header -->
+				<header class="flex items-center justify-between border-b p-4">
+					<div id="drawer-title">
+						<h2 class="text-lg font-semibold">Panel</h2>
+					</div>
+				</header>
+
+				<!-- İçerik -->
+				<main class="flex-1 overflow-y-auto p-4">
+					<p>Bu, sağdan kayarak açılan bir panel!</p>
+
+					<input type="text" class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 1" />
+					<button class="mt-4 rounded bg-blue-500 p-2 text-white">Buton</button>
+					<textarea class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 2"></textarea>
+				</main>
+
+				<!-- Footer -->
+				<footer class="border-t p-4">
+					<div class="flex justify-end">
+						<button onclick={close} class="rounded bg-gray-500 px-4 py-2 text-white"> Kapat </button>
+					</div>
+				</footer>
 			</div>
-		</dialog>
-		<button bind:this={openButton} onclick={handleOpen}>Show the dialog</button>
+		</div>
 	</div>
-	<div class="bg-warning-100 p-1">
-		<h6>Dialog Footer</h6>
+{/if}
+
+<!-- Sayfa içeriği -->
+<main class="p-8">
+	<h1 class="mb-4 text-2xl font-bold">Svelte 5 Drawer Örneği</h1>
+
+	<div class="flex gap-4">
+		<!-- Sadece bir tane açma butonu yeterli -->
+		<button onclick={show} class="rounded bg-blue-500 px-4 py-2 text-white"> Paneli Aç </button>
 	</div>
-</div>
-
-<style lang="postcss">
-	::backdrop {
-		background-color: var(--color-surface-300);
-		opacity: 0.75;
-	}
-
-	dialog {
-		/* Sihirli dokunuş: Dialog'u dikey ve yatayda ortalar */
-		margin: auto;
-
-		/* Estetik ve kontrol için eklemeler */
-		width: 90%; /* Genişlik ekranın %90'ı olsun */
-		max-width: 500px; /* Ama 500px'den fazla büyümesin */
-		border: none; /* Tarayıcının varsayılan kenarlığını kaldır */
-		border-radius: 0.5rem; /* Köşeleri yuvarlat */
-		padding: 0; /* İçerideki div'in tam oturması için dialog'un kendi padding'ini sıfırla */
-		box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); /* Güzel bir gölge ekle */
-	}
-
-	/* Dialog içindeki içeriğe biraz boşluk verelim */
-	.dialog-content {
-		padding: 1.5rem; /* 24px */
-	}
-</style>
+</main>

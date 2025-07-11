@@ -673,18 +673,18 @@
 		max-width: 275px;
 		padding: 3px 5px;
 		text-align: center;
-		font-size: theme(fontSize.sm);
-		font-weight: theme(fontWeight.semibold);
-		background-color: theme(backgroundColor.surface.950);
-		color: theme(textColor.surface.50);
-		border-radius: theme(borderRadius.md);
+		font-size: var(--text-sm);
+		font-weight: var(--font-weight-semibold);
+		background-color: var(--color-surface-950);
+		color: var(--color-surface-50);
+		border-radius: var(--radius-sm);
 		pointer-events: none;
 		user-select: none;
 		transition:
 			opacity 150ms,
 			visibility 150ms,
 			transform 150ms;
-		transform: translateY(1px);
+		transform: translateY(2px);
 		backface-visibility: hidden;
 		white-space: pre-line;
 		word-break: break-word;
