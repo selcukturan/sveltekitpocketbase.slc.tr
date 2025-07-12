@@ -49,10 +49,10 @@
 
 <Icons />
 
-<ProgressBar navigate={navigating} />
-
-<Toaster toaster={appToaster} />
-
-<AppLayout {sidebarData}>
-	{@render children?.()}
-</AppLayout>
+<ProgressBar navigate={navigating}>
+	<Toaster toaster={appToaster}>
+		<AppLayout {sidebarData}>
+			{@render children?.()}
+		</AppLayout>
+	</Toaster>
+</ProgressBar>

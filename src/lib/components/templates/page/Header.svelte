@@ -6,7 +6,7 @@
 
 	// Get Context
 	const ctx = getContext();
-	console.log('Header', ctx.pageTitle);
+	/* console.log('Header', ctx.pageTitle); */
 </script>
 
 <header class="{classes} {`bg-surface-100/80`}" style:border-top="0px" style:border-left="0px">

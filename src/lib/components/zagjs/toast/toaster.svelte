@@ -4,7 +4,7 @@
 	import Toast from './toast.svelte';
 	import type { ToasterProps } from './types';
 
-	const { toaster }: ToasterProps = $props();
+	const { toaster, children }: ToasterProps = $props();
 
 	const id = $props.id();
 	const service = useMachine(toast.group.machine, () => ({ id: id, store: toaster }));
@@ -16,3 +16,7 @@
 		<Toast {newToastOptions} {index} parent={service}></Toast>
 	{/each}
 </div>
+
+{#if children}
+	{@render children?.()}
+{/if}

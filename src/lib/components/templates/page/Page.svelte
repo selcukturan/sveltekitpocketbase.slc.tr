@@ -8,7 +8,7 @@
 	const ctx = setContext({
 		pageTitle: 'SLC Web Applications'
 	});
-	console.log('Page', ctx.pageTitle);
+	/* console.log('Page', ctx.pageTitle); */
 </script>
 
 <section class={classes} style="display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;">

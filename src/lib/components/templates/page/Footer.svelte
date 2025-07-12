@@ -6,7 +6,7 @@
 
 	// Get Context
 	const ctx = getContext();
-	console.log('Footer', ctx.pageTitle);
+	/* console.log('Footer', ctx.pageTitle); */
 </script>
 
 <footer class="{classes} {`bg-surface-100/80`}" style:border-bottom="0px" style:border-left="0px">
