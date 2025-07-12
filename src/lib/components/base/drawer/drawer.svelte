@@ -15,7 +15,6 @@
 	const id = $props.id();
 	let openDrawer = $state(false);
 	let drawer: HTMLElement | null = $state(null);
-	let wrapper: HTMLElement | null = $state(null);
 	let start = $state(1000);
 
 	export const open = () => {
@@ -53,7 +52,7 @@
 		};
 	};
 
-	function handleEscPress(e: KeyboardEvent) {
+	const onkeydown = (e: KeyboardEvent) => {
 		const target = e.target as HTMLElement;
 		if (!drawer) return;
 		const { index } = drawer.dataset;
@@ -61,26 +60,26 @@
 			e.preventDefault();
 			close();
 		}
-	}
+	};
 
 	const zindex = $derived(start + length());
 </script>
 
-<svelte:window onkeydown={handleEscPress} />
+<svelte:window {onkeydown} />
 
-<!-- Portal attach'ı ile drawer wrapper'ı body'ye ışınlıyoruz -->
-<div bind:this={wrapper} data-id={id} class:slc-app-drawer-wrapper={true} {@attach portal}>
+<!-- Portal -->
+<div {@attach portal} class:slc-app-drawer-wrapper={true} data-id={id}>
 	{#if openDrawer}
 		<!-- Backdrop -->
 		<div
+			{@attach backdropAttach}
 			class:slc-app-drawer-backdrop={true}
 			class="bg-surface-300/50 fixed inset-0"
 			style:z-index={zindex}
-			{@attach backdropAttach}
 			transition:fade={{ duration: 150 }}
 		></div>
 
-		<!-- Drawer Panel -->
+		<!-- Drawer -->
 		<div
 			bind:this={drawer}
 			{@attach focustrap}
