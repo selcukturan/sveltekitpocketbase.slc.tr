@@ -1,26 +1,41 @@
 <script lang="ts">
 	import { Drawer } from '$lib/components/base/drawer';
-	import { Page } from '$lib/components/templates';
+	import { Page, Head } from '$lib/components/templates';
 
 	let drawer: Drawer;
 	let drawer2: Drawer;
 </script>
 
-<!-- Sayfa içeriği -->
-<main class="p-8">
-	<h1 class="mb-4 text-2xl font-bold">Svelte 5 Drawer</h1>
+<Head>
+	<title>Drawer - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
 
-	<div class="flex gap-4">
-		<button
-			onclick={() => {
-				drawer.open();
-			}}
-			class="rounded bg-blue-500 px-4 py-2 text-white"
-		>
-			Paneli Aç
-		</button>
-	</div>
-</main>
+<!-- Sayfa içeriği -->
+<Page>
+	<Page.Header>
+		<p>Drawer Header</p>
+	</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<main class="p-8">
+				<div class="flex gap-4">
+					<button
+						onclick={() => {
+							drawer.open();
+						}}
+						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+					>
+						Open Panel
+					</button>
+				</div>
+			</main>
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>
+		<p>Drawer Footer</p>
+	</Page.Footer>
+</Page>
 
 <Drawer bind:this={drawer} onOpen={() => console.log('Drawer opened')} onClose={() => console.log('Drawer closed')}>
 	<Page>
@@ -39,14 +54,14 @@
 				onclick={() => {
 					drawer2.open();
 				}}
-				class="rounded bg-blue-500 px-4 py-2 text-white"
+				class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 			>
-				Paneli Aç
+				Open Panel
 			</button>
 		</Page.Main>
 		<Page.Footer class="border-t p-4">
 			<div class="flex justify-end">
-				<button onclick={() => drawer.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Kapat </button>
+				<button onclick={() => drawer.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Close 1 </button>
 			</div>
 		</Page.Footer>
 	</Page>
@@ -68,7 +83,7 @@
 		</Page.Main>
 		<Page.Footer class="border-t p-4">
 			<div class="flex justify-end">
-				<button onclick={() => drawer2.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Kapat 2 </button>
+				<button onclick={() => drawer2.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Close 2 </button>
 			</div>
 		</Page.Footer>
 	</Page>

@@ -20,7 +20,7 @@
 	type="submit"
 	disabled={$submitting || !isTainted($tainted)}
 	{...rest}
-	class="bg-secondary-200 text-surface-800 disabled:bg-error-500 cursor-pointer"
+	class="bg-primary-200 hover:bg-primary-300 text-surface-800 m-1 cursor-pointer rounded-md p-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
 >
 	{#if $submitting && !$delayed}
 		<!-- <Icon name={`rotate-cw`} size={`18px`} class="animate-spin" /> -->

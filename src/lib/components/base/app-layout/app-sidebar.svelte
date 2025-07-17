@@ -17,8 +17,7 @@
 		</a>
 	</header>
 	<nav
-		class="slc-hide-scrollbar
-			flex
+		class="flex
 			flex-1
 			flex-row
 			items-center
@@ -67,19 +66,17 @@
 						text-inherit
 						no-underline
 						outline-0
-						transition-colors
-						duration-150
 						select-none"
 			>
 				<span>
-					<Icon name={`${d.icon}`} size={global.isMobileBreakpoint ? `18px` : `22px`} />
+					<Icon name={`${d.icon}`} size={`22px`} />
 				</span>
 			</a>
 		{/each}
 	</nav>
 	<footer class="flex items-center justify-center px-2 sm:py-2">
-		<figure class="bg-secondary-300 flex h-10 w-10 items-center justify-center rounded-full select-none">
+		<!-- <figure class="bg-secondary-300 flex h-10 w-10 items-center justify-center rounded-full select-none">
 			<span>x</span>
-		</figure>
+		</figure> -->
 	</footer>
 </section>

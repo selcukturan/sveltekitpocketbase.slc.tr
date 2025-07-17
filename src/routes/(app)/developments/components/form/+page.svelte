@@ -12,7 +12,7 @@
 
 <Page>
 	<Page.Header>
-		<p>Form Page Header</p>
+		<p>Form validation with valibot and superforms.rocks</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>

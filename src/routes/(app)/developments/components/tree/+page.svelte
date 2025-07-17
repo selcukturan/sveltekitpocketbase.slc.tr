@@ -1,81 +1,99 @@
-<ul class="slc-left-menu">
-	<li class="slc-left-menu-root">
-		<input type="checkbox" id="cb1" /><label for="cb1" tabindex="-1">Level 1</label>
-		<ul>
-			<li>
-				<input type="checkbox" id="cb2" /><label for="cb2">Level 2-A</label>
-				<ul>
-					<li>
-						<label class="slc-menu-action" for="" tabindex="-1">Level 3-A</label>
-					</li>
-					<li>
-						<label class="slc-menu-action" for="" tabindex="-1">Level 3-B</label>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<input type="checkbox" id="cb3" /><label for="cb3">Level 2-B</label>
-				<ul>
-					<li>
-						<input type="checkbox" id="cb5" /><label for="cb5">Level 3-A</label>
-						<ul>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-C</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-D</label>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<input type="checkbox" id="cb6" /><label for="cb6">Level 3-B</label>
-						<ul>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<input type="checkbox" id="cb7" /><label for="cb7">Level 3-C</label>
-						<ul>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
-							</li>
-							<li>
-								<label class="slc-menu-action" for="" tabindex="-1">Level 4-C</label>
-							</li>
-						</ul>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<input type="checkbox" id="cb4" /><label for="cb4">Level 2-C</label>
-				<ul>
-					<li>
-						<label class="slc-menu-action" for="" tabindex="-1">Level 3-A</label>
-					</li>
-				</ul>
-			</li>
-		</ul>
-	</li>
-</ul>
+<script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
+</script>
+
+<Head>
+	<title>Tree - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
+
+<Page>
+	<Page.Header>
+		<p>Tree Page Header</p>
+	</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<ul class="slc-left-menu">
+				<li class="slc-left-menu-root">
+					<input type="checkbox" id="cb1" /><label for="cb1" tabindex="-1">Level 1</label>
+					<ul>
+						<li>
+							<input type="checkbox" id="cb2" /><label for="cb2">Level 2-A</label>
+							<ul>
+								<li>
+									<label class="slc-menu-action" for="" tabindex="-1">Level 3-A</label>
+								</li>
+								<li>
+									<label class="slc-menu-action" for="" tabindex="-1">Level 3-B</label>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<input type="checkbox" id="cb3" /><label for="cb3">Level 2-B</label>
+							<ul>
+								<li>
+									<input type="checkbox" id="cb5" /><label for="cb5">Level 3-A</label>
+									<ul>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-C</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-D</label>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<input type="checkbox" id="cb6" /><label for="cb6">Level 3-B</label>
+									<ul>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<input type="checkbox" id="cb7" /><label for="cb7">Level 3-C</label>
+									<ul>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-A</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-B</label>
+										</li>
+										<li>
+											<label class="slc-menu-action" for="" tabindex="-1">Level 4-C</label>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<input type="checkbox" id="cb4" /><label for="cb4">Level 2-C</label>
+							<ul>
+								<li>
+									<label class="slc-menu-action" for="" tabindex="-1">Level 3-A</label>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>
+		<p>Tree Page Footer</p>
+	</Page.Footer>
+</Page>
 
 <style>
-	/** 
-* BEGIN slc-left-menu
-*/
 	ul.slc-left-menu {
 		list-style-type: none;
 		/* margin-top: 10px; */
@@ -89,7 +107,7 @@
     border-bottom-right-radius: 8px; */
 		padding: 10px 25px;
 		cursor: pointer;
-		color: #637381;
+		color: var(--color-surface-600);
 		display: block;
 		-webkit-user-select: none;
 		-moz-user-select: none;
@@ -99,21 +117,20 @@
 	}
 
 	.slc-left-menu label:hover {
-		/* SELECTED --- background-color: rgba(145, 158, 171, 0.08); */
-		background-color: rgba(0, 171, 85, 0.08);
+		background-color: color-mix(in oklab, var(--color-quaternary-300) 20%, transparent);
 	}
 
 	.slc-left-menu li {
 		margin-left: 11px;
 		padding: 0px;
-		border-left: 1px solid rgba(145, 158, 171, 0.1);
+		border-left: 1px solid var(--color-surface-300);
 		border-left-style: dashed;
 		position: relative;
 	}
 
 	.slc-left-menu .slc-left-menu-root {
 		margin-left: 0px;
-		border-left: 0px solid rgba(145, 158, 171, 0.589);
+		border-left: 0px solid red;
 	}
 
 	.slc-left-menu input[type='checkbox'] {
@@ -232,14 +249,10 @@
 		top: 20px;
 		left: 10px;
 		border-radius: 50%;
-		background-color: #00ab55;
+		background-color: var(--color-secondary-400);
 		display: inline-block;
 		position: absolute;
 		transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 		transform: scale(2);
 	}
-
-	/** 
-* END slc-left-menu
-*/
 </style>

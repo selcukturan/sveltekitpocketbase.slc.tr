@@ -10,9 +10,9 @@
 </Head>
 
 <Page>
-	<!-- <Page.Header>
-		<p>Form Page Header</p>
-	</Page.Header> -->
+	<Page.Header>
+		<p>Application Tailwind v4 Theme System</p>
+	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<div class="flex h-full w-full flex-col overflow-hidden">

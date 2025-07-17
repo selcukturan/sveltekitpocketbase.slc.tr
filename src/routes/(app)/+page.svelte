@@ -1,16 +1,31 @@
 <script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
 	const { data } = $props();
 </script>
 
-<section class="flex h-full w-full flex-col overflow-hidden">
-	<header class="bg-warning-200 p-1">
-		<h6>DASHBOARD HEADER</h6>
-	</header>
-	<main class="relative flex-1 overflow-y-auto overflow-x-hidden p-1">
-		<h6>DASHBOARD CONTENT</h6>
-		<pre>{JSON.stringify(data, null, 2)}</pre>
-	</main>
-	<footer class="bg-success-200 p-1">
-		<h6>DASHBOARD FOOTER</h6>
-	</footer>
-</section>
+<Head>
+	<title>Dashboard - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
+
+<Page>
+	<!-- <Page.Header>
+		<p>Form Page Header</p>
+	</Page.Header> -->
+	<Page.Main>
+		<Page.Main.Panel>
+			<div class="flex h-full w-full flex-col overflow-hidden">
+				<a
+					href="https://github.com/selcukturan/sveltekitpocketbase.slc.tr"
+					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					Go Project Github Page
+				</a>
+				<pre>{JSON.stringify(data, null, 2)}</pre>
+			</div>
+		</Page.Main.Panel>
+	</Page.Main>
+	<!-- <Page.Footer>Footer</Page.Footer> -->
+</Page>

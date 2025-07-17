@@ -3,20 +3,20 @@
 </script>
 
 <Head>
-	<title>Page - SLC Web Applications</title>
+	<title>Settings - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
 <Page>
 	<Page.Header>
-		<p>Form Page Header</p>
+		<p>Settings Page Header</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<p>test</p>
+			<div>Settings Introduction</div>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
-		<p>Footer</p>
+		<p>Settings Page Footer</p>
 	</Page.Footer>
 </Page>

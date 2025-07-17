@@ -19,7 +19,7 @@
 		<div class="flex items-stretch gap-3">
 			<button
 				onclick={handleClick}
-				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 m-1 items-center justify-center rounded-md p-0.5 text-center no-underline outline-0 transition-colors duration-150 select-none sm:rounded-lg sm:p-1`}
+				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 m-1 items-center justify-center rounded-md p-0.5 text-center no-underline outline-0 transition-colors duration-150 select-none`}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
 				<Icon name={global.hideSidebar ? `panel-right-close` : `panel-right-open`} />

@@ -65,27 +65,6 @@ WHERE
   t1.status="active"
 ```
 
-```sveltekit
-<Form>
-	<Form.iTextbox />
-    <Form.iNumberbox />
+# (Request)İstek akışı: kullanıcıdan → veritabanına
 
-    <Form.iDate />
-    <Form.iDatetime />
-
-    <Form.iSelect />
-    <Form.iCombobox />
-
-    <Form.iRadio />
-    <Form.iCheckbox />
-    <Form.iSwitch />
-
-    <Form.iSlider />
-
-    <Form.iSubmit />
-</Form>
-```
-
-# İstek akışı:
-
-Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması (s_app) → PocketBase (s_pocketbase)
+Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması (docker s_app) → PocketBase (docker s_pocketbase)

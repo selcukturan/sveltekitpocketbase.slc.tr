@@ -1,165 +1,186 @@
 <script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
 	import { Toaster, createToaster, appToaster } from '$lib/components/zagjs/toast';
 
 	const pageToaster = createToaster({ overlap: true });
 </script>
 
-<Toaster toaster={pageToaster} />
-<p>################################ Page Toast #################################################################################</p>
-<div class="grid w-full max-w-72 grid-cols-2 gap-2">
-	<button
-		style="background-color:#5499e8;color:#cee2f8;padding:5px;margin:5px;"
-		onclick={() => {
-			pageToaster.info({
-				title: 'Bilgi',
-				description:
-					'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				action: {
-					label: 'Detay',
-					onClick: () => {
-						pageToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
-					}
-				}
-			});
-		}}
-	>
-		Info
-	</button>
-	<button
-		style="background-color:#32ad84;color:#c4eedc;padding:5px;margin:5px;"
-		onclick={() => {
-			pageToaster.success({
-				type: 'success',
-				title: 'Başarılı',
-				description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				action: {
-					label: 'Detay',
-					onClick: () => {
-						pageToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
-					}
-				}
-			});
-		}}
-	>
-		Success
-	</button>
-	<button
-		style="background-color:#ff944d;color:#ffd4b8;padding:5px;margin:5px;"
-		onclick={() => {
-			pageToaster.warning({
-				title: 'Uyarı',
-				description: 'Warning lorem ipsum dolor sit amet.',
-				closable: false
-			});
-		}}
-	>
-		Warning
-	</button>
-	<button
-		style="background-color:#e34562;color:#f7cad2;padding:5px;margin:5px;"
-		onclick={() => {
-			pageToaster.error({
-				title: 'Hata',
-				description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				action: {
-					label: 'Detay',
-					onClick: () => {
-						pageToaster.success({ type: 'success', title: 'Başarılı', description: 'İşlem yapıldı.' });
-					}
-				}
-			});
-		}}
-	>
-		Error
-	</button>
+<Head>
+	<title>Toast - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
 
-	<button
-		onclick={() =>
-			pageToaster.create({
-				type: 'info',
-				title: 'Silmek istediğinize emin misiniz?',
-				description: 'Loading lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				closable: false,
-				action: {
-					label: 'İptal',
-					onClick: () => {
-						pageToaster.warning({ title: 'İptal', description: 'İptal edildi.' });
-					}
-				}
-			})}
-	>
-		Action
-	</button>
+<Page>
+	<Page.Header>
+		<p>Zag.js UI Toast</p>
+	</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<Toaster toaster={pageToaster}>
+				<p class="p-3">Page Toast</p>
+				<div class="grid w-full max-w-72 grid-cols-2 gap-2">
+					<button
+						class="bg-info-400 text-info-50 rounded"
+						onclick={() => {
+							pageToaster.info({
+								title: 'Bilgi',
+								description:
+									'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+								action: {
+									label: 'Detay',
+									onClick: () => {
+										pageToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
+									}
+								}
+							});
+						}}
+					>
+						Info
+					</button>
+					<button
+						class="bg-success-400 text-success-50 rounded"
+						onclick={() => {
+							pageToaster.success({
+								type: 'success',
+								title: 'Başarılı',
+								description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+								action: {
+									label: 'Detay',
+									onClick: () => {
+										pageToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
+									}
+								}
+							});
+						}}
+					>
+						Success
+					</button>
+					<button
+						class="bg-warning-400 text-warning-50 rounded"
+						onclick={() => {
+							pageToaster.warning({
+								title: 'Uyarı',
+								description: 'Warning lorem ipsum dolor sit amet.',
+								closable: false
+							});
+						}}
+					>
+						Warning
+					</button>
+					<button
+						class="bg-error-400 text-error-50 rounded"
+						onclick={() => {
+							pageToaster.error({
+								title: 'Hata',
+								description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+								action: {
+									label: 'Detay',
+									onClick: () => {
+										pageToaster.success({ type: 'success', title: 'Başarılı', description: 'İşlem yapıldı.' });
+									}
+								}
+							});
+						}}
+					>
+						Error
+					</button>
 
-	<button
-		onclick={() => {
-			const promise = new Promise((resolve, reject) => {
-				setTimeout(() => {
-					resolve('Success');
-				}, 3000);
-			});
-			pageToaster.promise(promise, {
-				loading: {
-					title: 'Yükleniyor',
-					description: 'Lütfen bekleyin...'
-				},
-				success: (data) => ({
-					title: 'Başarılı',
-					description: 'İşleminiz tamamlandı'
-				}),
-				error: (err) => ({
-					title: 'Hata',
-					description: 'Bir hata oluştu'
-				})
-			});
-		}}
-	>
-		Promise
-	</button>
-</div>
-<p>################################ App Toast #################################################################################</p>
-<div class="grid w-full max-w-72 grid-cols-2 gap-2">
-	<button
-		style="background-color:#5499e8;color:#cee2f8;padding:5px;margin:5px;"
-		onclick={() => {
-			appToaster.info({
-				title: 'This is a APP toast!.',
-				description:
-					'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-				action: {
-					label: 'Detay',
-					onClick: () => {
-						appToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
-					}
-				}
-			});
-		}}>Info</button
-	>
-	<button
-		style="background-color:#32ad84;color:#c4eedc;padding:5px;margin:5px;"
-		onclick={() => {
-			appToaster.success({
-				title: 'This is a APP toast!',
-				description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.'
-			});
-		}}>Success</button
-	>
-	<button
-		style="background-color:#ff944d;color:#ffd4b8;padding:5px;margin:5px;"
-		onclick={() => {
-			appToaster.warning({
-				title: 'This is a APP toast!',
-				description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.'
-			});
-		}}>Warning</button
-	>
-	<button
-		style="background-color:#e34562;color:#f7cad2;padding:5px;margin:5px;"
-		onclick={() => {
-			appToaster.error({
-				title: 'This is a APP toast!',
-				description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.'
-			});
-		}}>Error</button
-	>
-</div>
+					<button
+						class="bg-surface-400 text-surface-50 rounded"
+						onclick={() =>
+							pageToaster.create({
+								type: 'info',
+								title: 'Silmek istediğinize emin misiniz?',
+								description: 'Loading lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+								closable: false,
+								action: {
+									label: 'İptal',
+									onClick: () => {
+										pageToaster.warning({ title: 'İptal', description: 'İptal edildi.' });
+									}
+								}
+							})}
+					>
+						Action
+					</button>
+
+					<button
+						class="bg-surface-400 text-surface-50 rounded"
+						onclick={() => {
+							const promise = new Promise((resolve, reject) => {
+								setTimeout(() => {
+									resolve('Success');
+								}, 3000);
+							});
+							pageToaster.promise(promise, {
+								loading: {
+									title: 'Yükleniyor',
+									description: 'Lütfen bekleyin...'
+								},
+								success: (data) => ({
+									title: 'Başarılı',
+									description: 'İşleminiz tamamlandı'
+								}),
+								error: (err) => ({
+									title: 'Hata',
+									description: 'Bir hata oluştu'
+								})
+							});
+						}}
+					>
+						Promise
+					</button>
+				</div>
+				<p class="p-3">App Toast</p>
+				<div class="grid w-full max-w-72 grid-cols-2 gap-2">
+					<button
+						class="bg-info-400 text-info-50 rounded"
+						onclick={() => {
+							appToaster.info({
+								title: 'This is a APP toast!.',
+								description:
+									'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+								action: {
+									label: 'Detay',
+									onClick: () => {
+										appToaster.success({ title: 'Başarılı', description: 'İşlem yapıldı.' });
+									}
+								}
+							});
+						}}>Info</button
+					>
+					<button
+						class="bg-success-400 text-success-50 rounded"
+						onclick={() => {
+							appToaster.success({
+								title: 'This is a APP toast!',
+								description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+							});
+						}}>Success</button
+					>
+					<button
+						class="bg-warning-400 text-warning-50 rounded"
+						onclick={() => {
+							appToaster.warning({
+								title: 'This is a APP toast!',
+								description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+							});
+						}}>Warning</button
+					>
+					<button
+						class="bg-error-400 text-error-50 rounded"
+						onclick={() => {
+							appToaster.error({
+								title: 'This is a APP toast!',
+								description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+							});
+						}}>Error</button
+					>
+				</div>
+			</Toaster>
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>
+		<p>Toast Footer</p>
+	</Page.Footer>
+</Page>

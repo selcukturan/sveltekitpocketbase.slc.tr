@@ -25,7 +25,7 @@
 		timeoutMs: 2000,
 		taintedMessage: () => {
 			return new Promise((resolve) => {
-				alert(`confirm - Do you want to leave? - Changes you made may not be saved. resolve:${resolve}`);
+				confirm('Yaptığınız değişiklikler kaydedilmemiş olabilir.\n\nSayfadan ayrılmak istiyor musunuz?') ? resolve(true) : resolve(false);
 			});
 		}
 	});
@@ -46,4 +46,4 @@
 </Form>
 
 <Form.Message {frm} />
-<Form.Debug {frm} label="My First Form Data" />
+<Form.Debug {frm} label="My Form Data" />

@@ -28,17 +28,17 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Form',
+					title: 'Form Validation with Superforms',
 					href: `/developments/components/form`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Form (Tanstack)',
+					title: 'Form Validation with Tanstack',
 					href: `/developments/components/form-tanstack`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Tree',
+					title: 'Tree (Draft)',
 					href: `/developments/components/tree`,
 					icon: 'file-symlink'
 				},
@@ -49,17 +49,17 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Toast',
+					title: 'Toast (zagjs ui)',
 					href: `/developments/components/toast`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Button',
-					href: `/developments/components/button`,
+					title: 'Drawer Panel',
+					href: `/developments/components/drawer`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Select',
+					title: 'Select (zagjs ui)',
 					href: `/developments/components/select`,
 					icon: 'file-symlink'
 				},

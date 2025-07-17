@@ -1,41 +1,30 @@
 <script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
 	import type { PageProps } from './$types';
 	const props: PageProps = $props();
 </script>
 
-<section class="flex h-full w-full flex-col overflow-hidden">
-	<header class="bg-warning-200 p-1">
-		<h6>LOGS HEADER - ĞÜŞİÖÇI - ğüşiöçı</h6>
-	</header>
-	<main class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
-		<h6>LOGS PAGE PROPS</h6>
-		<p>######## USER ########</p>
-		<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
-		<p>######## acl_roles_perms_menu ########</p>
-		<pre>{JSON.stringify(props.data.acl_roles_perms_menu, null, 2)}</pre>
-		######## envTest ########
-		<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
+<Head>
+	<title>DASHBOARD - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
 
-		<div
-			data-llm-ignore=""
-			class="rounded-tl-card rounded-tr-card border-muted relative mt-6 border-2 bg-zinc-50 ring-transparent! dark:bg-neutral-900/50"
-		>
-			<label>
-				E-Posta
-				<input
-					id="email"
-					name="email"
-					placeholder="E-Posta"
-					type="email"
-					autocapitalize="none"
-					autocomplete="email"
-					autocorrect="off"
-					class="h-input focus-within:border-border-input-hover focus-within:shadow-date-field-focus rounded-10px hover:border-border-input-hover border-border-input bg-background text-foreground w-[219px] border pr-2 pl-2 text-base outline-none sm:text-sm"
-				/>
-			</label>
-		</div>
-	</main>
-	<footer class="bg-success-200 p-1">
-		<h6>LOGS FOOTER</h6>
-	</footer>
-</section>
+<Page>
+	<!-- <Page.Header>
+		<p>Form Page Header</p>
+	</Page.Header> -->
+	<Page.Main>
+		<Page.Main.Panel>
+			<div class="flex h-full w-full flex-col overflow-hidden">
+				<h6>LOGS PAGE PROPS</h6>
+				<p>######## USER ########</p>
+				<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
+				<p>######## acl_roles_perms_menu ########</p>
+				<pre>{JSON.stringify(props.data.acl_roles_perms_menu, null, 2)}</pre>
+				######## envTest ########
+				<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
+			</div>
+		</Page.Main.Panel>
+	</Page.Main>
+	<!-- <Page.Footer>Footer</Page.Footer> -->
+</Page>

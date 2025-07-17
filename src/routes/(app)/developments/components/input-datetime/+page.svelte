@@ -1,22 +1,22 @@
 <script lang="ts">
-	let value = $state(new Date());
+	import { Page, Head } from '$lib/components/templates';
 </script>
 
-<div class="flex h-full w-full flex-col overflow-hidden">
-	<div class="bg-success-100 p-1">
-		<h6>Tests Root Header</h6>
-	</div>
-	<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
-		<button
-			onclick={() => {
-				value = new Date();
-			}}
-		>
-			Set Value
-		</button>
-		<div>{value}</div>
-	</div>
-	<div class="bg-warning-100 p-1">
-		<h6>Tests Root Footer</h6>
-	</div>
-</div>
+<Head>
+	<title>SLC - SLC Web Applications</title>
+	<meta name="description" content="SLC Web Applications" />
+</Head>
+
+<Page>
+	<Page.Header>
+		<p>Page Header Datetime</p>
+	</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<div>Content Datetime</div>
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>
+		<p>Page Footer Datetime</p>
+	</Page.Footer>
+</Page>

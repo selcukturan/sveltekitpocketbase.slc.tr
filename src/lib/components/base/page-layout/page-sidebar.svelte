@@ -53,8 +53,6 @@
 					text-base
 					no-underline
 					outline-0
-					transition-colors
-					duration-150
 					select-none"
 				>
 					<span>
