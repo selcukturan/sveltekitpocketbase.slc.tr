@@ -3,7 +3,7 @@
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
 	import type { PropsAppSidebarType } from './types';
 	import { Icon } from '$lib/components/icons';
-	import tooltip from '$lib/client/actions/tooltip';
+	import { tooltip } from '$lib/client/attachments';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
 
@@ -35,38 +35,37 @@
 			<a
 				href={`${d.href}`}
 				aria-label={d.title}
-				use:tooltip={{ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' }}
+				{@attach tooltip({ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' })}
 				aria-current={d.href === '/' && page.url.pathname === '/'
 					? 'page'
 					: d.href !== '/' && page.url.pathname.startsWith(`${d.href}`)
 						? 'page'
 						: undefined}
-				class="
-						hover:bg-surface-200
-						active:bg-surface-300
-						aria-[current]:border-primary-900
-						aria-[current]:bg-primary-50
-						aria-[current]:text-primary-900
-						relative
-						inline-flex
-						min-h-[45px]
-						min-w-[45px]
-						cursor-pointer
-						items-center
-						justify-center
-						rounded-xl
-						border-2
-						border-solid
-						border-transparent
-						p-2
-						text-center
-						align-middle
-						text-2xl
-						leading-none
-						text-inherit
-						no-underline
-						outline-0
-						select-none"
+				class="hover:bg-surface-200
+					active:bg-surface-300
+					aria-[current]:border-primary-900
+					aria-[current]:bg-primary-50
+					aria-[current]:text-primary-900
+					relative
+					inline-flex
+					min-h-[45px]
+					min-w-[45px]
+					cursor-pointer
+					items-center
+					justify-center
+					rounded-xl
+					border-2
+					border-solid
+					border-transparent
+					p-2
+					text-center
+					align-middle
+					text-2xl
+					leading-none
+					text-inherit
+					no-underline
+					outline-0
+					select-none"
 			>
 				<span>
 					<Icon name={`${d.icon}`} size={`22px`} />

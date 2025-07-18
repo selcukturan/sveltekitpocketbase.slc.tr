@@ -1,3 +1,3 @@
 export { focustrap } from './focustrap.svelte';
 export { portal } from './portal.svelte';
-export { default as tooltip } from './tooltip';
+export { tooltip } from './tooltip.svelte';

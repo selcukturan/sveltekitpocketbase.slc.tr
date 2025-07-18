@@ -1,26 +1,10 @@
-// Simple Svelte tooltip action.
-// ===================================================================
-// source: https://github.com/pocketbase/pocketbase/blob/master/ui/src/actions/tooltip.js
-//
-// ### Example usage
-//
-// Default (position bottom):
-// ```html
-// <span use:tooltip={"My tooltip"}>Lorem Ipsum</span>
-// ```
-//
-// Custom options (valid positions: top, right, bottom, left, bottom-left, bottom-right, top-left, top-right):
-// ```html
-// <span use:tooltip={{text: "My tooltip", position: "top-left", class: "...", delay: 300, hideOnClick: false}}>Lorem Ipsum</span>
-// ```
-// ===================================================================
-
+import type { Attachment } from 'svelte/attachments';
 import { isFocusable } from '$lib/client/utils';
 
 // tooltip element type [extended div]
-interface TooltipElementType extends HTMLDivElement {
+type TooltipElementType = HTMLDivElement & {
 	activeNode?: HTMLElement;
-}
+};
 
 // tooltip options type
 type TooltipOptionType = {
@@ -33,7 +17,6 @@ type TooltipOptionType = {
 
 let showTimeoutId: ReturnType<typeof setTimeout>;
 let tooltipContainer: TooltipElementType;
-
 const defaultTooltipClass = 'slc-app-tooltip';
 
 function normalize(rawData: string | object) {
@@ -165,42 +148,47 @@ function showTooltip(node: HTMLElement, data: TooltipOptionType) {
 	);
 }
 
-export default function tooltip(node: HTMLElement, tooltipData: string | object) {
+export function tooltip(tooltipData: string | object): Attachment {
+	console.log(`Started. ${new Date().getTime()}`);
 	let data: TooltipOptionType = normalize(tooltipData);
 
-	function showEventHandler() {
-		showTooltip(node, data);
-	}
+	return (node) => {
+		console.log(`Element DOM'a monte edildi. ${new Date().getTime()}`);
+		if (!(node instanceof HTMLElement)) {
+			throw new Error('Node is not an HTMLElement');
+		}
 
-	function hideEventHandler() {
-		hideTooltip();
-	}
+		function showEventHandler() {
+			showTooltip(node as HTMLElement, data);
+		}
 
-	node.addEventListener('mouseenter', showEventHandler);
-	node.addEventListener('mouseleave', hideEventHandler);
-	node.addEventListener('blur', hideEventHandler);
-	if (data.hideOnClick === true || (data.hideOnClick === null && isFocusable(node))) {
-		node.addEventListener('click', hideEventHandler);
-	}
+		function hideEventHandler() {
+			hideTooltip();
+		}
 
-	// tooltip oluşturmayı tetikler (zaten eklenmemişse)
-	getTooltip();
+		// getTooltip() ile ilk tooltip oluşturmayı tetikler (zaten eklenmemişse)
+		// refreshTooltip(node, data);
+		if (getTooltip()?.activeNode?.contains(node)) {
+			refreshTooltip(node, data);
+		}
 
-	return {
-		update(newTooltipData: string | object) {
-			data = normalize(newTooltipData);
-			if (getTooltip()?.activeNode?.contains(node)) {
-				refreshTooltip(node, data);
-			}
-		},
-		destroy() {
-			if (getTooltip()?.activeNode?.contains(node)) {
-				hideTooltip();
-			}
+		console.log(`Element'in kurulumu yapıldı. ${new Date().getTime()}`);
+		node.addEventListener('mouseenter', showEventHandler);
+		node.addEventListener('mouseleave', hideEventHandler);
+		node.addEventListener('blur', hideEventHandler);
+		if (data.hideOnClick === true || (data.hideOnClick === null && isFocusable(node))) {
+			node.addEventListener('click', hideEventHandler);
+		}
+
+		return () => {
+			console.log(`Element DOM'dan söküldü. ${new Date().getTime()}`);
+			// if (getTooltip()?.activeNode?.contains(element)) {
+			//	hideTooltip();
+			// }
 			node.removeEventListener('mouseenter', showEventHandler);
 			node.removeEventListener('mouseleave', hideEventHandler);
 			node.removeEventListener('blur', hideEventHandler);
 			node.removeEventListener('click', hideEventHandler);
-		}
+		};
 	};
 }

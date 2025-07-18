@@ -21,7 +21,7 @@
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					Go Project Github Page
+					Go to project github page
 				</a>
 				<pre>{JSON.stringify(data, null, 2)}</pre>
 			</div>

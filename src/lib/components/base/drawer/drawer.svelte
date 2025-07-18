@@ -2,7 +2,7 @@
 	import type { Attachment } from 'svelte/attachments';
 	import { tick, type Snippet } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { focustrap, portal } from '$lib/client/actions';
+	import { focustrap, portal } from '$lib/client/attachments';
 	import { isInput } from '$lib/client/utils';
 
 	let {

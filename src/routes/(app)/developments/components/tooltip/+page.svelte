@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { getGlobalContext } from '$lib/client/app/global.svelte';
-	import tooltip from '$lib/client/actions/tooltip';
+	import { tooltip } from '$lib/client/attachments';
 
-	const global = getGlobalContext();
+	let content = $state('This is a SLC attachment tooltip');
+	let userSelected = $state('top');
 </script>
 
 <Head>
@@ -17,8 +17,21 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
+			<input bind:value={content} class="border" />
+			<label>
+				<input type="radio" name="position0" value="top" bind:group={userSelected} />top
+			</label>
+			<label>
+				<input type="radio" name="position1" value="bottom" bind:group={userSelected} />bottom
+			</label>
+			<label>
+				<input type="radio" name="position2" value="left" bind:group={userSelected} />left
+			</label>
+			<label>
+				<input type="radio" name="position3" value="right" bind:group={userSelected} />right
+			</label>
 			<div class="flex h-96 w-96 flex-col items-center justify-center">
-				<span use:tooltip={{ text: 'This is a SLC tooltip.', position: global.isMobileBreakpoint ? 'bottom' : 'right' }}>Hover Me</span>
+				<span {@attach tooltip({ text: content, position: userSelected })}> Hover Me </span>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>

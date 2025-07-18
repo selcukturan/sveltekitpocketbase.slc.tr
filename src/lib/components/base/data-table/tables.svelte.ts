@@ -44,7 +44,7 @@ class Table<TData extends Row> {
 	// ################################## END Default Sources #######################################################################################################################
 
 	// ################################## BEGIN Constructor #########################################################################################################################
-	version = 'v0.0.1-alpha.151';
+	version = 'v0.0.1-alpha.152';
 	element?: HTMLDivElement = $state();
 	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { DataTable } from '$lib/components/base/data-table';
-	import { createTable, type Sources } from '$lib/components/base/data-table/tables.svelte';
+	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
 	import { generateProducedData } from '$lib/client/demo/produced-grapes-generate-data';
 
 	import type { ProducedGrapes } from '$lib/client/demo/produced-grapes-schema';
