@@ -11,7 +11,7 @@
 	const api = $derived(toast.group.connect(service, normalizeProps));
 </script>
 
-<div {...api.getGroupProps()} data-testid="toaster-root">
+<div {...api.getGroupProps()} class="min-w-11/12 sm:min-w-lg" data-testid="toaster-root">
 	{#each api.getToasts() as newToastOptions, index (newToastOptions.id)}
 		<Toast {newToastOptions} {index} parent={service}></Toast>
 	{/each}

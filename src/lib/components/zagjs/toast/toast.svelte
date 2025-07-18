@@ -134,7 +134,7 @@
 </div>
 
 <style lang="postcss">
-	@reference "tailwindcss";
+	/* @reference "tailwindcss"; */
 
 	/* BEGIN Zag.js Required */
 	[data-part='root'] {

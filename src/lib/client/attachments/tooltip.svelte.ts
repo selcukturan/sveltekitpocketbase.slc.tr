@@ -159,7 +159,11 @@ export function tooltip(tooltipData: string | object): Attachment {
 		}
 
 		function showEventHandler() {
-			showTooltip(node as HTMLElement, data);
+			if (node instanceof HTMLElement) {
+				showTooltip(node, data);
+			} else {
+				console.error('Node is not an HTMLElement');
+			}
 		}
 
 		function hideEventHandler() {
