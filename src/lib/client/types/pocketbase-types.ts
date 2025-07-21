@@ -334,8 +334,11 @@ export type TestFormRecord = {
 	date_required: IsoDateString
 	datetime_optional?: IsoDateString
 	datetime_required: IsoDateString
+	decimal_number_optional?: number
+	decimal_number_required: number
 	id: string
-	number_optional?: number
+	integer_number_optional?: number
+	integer_number_required: number
 	text_optional?: string
 	text_required: string
 	updated?: IsoDateString

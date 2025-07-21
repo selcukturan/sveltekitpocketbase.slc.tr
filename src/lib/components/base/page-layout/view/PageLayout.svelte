@@ -16,16 +16,27 @@
 		global.hidePageSidebar = !global.hidePageSidebar;
 	};
 
-	const item = localStorage.getItem('slc:splitpane');
-	let initialPos: Length = item ? JSON.parse(item).position : '250px';
+	// const item = localStorage.getItem('slc:splitpane');
+	let initialPos: Length = $derived.by(() => {
+		if (global.isMobileBreakpoint) {
+			return global.pageSidebarWidth.vertical ? (`${global.pageSidebarWidth.vertical}px` as Length) : ('150px' as Length);
+		} else {
+			return global.pageSidebarWidth.horizontal ? (`${global.pageSidebarWidth.horizontal}px` as Length) : ('150px' as Length);
+		}
+	});
 </script>
 
 <SplitPane
 	id="main"
 	type={global.isMobileBreakpoint ? 'vertical' : 'horizontal'}
 	onchange={(position) => {
-		localStorage.setItem('slc:splitpane', `{"position":"${position}"}`);
-		// pos = position;
+		// REMOVE THIS CODE
+		localStorage.removeItem('slc:splitpane');
+		if (global.isMobileBreakpoint) {
+			global.pageSidebarWidth.vertical = parseInt(position, 10);
+		} else {
+			global.pageSidebarWidth.horizontal = parseInt(position, 10);
+		}
 	}}
 	class="slc-app-page-layout"
 	min={global.hidePageSidebar ? '0%' : '150px'}
@@ -53,7 +64,7 @@
 				class:desktop-position={!global.isMobileBreakpoint}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
-				<Icon name={global.hidePageSidebar ? `chevron-right` : `chevron-left`} size={global.isMobileBreakpoint ? `14px` : `16px`} />
+				<Icon name={global.hidePageSidebar ? `chevron-right` : `chevron-left`} size="16px" />
 			</button>
 			<PageSidebar {pageSidebardata} />
 		</section>
