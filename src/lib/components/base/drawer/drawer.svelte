@@ -9,13 +9,14 @@
 		children,
 		onOpen,
 		onClose,
+		onBeforeClose,
 		escClose = true
-	}: { children?: Snippet<[() => void]>; onOpen?: () => void; onClose?: () => void; escClose?: boolean } = $props();
+	}: { children?: Snippet<[() => void]>; onOpen?: () => void; onClose?: () => void; onBeforeClose?: () => boolean; escClose?: boolean } = $props();
 
 	const id = $props.id();
 	let openDrawer = $state(false);
 	let drawer: HTMLElement | null = $state(null);
-	let start = $state(1000);
+	let startingZindex = $state(1000);
 
 	export const open = () => {
 		openDrawer = true;
@@ -24,6 +25,7 @@
 		});
 	};
 	export const close = () => {
+		if (onBeforeClose && !onBeforeClose()) return;
 		openDrawer = false;
 		tick().then(() => {
 			onClose?.();
@@ -62,7 +64,7 @@
 		}
 	};
 
-	const zindex = $derived(start + length());
+	const zindex = $derived(startingZindex + length());
 </script>
 
 <svelte:window {onkeydown} />
@@ -86,7 +88,7 @@
 			class:slc-app-drawer-panel={true}
 			class="bg-surface-50 fixed top-0 right-0 h-full w-full max-w-2xl bg-white shadow-xl"
 			style:z-index={zindex}
-			data-index={zindex - start}
+			data-index={zindex - startingZindex}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="drawer-title"

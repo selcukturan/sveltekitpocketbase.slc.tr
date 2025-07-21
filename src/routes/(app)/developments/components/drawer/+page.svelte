@@ -67,7 +67,15 @@
 	</Page>
 </Drawer>
 
-<Drawer bind:this={drawer2} onOpen={() => console.log('Drawer 2 opened')} onClose={() => console.log('Drawer 2 closed')}>
+<Drawer
+	bind:this={drawer2}
+	onOpen={() => console.log('Drawer 2 opened')}
+	onClose={() => console.log('Drawer 2 closed')}
+	onBeforeClose={() => {
+		// any custom logic before closing
+		return confirm('Drawer 2 kapatılsın mı?');
+	}}
+>
 	<Page>
 		<Page.Header class="flex items-center justify-between border-b p-4">
 			<div class="flex w-full items-center justify-between">

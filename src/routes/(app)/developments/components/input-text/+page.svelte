@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
+	import { Select } from '$lib/components/base/select';
 </script>
 
 <Head>
-	<title>SLC - SLC Web Applications</title>
+	<title>SLC Select - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
@@ -13,7 +14,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<div>Content Text</div>
+			<Select />
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>

@@ -16,12 +16,11 @@
 		global.hidePageSidebar = !global.hidePageSidebar;
 	};
 
-	// const item = localStorage.getItem('slc:splitpane');
 	let initialPos: Length = $derived.by(() => {
 		if (global.isMobileBreakpoint) {
-			return global.pageSidebarWidth.vertical ? (`${global.pageSidebarWidth.vertical}px` as Length) : ('150px' as Length);
+			return global.pageSidebarSize.vertical ? (`${global.pageSidebarSize.vertical}px` as Length) : ('150px' as Length);
 		} else {
-			return global.pageSidebarWidth.horizontal ? (`${global.pageSidebarWidth.horizontal}px` as Length) : ('150px' as Length);
+			return global.pageSidebarSize.horizontal ? (`${global.pageSidebarSize.horizontal}px` as Length) : ('150px' as Length);
 		}
 	});
 </script>
@@ -30,12 +29,10 @@
 	id="main"
 	type={global.isMobileBreakpoint ? 'vertical' : 'horizontal'}
 	onchange={(position) => {
-		// REMOVE THIS CODE
-		localStorage.removeItem('slc:splitpane');
 		if (global.isMobileBreakpoint) {
-			global.pageSidebarWidth.vertical = parseInt(position, 10);
+			global.pageSidebarSize.vertical = parseInt(position, 10);
 		} else {
-			global.pageSidebarWidth.horizontal = parseInt(position, 10);
+			global.pageSidebarSize.horizontal = parseInt(position, 10);
 		}
 	}}
 	class="slc-app-page-layout"
