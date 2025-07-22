@@ -41,7 +41,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			expires: auth.getCookieExpDate(event.locals.auth.token),
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'strict',
+			sameSite: 'lax',
 			priority: 'High'
 		})
 	);
