@@ -33,8 +33,14 @@
 			<p>{config.version}</p>
 		</div>
 		<div class="flex items-center gap-4">
+			<!-- class="btn slc-will-close w-full justify-start text-nowrap" -->
 			<form action="/logout" method="POST" use:enhance>
-				<button type="submit" class="btn slc-will-close w-full justify-start text-nowrap"> Çıkış Yap </button>
+				<button
+					type="submit"
+					class="bg-primary-300 hover:bg-primary-300/80 text-primary-900 flex cursor-pointer rounded-sm px-2.5 *:disabled:opacity-50"
+				>
+					Çıkış Yap
+				</button>
 			</form>
 			<ThemeToggle />
 		</div>

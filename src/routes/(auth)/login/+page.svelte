@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/client/app';
 
@@ -81,7 +81,13 @@
 	>
 		<form
 			method="POST"
-			use:enhance
+			use:enhance={() => {
+				isLoading = true;
+				return async ({ result }) => {
+					isLoading = false;
+					await applyAction(result);
+				};
+			}}
 			class="flex w-full flex-col
 				px-2
 				pb-4
@@ -129,9 +135,18 @@
 					class="bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 text-surface-token-900 flex h-10 w-full cursor-pointer items-center justify-center rounded-sm text-base font-bold shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
 				>
 					{#if isLoading}
-						<span class="animate-spin">♠</span>
+						<!-- Dönen spinner ikonu -->
+						<svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+					{:else}
+						Giriş Yap
 					{/if}
-					Giriş Yap
 				</button>
 			</div>
 		</form>

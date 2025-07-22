@@ -3,8 +3,11 @@ import { ClientResponseError, type RecordAuthResponse } from 'pocketbase';
 import { Collections, type UsersResponse } from '$lib/client/types/pocketbase-types';
 import { fail, redirect } from '@sveltejs/kit';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const actions: Actions = {
 	default: async ({ locals, request }) => {
+		await sleep(1000);
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;

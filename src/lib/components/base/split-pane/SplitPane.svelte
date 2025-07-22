@@ -1,4 +1,5 @@
 <script lang="ts">
+	// https://github.com/Rich-Harris/svelte-split-pane
 	import type { SplitPanePropsType, Length } from './types';
 	import { constrain } from './utils';
 

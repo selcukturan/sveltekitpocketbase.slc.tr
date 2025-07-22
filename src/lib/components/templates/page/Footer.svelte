@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
-	import { getContext } from './context';
 
 	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
-
-	// Get Context
-	const ctx = getContext();
-	/* console.log('Footer', ctx.pageTitle); */
 </script>
 
 <footer class="{classes} {`bg-surface-100/80`}" style:border-bottom="0px" style:border-left="0px">

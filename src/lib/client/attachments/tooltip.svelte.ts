@@ -149,11 +149,11 @@ function showTooltip(node: HTMLElement, data: TooltipOptionType) {
 }
 
 export function tooltip(tooltipData: string | object): Attachment {
-	console.log(`Started. ${new Date().getTime()}`);
+	// console.log(`Started. ${new Date().getTime()}`);
 	let data: TooltipOptionType = normalize(tooltipData);
 
 	return (node) => {
-		console.log(`Element DOM'a monte edildi. ${new Date().getTime()}`);
+		// console.log(`Element DOM'a monte edildi. ${new Date().getTime()}`);
 		if (!(node instanceof HTMLElement)) {
 			throw new Error('Node is not an HTMLElement');
 		}
@@ -176,7 +176,7 @@ export function tooltip(tooltipData: string | object): Attachment {
 			refreshTooltip(node, data);
 		}
 
-		console.log(`Element'in kurulumu yapıldı. ${new Date().getTime()}`);
+		//console.log(`Element'in kurulumu yapıldı. ${new Date().getTime()}`);
 		node.addEventListener('mouseenter', showEventHandler);
 		node.addEventListener('mouseleave', hideEventHandler);
 		node.addEventListener('blur', hideEventHandler);
@@ -185,7 +185,7 @@ export function tooltip(tooltipData: string | object): Attachment {
 		}
 
 		return () => {
-			console.log(`Element DOM'dan söküldü. ${new Date().getTime()}`);
+			// console.log(`Element DOM'dan söküldü. ${new Date().getTime()}`);
 			// if (getTooltip()?.activeNode?.contains(element)) {
 			//	hideTooltip();
 			// }
