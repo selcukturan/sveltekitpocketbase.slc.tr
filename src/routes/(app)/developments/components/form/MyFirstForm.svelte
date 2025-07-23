@@ -8,7 +8,7 @@
 	import { myFirstFormSchema } from './schema';
 
 	// inputs
-	import Form from '$lib/components/base/form';
+	import Form from '$lib/components/base/superform';
 
 	// props
 	let { data }: { data: SuperValidated<Infer<typeof myFirstFormSchema>> } = $props();

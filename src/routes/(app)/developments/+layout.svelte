@@ -38,13 +38,13 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Tree (Draft)',
+					title: 'Tree (SLC Draft)',
 					href: `/developments/components/tree`,
 					icon: 'file-symlink'
 				},
 
 				{
-					title: 'Tooltip',
+					title: 'Tooltip (SLC)',
 					href: `/developments/components/tooltip`,
 					icon: 'file-symlink'
 				},
@@ -54,7 +54,7 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Drawer Panel',
+					title: 'Drawer Panel (SLC)',
 					href: `/developments/components/drawer`,
 					icon: 'file-symlink'
 				},
@@ -65,18 +65,18 @@
 				},
 
 				{
-					title: 'InputText',
-					href: `/developments/components/input-text`,
+					title: 'Select (SLC)',
+					href: `/developments/components/select-slc`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'InputNumber',
-					href: `/developments/components/input-number`,
+					title: 'Toast (SLC)',
+					href: `/developments/components/toast-slc`,
 					icon: 'file-symlink'
 				},
 				{
-					title: 'InputDateTime',
-					href: `/developments/components/input-datetime`,
+					title: 'Form Validation with SLC',
+					href: `/developments/components/form-slc`,
 					icon: 'file-symlink'
 				}
 			]
