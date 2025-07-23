@@ -1,8 +1,10 @@
-<script lang="ts" generics="TInput = unknown, TOutput = TInput, TIssue extends BaseIssue<unknown> = BaseIssue<unknown>">
+<script lang="ts" generics="Schema extends GenericValibotObject">
 	import { type Snippet } from 'svelte';
-	import { type BaseSchema, type BaseIssue } from 'valibot';
+	import type { GenericValibotObject } from './types';
+	import * as v from 'valibot';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { enhance, applyAction } from '$app/forms';
+	import * as devalue from 'devalue';
 
 	import { createForm } from './forms.svelte';
 
@@ -11,19 +13,32 @@
 		class: classes,
 		schema,
 		defaultValues
-	}: { children?: Snippet; class?: string; schema: BaseSchema<TInput, TOutput, TIssue>; defaultValues: TInput } = $props();
+	}: { children?: Snippet; class?: string; schema: Schema; defaultValues: Partial<v.InferInput<Schema>> } = $props();
 
 	// Set Context
 	const ctx = createForm(schema, defaultValues);
-	console.log('Page', ctx.test);
+
+	// $inspect('ctx.inputs', ctx.inputs);
+	$inspect('ctx.data', ctx.data);
 
 	const svelteForm = (): SubmitFunction => {
 		return async ({ formElement, formData, action, cancel }) => {
-			if (0 > 0) {
-				// Form verileri geçersizse, formu iptal et
-				cancel(); // Form gönderimini iptal et
-				return; // enhance callback'inden çık
+			// const formdata: { [key: string]: FormDataEntryValue | File[] | File | undefined | null } = Object.fromEntries(formData.entries());
+			for (const [key, value] of formData.entries()) {
+				formData.delete(key);
 			}
+
+			const result = ctx.safeParse();
+			const jsonPayload = devalue.stringify(result.output); // devalue.parse(jsonPayload);
+			formData.set('_slc_json', jsonPayload);
+
+			// if (0 > 0) {
+			// Form verileri geçersizse, formu iptal et
+			// cancel(); // Form gönderimini iptal et
+			// return; // enhance callback'inden çık
+			// }
+
+			// yeni URL üret
 
 			return async ({ result, update }) => {
 				await applyAction(result); // applyAction, form prop'unu otomatik güncelleyerek sunucu hatalarını (result.type === 'failure') veya başarı durumunu (result.type === 'success') yansıtır.

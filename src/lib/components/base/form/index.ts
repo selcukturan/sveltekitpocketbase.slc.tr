@@ -1,4 +1,4 @@
-import Form from './deneme.svelte';
+import Form from './form.svelte';
 /* import iCheckbox from './iCheckbox.svelte';
 import iCombobox from './iCombobox.svelte';
 import iDate from './iDate.svelte';

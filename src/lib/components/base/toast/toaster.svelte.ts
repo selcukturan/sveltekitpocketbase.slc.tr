@@ -136,5 +136,9 @@ export function createToaster(id: string) {
 }
 
 export function getToaster(id: string) {
-	return getContext<Toaster>(id);
+	const toasterInstance = getContext<ReturnType<typeof createToaster>>(id);
+	if (!toasterInstance) {
+		throw new Error('Toaster context not found. Make sure you have called createToaster in an ancestor component.');
+	}
+	return toasterInstance;
 }

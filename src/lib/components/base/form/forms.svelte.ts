@@ -1,53 +1,91 @@
 import { getContext, setContext } from 'svelte';
-import { type BaseSchema, type BaseIssue } from 'valibot';
+import * as v from 'valibot';
+import type { GenericValibotObject, PartialSchemaError } from './types';
 
-class Forms<TInput = unknown, TOutput = TInput, TIssue extends BaseIssue<unknown> = BaseIssue<unknown>> {
+type InputDataType = {
+	inputValue: string;
+	initialValue: string;
+	value: string;
+};
+
+class Forms<Schema extends GenericValibotObject> {
 	// ################################## BEGIN Constructor #########################################################################################################################
 
-	#test = $state(1);
-	get test() {
-		return this.#test;
-	}
+	inputs = $state<Record<string, InputDataType>>({});
+	data = $state<v.InferInput<Schema>>({});
+	// values = $state<v.InferOutput<Schema>>({});
+	// errors?: [v.InferIssue<Schema>, ...v.InferIssue<Schema>[]] = $state([]);
+	defaultValues?: Partial<v.InferInput<Schema>> = $state({});
+	parseResult: v.SafeParseResult<Schema> | undefined = $state(undefined);
 
-	public readonly schema: BaseSchema<TInput, TOutput, TIssue>;
+	errorsByName: { [key: string]: string | undefined } = $derived.by(() => this.convertIssuesToErrorMap(this.parseResult?.issues ?? []));
 
-	constructor(schema: BaseSchema<TInput, TOutput, TIssue>, defaultValues?: TInput) {
+	public readonly schema: Schema;
+
+	constructor(schema: Schema, defaultValues?: Partial<v.InferInput<Schema>>) {
 		this.schema = schema;
+		this.defaultValues = defaultValues;
 	}
+
+	safeParse = () => {
+		const result = v.safeParse(this.schema, this.data);
+		this.parseResult = result;
+		return result;
+	};
+
+	convertIssuesToErrorMap = <Schema extends GenericValibotObject>(issues: v.GenericIssue[]): PartialSchemaError<Schema> => {
+		const errors: PartialSchemaError<Schema> = {};
+
+		for (const issue of issues ?? []) {
+			if (!issue.path) continue;
+			const key = issue.path[0]?.key as keyof v.InferInput<Schema>;
+			if (!key) continue;
+			errors[key] = issue.message;
+		}
+		return errors;
+	};
+
+	onblur = (inputNode?: HTMLInputElement) => {
+		if (!(inputNode instanceof HTMLInputElement)) return;
+		this.safeParse();
+	};
+
+	oninput = (inputNode: HTMLInputElement, inputName: string, inputValue: unknown) => {
+		if (!(inputNode instanceof HTMLInputElement)) return;
+		if (typeof inputValue !== 'string') return;
+
+		this.inputs = {
+			...this.inputs,
+			[inputName]: {
+				value: `xxx${inputValue}xxx`,
+				initialValue: 'text',
+				inputValue: inputValue
+			}
+		};
+
+		this.data = {
+			...this.data,
+			[inputName]: inputValue
+		};
+
+		// this.safeParse();
+	};
 
 	// ################################## END Constructor ##########################################################################################################################
 }
 
 // ################################## BEGIN Export Table Context ##############################################################################################################################
 
-const FORM_CONTEXT_KEY = Symbol('svelte-form-context-key'); // Benzersiz bir key kullanmak daha iyidir
+const FORM_CONTEXT_KEY = Symbol('SLC_FORM_CTX'); // Benzersiz bir key kullanmak daha iyidir
 
-/**
- * Creates a new Form instance with the given schema and sets it in the Svelte context.
- * @param schema The Valibot schema for the form.
- * @returns The created Form instance.
- */
-export function createForm<TInput, TOutput, TIssue extends BaseIssue<unknown>>(
-	schema: BaseSchema<TInput, TOutput, TIssue>,
-	defaultValues: TInput
-): Forms<TInput, TOutput, TIssue> {
-	const formInstance = new Forms<TInput, TOutput, TIssue>(schema, defaultValues);
+export function createForm<Schema extends GenericValibotObject>(schema: Schema, defaultValues?: Partial<v.InferInput<Schema>>) {
+	const formInstance = new Forms<Schema>(schema, defaultValues);
 	setContext(FORM_CONTEXT_KEY, formInstance);
 	return formInstance;
 }
 
-/**
- * Retrieves the Form instance from the Svelte context.
- * You need to provide the generic types that were used when creating the form.
- * @returns The Form instance from context.
- * @throws Error if the form context is not found.
- */
-export function getForm<
-	TInput = unknown, // Varsayılanlar eklenebilir ama çağırırken belirtmek daha güvenli
-	TOutput = TInput,
-	TIssue extends BaseIssue<unknown> = BaseIssue<unknown>
->(): Forms<TInput, TOutput, TIssue> {
-	const formInstance = getContext<Forms<TInput, TOutput, TIssue>>(FORM_CONTEXT_KEY);
+export function getForm<Schema extends GenericValibotObject>() {
+	const formInstance = getContext<Forms<Schema>>(FORM_CONTEXT_KEY);
 	if (!formInstance) {
 		throw new Error('Form context not found. Make sure you have called createForm in an ancestor component.');
 	}

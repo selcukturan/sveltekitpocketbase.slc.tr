@@ -1,5 +1,12 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
+
+	import { myFirstFormSchema } from './schema';
+	import Form from '$lib/components/base/form';
+
+	const formInitialData = {
+		text_optional: '1'
+	};
 </script>
 
 <Head>
@@ -13,7 +20,9 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<div>Content Datetime</div>
+			<Form schema={myFirstFormSchema} defaultValues={formInitialData}>
+				<Form.iTextbox name="text_optional" />
+			</Form>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
