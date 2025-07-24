@@ -81,7 +81,8 @@
 	}
 
 	dialog::backdrop {
-		background-color: var(--color-surface-400);
+		/* background-color: var(--color-surface-400); */
+		background-image: linear-gradient(45deg, magenta, rebeccapurple, dodgerblue, green);
 	}
 
 	/* Animate In */
