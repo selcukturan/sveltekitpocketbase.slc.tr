@@ -78,6 +78,11 @@
 					title: 'Form Validation with SLC',
 					href: `/developments/components/form-slc`,
 					icon: 'file-symlink'
+				},
+				{
+					title: 'Alert Dialog (SLC)',
+					href: `/developments/components/alert-dialog`,
+					icon: 'file-symlink'
 				}
 			]
 		}
