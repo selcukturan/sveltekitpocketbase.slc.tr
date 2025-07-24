@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { focustrap } from '$lib/client/attachments';
 	import { tick } from 'svelte';
-	import { fly } from 'svelte/transition';
 
 	let closeButton: HTMLButtonElement | null = $state(null);
 	let openButton: HTMLButtonElement | null = $state(null);
 	let dialog: HTMLDialogElement | null = $state(null);
 	let open = $state(false);
+	let isClosing = $state(false); // 1. YENİ: Kapanma animasyonu durumunu tutmak için yeni bir state
 
-	// let { open = false }: { open: boolean } = $props();
+	// Animasyon süresini bir değişkende tutmak, JS ve CSS'i senkronize tutmayı kolaylaştırır.
+	const ANIMATION_DURATION = 250;
 
 	const handleBackdropClick = (e: MouseEvent) => {
 		const target = e.target as HTMLElement;
@@ -18,22 +19,37 @@
 	};
 
 	const show = () => {
+		isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
 		open = true;
 		tick().then(() => {
 			dialog?.showModal();
 		});
 	};
+
+	// 2. GÜNCELLENDİ: hide fonksiyonu artık animasyonu yönetecek
 	const hide = () => {
-		dialog?.close();
-		open = false;
+		if (!dialog) return;
+
+		isClosing = true; // Kapanma animasyonunu tetikle
+
+		// Animasyonun bitmesini bekle
+		setTimeout(() => {
+			dialog?.close(); // Gerçek kapatma işlemi
+			open = false; // #if bloğu ile DOM'dan kaldırma
+			isClosing = false; // Durumu sıfırla
+		}, ANIMATION_DURATION);
 	};
+
 	const handleOpen = (e: MouseEvent) => {
 		e.preventDefault();
 		show();
 	};
 
-	const handleClose = (e: Event) => {
+	// 3. GÜNCELLENDİ: Hem buton tıklaması hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırmalı
+	const handleInitiateClose = (e: Event) => {
 		e.preventDefault();
+		// Zaten kapanma sürecindeyse tekrar başlatma
+		if (isClosing) return;
 		hide();
 	};
 </script>
@@ -41,19 +57,19 @@
 <button bind:this={openButton} onclick={handleOpen}>Open Dialog</button>
 
 {#if open}
-	<dialog bind:this={dialog} {@attach focustrap} out:fly={{ y: 100, duration: 150 }} onclose={handleClose} onclick={handleBackdropClick}>
+	<!-- 4. GÜNCELLENDİ: Kapanma animasyonu için `closing` sınıfını dinamik olarak ekle -->
+	<dialog bind:this={dialog} {@attach focustrap} onclose={handleInitiateClose} onclick={handleBackdropClick} class:closing={isClosing}>
 		<div class="dialog-content">
-			<button bind:this={closeButton} onclick={handleClose}>Close</button>
+			<button bind:this={closeButton} onclick={handleInitiateClose}>Close</button>
 			<p>This modal dialog has a groovy backdrop!</p>
 			<!-- svelte-ignore a11y_autofocus -->
-			<input autofocus type="text" />
+			<input type="text" />
 			<input type="text" />
 		</div>
 	</dialog>
 {/if}
 
 <style>
-	/* NOTE: add the following styles to your global stylesheet. */
 	dialog,
 	dialog::backdrop {
 		--anim-duration: 250ms;
@@ -61,39 +77,37 @@
 			display var(--anim-duration) allow-discrete,
 			overlay var(--anim-duration) allow-discrete,
 			opacity var(--anim-duration),
-			transform 150ms;
+			transform var(--anim-duration) ease-in-out; /* Animasyonun daha yumuşak olması için transform süresini de ekleyelim */
 		opacity: 0;
 	}
 
 	dialog {
-		/* Sihirli dokunuş: Dialog'u dikey ve yatayda ortalar */
 		margin: auto;
-
-		transform: scale(1);
-
-		/* Estetik ve kontrol için eklemeler */
-		width: 90%; /* Genişlik ekranın %90'ı olsun */
-		max-width: 500px; /* Ama 500px'den fazla büyümesin */
-		border: none; /* Tarayıcının varsayılan kenarlığını kaldır */
-		border-radius: 0.5rem; /* Köşeleri yuvarlat */
-		padding: 0; /* İçerideki div'in tam oturması için dialog'un kendi padding'ini sıfırla */
-		box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); /* Güzel bir gölge ekle */
+		width: 90%;
+		max-width: 500px;
+		border: none;
+		border-radius: 0.5rem;
+		padding: 0;
+		box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+		/* 5. GÜNCELLENDİ: Açılış animasyonu ile simetrik olması için transform'u sıfırla */
+		transform: translateY(0);
 	}
 
 	dialog::backdrop {
-		/* background-color: var(--color-surface-400); */
 		background-image: linear-gradient(45deg, magenta, rebeccapurple, dodgerblue, green);
 	}
 
 	/* Animate In */
 	dialog[open] {
 		opacity: 1;
+		/* 6. GÜNCELLENDİ: Açılışta transform'un hedefini belirt. Artık scale değil, Y ekseninde hareket. */
+		transform: translateY(0);
 	}
 	dialog[open]::backdrop {
 		opacity: 0.5;
 	}
 
-	/* Animate Out */
+	/* Starting style for entry animation */
 	@starting-style {
 		dialog[open] {
 			transform: translateY(100px);
@@ -103,6 +117,19 @@
 		dialog[open]::backdrop {
 			opacity: 0;
 		}
+	}
+
+	/* 7. YENİ: Kapanma animasyonu için yeni kural */
+	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
+	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
+	dialog.closing {
+		opacity: 0;
+		transform: translateY(100px);
+	}
+
+	/* Kapanırken backdrop'ın da fade-out olması için */
+	dialog.closing::backdrop {
+		opacity: 0;
 	}
 
 	.dialog-content {

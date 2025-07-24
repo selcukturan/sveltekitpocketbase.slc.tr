@@ -8,6 +8,7 @@ export class Toaster {
 	toasts = $state<Toast[]>([]);
 	// Haritamızı daha fazla veri tutacak şekilde güncelliyoruz
 	private toastTimerData = new Map<string, ToastTimerData>();
+	private _isPaused: boolean = false;
 
 	constructor() {
 		onDestroy(() => {
@@ -24,6 +25,7 @@ export class Toaster {
 		for (const id of this.toastTimerData.keys()) {
 			this.pauseTimer(id);
 		}
+		this._isPaused = true;
 	};
 
 	// Tüm toast'ların zamanlayıcılarını devam ettiren bir metot
@@ -31,6 +33,7 @@ export class Toaster {
 		for (const id of this.toastTimerData.keys()) {
 			this.resumeTimer(id);
 		}
+		this._isPaused = false;
 	};
 
 	readonly add = (title: string, message: string, durationMs = 5000) => {
@@ -113,20 +116,37 @@ export class Toaster {
 	readonly attach: Attachment = (element) => {
 		// element DOM'a monte edilmiştir
 		// setup buraya
-		const handleMouseEnter = () => {
+		const handleInteractionStart = () => {
+			console.log('handleInteractionStart called');
 			this.pauseAll();
 		};
 
 		const handleMouseLeave = () => {
+			console.log('handleMouseLeave called');
 			this.resumeAll();
 		};
 
-		element.addEventListener('mouseenter', handleMouseEnter);
+		const handleDocumentInteraction = (event: MouseEvent | TouchEvent) => {
+			if (!this._isPaused) return;
+
+			// Eğer fare toast'ın dışında ise tüm toast'ların zamanlayıcılarını devam ettir
+			if (!element.contains(event.target as Node)) {
+				console.log('handleDocumentInteraction called');
+				this.resumeAll();
+			}
+		};
+
+		element.addEventListener('mouseenter', handleInteractionStart);
+		element.addEventListener('touchstart', handleInteractionStart, { passive: true });
 		element.addEventListener('mouseleave', handleMouseLeave);
+		document.addEventListener('click', handleDocumentInteraction);
+
 		return () => {
 			// destroy buraya
-			element.removeEventListener('mouseenter', handleMouseEnter);
+			element.removeEventListener('mouseenter', handleInteractionStart);
+			element.removeEventListener('touchstart', handleInteractionStart);
 			element.removeEventListener('mouseleave', handleMouseLeave);
+			document.removeEventListener('click', handleDocumentInteraction);
 		};
 	};
 }
