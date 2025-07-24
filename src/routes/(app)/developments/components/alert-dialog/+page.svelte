@@ -9,12 +9,12 @@
 	let isClosing = $state(false); // 1. YENİ: Kapanma animasyonu durumunu tutmak için yeni bir state
 
 	// Animasyon süresini bir değişkende tutmak, JS ve CSS'i senkronize tutmayı kolaylaştırır.
-	const ANIMATION_DURATION = 250;
+	const ANIMATION_DURATION = 150;
 
 	const handleBackdropClick = (e: MouseEvent) => {
 		const target = e.target as HTMLElement;
 		if (target === dialog) {
-			hide();
+			// hide();
 		}
 	};
 
@@ -58,7 +58,14 @@
 
 {#if open}
 	<!-- 4. GÜNCELLENDİ: Kapanma animasyonu için `closing` sınıfını dinamik olarak ekle -->
-	<dialog bind:this={dialog} {@attach focustrap} onclose={handleInitiateClose} onclick={handleBackdropClick} class:closing={isClosing}>
+	<dialog
+		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
+		bind:this={dialog}
+		{@attach focustrap}
+		onclose={handleInitiateClose}
+		onclick={handleBackdropClick}
+		class:closing={isClosing}
+	>
 		<div class="dialog-content">
 			<button bind:this={closeButton} onclick={handleInitiateClose}>Close</button>
 			<p>This modal dialog has a groovy backdrop!</p>
@@ -72,7 +79,7 @@
 <style>
 	dialog,
 	dialog::backdrop {
-		--anim-duration: 250ms;
+		--anim-duration: 150ms;
 		transition:
 			display var(--anim-duration) allow-discrete,
 			overlay var(--anim-duration) allow-discrete,
@@ -82,19 +89,12 @@
 	}
 
 	dialog {
-		margin: auto;
-		width: 90%;
-		max-width: 500px;
-		border: none;
-		border-radius: 0.5rem;
-		padding: 0;
-		box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 		/* 5. GÜNCELLENDİ: Açılış animasyonu ile simetrik olması için transform'u sıfırla */
 		transform: translateY(0);
 	}
 
 	dialog::backdrop {
-		background-image: linear-gradient(45deg, magenta, rebeccapurple, dodgerblue, green);
+		background-image: linear-gradient(45deg, var(--color-surface-300));
 	}
 
 	/* Animate In */
@@ -110,7 +110,7 @@
 	/* Starting style for entry animation */
 	@starting-style {
 		dialog[open] {
-			transform: translateY(100px);
+			transform: translateY(20px);
 			opacity: 0;
 		}
 
@@ -124,7 +124,7 @@
 	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
 	dialog.closing {
 		opacity: 0;
-		transform: translateY(100px);
+		transform: translateY(20px);
 	}
 
 	/* Kapanırken backdrop'ın da fade-out olması için */
