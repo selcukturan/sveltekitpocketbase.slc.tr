@@ -80,8 +80,8 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'Alert Dialog (SLC)',
-					href: `/developments/components/alert-dialog`,
+					title: 'Confirmation (SLC)',
+					href: `/developments/components/confirmation`,
 					icon: 'file-symlink'
 				}
 			]

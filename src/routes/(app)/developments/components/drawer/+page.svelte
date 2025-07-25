@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Drawer } from '$lib/components/base/drawer';
+	import { confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
 	let drawer: Drawer;
@@ -71,9 +72,13 @@
 	bind:this={drawer2}
 	onOpen={() => console.log('Drawer 2 opened')}
 	onClose={() => console.log('Drawer 2 closed')}
-	onBeforeClose={() => {
+	onBeforeClose={async () => {
 		// any custom logic before closing
-		return confirm('Drawer 2 kapatılsın mı?');
+		return await confirm({
+			message: 'Bu paneli kapatmak istediğinize emin misiniz?',
+			yes: 'Evet',
+			no: 'Hayır'
+		});
 	}}
 >
 	<Page>

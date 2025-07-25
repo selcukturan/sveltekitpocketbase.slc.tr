@@ -2,14 +2,15 @@
 	import { focustrap } from '$lib/client/attachments';
 	import { tick } from 'svelte';
 
-	let closeButton: HTMLButtonElement | null = $state(null);
-	let openButton: HTMLButtonElement | null = $state(null);
-	let dialog: HTMLDialogElement | null = $state(null);
-	let open = $state(false);
-	let isClosing = $state(false); // 1. YENİ: Kapanma animasyonu durumunu tutmak için yeni bir state
+	let { message = 'Onaylıyor musunuz?', yes = 'Evet', no = 'Hayır' }: { message?: string; yes?: string; no?: string } = $props();
 
-	// Animasyon süresini bir değişkende tutmak, JS ve CSS'i senkronize tutmayı kolaylaştırır.
-	const ANIMATION_DURATION = 150;
+	let dialog: HTMLDialogElement | null = $state(null);
+	let resolvePromise: ((value: boolean) => void) | null = null;
+	let open = $state(false);
+	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
+
+	// Animasyon süresini, JS ve CSS'te senkronize tut.
+	export const ANIMATION_DURATION = 150;
 
 	const handleBackdropClick = (e: MouseEvent) => {
 		const target = e.target as HTMLElement;
@@ -18,15 +19,24 @@
 		}
 	};
 
-	const show = () => {
+	export const show = () => {
 		isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
 		open = true;
-		tick().then(() => {
-			dialog?.showModal();
+
+		// Yeni bir Promise oluşturup döndürüyoruz.
+		return new Promise((resolve) => {
+			// Bu Promise'in resolve fonksiyonunu dışarıdaki değişkene atıyoruz.
+			// Böylece butonlar bu fonksiyona erişebilir.
+			resolvePromise = resolve;
+
+			// DOM'un güncellenmesini bekleyip sonra dialog'u gösteriyoruz.
+			tick().then(() => {
+				dialog?.showModal();
+			});
 		});
 	};
 
-	// 2. GÜNCELLENDİ: hide fonksiyonu artık animasyonu yönetecek
+	// hide fonksiyonu animasyonu da yönetir
 	const hide = () => {
 		if (!dialog) return;
 
@@ -40,38 +50,29 @@
 		}, ANIMATION_DURATION);
 	};
 
-	const handleOpen = (e: MouseEvent) => {
+	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır
+	const handleClose = (e: Event, value: boolean) => {
 		e.preventDefault();
-		show();
-	};
-
-	// 3. GÜNCELLENDİ: Hem buton tıklaması hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırmalı
-	const handleInitiateClose = (e: Event) => {
-		e.preventDefault();
-		// Zaten kapanma sürecindeyse tekrar başlatma
-		if (isClosing) return;
+		if (isClosing) return; // Zaten kapanma sürecindeyse tekrar başlatma
 		hide();
+		resolvePromise?.(value); // Promise'i true veya false ile çöz
+		resolvePromise = null; // Promise'i sıfırla, böylece tekrar kullanılabilir
 	};
 </script>
 
-<button bind:this={openButton} onclick={handleOpen}>Open Dialog</button>
-
 {#if open}
-	<!-- 4. GÜNCELLENDİ: Kapanma animasyonu için `closing` sınıfını dinamik olarak ekle -->
 	<dialog
 		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
 		bind:this={dialog}
 		{@attach focustrap}
-		onclose={handleInitiateClose}
+		onclose={(e) => handleClose(e, false)}
 		onclick={handleBackdropClick}
 		class:closing={isClosing}
 	>
 		<div class="dialog-content">
-			<button bind:this={closeButton} onclick={handleInitiateClose}>Close</button>
-			<p>This modal dialog has a groovy backdrop!</p>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input type="text" />
-			<input type="text" />
+			<p>{message}</p>
+			<button onclick={(e) => handleClose(e, false)}>{no}</button>
+			<button onclick={(e) => handleClose(e, true)}>{yes}</button>
 		</div>
 	</dialog>
 {/if}
@@ -119,7 +120,6 @@
 		}
 	}
 
-	/* 7. YENİ: Kapanma animasyonu için yeni kural */
 	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
 	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
 	dialog.closing {

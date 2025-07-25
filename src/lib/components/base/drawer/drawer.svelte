@@ -11,12 +11,19 @@
 		onClose,
 		onBeforeClose,
 		escClose = true
-	}: { children?: Snippet<[() => void]>; onOpen?: () => void; onClose?: () => void; onBeforeClose?: () => boolean; escClose?: boolean } = $props();
+	}: {
+		children?: Snippet<[() => void]>;
+		onOpen?: () => void;
+		onClose?: () => void;
+		onBeforeClose?: () => Promise<boolean>;
+		escClose?: boolean;
+	} = $props();
 
 	const id = $props.id();
 	let openDrawer = $state(false);
 	let drawer: HTMLElement | null = $state(null);
 	let startingZindex = $state(1000);
+	let waitingForClose = false;
 
 	export const open = () => {
 		openDrawer = true;
@@ -24,8 +31,22 @@
 			onOpen?.();
 		});
 	};
+
 	export const close = () => {
-		if (onBeforeClose && !onBeforeClose()) return;
+		if (onBeforeClose) {
+			waitingForClose = true;
+			onBeforeClose().then((shouldClose) => {
+				waitingForClose = false;
+				if (shouldClose) {
+					performClose();
+				}
+			});
+		} else {
+			performClose();
+		}
+	};
+
+	const performClose = () => {
 		openDrawer = false;
 		tick().then(() => {
 			onClose?.();
@@ -58,7 +79,7 @@
 		const target = e.target as HTMLElement;
 		if (!drawer) return;
 		const { index } = drawer.dataset;
-		if (openDrawer && escClose && e.code == 'Escape' && !isInput(target) && index === `${length() - 1}`) {
+		if (!waitingForClose && openDrawer && escClose && e.code == 'Escape' && !isInput(target) && index === `${length() - 1}`) {
 			e.preventDefault();
 			close();
 		}
