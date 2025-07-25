@@ -107,7 +107,7 @@
 			bind:this={drawer}
 			{@attach focustrap}
 			class:slc-app-drawer-panel={true}
-			class="bg-surface-50 fixed top-0 right-0 h-full w-full max-w-2xl bg-white shadow-xl"
+			class="bg-surface-50 fixed top-0 right-0 h-full w-full max-w-2xl shadow-xl"
 			style:z-index={zindex}
 			data-index={zindex - startingZindex}
 			role="dialog"

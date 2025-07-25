@@ -1,16 +1,20 @@
 <script lang="ts">
 	import { Drawer } from '$lib/components/base/drawer';
+	import { Drawerx } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
 	let drawer: Drawer;
 	let drawer2: Drawer;
+	let drawerx: Drawerx;
 </script>
 
 <Head>
 	<title>Drawer - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
+
+<Drawerx bind:this={drawerx} />
 
 <!-- Sayfa içeriği -->
 <Page>
@@ -28,6 +32,16 @@
 						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 					>
 						Open Panel
+					</button>
+				</div>
+				<div class="flex gap-4">
+					<button
+						onclick={() => {
+							drawerx.show();
+						}}
+						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+					>
+						Open Panel X
 					</button>
 				</div>
 			</main>
