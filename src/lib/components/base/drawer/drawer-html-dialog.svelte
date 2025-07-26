@@ -134,8 +134,8 @@
 
 		/* max-height bug fixed */
 		max-height: none;
-		max-height: 100vh;
-		height: 100vh;
+		max-height: 100%;
+		height: 100%;
 		/* Başlangıçta dialog görünmez ve animasyona hazır */
 		opacity: 0;
 	}
