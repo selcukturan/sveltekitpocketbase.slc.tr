@@ -7,6 +7,7 @@
 	let drawer: Drawer;
 	let drawer2: Drawer;
 	let drawerx: Drawerx;
+	let drawerx2: Drawerx;
 </script>
 
 <Head>
@@ -14,7 +15,67 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
-<Drawerx bind:this={drawerx} />
+<Drawerx bind:this={drawerx}>
+	<Page>
+		<Page.Header class="flex items-center justify-between border-b p-4">
+			<div class="flex w-full items-center justify-between">
+				<h2 class="text-lg font-semibold">Panel</h2>
+				<button onclick={() => drawerx.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> X </button>
+			</div>
+		</Page.Header>
+		<Page.Main class="flex-1 overflow-y-auto p-4">
+			<p>Bu, sağdan kayarak açılan bir panel!</p>
+			<input type="text" class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 1" />
+			<button class="mt-4 rounded bg-blue-500 p-2 text-white">Buton</button>
+			<textarea class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 2"></textarea>
+			<button
+				onclick={() => {
+					drawerx2.open();
+				}}
+				class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+			>
+				Open Panel
+			</button>
+		</Page.Main>
+		<Page.Footer class="border-t p-4">
+			<div class="flex justify-end">
+				<button onclick={() => drawerx.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Close 1 </button>
+			</div>
+		</Page.Footer>
+	</Page>
+</Drawerx>
+
+<Drawerx
+	bind:this={drawerx2}
+	onBeforeClose={async () => {
+		// any custom logic before closing
+		return await confirm({
+			message: 'Bu paneli kapatmak istediğinize emin misiniz?',
+			yes: 'Evet',
+			no: 'Hayır'
+		});
+	}}
+>
+	<Page>
+		<Page.Header class="flex items-center justify-between border-b p-4">
+			<div class="flex w-full items-center justify-between">
+				<h2 class="text-lg font-semibold">Panel</h2>
+				<button onclick={() => drawerx2.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> X </button>
+			</div>
+		</Page.Header>
+		<Page.Main class="flex-1 overflow-y-auto p-4">
+			<p>Bu, sağdan kayarak açılan bir panel!</p>
+			<input type="text" class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 1" />
+			<button class="mt-4 rounded bg-blue-500 p-2 text-white">Buton</button>
+			<textarea class="mt-4 w-full rounded border bg-transparent p-2" placeholder="Odaklanılabilir alan 2"></textarea>
+		</Page.Main>
+		<Page.Footer class="border-t p-4">
+			<div class="flex justify-end">
+				<button onclick={() => drawerx2.close()} class="rounded bg-gray-500 px-4 py-2 text-white"> Close 22 </button>
+			</div>
+		</Page.Footer>
+	</Page>
+</Drawerx>
 
 <!-- Sayfa içeriği -->
 <Page>
@@ -31,17 +92,17 @@
 						}}
 						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 					>
-						Open Panel
+						Open Panel (html div)
 					</button>
 				</div>
 				<div class="flex gap-4">
 					<button
 						onclick={() => {
-							drawerx.show();
+							drawerx.open();
 						}}
 						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 					>
-						Open Panel X
+						Open Panel (html dialog)
 					</button>
 				</div>
 			</main>

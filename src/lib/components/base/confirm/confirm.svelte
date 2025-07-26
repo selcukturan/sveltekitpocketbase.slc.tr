@@ -12,13 +12,6 @@
 	// Animasyon süresini, JS ve CSS'te senkronize tut.
 	export const ANIMATION_DURATION = 150;
 
-	const handleBackdropClick = (e: MouseEvent) => {
-		const target = e.target as HTMLElement;
-		if (target === dialog) {
-			// hide();
-		}
-	};
-
 	export const show = () => {
 		isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
 		open = true;
@@ -43,11 +36,14 @@
 		isClosing = true; // Kapanma animasyonunu tetikle
 
 		// Animasyonun bitmesini bekle
-		setTimeout(() => {
+		dialog?.close(); // Gerçek kapatma işlemi
+		open = false; // #if bloğu ile DOM'dan kaldırma
+		isClosing = false; // Durumu sıfırla
+		/* setTimeout(() => {
 			dialog?.close(); // Gerçek kapatma işlemi
 			open = false; // #if bloğu ile DOM'dan kaldırma
 			isClosing = false; // Durumu sıfırla
-		}, ANIMATION_DURATION);
+		}, ANIMATION_DURATION); */
 	};
 
 	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır
@@ -66,7 +62,6 @@
 		bind:this={dialog}
 		{@attach focustrap}
 		onclose={(e) => handleClose(e, false)}
-		onclick={handleBackdropClick}
 		class:closing={isClosing}
 	>
 		<div class="dialog-content">
