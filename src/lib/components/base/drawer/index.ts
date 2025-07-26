@@ -1,2 +1,2 @@
-export { default as Drawer } from './drawer-html-div.svelte';
-export { default as Drawerx } from './drawer-html-dialog.svelte';
+export { default as Drawer } from './drawer.svelte';
+export { default as DrawerHtmlDialog } from './drawer-html-dialog.svelte';

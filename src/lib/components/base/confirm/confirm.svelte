@@ -36,14 +36,11 @@
 		isClosing = true; // Kapanma animasyonunu tetikle
 
 		// Animasyonun bitmesini bekle
-		dialog?.close(); // Gerçek kapatma işlemi
-		open = false; // #if bloğu ile DOM'dan kaldırma
-		isClosing = false; // Durumu sıfırla
-		/* setTimeout(() => {
+		setTimeout(() => {
 			dialog?.close(); // Gerçek kapatma işlemi
 			open = false; // #if bloğu ile DOM'dan kaldırma
 			isClosing = false; // Durumu sıfırla
-		}, ANIMATION_DURATION); */
+		}, ANIMATION_DURATION);
 	};
 
 	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır

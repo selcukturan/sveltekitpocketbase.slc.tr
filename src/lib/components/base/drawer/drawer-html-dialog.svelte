@@ -2,8 +2,12 @@
 	import { focustrap } from '$lib/client/attachments';
 	import { tick, type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { isInput } from '$lib/client/utils';
 
+	/**
+	 * KISIT TARAYICI UYUMLULUĞU:
+	 * https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#browser_compatibility
+	 * https://caniuse.com/dialog
+	 */
 	let {
 		children,
 		onOpen,
@@ -23,6 +27,10 @@
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
 
 	/**
+	 * KISIT TARAYICI UYUMLULUĞU:
+	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/closedBy#browser_compatibility
+	 * https://caniuse.com/mdn-html_elements_dialog_closedby
+	 *
 	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
 	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
 	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
