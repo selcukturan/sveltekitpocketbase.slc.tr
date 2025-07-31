@@ -8,7 +8,6 @@ export class Toaster {
 	toasts = $state<Toast[]>([]);
 	// Haritamızı daha fazla veri tutacak şekilde güncelliyoruz
 	private toastTimerData = new Map<string, ToastTimerData>();
-	private _isPaused: boolean = false;
 
 	constructor() {
 		onDestroy(() => {
@@ -25,7 +24,6 @@ export class Toaster {
 		for (const id of this.toastTimerData.keys()) {
 			this.pauseTimer(id);
 		}
-		this._isPaused = true;
 	};
 
 	// Tüm toast'ların zamanlayıcılarını devam ettiren bir metot
@@ -33,7 +31,6 @@ export class Toaster {
 		for (const id of this.toastTimerData.keys()) {
 			this.resumeTimer(id);
 		}
-		this._isPaused = false;
 	};
 
 	readonly add = (title: string, message: string, durationMs = 5000) => {
@@ -116,37 +113,31 @@ export class Toaster {
 	readonly attach: Attachment = (element) => {
 		// element DOM'a monte edilmiştir
 		// setup buraya
-		const handleInteractionStart = () => {
-			console.log('handleInteractionStart called');
+		if (!(element instanceof HTMLElement)) {
+			throw new Error('toast must be attached to an HTMLElement');
+		}
+
+		const handlePause = (e: PointerEvent) => {
+			console.log('pauseAll - handlePause');
 			this.pauseAll();
 		};
-
-		const handleMouseLeave = () => {
-			console.log('handleMouseLeave called');
+		const handleResume = (e: PointerEvent) => {
+			console.log('resumeAll - handleResume');
 			this.resumeAll();
 		};
-
-		const handleDocumentInteraction = (event: MouseEvent | TouchEvent) => {
-			if (!this._isPaused) return;
-
-			// Eğer fare toast'ın dışında ise tüm toast'ların zamanlayıcılarını devam ettir
-			if (!element.contains(event.target as Node)) {
-				console.log('handleDocumentInteraction called');
-				this.resumeAll();
-			}
+		const preventContextMenu = (event: Event) => {
+			event.preventDefault();
 		};
 
-		element.addEventListener('mouseenter', handleInteractionStart);
-		element.addEventListener('touchstart', handleInteractionStart, { passive: true });
-		element.addEventListener('mouseleave', handleMouseLeave);
-		document.addEventListener('click', handleDocumentInteraction);
+		element.addEventListener('pointerenter', handlePause);
+		element.addEventListener('pointerleave', handleResume);
+		element.addEventListener('contextmenu', preventContextMenu);
 
 		return () => {
 			// destroy buraya
-			element.removeEventListener('mouseenter', handleInteractionStart);
-			element.removeEventListener('touchstart', handleInteractionStart);
-			element.removeEventListener('mouseleave', handleMouseLeave);
-			document.removeEventListener('click', handleDocumentInteraction);
+			element.removeEventListener('pointerenter', handlePause);
+			element.removeEventListener('pointerleave', handleResume);
+			element.removeEventListener('contextmenu', preventContextMenu);
 		};
 	};
 }

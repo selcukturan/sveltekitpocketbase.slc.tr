@@ -1,5 +1,6 @@
 <script lang="ts">
 	// https://github.com/huntabyte/svelte-5-context-classes
+	import type { Attachment } from 'svelte/attachments';
 	import { getToaster } from './toaster.svelte';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
@@ -31,6 +32,29 @@
 		error: 'bg-error-400 text-error-950 border-error-600 border',
 		loading: 'bg-surface-400 text-surface-950 border-surface-600 border'
 	};
+	const handleClick = (event: MouseEvent, id: string) => {
+		console.log('click');
+		event.stopPropagation();
+		toaster.remove(id);
+	};
+
+	function closeAttach(id: string): Attachment {
+		return (element) => {
+			if (!(element instanceof HTMLElement)) {
+				throw new Error('closeAttach must be attached to an HTMLElement');
+			}
+
+			const handleClick = (event: MouseEvent) => {
+				toaster.remove(id);
+			};
+
+			element.addEventListener('click', handleClick);
+			return () => {
+				// destroy buraya
+				element.removeEventListener('click', handleClick);
+			};
+		};
+	}
 </script>
 
 <!-- Toaster -->
@@ -45,7 +69,7 @@
 		>
 			<span class="text-sm font-medium">{toast.title + ' - ' + crypto.randomUUID()}</span>
 			<span class="text-xs">{toast.message}</span>
-			<button class="absolute top-2 right-2 size-5" onclick={() => toaster.remove(toast.id)}>
+			<button data-toast-button class="absolute top-2 right-2 size-5" {@attach closeAttach(toast.id)}>
 				<span class="sr-only">Close toast</span>
 				<p>X</p>
 			</button>
