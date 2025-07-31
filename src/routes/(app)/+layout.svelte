@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Icons } from '$lib/components/icons';
 	import { Toaster, appToaster } from '$lib/components/zagjs/toast';
 	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
 	import { AppLayout } from '$lib/components/base/app-layout/view';
@@ -15,39 +14,39 @@
 		{
 			title: 'Home',
 			href: '/',
-			icon: 'home'
+			icon: 'ri-home-5-line'
 		},
 		{
 			title: 'Grapes',
 			href: '/grapes',
-			icon: 'grape'
+			icon: 'ri-color-filter-line'
 		},
 		{
 			title: 'Data Table',
 			href: '/data-table',
-			icon: 'data-table'
+			icon: 'ri-table-3'
 		},
 		{
 			title: 'Logs',
 			href: '/logs',
-			icon: 'chart-spline'
+			icon: 'ri-line-chart-line'
 		},
 		{
 			title: 'Developments',
 			href: '/developments',
-			icon: 'square-code'
+			icon: 'ri-code-box-line'
 		},
 		{
 			title: 'Settings',
 			href: '/settings',
-			icon: 'settings'
+			icon: 'ri-tools-line'
 		}
 	];
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<Icons />
+<!-- <Icons /> -->
 
 <ProgressBar navigate={navigating}>
 	<Toaster toaster={appToaster}>

@@ -1,0 +1,757 @@
+@import 'tailwindcss';
+/* @plugin "@tailwindcss/forms"; */
+/* @plugin "tailwindcss-animate"; */
+
+@custom-variant dark (&:is(.dark *));
+
+/* SLC Colors Token */
+:root {
+	/* Web Orange */
+	--token-primary-50: hsl(52 100% 97%);
+	--token-primary-100: hsl(50 100% 88%);
+	--token-primary-200: hsl(50 100% 75%);
+	--token-primary-300: hsl(45 100% 63%);
+	--token-primary-400: hsl(42 100% 55%);
+	--token-primary-500: hsl(39 100% 50%);
+	--token-primary-600: hsl(35 100% 44%);
+	--token-primary-700: hsl(27 97% 36%);
+	--token-primary-800: hsl(30 88% 31%);
+	--token-primary-900: hsl(20 80% 26%);
+	--token-primary-950: hsl(20 100% 14%);
+	/* Blue */
+	--token-secondary-50: hsl(210 100% 97%);
+	--token-secondary-100: hsl(210 100% 93%);
+	--token-secondary-200: hsl(210 100% 87%);
+	--token-secondary-300: hsl(210 100% 78%);
+	--token-secondary-400: hsl(210 100% 68%);
+	--token-secondary-500: hsl(210 100% 60%);
+	--token-secondary-600: hsl(210 100% 53%);
+	--token-secondary-700: hsl(210 100% 48%);
+	--token-secondary-800: hsl(210 100% 40%);
+	--token-secondary-900: hsl(210 100% 33%);
+	--token-secondary-950: hsl(210 100% 21%);
+	/* Green */
+	--token-tertiary-50: hsl(82 39% 82%);
+	--token-tertiary-100: hsl(82 39% 77%);
+	--token-tertiary-200: hsl(82 39% 70%);
+	--token-tertiary-300: hsl(82 39% 63%);
+	--token-tertiary-400: hsl(82 39% 56%);
+	--token-tertiary-500: hsl(82 39% 49%);
+	--token-tertiary-600: hsl(82 39% 42%);
+	--token-tertiary-700: hsl(82 39% 35%);
+	--token-tertiary-800: hsl(83 39% 28%);
+	--token-tertiary-900: hsl(81 40% 21%);
+	--token-tertiary-950: hsl(81 40% 14%);
+	/* Olive Green */
+	--token-quaternary-50: hsl(49 100% 95%);
+	--token-quaternary-100: hsl(52 100% 88%);
+	--token-quaternary-200: hsl(52 100% 78%);
+	--token-quaternary-300: hsl(55 100% 66%);
+	--token-quaternary-400: hsl(57 99% 55%);
+	--token-quaternary-500: hsl(58 100% 45%);
+	--token-quaternary-600: hsl(60 100% 36%);
+	--token-quaternary-700: hsl(60 100% 25%);
+	--token-quaternary-800: hsl(61 88% 23%);
+	--token-quaternary-900: hsl(61 79% 20%);
+	--token-quaternary-950: hsl(65 100% 10%);
+	/* Slate */
+	--token-surface-50: hsl(210 40% 98%);
+	--token-surface-100: hsl(210 40% 96%);
+	--token-surface-200: hsl(214 32% 91%);
+	--token-surface-300: hsl(213 27% 84%);
+	--token-surface-400: hsl(215 20% 65%);
+	--token-surface-500: hsl(215 16% 47%);
+	--token-surface-600: hsl(215 19% 35%);
+	--token-surface-700: hsl(215 25% 27%);
+	--token-surface-800: hsl(217 33% 17%);
+	--token-surface-900: hsl(222 47% 11%);
+	--token-surface-950: hsl(229 84% 5%);
+	/* Sky */
+	--token-info-50: hsl(204 100% 97%);
+	--token-info-100: hsl(204 94% 94%);
+	--token-info-200: hsl(201 94% 86%);
+	--token-info-300: hsl(199 95% 74%);
+	--token-info-400: hsl(198 93% 60%);
+	--token-info-500: hsl(199 89% 48%);
+	--token-info-600: hsl(200 98% 39%);
+	--token-info-700: hsl(201 96% 32%);
+	--token-info-800: hsl(201 90% 27%);
+	--token-info-900: hsl(202 80% 24%);
+	--token-info-950: hsl(204 80% 16%);
+	/* Lime */
+	--token-success-50: hsl(78 92% 95%);
+	--token-success-100: hsl(80 89% 89%);
+	--token-success-200: hsl(81 88% 80%);
+	--token-success-300: hsl(82 85% 67%);
+	--token-success-400: hsl(83 78% 55%);
+	--token-success-500: hsl(84 81% 44%);
+	--token-success-600: hsl(85 85% 35%);
+	--token-success-700: hsl(86 78% 27%);
+	--token-success-800: hsl(86 69% 23%);
+	--token-success-900: hsl(88 61% 20%);
+	--token-success-950: hsl(89 80% 10%);
+	/* Amber */
+	--token-warning-50: hsl(48 100% 96%);
+	--token-warning-100: hsl(48 96% 89%);
+	--token-warning-200: hsl(48 97% 77%);
+	--token-warning-300: hsl(46 97% 65%);
+	--token-warning-400: hsl(43 96% 56%);
+	--token-warning-500: hsl(38 92% 50%);
+	--token-warning-600: hsl(32 95% 44%);
+	--token-warning-700: hsl(26 90% 37%);
+	--token-warning-800: hsl(23 83% 31%);
+	--token-warning-900: hsl(22 78% 26%);
+	--token-warning-950: hsl(21 92% 14%);
+	/* Red */
+	--token-error-50: hsl(0 86% 97%);
+	--token-error-100: hsl(0 93% 94%);
+	--token-error-200: hsl(0 96% 89%);
+	--token-error-300: hsl(0 94% 82%);
+	--token-error-400: hsl(0 91% 71%);
+	--token-error-500: hsl(0 84% 60%);
+	--token-error-600: hsl(0 72% 51%);
+	--token-error-700: hsl(0 74% 42%);
+	--token-error-800: hsl(0 70% 35%);
+	--token-error-900: hsl(0 63% 31%);
+	--token-error-950: hsl(0 75% 15%);
+}
+
+/* SLC Colors Light */
+:root {
+	/* primary */
+	--provider-primary-50: var(--token-primary-50);
+	--provider-primary-100: var(--token-primary-100);
+	--provider-primary-200: var(--token-primary-200);
+	--provider-primary-300: var(--token-primary-300);
+	--provider-primary-400: var(--token-primary-400);
+	--provider-primary-500: var(--token-primary-500);
+	--provider-primary-600: var(--token-primary-600);
+	--provider-primary-700: var(--token-primary-700);
+	--provider-primary-800: var(--token-primary-800);
+	--provider-primary-900: var(--token-primary-900);
+	--provider-primary-950: var(--token-primary-950);
+	/* secondary */
+	--provider-secondary-50: var(--token-secondary-50);
+	--provider-secondary-100: var(--token-secondary-100);
+	--provider-secondary-200: var(--token-secondary-200);
+	--provider-secondary-300: var(--token-secondary-300);
+	--provider-secondary-400: var(--token-secondary-400);
+	--provider-secondary-500: var(--token-secondary-500);
+	--provider-secondary-600: var(--token-secondary-600);
+	--provider-secondary-700: var(--token-secondary-700);
+	--provider-secondary-800: var(--token-secondary-800);
+	--provider-secondary-900: var(--token-secondary-900);
+	--provider-secondary-950: var(--token-secondary-950);
+	/* tertiary */
+	--provider-tertiary-50: var(--token-tertiary-50);
+	--provider-tertiary-100: var(--token-tertiary-100);
+	--provider-tertiary-200: var(--token-tertiary-200);
+	--provider-tertiary-300: var(--token-tertiary-300);
+	--provider-tertiary-400: var(--token-tertiary-400);
+	--provider-tertiary-500: var(--token-tertiary-500);
+	--provider-tertiary-600: var(--token-tertiary-600);
+	--provider-tertiary-700: var(--token-tertiary-700);
+	--provider-tertiary-800: var(--token-tertiary-800);
+	--provider-tertiary-900: var(--token-tertiary-900);
+	--provider-tertiary-950: var(--token-tertiary-950);
+	/* quaternary */
+	--provider-quaternary-50: var(--token-quaternary-50);
+	--provider-quaternary-100: var(--token-quaternary-100);
+	--provider-quaternary-200: var(--token-quaternary-200);
+	--provider-quaternary-300: var(--token-quaternary-300);
+	--provider-quaternary-400: var(--token-quaternary-400);
+	--provider-quaternary-500: var(--token-quaternary-500);
+	--provider-quaternary-600: var(--token-quaternary-600);
+	--provider-quaternary-700: var(--token-quaternary-700);
+	--provider-quaternary-800: var(--token-quaternary-800);
+	--provider-quaternary-900: var(--token-quaternary-900);
+	--provider-quaternary-950: var(--token-quaternary-950);
+	/* surface */
+	--provider-surface-50: var(--token-surface-50);
+	--provider-surface-100: var(--token-surface-100);
+	--provider-surface-200: var(--token-surface-200);
+	--provider-surface-300: var(--token-surface-300);
+	--provider-surface-400: var(--token-surface-400);
+	--provider-surface-500: var(--token-surface-500);
+	--provider-surface-600: var(--token-surface-600);
+	--provider-surface-700: var(--token-surface-700);
+	--provider-surface-800: var(--token-surface-800);
+	--provider-surface-900: var(--token-surface-900);
+	--provider-surface-950: var(--token-surface-950);
+	/* info */
+	--provider-info-50: var(--token-info-50);
+	--provider-info-100: var(--token-info-100);
+	--provider-info-200: var(--token-info-200);
+	--provider-info-300: var(--token-info-300);
+	--provider-info-400: var(--token-info-400);
+	--provider-info-500: var(--token-info-500);
+	--provider-info-600: var(--token-info-600);
+	--provider-info-700: var(--token-info-700);
+	--provider-info-800: var(--token-info-800);
+	--provider-info-900: var(--token-info-900);
+	--provider-info-950: var(--token-info-950);
+	/* success */
+	--provider-success-50: var(--token-success-50);
+	--provider-success-100: var(--token-success-100);
+	--provider-success-200: var(--token-success-200);
+	--provider-success-300: var(--token-success-300);
+	--provider-success-400: var(--token-success-400);
+	--provider-success-500: var(--token-success-500);
+	--provider-success-600: var(--token-success-600);
+	--provider-success-700: var(--token-success-700);
+	--provider-success-800: var(--token-success-800);
+	--provider-success-900: var(--token-success-900);
+	--provider-success-950: var(--token-success-950);
+	/* warning */
+	--provider-warning-50: var(--token-warning-50);
+	--provider-warning-100: var(--token-warning-100);
+	--provider-warning-200: var(--token-warning-200);
+	--provider-warning-300: var(--token-warning-300);
+	--provider-warning-400: var(--token-warning-400);
+	--provider-warning-500: var(--token-warning-500);
+	--provider-warning-600: var(--token-warning-600);
+	--provider-warning-700: var(--token-warning-700);
+	--provider-warning-800: var(--token-warning-800);
+	--provider-warning-900: var(--token-warning-900);
+	--provider-warning-950: var(--token-warning-950);
+	/* error */
+	--provider-error-50: var(--token-error-50);
+	--provider-error-100: var(--token-error-100);
+	--provider-error-200: var(--token-error-200);
+	--provider-error-300: var(--token-error-300);
+	--provider-error-400: var(--token-error-400);
+	--provider-error-500: var(--token-error-500);
+	--provider-error-600: var(--token-error-600);
+	--provider-error-700: var(--token-error-700);
+	--provider-error-800: var(--token-error-800);
+	--provider-error-900: var(--token-error-900);
+	--provider-error-950: var(--token-error-950);
+}
+
+/* SLC Colors Dark */
+.dark {
+	color-scheme: dark;
+	/* primary */
+	--provider-primary-50: var(--token-primary-950);
+	--provider-primary-100: var(--token-primary-900);
+	--provider-primary-200: var(--token-primary-800);
+	--provider-primary-300: var(--token-primary-700);
+	--provider-primary-400: var(--token-primary-600);
+	--provider-primary-500: var(--token-primary-500);
+	--provider-primary-600: var(--token-primary-400);
+	--provider-primary-700: var(--token-primary-300);
+	--provider-primary-800: var(--token-primary-200);
+	--provider-primary-900: var(--token-primary-100);
+	--provider-primary-950: var(--token-primary-50);
+	/* secondary */
+	--provider-secondary-50: var(--token-secondary-950);
+	--provider-secondary-100: var(--token-secondary-900);
+	--provider-secondary-200: var(--token-secondary-800);
+	--provider-secondary-300: var(--token-secondary-700);
+	--provider-secondary-400: var(--token-secondary-600);
+	--provider-secondary-500: var(--token-secondary-500);
+	--provider-secondary-600: var(--token-secondary-400);
+	--provider-secondary-700: var(--token-secondary-300);
+	--provider-secondary-800: var(--token-secondary-200);
+	--provider-secondary-900: var(--token-secondary-100);
+	--provider-secondary-950: var(--token-secondary-50);
+	/* tertiary */
+	--provider-tertiary-50: var(--token-tertiary-950);
+	--provider-tertiary-100: var(--token-tertiary-900);
+	--provider-tertiary-200: var(--token-tertiary-800);
+	--provider-tertiary-300: var(--token-tertiary-700);
+	--provider-tertiary-400: var(--token-tertiary-600);
+	--provider-tertiary-500: var(--token-tertiary-500);
+	--provider-tertiary-600: var(--token-tertiary-400);
+	--provider-tertiary-700: var(--token-tertiary-300);
+	--provider-tertiary-800: var(--token-tertiary-200);
+	--provider-tertiary-900: var(--token-tertiary-100);
+	--provider-tertiary-950: var(--token-tertiary-50);
+	/* quaternary */
+	--provider-quaternary-50: var(--token-quaternary-950);
+	--provider-quaternary-100: var(--token-quaternary-900);
+	--provider-quaternary-200: var(--token-quaternary-800);
+	--provider-quaternary-300: var(--token-quaternary-700);
+	--provider-quaternary-400: var(--token-quaternary-600);
+	--provider-quaternary-500: var(--token-quaternary-500);
+	--provider-quaternary-600: var(--token-quaternary-400);
+	--provider-quaternary-700: var(--token-quaternary-300);
+	--provider-quaternary-800: var(--token-quaternary-200);
+	--provider-quaternary-900: var(--token-quaternary-100);
+	--provider-quaternary-950: var(--token-quaternary-50);
+	/* surface */
+	--provider-surface-50: var(--token-surface-950);
+	--provider-surface-100: var(--token-surface-900);
+	--provider-surface-200: var(--token-surface-800);
+	--provider-surface-300: var(--token-surface-700);
+	--provider-surface-400: var(--token-surface-600);
+	--provider-surface-500: var(--token-surface-500);
+	--provider-surface-600: var(--token-surface-400);
+	--provider-surface-700: var(--token-surface-300);
+	--provider-surface-800: var(--token-surface-200);
+	--provider-surface-900: var(--token-surface-100);
+	--provider-surface-950: var(--token-surface-50);
+	/* info */
+	--provider-info-50: var(--token-info-950);
+	--provider-info-100: var(--token-info-900);
+	--provider-info-200: var(--token-info-800);
+	--provider-info-300: var(--token-info-700);
+	--provider-info-400: var(--token-info-600);
+	--provider-info-500: var(--token-info-500);
+	--provider-info-600: var(--token-info-400);
+	--provider-info-700: var(--token-info-300);
+	--provider-info-800: var(--token-info-200);
+	--provider-info-900: var(--token-info-100);
+	--provider-info-950: var(--token-info-50);
+	/* success */
+	--provider-success-50: var(--token-success-950);
+	--provider-success-100: var(--token-success-900);
+	--provider-success-200: var(--token-success-800);
+	--provider-success-300: var(--token-success-700);
+	--provider-success-400: var(--token-success-600);
+	--provider-success-500: var(--token-success-500);
+	--provider-success-600: var(--token-success-400);
+	--provider-success-700: var(--token-success-300);
+	--provider-success-800: var(--token-success-200);
+	--provider-success-900: var(--token-success-100);
+	--provider-success-950: var(--token-success-50);
+	/* warning */
+	--provider-warning-50: var(--token-warning-950);
+	--provider-warning-100: var(--token-warning-900);
+	--provider-warning-200: var(--token-warning-800);
+	--provider-warning-300: var(--token-warning-700);
+	--provider-warning-400: var(--token-warning-600);
+	--provider-warning-500: var(--token-warning-500);
+	--provider-warning-600: var(--token-warning-400);
+	--provider-warning-700: var(--token-warning-300);
+	--provider-warning-800: var(--token-warning-200);
+	--provider-warning-900: var(--token-warning-100);
+	--provider-warning-950: var(--token-warning-50);
+	/* error */
+	--provider-error-50: var(--token-error-950);
+	--provider-error-100: var(--token-error-900);
+	--provider-error-200: var(--token-error-800);
+	--provider-error-300: var(--token-error-700);
+	--provider-error-400: var(--token-error-600);
+	--provider-error-500: var(--token-error-500);
+	--provider-error-600: var(--token-error-400);
+	--provider-error-700: var(--token-error-300);
+	--provider-error-800: var(--token-error-200);
+	--provider-error-900: var(--token-error-100);
+	--provider-error-950: var(--token-error-50);
+}
+
+/* SLC Colors Tailwind */
+@theme inline {
+	--color-*: initial;
+
+	/* TAILWIND COLOR TOKEN */
+	/* primary */
+	--color-primary-token-50: var(--token-primary-50);
+	--color-primary-token-100: var(--token-primary-100);
+	--color-primary-token-200: var(--token-primary-200);
+	--color-primary-token-300: var(--token-primary-300);
+	--color-primary-token-400: var(--token-primary-400);
+	--color-primary-token-500: var(--token-primary-500);
+	--color-primary-token-600: var(--token-primary-600);
+	--color-primary-token-700: var(--token-primary-700);
+	--color-primary-token-800: var(--token-primary-800);
+	--color-primary-token-900: var(--token-primary-900);
+	--color-primary-token-950: var(--token-primary-950);
+	/* secondary */
+	--color-secondary-token-50: var(--token-secondary-50);
+	--color-secondary-token-100: var(--token-secondary-100);
+	--color-secondary-token-200: var(--token-secondary-200);
+	--color-secondary-token-300: var(--token-secondary-300);
+	--color-secondary-token-400: var(--token-secondary-400);
+	--color-secondary-token-500: var(--token-secondary-500);
+	--color-secondary-token-600: var(--token-secondary-600);
+	--color-secondary-token-700: var(--token-secondary-700);
+	--color-secondary-token-800: var(--token-secondary-800);
+	--color-secondary-token-900: var(--token-secondary-900);
+	--color-secondary-token-950: var(--token-secondary-950);
+	/* tertiary */
+	--color-tertiary-token-50: var(--token-tertiary-50);
+	--color-tertiary-token-100: var(--token-tertiary-100);
+	--color-tertiary-token-200: var(--token-tertiary-200);
+	--color-tertiary-token-300: var(--token-tertiary-300);
+	--color-tertiary-token-400: var(--token-tertiary-400);
+	--color-tertiary-token-500: var(--token-tertiary-500);
+	--color-tertiary-token-600: var(--token-tertiary-600);
+	--color-tertiary-token-700: var(--token-tertiary-700);
+	--color-tertiary-token-800: var(--token-tertiary-800);
+	--color-tertiary-token-900: var(--token-tertiary-900);
+	--color-tertiary-token-950: var(--token-tertiary-950);
+	/* quaternary */
+	--color-quaternary-token-50: var(--token-quaternary-50);
+	--color-quaternary-token-100: var(--token-quaternary-100);
+	--color-quaternary-token-200: var(--token-quaternary-200);
+	--color-quaternary-token-300: var(--token-quaternary-300);
+	--color-quaternary-token-400: var(--token-quaternary-400);
+	--color-quaternary-token-500: var(--token-quaternary-500);
+	--color-quaternary-token-600: var(--token-quaternary-600);
+	--color-quaternary-token-700: var(--token-quaternary-700);
+	--color-quaternary-token-800: var(--token-quaternary-800);
+	--color-quaternary-token-900: var(--token-quaternary-900);
+	--color-quaternary-token-950: var(--token-quaternary-950);
+	/* surface */
+	--color-surface-token-50: var(--token-surface-50);
+	--color-surface-token-100: var(--token-surface-100);
+	--color-surface-token-200: var(--token-surface-200);
+	--color-surface-token-300: var(--token-surface-300);
+	--color-surface-token-400: var(--token-surface-400);
+	--color-surface-token-500: var(--token-surface-500);
+	--color-surface-token-600: var(--token-surface-600);
+	--color-surface-token-700: var(--token-surface-700);
+	--color-surface-token-800: var(--token-surface-800);
+	--color-surface-token-900: var(--token-surface-900);
+	--color-surface-token-950: var(--token-surface-950);
+	/* info */
+	--color-info-token-50: var(--token-info-50);
+	--color-info-token-100: var(--token-info-100);
+	--color-info-token-200: var(--token-info-200);
+	--color-info-token-300: var(--token-info-300);
+	--color-info-token-400: var(--token-info-400);
+	--color-info-token-500: var(--token-info-500);
+	--color-info-token-600: var(--token-info-600);
+	--color-info-token-700: var(--token-info-700);
+	--color-info-token-800: var(--token-info-800);
+	--color-info-token-900: var(--token-info-900);
+	--color-info-token-950: var(--token-info-950);
+	/* success */
+	--color-success-token-50: var(--token-success-50);
+	--color-success-token-100: var(--token-success-100);
+	--color-success-token-200: var(--token-success-200);
+	--color-success-token-300: var(--token-success-300);
+	--color-success-token-400: var(--token-success-400);
+	--color-success-token-500: var(--token-success-500);
+	--color-success-token-600: var(--token-success-600);
+	--color-success-token-700: var(--token-success-700);
+	--color-success-token-800: var(--token-success-800);
+	--color-success-token-900: var(--token-success-900);
+	--color-success-token-950: var(--token-success-950);
+	/* warning */
+	--color-warning-token-50: var(--token-warning-50);
+	--color-warning-token-100: var(--token-warning-100);
+	--color-warning-token-200: var(--token-warning-200);
+	--color-warning-token-300: var(--token-warning-300);
+	--color-warning-token-400: var(--token-warning-400);
+	--color-warning-token-500: var(--token-warning-500);
+	--color-warning-token-600: var(--token-warning-600);
+	--color-warning-token-700: var(--token-warning-700);
+	--color-warning-token-800: var(--token-warning-800);
+	--color-warning-token-900: var(--token-warning-900);
+	--color-warning-token-950: var(--token-warning-950);
+	/* error */
+	--color-error-token-50: var(--token-error-50);
+	--color-error-token-100: var(--token-error-100);
+	--color-error-token-200: var(--token-error-200);
+	--color-error-token-300: var(--token-error-300);
+	--color-error-token-400: var(--token-error-400);
+	--color-error-token-500: var(--token-error-500);
+	--color-error-token-600: var(--token-error-600);
+	--color-error-token-700: var(--token-error-700);
+	--color-error-token-800: var(--token-error-800);
+	--color-error-token-900: var(--token-error-900);
+	--color-error-token-950: var(--token-error-950);
+
+	/* TAILWIND COLOR DARK-LIGHT */
+	/* primary */
+	--color-primary-50: var(--provider-primary-50);
+	--color-primary-100: var(--provider-primary-100);
+	--color-primary-200: var(--provider-primary-200);
+	--color-primary-300: var(--provider-primary-300);
+	--color-primary-400: var(--provider-primary-400);
+	--color-primary-500: var(--provider-primary-500);
+	--color-primary-600: var(--provider-primary-600);
+	--color-primary-700: var(--provider-primary-700);
+	--color-primary-800: var(--provider-primary-800);
+	--color-primary-900: var(--provider-primary-900);
+	--color-primary-950: var(--provider-primary-950);
+	/* secondary */
+	--color-secondary-50: var(--provider-secondary-50);
+	--color-secondary-100: var(--provider-secondary-100);
+	--color-secondary-200: var(--provider-secondary-200);
+	--color-secondary-300: var(--provider-secondary-300);
+	--color-secondary-400: var(--provider-secondary-400);
+	--color-secondary-500: var(--provider-secondary-500);
+	--color-secondary-600: var(--provider-secondary-600);
+	--color-secondary-700: var(--provider-secondary-700);
+	--color-secondary-800: var(--provider-secondary-800);
+	--color-secondary-900: var(--provider-secondary-900);
+	--color-secondary-950: var(--provider-secondary-950);
+	/* tertiary */
+	--color-tertiary-50: var(--provider-tertiary-50);
+	--color-tertiary-100: var(--provider-tertiary-100);
+	--color-tertiary-200: var(--provider-tertiary-200);
+	--color-tertiary-300: var(--provider-tertiary-300);
+	--color-tertiary-400: var(--provider-tertiary-400);
+	--color-tertiary-500: var(--provider-tertiary-500);
+	--color-tertiary-600: var(--provider-tertiary-600);
+	--color-tertiary-700: var(--provider-tertiary-700);
+	--color-tertiary-800: var(--provider-tertiary-800);
+	--color-tertiary-900: var(--provider-tertiary-900);
+	--color-tertiary-950: var(--provider-tertiary-950);
+	/* quaternary */
+	--color-quaternary-50: var(--provider-quaternary-50);
+	--color-quaternary-100: var(--provider-quaternary-100);
+	--color-quaternary-200: var(--provider-quaternary-200);
+	--color-quaternary-300: var(--provider-quaternary-300);
+	--color-quaternary-400: var(--provider-quaternary-400);
+	--color-quaternary-500: var(--provider-quaternary-500);
+	--color-quaternary-600: var(--provider-quaternary-600);
+	--color-quaternary-700: var(--provider-quaternary-700);
+	--color-quaternary-800: var(--provider-quaternary-800);
+	--color-quaternary-900: var(--provider-quaternary-900);
+	--color-quaternary-950: var(--provider-quaternary-950);
+	/* surface */
+	--color-surface-50: var(--provider-surface-50);
+	--color-surface-100: var(--provider-surface-100);
+	--color-surface-200: var(--provider-surface-200);
+	--color-surface-300: var(--provider-surface-300);
+	--color-surface-400: var(--provider-surface-400);
+	--color-surface-500: var(--provider-surface-500);
+	--color-surface-600: var(--provider-surface-600);
+	--color-surface-700: var(--provider-surface-700);
+	--color-surface-800: var(--provider-surface-800);
+	--color-surface-900: var(--provider-surface-900);
+	--color-surface-950: var(--provider-surface-950);
+	/* info */
+	--color-info-50: var(--provider-info-50);
+	--color-info-100: var(--provider-info-100);
+	--color-info-200: var(--provider-info-200);
+	--color-info-300: var(--provider-info-300);
+	--color-info-400: var(--provider-info-400);
+	--color-info-500: var(--provider-info-500);
+	--color-info-600: var(--provider-info-600);
+	--color-info-700: var(--provider-info-700);
+	--color-info-800: var(--provider-info-800);
+	--color-info-900: var(--provider-info-900);
+	--color-info-950: var(--provider-info-950);
+	/* success */
+	--color-success-50: var(--provider-success-50);
+	--color-success-100: var(--provider-success-100);
+	--color-success-200: var(--provider-success-200);
+	--color-success-300: var(--provider-success-300);
+	--color-success-400: var(--provider-success-400);
+	--color-success-500: var(--provider-success-500);
+	--color-success-600: var(--provider-success-600);
+	--color-success-700: var(--provider-success-700);
+	--color-success-800: var(--provider-success-800);
+	--color-success-900: var(--provider-success-900);
+	--color-success-950: var(--provider-success-950);
+	/* warning */
+	--color-warning-50: var(--provider-warning-50);
+	--color-warning-100: var(--provider-warning-100);
+	--color-warning-200: var(--provider-warning-200);
+	--color-warning-300: var(--provider-warning-300);
+	--color-warning-400: var(--provider-warning-400);
+	--color-warning-500: var(--provider-warning-500);
+	--color-warning-600: var(--provider-warning-600);
+	--color-warning-700: var(--provider-warning-700);
+	--color-warning-800: var(--provider-warning-800);
+	--color-warning-900: var(--provider-warning-900);
+	--color-warning-950: var(--provider-warning-950);
+	/* error */
+	--color-error-50: var(--provider-error-50);
+	--color-error-100: var(--provider-error-100);
+	--color-error-200: var(--provider-error-200);
+	--color-error-300: var(--provider-error-300);
+	--color-error-400: var(--provider-error-400);
+	--color-error-500: var(--provider-error-500);
+	--color-error-600: var(--provider-error-600);
+	--color-error-700: var(--provider-error-700);
+	--color-error-800: var(--provider-error-800);
+	--color-error-900: var(--provider-error-900);
+	--color-error-950: var(--provider-error-950);
+}
+
+@theme {
+	--breakpoint-*: initial;
+	--breakpoint-sm: 640px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 1140px;
+}
+
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-surface-300, currentColor);
+	}
+
+	* {
+		@apply border-surface-200;
+	}
+	html {
+		-webkit-tap-highlight-color: color-mix(in oklab, var(--color-primary-500) 30%, transparent);
+	}
+
+	body {
+		@apply bg-surface-50 text-surface-950 font-sans text-base font-normal;
+	}
+
+	html,
+	body {
+		@apply m-0 h-full w-full overflow-hidden p-0;
+	}
+
+	::selection {
+		background-color: color-mix(in srgb, var(--color-primary-200) 50%, transparent);
+	}
+
+	/* States --- */
+
+	/* *:disabled,
+	.disabled {
+		opacity: 0.5;
+		& > * {
+			pointer-events: none;
+		}
+	} */
+
+	/* Outlines and Focus --- */
+	/*
+		REMINDER: Never disabled focus and outlines
+		as this would be harmful to accessibility!
+		Source: http://www.outlinenone.com/
+
+		EXAMPLE: Set a global focus style.
+		Apply this in your app's global stylesheet: */
+	:focus {
+		@apply focus:outline-primary-800;
+	}
+
+	/* Component Focus Utility */
+	/* .focused {
+		@apply ring-[2px] ring-surface-950 dark:ring-surface-50 ring-inset;
+	} */
+
+	/* ############################# BEGIN scrollbar ################################# */
+	/* sm: 640px >  < ∞ */
+	@media (width >= 640px) {
+		/* Modern browsers with `scrollbar-*` support */
+		@supports (scrollbar-width: auto) {
+			html {
+				/* scrollbar-color: <thumb> <track>; */
+				scrollbar-color: var(--color-surface-200) transparent;
+				scrollbar-width: thin;
+				scroll-behavior: smooth;
+			}
+
+			html * {
+				scrollbar-width: inherit;
+			}
+		}
+
+		/* Legacy browsers with `::-webkit-scrollbar-*` support */
+		@supports selector(::-webkit-scrollbar) {
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			::-webkit-scrollbar-thumb {
+				background-color: var(--color-surface-200);
+			}
+			::-webkit-scrollbar {
+				max-width: 8px;
+				max-height: 8px;
+			}
+		}
+	}
+	/* ############################# END scrollbar ################################### */
+
+	/* ############################# BEGIN tooltip ################################### */
+	.slc-app-tooltip {
+		position: fixed;
+		z-index: 999999;
+		top: 0;
+		left: 0;
+		display: inline-block;
+		vertical-align: top;
+		max-width: 275px;
+		padding: 3px 5px;
+		text-align: center;
+		font-size: var(--text-sm);
+		font-weight: var(--font-weight-semibold);
+		background-color: var(--color-surface-950);
+		color: var(--color-surface-50);
+		border-radius: var(--radius-sm);
+		pointer-events: none;
+		user-select: none;
+		transition:
+			opacity 150ms,
+			visibility 150ms,
+			transform 150ms;
+		transform: translateY(2px);
+		backface-visibility: hidden;
+		white-space: pre-line;
+		word-break: break-word;
+		/* hide */
+		opacity: 0;
+		visibility: hidden;
+
+		/* styles */
+		&.code {
+			font-family: monospace;
+			white-space: pre-wrap;
+			text-align: left;
+			min-width: 150px;
+			max-width: 340px;
+		}
+
+		/* states */
+		&.active {
+			transform: scale(1);
+			/* show */
+			opacity: 1;
+			visibility: visible;
+		}
+	}
+	/* ############################# END tooltip ################################### */
+
+	/* ##### Mobile First. `tailwind screens breakpoints` ########################################### */
+	/* ##### BEGIN `mobile` ######################################################################### */
+	.slc-screen-test::before {
+		content: 'CSS Screen Size: (width < 640px) - bg-error-500 - (mobile)';
+	}
+	/* ##### END `mobile` ########################################################################### */
+
+	/* ##### BEGIN `sm` ############################################################################# */
+	@media (width >= 640px) {
+		.slc-screen-test::before {
+			content: 'CSS Screen Size: (width >= 640px) - sm:bg-info-500';
+		}
+	}
+	/* ##### END `sm` ############################################################################### */
+
+	/* ##### BEGIN `md` ############################################################################# */
+	@media (width >= 768px) {
+		.slc-screen-test::before {
+			content: 'CSS Screen Size: (width >= 768px) - md:bg-success-500';
+		}
+	}
+	/* ##### END `md` ############################################################################### */
+
+	/* ##### BEGIN `lg` ############################################################################# */
+	@media (width >= 1140px) {
+		.slc-screen-test::before {
+			content: 'CSS Screen Size: (width >= 1140px) - lg:bg-warning-500';
+		}
+	}
+	/* ##### END `lg` ############################################################################### */
+}
+
+@layer components {
+	/* *:not(body):not(.focus-override) {
+		outline: none !important;
+		&:focus-visible {
+			@apply focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-hidden;
+		}
+	} */
+
+	/* .link {
+		@apply hover:text-surface-500/80 focus-visible:ring-surface-500 focus-visible:ring-offset-background inline-flex items-center gap-1 rounded-xs font-medium underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden;
+	} */
+}

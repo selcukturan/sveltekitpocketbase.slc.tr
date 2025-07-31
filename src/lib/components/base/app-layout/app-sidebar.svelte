@@ -2,7 +2,6 @@
 	import { page } from '$app/state';
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
 	import type { PropsAppSidebarType } from './types';
-	import { Icon } from '$lib/components/icons';
 	import { tooltip } from '$lib/client/attachments';
 
 	let { sidebarData }: PropsAppSidebarType = $props();
@@ -57,19 +56,9 @@
 					border-2
 					border-solid
 					border-transparent
-					p-2
-					text-center
-					align-middle
-					text-2xl
-					leading-none
-					text-inherit
-					no-underline
-					outline-0
-					select-none"
+					text-center select-none"
 			>
-				<span>
-					<Icon name={`${d.icon}`} size={`22px`} />
-				</span>
+				<i class={`${d.icon} !text-2xl`}></i>
 			</a>
 		{/each}
 	</nav>

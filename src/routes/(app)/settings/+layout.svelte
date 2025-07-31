@@ -14,7 +14,7 @@
 				{
 					title: 'Introduction',
 					href: `/settings`,
-					icon: 'file-symlink',
+					icon: 'ri-file-line',
 					root: true
 				}
 			]
@@ -25,13 +25,13 @@
 				{
 					title: 'Introduction',
 					href: `/settings/system`,
-					icon: 'file-symlink',
+					icon: 'ri-file-line',
 					root: true
 				},
 				{
 					title: 'application',
 					href: `/settings/system/application`,
-					icon: 'file-symlink',
+					icon: 'ri-file-line',
 					root: true
 				}
 			]

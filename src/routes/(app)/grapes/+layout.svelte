@@ -14,7 +14,7 @@
 				{
 					title: 'Introduction',
 					href: `/grapes`,
-					icon: 'file-symlink',
+					icon: 'ri-file-line',
 					root: true
 				}
 			]
@@ -25,12 +25,12 @@
 				{
 					title: 'Introduction',
 					href: `/grapes/crud`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Create, Read, Update, Delete',
 					href: `/grapes/crud/create-read-update-delete`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				}
 			]
 		}

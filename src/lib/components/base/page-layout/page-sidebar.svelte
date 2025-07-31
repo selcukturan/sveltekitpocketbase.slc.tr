@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { PageSidebarPropsType } from './types';
-	import { Icon } from '$lib/components/icons';
 
 	let { pageSidebardata }: PageSidebarPropsType = $props();
 </script>
@@ -56,7 +55,7 @@
 					select-none"
 				>
 					<span>
-						<Icon name={`${c.icon}`} />
+						<i class={`${c.icon} !text-xl`}></i>
 					</span>
 					<span class="inline-block overflow-hidden align-top text-ellipsis whitespace-nowrap">
 						{c.title}

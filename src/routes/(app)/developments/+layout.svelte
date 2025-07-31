@@ -14,7 +14,7 @@
 				{
 					title: 'Introduction',
 					href: `/developments`,
-					icon: 'file-symlink',
+					icon: 'ri-file-line',
 					root: true
 				}
 			]
@@ -25,64 +25,64 @@
 				{
 					title: 'Introduction',
 					href: `/developments/components`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Form Validation with Superforms',
 					href: `/developments/components/form`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Form Validation with Tanstack',
 					href: `/developments/components/form-tanstack`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Tree (SLC Draft)',
 					href: `/developments/components/tree`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 
 				{
 					title: 'Tooltip (SLC)',
 					href: `/developments/components/tooltip`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Toast (zagjs ui)',
 					href: `/developments/components/toast`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Drawer Panel (SLC)',
 					href: `/developments/components/drawer`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Select (zagjs ui)',
 					href: `/developments/components/select`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 
 				{
 					title: 'Select (SLC)',
 					href: `/developments/components/select-slc`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Toast (SLC)',
 					href: `/developments/components/toast-slc`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Form Validation with SLC',
 					href: `/developments/components/form-slc`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				},
 				{
 					title: 'Confirmation (SLC)',
 					href: `/developments/components/confirmation`,
-					icon: 'file-symlink'
+					icon: 'ri-file-line'
 				}
 			]
 		}

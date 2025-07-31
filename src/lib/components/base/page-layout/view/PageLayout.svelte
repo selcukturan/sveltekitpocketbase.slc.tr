@@ -3,7 +3,7 @@
 	import type { Length } from '$lib/components/base/split-pane/types';
 	import { PageSidebar, PageContainer } from '../';
 	import { getGlobalContext } from '$lib/client/app/global.svelte';
-	import { Icon } from '$lib/components/icons';
+
 	import type { PageLayoutPropsType } from '../types';
 
 	let { pageSidebardata, children }: PageLayoutPropsType = $props();
@@ -21,6 +21,14 @@
 			return global.pageSidebarSize.vertical ? (`${global.pageSidebarSize.vertical}px` as Length) : ('150px' as Length);
 		} else {
 			return global.pageSidebarSize.horizontal ? (`${global.pageSidebarSize.horizontal}px` as Length) : ('150px' as Length);
+		}
+	});
+
+	let icon = $derived.by(() => {
+		if (global.isMobileBreakpoint) {
+			return global.hidePageSidebar ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line';
+		} else {
+			return global.hidePageSidebar ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line';
 		}
 	});
 </script>
@@ -55,13 +63,26 @@
 			<button
 				type="button"
 				onclick={handleClick}
-				style:display={global.hideSidebar ? 'none' : 'block'}
-				class="bg-surface-50 absolute z-52 inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full border text-center align-middle leading-none select-none"
+				style:display={global.hideSidebar ? 'none' : 'flex'}
+				class="bg-surface-50
+				text-surface-600
+				hover:bg-quaternary-50/90
+				absolute
+				z-52
+				h-7
+				w-7
+				cursor-pointer
+				items-center
+				justify-center
+				rounded-full
+				border
+				select-none
+				sm:h-5 sm:w-5"
 				class:mobile-position={global.isMobileBreakpoint}
 				class:desktop-position={!global.isMobileBreakpoint}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
-				<Icon name={global.hidePageSidebar ? `chevron-right` : `chevron-left`} size="16px" />
+				<i class={`${icon} ${global.hidePageSidebar ? (global.isMobileBreakpoint ? 'mt-3' : 'ml-2') : ''}`}></i>
 			</button>
 			<PageSidebar {pageSidebardata} />
 		</section>

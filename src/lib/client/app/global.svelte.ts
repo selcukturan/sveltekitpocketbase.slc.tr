@@ -4,7 +4,7 @@ class Globals {
 	mobileBreakpoint = $state(640);
 	hideSidebar = $state(false);
 	hidePageSidebar = $state(false);
-	pageSidebarSize = $state({ vertical: 160, horizontal: 250 });
+	pageSidebarSize = $state({ vertical: 160, horizontal: 330 });
 	windowWidth = $state(1000);
 	isMobileBreakpoint = $derived(this.windowWidth < this.mobileBreakpoint);
 

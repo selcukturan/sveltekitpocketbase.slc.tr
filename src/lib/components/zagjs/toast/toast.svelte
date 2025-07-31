@@ -2,7 +2,6 @@
 	import * as toast from '@zag-js/toast';
 	import type { ToastProps } from './types';
 	import { normalizeProps, useMachine } from '@zag-js/svelte';
-	import { Icon } from '$lib/components/icons';
 
 	const props: ToastProps = $props();
 
@@ -98,19 +97,20 @@
 	<div class="flex h-full items-center">
 		<div class="pr-2">
 			{#if api.type === 'info'}
-				<Icon name="info" />
+				<!-- <Icon name="info" /> -->
+				<i class={`ri-information-line !text-2xl`}></i>
 			{:else if api.type === 'error'}
-				<Icon name="circle-x" />
+				<i class={`ri-error-warning-line !text-2xl`}></i>
 			{:else if api.type === 'success'}
-				<Icon name="circle-check" />
+				<i class={`ri-check-line !text-2xl`}></i>
 			{:else if api.type === 'warning'}
-				<Icon name="circle-alert" />
+				<i class={`ri-alert-line !text-2xl`}></i>
 			{:else if api.type === 'loading'}
 				<div class="animate-spin">
-					<Icon name="loader" />
+					<i class={`ri-loader-4-line !text-2xl`}></i>
 				</div>
 			{:else}
-				<Icon name="circle" />
+				<i class={`ri-circle-line !text-2xl`}></i>
 			{/if}
 		</div>
 		<div class="flex-1">
@@ -125,7 +125,7 @@
 		{#if api.closable}
 			<div class="self-start">
 				<button type="button" class={closeButtonClass} {...api.getCloseTriggerProps()} onclick={api.dismiss} aria-label="Kapat">
-					<Icon name="close" size="12px" />
+					<i class={`ri-close-line !text-base`}></i>
 				</button>
 			</div>
 		{/if}
