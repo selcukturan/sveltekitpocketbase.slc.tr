@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Toaster, appToaster } from '$lib/components/zagjs/toast';
-	import type { SidebarDataType } from '$lib/components/base/app-layout/types';
-	import { AppLayout } from '$lib/components/base/app-layout/view';
+	import { AppLayout, type SidebarDataType } from '$lib/components/layouts/app';
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';

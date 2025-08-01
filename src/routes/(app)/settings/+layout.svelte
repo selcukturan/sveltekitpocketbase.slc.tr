@@ -1,11 +1,7 @@
 <script lang="ts">
-	import type { PageSidebarDataType, ChildrenPropsType } from '$lib/components/base/page-layout/types';
-	import { PageLayout } from '$lib/components/base/page-layout/view';
-	/* import { getConfigContext } from '$lib/client/config.svelte'; */
+	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '$lib/components/layouts/page';
 
 	let { children }: ChildrenPropsType = $props();
-
-	/* const config = getConfigContext(); */
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
