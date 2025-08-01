@@ -68,3 +68,8 @@ WHERE
 # (Request)İstek akışı: kullanıcıdan → veritabanına
 
 Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması (docker s_app) → PocketBase (docker s_pocketbase)
+
+# createSubscriber
+
+- https://www.youtube.com/live/fExlOwTtZqM?si=nA6Ks7tsyKOwsLAj&t=1138
+- https://svelte.dev/docs/svelte/svelte-reactivity#createSubscriber

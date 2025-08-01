@@ -4,8 +4,8 @@
 	import Toasts from '$lib/components/base/toast/toasts.svelte';
 	import { createToaster } from '$lib/components/base/toast/toaster.svelte';
 
-	const toaster = createToaster('page-toaster');
-	const toaster2 = createToaster('page-toaster-2');
+	const appToaster = createToaster('app-toaster');
+	const pageToaster = createToaster('page-toaster');
 
 	let title = $state('title');
 	let message = $state(
@@ -19,61 +19,206 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
+<Toasts id="app-toaster" position="bottom-right" />
 <Toasts id="page-toaster" position="bottom-center" />
-<Toasts id="page-toaster-2" position="bottom-right" />
 
 <Page>
 	<Page.Header>
-		<p>Page Header Number</p>
+		<p>Zag.js UI Toast</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					toaster.add(title, message);
-					/* title = '';
-					message = '';
-					titleInput?.focus(); */
-				}}
-				class="flex w-1/4 flex-col gap-2"
-			>
-				<div class="flex flex-col gap-1">
-					<label for="title">Title</label>
-					<input class="rounded-md border border-gray-800" id="title" bind:this={titleInput} bind:value={title} />
-				</div>
+			<p class="p-3">Page Toast</p>
+			<div class="grid w-full max-w-72 grid-cols-2 gap-2">
+				<button
+					class="bg-info-400 text-info-50 rounded"
+					onclick={() => {
+						pageToaster.add({
+							type: 'info',
+							title: 'Bilgi',
+							description:
+								'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							action: {
+								label: 'Detay',
+								onClick: () => {
+									console.log('onClick');
+								}
+							}
+						});
+					}}
+				>
+					Info
+				</button>
+				<button
+					class="bg-success-400 text-success-50 rounded"
+					onclick={() => {
+						pageToaster.add({
+							type: 'success',
+							title: 'Başarılı',
+							description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							action: {
+								label: 'Detay',
+								onClick: () => {
+									console.log('onClick');
+								}
+							}
+						});
+					}}
+				>
+					Success
+				</button>
+				<button
+					class="bg-warning-400 text-warning-50 rounded"
+					onclick={() => {
+						pageToaster.add({
+							type: 'warning',
+							title: 'Uyarı',
+							description: 'Warning lorem ipsum dolor sit amet.',
+							closable: false
+						});
+					}}
+				>
+					Warning
+				</button>
+				<button
+					class="bg-error-400 text-error-50 rounded"
+					onclick={() => {
+						pageToaster.add({
+							type: 'error',
+							title: 'Hata',
+							description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							action: {
+								label: 'Detay',
+								onClick: () => {
+									console.log('onClick');
+								}
+							}
+						});
+					}}
+				>
+					Error
+				</button>
 
-				<div class="flex flex-col gap-1">
-					<label for="message">Message</label>
-					<input class="rounded-md border border-gray-800" id="message" bind:value={message} />
-				</div>
-				<button class="rounded-md bg-gray-300 p-1"> Add toast! </button>
-			</form>
+				<button
+					class="bg-surface-400 text-surface-50 rounded"
+					onclick={() =>
+						pageToaster.add({
+							type: 'info',
+							title: 'Silmek istediğinize emin misiniz?',
+							description: 'Loading lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							closable: false,
+							action: {
+								label: 'İptal',
+								onClick: () => {
+									console.log('onClick');
+								}
+							}
+						})}
+				>
+					Action
+				</button>
 
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					toaster2.add(title, message);
-					/* title = '';
-					message = '';
-					titleInput?.focus(); */
-				}}
-				class="flex w-1/4 flex-col gap-2"
-			>
-				<div class="flex flex-col gap-1">
-					<label for="title">Title</label>
-					<input class="rounded-md border border-gray-800" id="title" bind:this={titleInput} bind:value={title} />
-				</div>
-
-				<div class="flex flex-col gap-1">
-					<label for="message">Message</label>
-					<input class="rounded-md border border-gray-800" id="message" bind:value={message} />
-				</div>
-				<button class="rounded-md bg-gray-300 p-1"> Add toast! </button>
-			</form>
+				<button
+					class="bg-surface-400 text-surface-50 rounded"
+					onclick={() => {
+						pageToaster.add({
+							type: 'info',
+							title: 'Silmek istediğinize emin misiniz?',
+							description: 'Loading lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							duration: 0,
+							closable: true,
+							action: {
+								label: 'İptal',
+								onClick: () => {
+									console.log('onClick');
+								}
+							}
+						});
+					}}
+				>
+					Duration 0
+				</button>
+				<button
+					class="bg-surface-400 text-surface-50 rounded"
+					onclick={() => {
+						console.log('onClick');
+						/* const promise = new Promise((resolve, reject) => {
+							setTimeout(() => {
+								resolve('Success');
+							}, 3000);
+						});
+						pageToaster.promise(promise, {
+							loading: {
+								title: 'Yükleniyor',
+								description: 'Lütfen bekleyin...'
+							},
+							success: (data) => ({
+								title: 'Başarılı',
+								description: 'İşleminiz tamamlandı'
+							}),
+							error: (err) => ({
+								title: 'Hata',
+								description: 'Bir hata oluştu'
+							})
+						}); */
+					}}
+				>
+					Promise
+				</button>
+			</div>
+			<p class="p-3">App Toast</p>
+			<div class="grid w-full max-w-72 grid-cols-2 gap-2">
+				<button
+					class="bg-info-400 text-info-50 rounded"
+					onclick={() => {
+						appToaster.add({
+							type: 'info',
+							title: 'This is a APP toast!.',
+							description:
+								'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							action: {
+								label: 'Detay',
+								onClick: (id) => {
+									appToaster.remove(id);
+								}
+							}
+						});
+					}}>Info</button
+				>
+				<button
+					class="bg-success-400 text-success-50 rounded"
+					onclick={() => {
+						appToaster.add({
+							type: 'success',
+							title: 'This is a APP toast!',
+							description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+						});
+					}}>Success</button
+				>
+				<button
+					class="bg-warning-400 text-warning-50 rounded"
+					onclick={() => {
+						appToaster.add({
+							type: 'warning',
+							title: 'This is a APP toast!',
+							description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+						});
+					}}>Warning</button
+				>
+				<button
+					class="bg-error-400 text-error-50 rounded"
+					onclick={() => {
+						appToaster.add({
+							type: 'error',
+							title: 'This is a APP toast!',
+							description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.'
+						});
+					}}>Error</button
+				>
+			</div>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
-		<p>Page Footer Number</p>
+		<p>Toast Footer</p>
 	</Page.Footer>
 </Page>
