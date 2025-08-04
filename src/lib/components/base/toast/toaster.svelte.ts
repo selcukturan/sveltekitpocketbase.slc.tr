@@ -126,11 +126,11 @@ export class Toaster {
 		}
 
 		const handlePause = (e: MouseEvent) => {
-			console.log('pauseAll - handlePause');
+			//console.log('pauseAll - handlePause');
 			this.pauseAll();
 		};
 		const handleResume = (e: MouseEvent) => {
-			console.log('resumeAll - handleResume');
+			// console.log('resumeAll - handleResume');
 			this.resumeAll();
 		};
 

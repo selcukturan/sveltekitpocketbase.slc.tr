@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Toaster, appToaster } from '$lib/components/zagjs/toast';
 	import { AppLayout, type SidebarDataType } from '$lib/components/layouts/app';
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
+	import { createToaster, Toasts } from '$lib/components/base/toast';
 
 	let { children } = $props();
 
@@ -41,16 +41,16 @@
 			icon: 'ri-tools-line'
 		}
 	];
+
+	const appToaster = createToaster('app-toaster');
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<!-- <Icons /> -->
+<Toasts id="app-toaster" position="bottom-right" />
 
 <ProgressBar navigate={navigating}>
-	<Toaster toaster={appToaster}>
-		<AppLayout {sidebarData}>
-			{@render children?.()}
-		</AppLayout>
-	</Toaster>
+	<AppLayout {sidebarData}>
+		{@render children?.()}
+	</AppLayout>
 </ProgressBar>

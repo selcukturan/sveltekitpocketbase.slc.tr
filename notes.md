@@ -23,7 +23,12 @@ npm run slc:production:docker
 # Pocketbase tip çıkarımı
 
 ```bash
+# Kurulum
 npm install -D pocketbase-typegen
+```
+
+```bash
+# Tip çıkarımı
 npm run pb:typegen
 ```
 
@@ -40,11 +45,19 @@ Varsayılan olarak collections anlık görüntüsü genişletme modunda içe akt
 # Paket güncellemeleri
 
 ```bash
+# Kurulum
 npm install -g npm-check
+```
+
+```bash
+# Güncelleme
 npm-check --update
 ```
 
-##############################################################################################################################
+# app z-index
+
+- Drawer z-index >= 1000
+- Toasts z-index = 1500
 
 # Table Parent ID System
 

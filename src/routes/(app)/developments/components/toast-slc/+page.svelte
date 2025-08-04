@@ -1,17 +1,10 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
 
-	import Toasts from '$lib/components/base/toast/toasts.svelte';
-	import { createToaster } from '$lib/components/base/toast/toaster.svelte';
+	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 
-	const appToaster = createToaster('app-toaster');
+	const appToaster = getToaster('app-toaster');
 	const pageToaster = createToaster('page-toaster');
-
-	let title = $state('title');
-	let message = $state(
-		'message - lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-	);
-	let titleInput = $state<HTMLInputElement>();
 </script>
 
 <Head>
@@ -19,7 +12,6 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
-<Toasts id="app-toaster" position="bottom-right" />
 <Toasts id="page-toaster" position="bottom-center" />
 
 <Page>
@@ -55,7 +47,7 @@
 						pageToaster.add({
 							type: 'success',
 							title: 'Başarılı',
-							description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+							description: 'Success lorem ipsum dolor sit amet.',
 							action: {
 								label: 'Detay',
 								onClick: () => {

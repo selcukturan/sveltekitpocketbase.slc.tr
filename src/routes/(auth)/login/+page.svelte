@@ -2,6 +2,9 @@
 	import { enhance, applyAction } from '$app/forms';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/client/app';
+	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
+
+	const loginPageToaster = createToaster('login-page-toaster');
 
 	let isLoading = false;
 </script>
@@ -12,6 +15,28 @@
 	<title>{`Login - ${config.appName}`}</title>
 	<meta name="description" content={`Login - ${config.appName}`} />
 </svelte:head>
+
+<Toasts id="login-page-toaster" position="bottom-center" />
+
+<!-- <button
+	class="bg-info-400 text-info-50 rounded"
+	onclick={() => {
+		loginPageToaster.add({
+			type: 'info',
+			title: 'Bilgi',
+			description:
+				'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+			action: {
+				label: 'Detay',
+				onClick: () => {
+					console.log('onClick');
+				}
+			}
+		});
+	}}
+>
+	Toast
+</button> -->
 
 <main class="flex min-h-[100dvh] flex-row">
 	<a href="/" class="contents">
