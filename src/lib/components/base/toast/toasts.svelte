@@ -14,9 +14,9 @@
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
 	};
-	const toasterRootClasses = `min-w-11/12 sm:min-w-sm sm:max-w-lg fixed z-1500 flex flex-col gap-2 px-3 ${positionsClasses[position]}`;
+	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-1500 flex flex-col gap-2 px-2 ${positionsClasses[position]}`;
 	const toastRootClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'relative flex h-full items-center break-words rounded-sm border p-2 shadow-lg',
+		base: 'relative flex items-center break-words rounded-sm border p-2 shadow-lg min-w-full sm:min-w-sm sm:max-w-lg',
 		info: 'bg-info-400 text-info-950 border-info-600 border',
 		success: 'bg-success-400 text-success-950 border-success-600 border',
 		warning: 'bg-warning-400 text-warning-950 border-warning-600 border',
