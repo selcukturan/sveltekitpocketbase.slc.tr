@@ -36,7 +36,7 @@
 	};
 
 	const closeButtonClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'inline-flex h-5 w-5 transform cursor-pointer items-center justify-center rounded-full text-center align-middle leading-none select-none',
+		base: 'inline-flex items-center justify-center h-5 w-5 rounded-full cursor-pointer select-none',
 		info: 'bg-info-500 text-info-50 hover:bg-info-700 active:bg-info-600',
 		success: 'bg-success-500 text-success-50 hover:bg-success-700 active:bg-success-600',
 		warning: 'bg-warning-500 text-warning-50 hover:bg-warning-700 active:bg-warning-600',
@@ -95,7 +95,7 @@
 						onclick={() => toaster.remove(toastId)}
 						aria-label="Close"
 					>
-						<i class={`ri-close-line !text-base`}></i>
+						<i class={`ri-close-line !text-base !leading-0`}></i>
 					</button>
 				</div>
 			{/if}
