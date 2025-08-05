@@ -36,13 +36,10 @@ export const confirmDialog = async (options: { message?: string; yes?: string; n
 
 	const isConfirmed = await confirmInstance.show();
 
-	setTimeout(() => {
+	/* setTimeout(() => {
 		unmount(confirmInstance);
-	}, confirmInstance.ANIMATION_DURATION);
+	}, confirmInstance.ANIMATION_DURATION); */
+	unmount(confirmInstance);
 
-	if (isConfirmed === true) {
-		return true;
-	} else {
-		return false;
-	}
+	return isConfirmed;
 };

@@ -45,17 +45,19 @@
 	};
 
 	export const close = async () => {
-		await handleClose(undefined);
+		// await performClose(undefined);
+		xxxxClose('close');
 	};
 
 	const show = () => {
-		isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
+		dialog?.showModal();
+		/* isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
 		openDrawer = true;
-
+		// dialog?.showModal();
 		tick().then(() => {
-			dialog?.showModal();
+			// dialog?.showModal();
 			onOpen?.(); // onOpen callback'ini çağır
-		});
+		}); */
 	};
 
 	// hide fonksiyonu animasyonu da yönetir
@@ -74,7 +76,7 @@
 	};
 
 	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır
-	const handleClose = async (e: Event | undefined) => {
+	const performClose = async (e: Event | undefined) => {
 		if (isClosing) return;
 		// onBeforeClose kontrolü
 		if (onBeforeClose) {
@@ -90,39 +92,111 @@
 		hide();
 	};
 
+	const xxxxClose = (log: string) => {
+		/* if (onBeforeClose) {
+			closedby = 'none';
+			const canClose = onBeforeClose();
+			closedby = 'any';
+			if (!canClose) {
+				return; // Kapatmayı iptal et
+			}
+		} */
+		console.log('xxxxClose - ' + log);
+		if (onBeforeClose) {
+			onBeforeClose().then((canClose) => {
+				if (canClose) {
+					dialog?.close();
+				}
+			});
+		} else {
+			dialog?.close();
+		}
+
+		/* const confirmed = confirm('Are you sure you want to close?');
+		if (confirmed) {
+			dialog?.close();
+		} */
+	};
+
 	const dialogAttach: Attachment = (element) => {
 		if (!(element instanceof HTMLDialogElement)) {
 			throw new Error('Dialog element is not an HTMLDialogElement');
 		}
+		const handleKeydown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && escClose) {
+				// console.log('handleKeydown');
+				e.preventDefault();
+				xxxxClose('handleKeydown - Esc key pressed');
+			}
+		};
 
+		/**
+		 * oncancel olayı, bir diyalogun kapatılma niyetinin bir "iptal" eylemi olduğunu belirtir.
+		 * oncancel: Diyalog sadece kullanıcı tarafından "iptal edildiğinde" tetiklenir. Bu genellikle Esc tuşuna basılmasıdır.
+		 *
+		 * Ne zaman tetiklenir?
+		 * Kullanıcı klavyeden Esc tuşuna bastığında.
+		 *
+		 * En Önemli Özelliği Nedir?
+		 * oncancel olayının en güçlü yanı, event.preventDefault() metodu ile diyalogun kapanmasını engelleyebilmenizdir.
+		 * Bu, özellikle kullanıcıya "Değişiklikleri kaydetmeden çıkmak istediğinize emin misiniz?" gibi bir soru sormak için idealdir.
+		 *
+		 * Kullanım Amacı:
+		 * Kullanıcının yaptığı bir işlemi (örneğin bir formu doldurmayı) yarıda bırakıp Esc ile çıkmaya çalıştığı durumları yönetmek için kullanılır.
+		 */
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
-			handleClose(e); // Kapanma işlemini kendi animasyonlu fonksiyonumuzla yapıyoruz
+			xxxxClose('handleCancel - Backdrop click');
+		};
+
+		/**
+		 * onclose: Diyalog, sebebi ne olursa olsun, her kapandığında tetiklenir.
+		 * onclose olayı, diyalog penceresi kapandığında her zaman tetiklenir. Kapanma sebebinin bir önemi yoktur.
+		 *
+		 * Ne zaman tetiklenir?
+		 * Kullanıcı Esc tuşuna bastığında (eğer oncancel ile engellenmediyse).
+		 * JavaScript ile dialog.close() metodu çağrıldığında.
+		 * Diyalog içindeki bir formda method="dialog" olan bir buton tıklandığında.
+		 *
+		 * En Önemli Özelliği Nedir?
+		 * onclose olayı engellenemez. Sadece diyalog kapandıktan sonra ne yapılacağını belirlemek için kullanılır.
+		 * Genellikle temizlik işlemleri (örneğin form alanlarını sıfırlamak) için idealdir.
+		 *
+		 * Kullanım Amacı:
+		 * Diyalog kapatıldıktan sonra arayüzü veya verileri sıfırlamak, temizlemek veya son bir işlem yapmak için kullanılır.
+		 */
+		const handleClose = (e: Event) => {
+			//console.log('handleClose');
 		};
 
 		element.addEventListener('cancel', handleCancel);
+		// element.addEventListener('close', handleClose);
+		element.addEventListener('keydown', handleKeydown);
 		return () => {
 			element.removeEventListener('cancel', handleCancel);
+			// element.removeEventListener('close', handleClose);
+			element.removeEventListener('keydown', handleKeydown);
 		};
 	};
 </script>
 
-{#if openDrawer}
-	<!-- Dialog bileşeni -->
-	<dialog
-		{closedby}
-		class="bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl"
-		bind:this={dialog}
-		{@attach focustrap}
-		{@attach dialogAttach}
-		class:closing={isClosing}
-	>
-		<!-- Dialog içeriği -->
-		<div class="h-full w-full">
-			{@render children?.()}
-		</div>
-	</dialog>
-{/if}
+<!-- {#if openDrawer} -->
+<!-- Dialog bileşeni -->
+<dialog
+	{closedby}
+	class="bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl"
+	bind:this={dialog}
+	{@attach focustrap}
+	{@attach dialogAttach}
+	class:closing={isClosing}
+>
+	<!-- Dialog içeriği -->
+	<div class="h-full w-full">
+		{@render children?.()}
+	</div>
+</dialog>
+
+<!-- {/if} -->
 
 <style>
 	dialog {
