@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { focustrap } from '$lib/client/attachments';
-	import { tick, type Snippet } from 'svelte';
+	import { type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
 	/**
@@ -23,9 +23,8 @@
 	} = $props();
 
 	let dialog: HTMLDialogElement | null = $state(null);
-	let openDrawer = $state(false);
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
-
+	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
 	/**
 	 * KISIT TARAYICI UYUMLULUĞU:
 	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/closedBy#browser_compatibility
@@ -37,96 +36,52 @@
 	 */
 	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
 
-	// Animasyon süresini, JS ve CSS'te senkronize tut.
-	export const ANIMATION_DURATION = 150;
-
 	export const open = () => {
 		show();
 	};
 
 	export const close = async () => {
-		// await performClose(undefined);
-		xxxxClose('close');
+		hide('close');
 	};
 
 	const show = () => {
 		dialog?.showModal();
-		/* isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
-		openDrawer = true;
-		// dialog?.showModal();
-		tick().then(() => {
-			// dialog?.showModal();
-			onOpen?.(); // onOpen callback'ini çağır
-		}); */
+		onOpen?.();
 	};
 
-	// hide fonksiyonu animasyonu da yönetir
-	const hide = () => {
-		if (!dialog) return;
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+	const hide = async (log: string) => {
+		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 
-		isClosing = true; // Kapanma animasyonunu tetikle
+		console.log('hide - ' + log);
 
-		// Animasyonun bitmesini bekle
-		setTimeout(() => {
-			dialog?.close(); // Gerçek kapatma işlemi
-			openDrawer = false; // #if bloğu ile DOM'dan kaldırma
-			isClosing = false; // Durumu sıfırla
-			onClose?.(); // onClose callback'ini animasyon bittikten sonra çağır
-		}, ANIMATION_DURATION);
-	};
+		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
 
-	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır
-	const performClose = async (e: Event | undefined) => {
-		if (isClosing) return;
-		// onBeforeClose kontrolü
 		if (onBeforeClose) {
-			closedby = 'none';
-			const canClose = await onBeforeClose();
-			closedby = 'any';
-			if (!canClose) {
-				return; // Kapatmayı iptal et
-			}
+			canClose = await onBeforeClose(); // "await" ile onBeforeClose fonksiyonunun tamamlanmasını beklenir.
 		}
 
-		e?.preventDefault(); // Olası form gönderimlerini vb. engelle
-		hide();
-	};
+		if (!canClose) return; // Kapatma izni yoksa fonksiyondan erken çık
 
-	const xxxxClose = (log: string) => {
-		/* if (onBeforeClose) {
-			closedby = 'none';
-			const canClose = onBeforeClose();
-			closedby = 'any';
-			if (!canClose) {
-				return; // Kapatmayı iptal et
-			}
-		} */
-		console.log('xxxxClose - ' + log);
-		if (onBeforeClose) {
-			onBeforeClose().then((canClose) => {
-				if (canClose) {
-					dialog?.close();
-				}
-			});
-		} else {
-			dialog?.close();
-		}
+		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
 
-		/* const confirmed = confirm('Are you sure you want to close?');
-		if (confirmed) {
-			dialog?.close();
-		} */
+		await sleep(ANIMATION_DURATION); // CSS animasyonu için bekleniyor. Kod burada duraklar.
+
+		// Bekleme bittikten sonraki işlemler. Kapatma işlemi CSS `.closing` animasyonu bitti. Diyalog kapatılıyor.
+		isClosing = false;
+		dialog?.close();
+		onClose?.();
 	};
 
 	const dialogAttach: Attachment = (element) => {
 		if (!(element instanceof HTMLDialogElement)) {
 			throw new Error('Dialog element is not an HTMLDialogElement');
 		}
+
 		const handleKeydown = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && escClose) {
-				// console.log('handleKeydown');
 				e.preventDefault();
-				xxxxClose('handleKeydown - Esc key pressed');
+				hide('handleKeydown - Esc key pressed');
 			}
 		};
 
@@ -146,7 +101,7 @@
 		 */
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
-			xxxxClose('handleCancel - Backdrop click');
+			hide('handleCancel - Backdrop click');
 		};
 
 		/**
@@ -165,9 +120,9 @@
 		 * Kullanım Amacı:
 		 * Diyalog kapatıldıktan sonra arayüzü veya verileri sıfırlamak, temizlemek veya son bir işlem yapmak için kullanılır.
 		 */
-		const handleClose = (e: Event) => {
-			//console.log('handleClose');
-		};
+		/* const handleClose = (e: Event) => {
+			// console.log('handleClose');
+		}; */
 
 		element.addEventListener('cancel', handleCancel);
 		// element.addEventListener('close', handleClose);
@@ -180,23 +135,18 @@
 	};
 </script>
 
-<!-- {#if openDrawer} -->
-<!-- Dialog bileşeni -->
 <dialog
 	{closedby}
+	class:closing={isClosing}
 	class="bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl"
 	bind:this={dialog}
 	{@attach focustrap}
 	{@attach dialogAttach}
-	class:closing={isClosing}
 >
-	<!-- Dialog içeriği -->
 	<div class="h-full w-full">
 		{@render children?.()}
 	</div>
 </dialog>
-
-<!-- {/if} -->
 
 <style>
 	dialog {
@@ -241,13 +191,15 @@
 		}
 	}
 
-	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir. Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
+	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
+	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
 	dialog.closing {
-		animation: dialog-exit-to-right 0.15s ease-in forwards;
+		animation: dialog-exit-to-right 0.15s ease-out forwards;
 	}
 
+	/* Kapanırken backdrop'ın da fade-out olması için */
 	dialog.closing::backdrop {
-		animation: backdrop-fade-out 0.15s ease-in forwards;
+		animation: backdrop-fade-out 0.15s ease-out forwards;
 	}
 
 	@keyframes dialog-enter-from-right {
