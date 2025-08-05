@@ -11,7 +11,8 @@ export const confirm = async (options: { message?: string; yes?: string; no?: st
 			message,
 			yes,
 			no
-		}
+		},
+		intro: true
 	});
 
 	const isConfirmed = await confirmInstance.promise;
