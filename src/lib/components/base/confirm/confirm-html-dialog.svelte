@@ -11,6 +11,12 @@
 
 	// Animasyon süresini, JS ve CSS'te senkronize tut.
 	export const ANIMATION_DURATION = 150;
+	/**
+	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
+	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
+	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
+	 */
+	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('closerequest');
 
 	export const show = () => {
 		isClosing = false; // Dialog açılırken "closing" durumunu sıfırla
@@ -55,6 +61,7 @@
 
 {#if open}
 	<dialog
+		{closedby}
 		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
 		bind:this={dialog}
 		{@attach focustrap}

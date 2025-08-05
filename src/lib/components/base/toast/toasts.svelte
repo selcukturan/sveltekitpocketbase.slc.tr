@@ -2,7 +2,7 @@
 	// https://github.com/huntabyte/svelte-5-context-classes
 	import type { Toaster, Toast } from './types';
 	import { getToaster } from './toaster.svelte';
-	import { fly } from 'svelte/transition';
+	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
 	let { id, position = 'bottom-right' }: Toaster = $props();
@@ -53,7 +53,7 @@
 		{@const toastType = toast.type ?? 'default'}
 		<!-- Toast -->
 		<div
-			in:fly={{ y: 100, duration: 200 }}
+			in:slide={{ duration: 200 }}
 			out:fly={{ y: 200, duration: 200 }}
 			animate:flip={{ duration: 200 }}
 			class={`${toastRootClasses.base} ${toastRootClasses[toastType]}`}

@@ -51,28 +51,26 @@
 	};
 </script>
 
-<div transition:fade={{ duration: 150 }}>
-	<!-- Backdrop -->
-	<div class="bg-surface-300/40 fixed inset-0" style:z-index={zindex}></div>
+<!-- Backdrop -->
+<div class="bg-surface-300/40 fixed inset-0" style:z-index={zindex} transition:fade={{ duration: 150 }}></div>
 
-	<!-- Confirm -->
-	<div
-		{@attach focustrap}
-		{@attach confirmAttach}
-		class:slc-app-confirm-dialog={true}
-		class="bg-surface-50 fixed w-11/12 max-w-lg rounded-lg shadow-xl {centerPositionClassess}"
-		style:z-index={zindex}
-		data-index={zindex - startingZindex}
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby="confirm-title"
-		in:fly={{ duration: 150, y: 20 }}
-		out:fly={{ duration: 150, y: 20 }}
-	>
-		<div class="dialog-content">
-			<p>{message}</p>
-			<button onclick={() => close(false)}>{no}</button>
-			<button onclick={() => close(true)}>{yes}</button>
-		</div>
+<!-- Confirm -->
+<div
+	{@attach focustrap}
+	{@attach confirmAttach}
+	class:slc-app-confirm-dialog={true}
+	class="bg-surface-50 fixed w-11/12 max-w-lg rounded-lg shadow-xl {centerPositionClassess}"
+	style:z-index={zindex}
+	data-index={zindex - startingZindex}
+	role="dialog"
+	aria-modal="true"
+	aria-labelledby="confirm-title"
+	in:fly={{ duration: 150, y: 20 }}
+	out:fly={{ duration: 150, y: 20 }}
+>
+	<div class="dialog-content">
+		<p>{message}</p>
+		<button onclick={() => close(false)}>{no}</button>
+		<button onclick={() => close(true)}>{yes}</button>
 	</div>
 </div>
