@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { confirm } from '$lib/components/base/confirm';
+	import { confirmDialog, confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
-	let answer = $state('');
+	let answer1 = $state('waiting');
+	let answer2 = $state('waiting');
 </script>
 
 <Head>
@@ -18,22 +19,38 @@
 	<Page.Main>
 		<Page.Main.Panel>
 			<main class="p-8">
-				<div class="flex gap-4">
+				<div class="flex flex-col gap-4">
 					<button
 						onclick={async () => {
-							answer = '';
+							answer1 = 'waiting';
 							const isConfirmed = await confirm();
 							if (isConfirmed) {
-								answer = 'onayladı';
+								answer1 = 'true';
 							} else {
-								answer = 'iptal edildi';
+								answer1 = 'false';
 							}
 						}}
 						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 					>
-						Confirmation
+						Confirmation (html div)
 					</button>
-					<p>{answer}</p>
+					<p>{answer1}</p>
+					<button
+						onclick={async () => {
+							answer2 = 'waiting';
+							const isConfirmed = await confirmDialog();
+							if (isConfirmed) {
+								answer2 = 'true';
+							} else {
+								answer2 = 'false';
+							}
+						}}
+						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+					>
+						Confirmation (html dialog)
+					</button>
+
+					<p>{answer2}</p>
 				</div>
 			</main>
 		</Page.Main.Panel>

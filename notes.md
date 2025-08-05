@@ -57,7 +57,8 @@ npm-check --update
 # app z-index
 
 - Drawer z-index >= 1000
-- Toasts z-index = 1500
+- Confirm z-index >= 2000
+- Toasts z-index = 3000
 
 # Table Parent ID System
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Drawer } from '$lib/components/base/drawer';
 	import { DrawerHtmlDialog } from '$lib/components/base/drawer';
-	import { confirm } from '$lib/components/base/confirm';
+	import { confirm, confirmDialog } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
 	let drawer: Drawer;
@@ -49,7 +49,7 @@
 	bind:this={drawerHtmlDialog2}
 	onBeforeClose={async () => {
 		// any custom logic before closing
-		return await confirm({
+		return await confirmDialog({
 			message: 'Bu paneli kapatmak istediğinize emin misiniz?',
 			yes: 'Evet',
 			no: 'Hayır'

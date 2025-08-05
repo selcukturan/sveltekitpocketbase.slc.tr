@@ -2,7 +2,7 @@
 	// https://github.com/huntabyte/svelte-5-context-classes
 	import type { Toaster, Toast } from './types';
 	import { getToaster } from './toaster.svelte';
-	import { slide, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
 	let { id, position = 'bottom-right' }: Toaster = $props();
@@ -14,7 +14,7 @@
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
 	};
-	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-1500 flex flex-col gap-2 px-2 ${positionsClasses[position]}`;
+	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-3000 flex flex-col gap-2 px-2 ${positionsClasses[position]}`;
 	const toastRootClasses: Record<Required<Toast>['type'] | 'base', string> = {
 		base: 'relative flex items-center break-words rounded-sm border p-2 shadow-lg min-w-full sm:min-w-sm sm:max-w-lg',
 		info: 'bg-info-400 text-info-950 border-info-600 border',
@@ -53,9 +53,9 @@
 		{@const toastType = toast.type ?? 'default'}
 		<!-- Toast -->
 		<div
-			in:slide={{ duration: 300 }}
-			out:fly={{ y: 200, duration: 300 }}
-			animate:flip={{ duration: 300 }}
+			in:fly={{ y: 100, duration: 200 }}
+			out:fly={{ y: 200, duration: 200 }}
+			animate:flip={{ duration: 200 }}
 			class={`${toastRootClasses.base} ${toastRootClasses[toastType]}`}
 		>
 			<div class="pr-2">
