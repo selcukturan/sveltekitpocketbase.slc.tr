@@ -15,6 +15,42 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
+<!-- Sayfa içeriği -->
+<Page>
+	<Page.Header>
+		<p>Drawer Header</p>
+	</Page.Header>
+	<Page.Main>
+		<Page.Main.Panel>
+			<main class="p-8">
+				<div class="m-1 flex gap-4">
+					<button
+						onclick={() => {
+							drawer.open();
+						}}
+						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+					>
+						Open Panel (html div)
+					</button>
+				</div>
+				<div class="flex gap-4">
+					<button
+						onclick={() => {
+							drawerHtmlDialog1.open();
+						}}
+						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+					>
+						Open Panel (html dialog)
+					</button>
+				</div>
+			</main>
+		</Page.Main.Panel>
+	</Page.Main>
+	<Page.Footer>
+		<p>Drawer Footer</p>
+	</Page.Footer>
+</Page>
+
 <DrawerHtmlDialog bind:this={drawerHtmlDialog1}>
 	<Page>
 		<Page.Header class="flex items-center justify-between border-b p-4">
@@ -76,42 +112,6 @@
 		</Page.Footer>
 	</Page>
 </DrawerHtmlDialog>
-
-<!-- Sayfa içeriği -->
-<Page>
-	<Page.Header>
-		<p>Drawer Header</p>
-	</Page.Header>
-	<Page.Main>
-		<Page.Main.Panel>
-			<main class="p-8">
-				<div class="m-1 flex gap-4">
-					<button
-						onclick={() => {
-							drawer.open();
-						}}
-						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
-					>
-						Open Panel (html div)
-					</button>
-				</div>
-				<div class="flex gap-4">
-					<button
-						onclick={() => {
-							drawerHtmlDialog1.open();
-						}}
-						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
-					>
-						Open Panel (html dialog)
-					</button>
-				</div>
-			</main>
-		</Page.Main.Panel>
-	</Page.Main>
-	<Page.Footer>
-		<p>Drawer Footer</p>
-	</Page.Footer>
-</Page>
 
 <Drawer bind:this={drawer} onOpen={() => console.log('Drawer opened')} onClose={() => console.log('Drawer closed')}>
 	<Page>

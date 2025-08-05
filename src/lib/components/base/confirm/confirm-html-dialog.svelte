@@ -10,7 +10,7 @@
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
 	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
 	/**
-	 * KISIT TARAYICI UYUMLULUĞU:
+	 * KISITLI TARAYICI UYUMLULUĞU:
 	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
 	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
 	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
@@ -25,7 +25,7 @@
 		hide('close', false);
 	};
 
-	export const show = () => {
+	const show = () => {
 		// Yeni bir Promise oluşturup döndürüyoruz.
 		return new Promise<boolean>((resolve) => {
 			// Bu Promise'in resolve fonksiyonunu dışarıdaki değişkene atıyoruz.
@@ -44,7 +44,7 @@
 	const hide = async (log: string, value: boolean) => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma.
 
-		console.log('hide - ' + log);
+		// console.log('hide - ' + log);
 
 		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
 
@@ -64,9 +64,8 @@
 
 		const handleKeydown = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') {
-				// console.log('handleKeydown');
 				e.preventDefault();
-				hide('handleKeydown - Esc key pressed', false);
+				hide('confirm - handleKeydown - Esc key pressed', false);
 			}
 		};
 
@@ -168,14 +167,11 @@
 		}
 	}
 
-	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
-	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
-	dialog.closing {
+	dialog[open].closing {
 		animation: dialog-exit-to-bottom 0.15s ease-out forwards;
 	}
 
-	/* Kapanırken backdrop'ın da fade-out olması için */
-	dialog.closing::backdrop {
+	dialog[open].closing::backdrop {
 		animation: backdrop-fade-out 0.15s ease-out forwards;
 	}
 

@@ -53,7 +53,7 @@
 	const hide = async (log: string) => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 
-		console.log('hide - ' + log);
+		// console.log('hide - ' + log);
 
 		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
 
@@ -81,7 +81,7 @@
 		const handleKeydown = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && escClose) {
 				e.preventDefault();
-				hide('handleKeydown - Esc key pressed');
+				hide('drawer - handleKeydown - Esc key pressed');
 			}
 		};
 
@@ -191,14 +191,11 @@
 		}
 	}
 
-	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
-	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
-	dialog.closing {
+	dialog[open].closing {
 		animation: dialog-exit-to-right 0.15s ease-out forwards;
 	}
 
-	/* Kapanırken backdrop'ın da fade-out olması için */
-	dialog.closing::backdrop {
+	dialog[open].closing::backdrop {
 		animation: backdrop-fade-out 0.15s ease-out forwards;
 	}
 
