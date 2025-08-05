@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { focustrap } from '$lib/client/attachments';
 	import { tick } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
 
 	let { message = 'Onaylıyor musunuz?', yes = 'Evet', no = 'Hayır' }: { message?: string; yes?: string; no?: string } = $props();
 
@@ -13,6 +12,7 @@
 	// Animasyon süresini, JS ve CSS'te senkronize tut.
 	export const ANIMATION_DURATION = 150;
 	/**
+	 * KISIT TARAYICI UYUMLULUĞU:
 	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
 	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
 	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
@@ -52,27 +52,12 @@
 
 	// Hem buton tıklamaları hem de dialog'un kendi close olayı (ESC tuşu) aynı fonksiyonu çağırır
 	const handleClose = (e: Event, value: boolean) => {
-		e.preventDefault();
 		if (isClosing) return; // Zaten kapanma sürecindeyse tekrar başlatma
+		e.preventDefault();
+
 		hide();
 		resolvePromise?.(value); // Promise'i true veya false ile çöz
 		resolvePromise = null; // Promise'i sıfırla, böylece tekrar kullanılabilir
-	};
-
-	const dialogAttach: Attachment = (element) => {
-		if (!(element instanceof HTMLDialogElement)) {
-			throw new Error('Dialog element is not an HTMLDialogElement');
-		}
-
-		const handleCancel = (e: Event) => {
-			e.preventDefault();
-			handleClose(e, false); // Kapanma işlemini kendi animasyonlu fonksiyonumuzla yapıyoruz
-		};
-
-		element.addEventListener('cancel', handleCancel);
-		return () => {
-			element.removeEventListener('cancel', handleCancel);
-		};
 	};
 </script>
 
@@ -82,7 +67,7 @@
 		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
 		bind:this={dialog}
 		{@attach focustrap}
-		{@attach dialogAttach}
+		onclose={(e) => handleClose(e, false)}
 		class:closing={isClosing}
 	>
 		<div class="dialog-content">
@@ -94,85 +79,58 @@
 {/if}
 
 <style>
-	dialog {
-		/* Başlangıçta dialog görünmez ve animasyona hazır */
+	dialog,
+	dialog::backdrop {
+		--anim-duration: 150ms;
+		transition:
+			display var(--anim-duration) allow-discrete,
+			overlay var(--anim-duration) allow-discrete,
+			opacity var(--anim-duration),
+			transform var(--anim-duration) ease-in-out; /* Animasyonun daha yumuşak olması için transform süresini de ekleyelim */
 		opacity: 0;
 	}
 
+	dialog {
+		/* 5. GÜNCELLENDİ: Açılış animasyonu ile simetrik olması için transform'u sıfırla */
+		transform: translateY(0);
+	}
+
 	dialog::backdrop {
-		background-color: var(--color-surface-300);
-		/* Başlangıçta backdrop görünmez ve animasyona hazır */
-		opacity: 0;
+		background-image: linear-gradient(45deg, var(--color-surface-300));
 	}
 
 	/* Animate In */
 	dialog[open] {
-		animation: dialog-enter-from-bottom 0.15s ease-out forwards;
+		opacity: 1;
+		/* 6. GÜNCELLENDİ: Açılışta transform'un hedefini belirt. Artık scale değil, Y ekseninde hareket. */
+		transform: translateY(0);
 	}
 	dialog[open]::backdrop {
-		animation: backdrop-fade-in 0.15s ease-out forwards;
+		opacity: 0.5;
 	}
 
 	/* Starting style for entry animation */
 	@starting-style {
 		dialog[open] {
-			/* Başlangıçta dialog görünmez ve animasyona hazır */
+			transform: translateY(20px);
 			opacity: 0;
 		}
 
 		dialog[open]::backdrop {
-			/* Başlangıçta backdrop görünmez ve animasyona hazır */
 			opacity: 0;
 		}
 	}
 
-	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir. Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
+	/* dialog[open].closing yazmak yerine sadece .closing yazmak daha güvenilirdir.
+	   Çünkü animasyon bittiğinde [open] attribute'ü kalkacak. */
 	dialog.closing {
-		animation: dialog-exit-to-bottom 0.15s ease-in forwards;
+		opacity: 0;
+		transform: translateY(20px);
 	}
 
+	/* Kapanırken backdrop'ın da fade-out olması için */
 	dialog.closing::backdrop {
-		animation: backdrop-fade-out 0.15s ease-in forwards;
-	}
-
-	@keyframes dialog-enter-from-bottom {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	@keyframes dialog-exit-to-bottom {
-		from {
-			opacity: 1;
-			transform: translateY(0);
-		}
-		to {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-	}
-
-	@keyframes backdrop-fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 0.4;
-		}
-	}
-
-	@keyframes backdrop-fade-out {
-		from {
-			opacity: 0.4;
-		}
-		to {
-			opacity: 0;
-		}
+		opacity: 0;
 	}
 
 	.dialog-content {
