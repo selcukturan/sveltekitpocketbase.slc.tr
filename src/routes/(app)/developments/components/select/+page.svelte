@@ -34,8 +34,26 @@
 	<Page.Header>Components Header</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<p>Select</p>
+			<div class="relative">
+				<button id="my-anchor-popover" class="anchor" popovertarget="my-target-popover"> Anchor (click to open) </button>
+				<div id="my-target-popover" class="target" popover="">Popover (Target)</div>
+			</div>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>Components Footer</Page.Footer>
 </Page>
+
+<style>
+	#my-anchor-popover {
+		position: absolute;
+		background-color: blue;
+		anchor-name: --my-anchor-popover;
+	}
+
+	#my-target-popover {
+		position: absolute;
+		background-color: red;
+		left: anchor(--my-anchor-popover right);
+		top: anchor(--my-anchor-popover bottom);
+	}
+</style>
