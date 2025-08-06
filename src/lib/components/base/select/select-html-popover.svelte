@@ -68,7 +68,7 @@
 		value={value || selectText}
 		aria-invalid={errors ? 'true' : undefined}
 		{...attributes}
-		class={classes}
+		class="{classes} bg-error-500 w-full"
 	/>
 	<div
 		id={`s${uuid}`}
@@ -113,8 +113,11 @@
 		inset: unset;
 		position: absolute;
 		margin-top: 5px;
-		position-try-options: flip-block;
-		position-visibility: anchors-visible;
+		/*x*/
+		position-try-fallbacks: flip-block;
+		/* position-visibility: anchors-visible; */
+		position-area: inline-end span-block-end;
+
 		min-width: calc(anchor-size(width) * 1);
 		max-height: 300px;
 	}
