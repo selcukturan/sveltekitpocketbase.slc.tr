@@ -133,12 +133,15 @@
 			element.removeEventListener('keydown', handleKeydown);
 		};
 	};
+
+	const dialogClasses = 'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl';
+	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 
 <dialog
 	{closedby}
 	class:closing={isClosing}
-	class="bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl"
+	class="{dialogClasses} {dialogFocusOverrideClasses}"
 	bind:this={dialog}
 	{@attach focustrap}
 	{@attach dialogAttach}

@@ -620,9 +620,9 @@
 
 		EXAMPLE: Set a global focus style.
 		Apply this in your app's global stylesheet: */
-	:focus {
+	/* :focus {
 		@apply focus:outline-primary-800;
-	}
+	} */
 
 	/* Component Focus Utility */
 	/* .focused {
@@ -744,14 +744,7 @@
 }
 
 @layer components {
-	/* *:not(body):not(.focus-override) {
-		outline: none !important;
-		&:focus-visible {
-			@apply focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-hidden;
-		}
-	} */
-
-	/* .link {
-		@apply hover:text-surface-500/80 focus-visible:ring-surface-500 focus-visible:ring-offset-background inline-flex items-center gap-1 rounded-xs font-medium underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden;
-	} */
+	*:not(body):not(.focus-override):focus-visible {
+		@apply outline-primary-400 outline-2 outline-offset-2;
+	}
 }

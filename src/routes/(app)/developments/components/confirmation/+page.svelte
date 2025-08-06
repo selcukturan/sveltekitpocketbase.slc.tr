@@ -2,8 +2,8 @@
 	import { confirmDialog, confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
-	let answer1 = $state('waiting');
-	let answer2 = $state('waiting');
+	let answer1 = $state('init');
+	let answer2 = $state('init');
 </script>
 
 <Head>

@@ -51,7 +51,6 @@
 					py-1
 					text-base
 					no-underline
-					outline-0
 					select-none"
 				>
 					<span>
