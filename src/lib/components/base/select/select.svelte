@@ -25,6 +25,7 @@
 	const id = $props.id();
 	let container: HTMLDivElement | null = null;
 	let trigger: HTMLButtonElement | null = null;
+	let listbox: HTMLDivElement | null = $state(null);
 	let optionButtons: HTMLButtonElement[] = $state([]);
 	let active = $state(false);
 	let isOutsideMouseDown = $state(false);
@@ -40,12 +41,17 @@
 
 		await tick(); // Bekle, DOM güncellensin
 
-		optionButtons[activeIndex]?.focus();
+		// ODAĞI LİSTBOX'A VER
+		listbox?.focus();
+
+		// optionButtons[activeIndex]?.focus();
+		// VE SEÇİLİ ELEMANI GÖRÜNÜR KIL
+		optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
 	};
 	const close = async () => {
 		active = false;
 		await tick(); // Bekle, DOM güncellensin
-		trigger?.focus({ preventScroll: true });
+		trigger?.focus();
 	};
 	const toggle = () => {
 		if (active) {
@@ -60,7 +66,6 @@
 		const target = e.target as HTMLElement;
 		isOutsideMouseDown = !container?.contains(target);
 	}
-
 	function handleOutsideClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
 		if (active && isOutsideMouseDown && !container?.contains(target)) {
@@ -68,14 +73,12 @@
 			close();
 		}
 	}
-
 	function handleEscPress(e: KeyboardEvent) {
 		if (active && escClose && e.code === 'Escape') {
 			e.preventDefault();
 			close();
 		}
 	}
-
 	function handleFocusChange(e: FocusEvent) {
 		const target = e.target as HTMLElement;
 		if (active && !trigger?.contains(target) && !container?.contains(target)) {
@@ -84,19 +87,13 @@
 		}
 	}
 
-	function selectOption(index: number, val: T['value']) {
-		value = val;
-		selectedIndex = index;
-		close();
-	}
-
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 	let searchString = ''; // Arama metni
 	const handleListboxKeydown = (e: KeyboardEvent) => {
 		// 1. Arama (Typeahead) Mantığı
 		//----------------------------------------------------
-		// Eğer basılan tuş tek bir karakterse (Ctrl veya Alt basılı değilken)
-		if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+		// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
+		if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
 			e.preventDefault();
 
 			// Önceki zamanlayıcıyı temizle
@@ -111,7 +108,8 @@
 			// Eğer bir eşleşme bulunursa
 			if (matchIndex !== -1) {
 				activeIndex = matchIndex;
-				optionButtons[activeIndex]?.focus();
+				// optionButtons[activeIndex]?.focus();
+				optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
 			}
 
 			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla (örn: 500ms sonra)
@@ -144,7 +142,8 @@
 
 				if (nextIndex !== activeIndex) {
 					activeIndex = nextIndex;
-					optionButtons[activeIndex]?.focus();
+					// optionButtons[activeIndex]?.focus();
+					optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
 				}
 				break;
 			}
@@ -170,13 +169,19 @@
 		}
 	};
 
+	function selectOption(index: number, val: T['value']) {
+		value = val;
+		selectedIndex = index;
+		close();
+	}
+
 	const optionButtonFocusOverrideClasses = 'focus-override focus-visible:outline-error-400 focus-visible:outline-2 focus-visible:-outline-offset-2';
 </script>
 
 <svelte:window onclick={handleOutsideClick} onmousedown={handleOutsideMousedown} onkeydown={handleEscPress} onfocusin={handleFocusChange} />
 
 <!-- Select Container -->
-<div bind:this={container} tabindex="-1" class="relative select-none">
+<div bind:this={container} class="relative select-none">
 	<!-- Select Trigger -->
 	<button
 		bind:this={trigger}
@@ -190,9 +195,10 @@
 		class="bg-error-300 w-full select-none"
 		onclick={() => toggle()}>{selectedIndex === -1 ? '--Seçiniz--' : options[selectedIndex].label}</button
 	>
-	<!-- Select Popup -->
+	<!-- Select Listbox -->
 	{#if active && options.length > 0 && !disabled && !readonly}
 		<div
+			bind:this={listbox}
 			role="listbox"
 			aria-labelledby={`slc-combobox-button-${id}`}
 			id={`slc-listbox-popup-${id}`}
@@ -201,14 +207,16 @@
 			class="bg-warning-300 absolute flex max-h-80 w-full flex-col overflow-y-auto select-none"
 			transition:fly={{ y: 3, duration: 150 }}
 		>
+			<!-- Select Options -->
 			{#each options as option, i (i)}
 				<button
 					id={`slc-option-${id}-${i}`}
 					bind:this={optionButtons[i]}
 					role="option"
-					tabindex={activeIndex === i ? 0 : -1}
+					tabindex={-1}
 					aria-selected={i === selectedIndex}
 					class:bg-success-200={i === selectedIndex}
+					class:bg-success-400={i === activeIndex}
 					class="hover:bg-success-100 cursor-pointer p-2 {optionButtonFocusOverrideClasses}"
 					onclick={() => selectOption(i, option.value)}
 				>

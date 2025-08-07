@@ -25,6 +25,9 @@
 		{ value: 'raspberry', label: 'Raspberry' },
 		{ value: 'strawberry', label: 'Strawberry' },
 		{ value: 'selcuk', label: 'Selçuk' },
+		{ value: 'selcuk2', label: 'Selcuk' },
+		{ value: 'sec', label: 'Sec' },
+		{ value: 'seç', label: 'Seç' },
 		{ value: 'tangerine', label: 'Tangerine' }
 	];
 
