@@ -13,7 +13,7 @@ export type Toast = {
 
 export type Toaster = {
 	id: string;
-	position?: 'top-center' | 'bottom-center' | 'bottom-right';
+	position?: 'top-center' | 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-left';
 };
 
 // Her bir toast'ın zamanlayıcı verilerini tutmak için bir tip tanımı

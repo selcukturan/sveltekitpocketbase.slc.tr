@@ -10,6 +10,8 @@
 	const toaster = getToaster(id);
 
 	const positionsClasses: Record<Required<Toaster>['position'], string> = {
+		'bottom-left': 'bottom-2 left-2 items-start',
+		'top-left': 'top-2 left-2 items-start',
 		'bottom-right': 'bottom-2 right-2 items-end',
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
@@ -54,7 +56,7 @@
 		<!-- Toast -->
 		<div
 			in:slide={{ duration: 200 }}
-			out:fly={{ y: 200, duration: 200 }}
+			out:fly={{ y: 7, duration: 200 }}
 			animate:flip={{ duration: 200 }}
 			class={`${toastRootClasses.base} ${toastRootClasses[toastType]}`}
 		>

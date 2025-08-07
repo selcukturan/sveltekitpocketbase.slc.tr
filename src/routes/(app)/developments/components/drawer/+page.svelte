@@ -3,6 +3,9 @@
 	import { DrawerHtmlDialog } from '$lib/components/base/drawer';
 	import { confirm, confirmDialog } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
+	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
+
+	const dialogToaster = createToaster('dialog-toaster');
 
 	let drawer: Drawer;
 	let drawer2: Drawer;
@@ -52,6 +55,7 @@
 </Page>
 
 <DrawerHtmlDialog bind:this={drawerHtmlDialog1}>
+	<Toasts id="dialog-toaster" position="bottom-left" />
 	<Page>
 		<Page.Header class="flex items-center justify-between border-b p-4">
 			<div class="flex w-full items-center justify-between">
@@ -71,6 +75,26 @@
 				class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
 			>
 				Open Panel
+			</button>
+
+			<button
+				onclick={() => {
+					dialogToaster.add({
+						type: 'success',
+						title: 'Silmek istediğinize emin misiniz?',
+						description: 'Loading lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+						closable: true,
+						action: {
+							label: 'İptal',
+							onClick: () => {
+								console.log('onClick');
+							}
+						}
+					});
+				}}
+				class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+			>
+				Toast Message
 			</button>
 		</Page.Main>
 		<Page.Footer class="border-t p-4">
