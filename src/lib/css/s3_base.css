@@ -744,6 +744,10 @@
 }
 
 @layer components {
+	*:not(body):not(.focus-override):focus {
+		/* Varsayılanı temizliyoruz, çünkü kendi stilimizi :focus-visible ile ekleyeceğiz */
+		outline: none;
+	}
 	*:not(body):not(.focus-override):focus-visible {
 		@apply outline-primary-400 outline-2 outline-offset-2;
 	}

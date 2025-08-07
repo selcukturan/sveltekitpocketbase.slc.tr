@@ -100,167 +100,17 @@ Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması
 
 ### Detay
 
----
-
-### 1. `:focus` Sözde Sınıfı (Pseudo-class)
-
-Bu, en temel ve en çok bilinen odak seçicisidir. Bir kullanıcı klavyedeki `Tab` tuşuyla bir elemanın üzerine geldiğinde veya fare ile bir form elemanına tıkladığında o eleman "odaklanmış" olur. `:focus` tam olarak o anda devreye girer.
-
-**Hangi elemanlar odaklanabilir?**
-
-- Linkler (`<a>` `href` özelliği varsa)
-- Butonlar (`<button>`)
-- Form elemanları (`<input>`, `<textarea>`, `<select>`)
-- `tabindex` özelliği verilmiş herhangi bir eleman.
-
-**Nasıl Kullanılır?**
-
-Doğrudan odaklanan elemanın stilini değiştirmek için kullanılır.
-
-**Örnek:**
-Bir input alanına odaklanıldığında arka plan rengini ve kenarlığını değiştirelim.
-
-```html
-<label for="kullanici-adi">Kullanıcı Adı:</label>
-<input type="text" id="kullanici-adi" name="kullanici-adi" />
-
-<button>Giriş Yap</button>
-```
-
-```css
-/* Input'a odaklanıldığında */
-input:focus {
-	background-color: #eef5ff; /* Açık mavi bir arka plan */
-	border-color: #007bff; /* Mavi bir kenarlık */
-	outline: none; /* Varsayılan halkayı kaldırıp kendi stilimizi kullandık */
-	box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Hafif bir gölge efekti */
-}
-
-/* Butona odaklanıldığında */
-button:focus {
-	background-color: #0056b3;
-	outline: 2px solid #ffc107; /* Farklı bir odak halkası */
-	outline-offset: 2px; /* Halka ile eleman arasına boşluk koyar */
-}
-```
-
-**Ne Zaman Kullanılır?**
-Kullanıcının o anda etkileşimde olduğu **tek bir elemanı** görsel olarak vurgulamak istediğinizde `:focus` kullanmalısınız.
-
----
-
-### 2. `:focus-within` Sözde Sınıfı (Pseudo-class)
-
-Bu seçici, `:focus`'un daha güçlü bir versiyonudur. Sadece odaklanan elemanı değil, **o elemanı içeren kapsayıcı (parent) elemanı da** seçmenizi sağlar. Yani, bir `<div>` içindeki `<input>`'a odaklandığınızda, `:focus-within` sayesinde `<div>`'in stilini değiştirebilirsiniz.
-
-**Nasıl Kullanılır?**
-
-Bir form grubunu veya bir kartı komple vurgulamak için harikadır.
-
-**Örnek:**
-Bir form alanında, input'a odaklanıldığında hem etiketin hem de kapsayıcı `div`'in stilini değiştirelim.
-
-```html
-<div class="form-grup">
-	<label for="sifre">Şifre:</label>
-	<input type="password" id="sifre" name="sifre" />
-</div>
-```
-
-```css
-.form-grup {
-	padding: 15px;
-	border: 2px solid #ccc;
-	border-radius: 5px;
-	transition: all 0.2s ease-in-out; /* Geçişi yumuşatmak için */
-}
-
-/* HARİKA KISIM BURASI */
-/* .form-grup içindeki herhangi bir eleman odaklandığında .form-grup'un kendisini stillendir */
-.form-grup:focus-within {
-	border-color: #007bff;
-	box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
-}
-
-/* Ekstra: İçerideki label'ın rengini de değiştirebiliriz */
-.form-grup:focus-within label {
-	color: #007bff;
-	font-weight: bold;
-}
-```
-
-**Ne Zaman Kullanılır?**
-Kullanıcı bir bileşenin (component) içine girdiğinde, o bileşenin **tamamını** vurgulamak istediğinizde `:focus-within` mükemmel bir çözümdür. JavaScript kullanmaya gerek kalmadan harika etkileşimler yaratmanızı sağlar.
-
----
-
-### 3. "Ring" (Odak Halkası) ve `outline` Özelliği
-
-"Ring" bir CSS özelliği değildir; bir konsepttir. Tarayıcıların, odaklanılan elemanı belirtmek için varsayılan olarak çizdiği görsel çerçeveye (genellikle mavi veya noktalı bir çizgi) verilen addır. Bu halka, CSS'teki `outline` özelliği ile kontrol edilir.
-
-**En Büyük Hata: `outline: none;`**
-
-Geliştiricilerin yaptığı en yaygın erişilebilirlik hatası, bu halkanın "çirkin" göründüğünü düşünüp hiçbir alternatif sunmadan onu kaldırmaktır:
-
-```css
-/* SAKIN BUNU YAPMAYIN! */
-:focus {
-	outline: none;
-}
-```
-
-Bunu yaptığınızda, klavye ile gezinen kullanıcılar sitede nerede olduklarını tamamen kaybederler.
-
-**Doğru Yaklaşım: `outline`'ı Güzelleştirmek**
-
-`outline`'ı kaldırmak yerine, sitenizin tasarımına uyacak şekilde özelleştirin.
-
-```css
-a:focus {
-	/* outline: none; YERİNE... */
-
-	outline: 3px solid #fd7e14; /* Turuncu ve kalın bir halka */
-	outline-offset: 4px; /* Eleman ile halka arasına boşluk bırakır */
-	border-radius: 4px; /* Bazı tarayıcılar outline'a border-radius uygular */
-}
-```
-
-**Alternatifler:**
-Eğer `outline`'ın kutu modelini (layout) etkilememesi ama yine de istediğiniz gibi görünmemesi durumunda `box-shadow` da harika bir alternatiftir:
-
-```css
-input:focus {
-	outline: none; /* Önce varsayılanı kaldır */
-	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Sonra kendi "halkanı" ekle */
-}
-```
-
-Bu yöntem, `outline` gibi çalışır ama daha fazla kontrol (örn. bulanıklık) sunar ve `border-radius` ile mükemmel uyum sağlar.
-
----
-
-### Bonus: Modern Yaklaşım `:focus-visible`
-
-Bazen odak halkası, fare ile tıklayan kullanıcılar için gereksiz olabilir. Örneğin, bir butona tıkladığınızda etrafında mavi bir halkanın kalmasını istemeyebilirsiniz. Ancak klavye kullanıcısı için bu halka hayatidir.
-
-`:focus-visible` tam olarak bu sorunu çözer. Tarayıcı, kullanıcının odağı nasıl getirdiğini anlar (klavye mi, fare mi) ve halkayı yalnızca **gerekli olduğunda** (genellikle klavye gezintisi) gösterir.
-
-**Nasıl Kullanılır?**
-
 ```css
 /* Fare ile tıklanınca çıkan rahatsız edici outline'ı kaldır */
-button:focus {
+*:not(body):not(.focus-override):focus {
 	outline: none;
 }
-
 /* Ama klavye ile gelindiğinde ÇOK belirgin bir stil ekle */
-button:focus-visible {
+*:not(body):not(.focus-override):focus-visible {
 	outline: 3px solid hotpink;
 	outline-offset: 2px;
 }
 ```
-
-Bu, hem estetik hem de erişilebilirlik açısından en iyi deneyimi sunar.
 
 ### Hangisini, Ne Zaman Kullanmalı? Özet Tablo
 
@@ -270,3 +120,12 @@ Bu, hem estetik hem de erişilebilirlik açısından en iyi deneyimi sunar.
 | **`:focus-within`**  | İçindeki bir eleman odaklandığında kapsayıcıyı seçer. | Bir form grubunu, bir kartı veya bir menüyü **bütün olarak** vurgulamak için.                            |
 | **`outline` (Ring)** | Odaklanmayı gösteren görsel halkayı kontrol eder.     | **Her zaman!** Asla kaldırmayın, sitenizin tasarımına göre özelleştirin. Erişilebilirlik için kritiktir. |
 | **`:focus-visible`** | Odağın klavye ile yapılıp yapılmadığını anlar.        | Fare kullanıcılarını rahatsız etmeden klavye kullanıcıları için net odak stilleri sağlamak için.         |
+
+# JS operatör
+
+- **`||` (VEYA):** Sol taraf **"falsy"** ise ( `null`, `undefined`, `0`, `""`, `false` ) sağ tarafı verir.
+- **`??` (Boş Birleştirme):** Sol taraf **sadece `null` veya `undefined`** ise sağ tarafı verir.
+
+**Kilit Fark:** `??` operatörü, `0`, `""` (boş string) ve `false` gibi değerleri geçerli kabul eder ve değiştirmez.
+
+**Tavsiye:** Modern JavaScript'te, varsayılan değer atamak için neredeyse her zaman daha güvenli olan `??` operatörünü kullanın.

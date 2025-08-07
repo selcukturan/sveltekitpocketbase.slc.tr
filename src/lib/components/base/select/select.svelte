@@ -1,25 +1,59 @@
-<script lang="ts">
-	// https://github.com/pocketbase/pocketbase/blob/master/ui/src/components/base/Toggler.svelte
+<script lang="ts" module>
+	type Option = {
+		value: unknown;
+		label: string;
+		extras?: Record<string, unknown>;
+	};
+</script>
+
+<script lang="ts" generics="T extends Option">
+	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
+
+	let {
+		value = $bindable(undefined),
+		selectedIndex = $bindable(-1),
+		options,
+		disabled,
+		readonly,
+		escClose = true
+	}: { value?: T['value']; selectedIndex?: number; options: T[]; disabled?: boolean; readonly?: boolean; escClose?: boolean } = $props();
+
+	// öneri (value ve selectedIndex senkronizasyonu), bileşeninizin API'sini (yani nasıl kullanılacağını)
+	// ciddi anlamda basitleştireceği için en önemli iyileştirme olabilir.
 
 	const id = $props.id();
 	let container: HTMLDivElement | null = null;
-
 	let trigger: HTMLButtonElement | null = null;
+	let optionButtons: HTMLButtonElement[] = $state([]);
 	let active = $state(false);
 	let isOutsideMouseDown = $state(false);
-	let escClose = $state(true);
-	let disabled = $state(false);
-	let readonly = $state(false);
-	let options = $state([
-		{ label: 'Option 1', value: 'option1', selected: true },
-		{ label: 'Option 2', value: 'option2' },
-		{ label: 'Option 3', value: 'option3' },
-		{ label: 'Option 4', value: 'option4' }
-	]);
-	let initialSelectedOption = $state(options[0]); // Başlangıçta seçili olan
-	let selectedOptionIndex = $state(0); // Başlangıçta seçili olan
-	let activeOptionIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi
+	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi
+
+	const open = async () => {
+		if (disabled || readonly) return;
+
+		// Açıldığında klavye navigasyonunu seçili olanla senkronize et
+		activeIndex = selectedIndex !== -1 ? selectedIndex : 0;
+
+		active = true;
+
+		await tick(); // Bekle, DOM güncellensin
+
+		optionButtons[activeIndex]?.focus();
+	};
+	const close = async () => {
+		active = false;
+		await tick(); // Bekle, DOM güncellensin
+		trigger?.focus({ preventScroll: true });
+	};
+	const toggle = () => {
+		if (active) {
+			close();
+		} else {
+			open();
+		}
+	};
 
 	function handleOutsideMousedown(e: MouseEvent) {
 		if (!active) return;
@@ -30,29 +64,113 @@
 	function handleOutsideClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
 		if (active && isOutsideMouseDown && !container?.contains(target)) {
-			active = false;
+			console.log('handleOutsideClick');
+			close();
 		}
 	}
 
 	function handleEscPress(e: KeyboardEvent) {
 		if (active && escClose && e.code === 'Escape') {
 			e.preventDefault();
-			active = false;
+			close();
 		}
 	}
 
 	function handleFocusChange(e: FocusEvent) {
 		const target = e.target as HTMLElement;
 		if (active && !trigger?.contains(target) && !container?.contains(target)) {
-			// toggle();
-			active = !active;
+			console.log('handleFocusChange');
+			toggle();
 		}
 	}
 
-	function selectOption(index: number) {
-		selectedOptionIndex = index;
-		active = false;
+	function selectOption(index: number, val: T['value']) {
+		value = val;
+		selectedIndex = index;
+		close();
 	}
+
+	let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+	let searchString = ''; // Arama metni
+	const handleListboxKeydown = (e: KeyboardEvent) => {
+		// 1. Arama (Typeahead) Mantığı
+		//----------------------------------------------------
+		// Eğer basılan tuş tek bir karakterse (Ctrl veya Alt basılı değilken)
+		if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+			e.preventDefault();
+
+			// Önceki zamanlayıcıyı temizle
+			clearTimeout(searchTimeout);
+
+			// Yeni basılan karakteri arama metnine ekle
+			searchString += e.key.toLocaleLowerCase('tr-TR'); // Türkçe'ye uygun küçük harf çevrimi
+
+			// Arama metnine uyan ilk opsiyonu bul
+			const matchIndex = options.findIndex((opt) => opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString));
+
+			// Eğer bir eşleşme bulunursa
+			if (matchIndex !== -1) {
+				activeIndex = matchIndex;
+				optionButtons[activeIndex]?.focus();
+			}
+
+			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla (örn: 500ms sonra)
+			searchTimeout = setTimeout(() => {
+				searchString = '';
+			}, 500); // Yarım saniye bekleme süresi iyi bir başlangıçtır.
+
+			return; // Arama yapıldı, fonksiyonun geri kalanına gerek yok.
+		}
+
+		// 2. Navigasyon ve Seçim Mantığı
+		//----------------------------------------------------
+		switch (e.code) {
+			case 'ArrowUp':
+			case 'ArrowDown':
+			case 'Home':
+			case 'End': {
+				e.preventDefault();
+				let nextIndex = activeIndex;
+
+				if (e.code === 'ArrowUp') {
+					nextIndex = (activeIndex - 1 + options.length) % options.length;
+				} else if (e.code === 'ArrowDown') {
+					nextIndex = (activeIndex + 1) % options.length;
+				} else if (e.code === 'Home') {
+					nextIndex = 0;
+				} else if (e.code === 'End') {
+					nextIndex = options.length - 1;
+				}
+
+				if (nextIndex !== activeIndex) {
+					activeIndex = nextIndex;
+					optionButtons[activeIndex]?.focus();
+				}
+				break;
+			}
+
+			case 'Enter':
+			case 'Space': {
+				e.preventDefault();
+				if (activeIndex !== -1) {
+					selectOption(activeIndex, options[activeIndex].value);
+				}
+				break;
+			}
+
+			case 'Escape': {
+				e.preventDefault();
+				close();
+				break;
+			}
+
+			// Diğer tuşlar için bir şey yapma
+			default:
+				return;
+		}
+	};
+
+	const optionButtonFocusOverrideClasses = 'focus-override focus-visible:outline-error-400 focus-visible:outline-2 focus-visible:-outline-offset-2';
 </script>
 
 <svelte:window onclick={handleOutsideClick} onmousedown={handleOutsideMousedown} onkeydown={handleEscPress} onfocusin={handleFocusChange} />
@@ -67,29 +185,32 @@
 		aria-controls={`slc-listbox-popup-${id}`}
 		aria-haspopup="listbox"
 		aria-expanded={active}
-		aria-activedescendant={active ? `slc-option-${id}-${activeOptionIndex}` : undefined}
+		aria-activedescendant={active ? `slc-option-${id}-${activeIndex}` : undefined}
 		tabindex={disabled || readonly ? -1 : 0}
 		class="bg-error-300 w-full select-none"
-		onclick={() => (active = !active)}>Trigger</button
+		onclick={() => toggle()}>{selectedIndex === -1 ? '--Seçiniz--' : options[selectedIndex].label}</button
 	>
 	<!-- Select Popup -->
-	{#if active}
+	{#if active && options.length > 0 && !disabled && !readonly}
 		<div
 			role="listbox"
 			aria-labelledby={`slc-combobox-button-${id}`}
 			id={`slc-listbox-popup-${id}`}
-			tabindex="-1"
-			class="bg-warning-300 absolute flex w-full flex-col select-none"
+			tabindex={-1}
+			onkeydown={handleListboxKeydown}
+			class="bg-warning-300 absolute flex max-h-80 w-full flex-col overflow-y-auto select-none"
 			transition:fly={{ y: 3, duration: 150 }}
 		>
-			{#each options as option, i}
+			{#each options as option, i (i)}
 				<button
 					id={`slc-option-${id}-${i}`}
+					bind:this={optionButtons[i]}
 					role="option"
-					aria-selected={i === selectedOptionIndex}
-					class:bg-success-200={i === selectedOptionIndex}
-					class="hover:bg-success-100 cursor-pointer p-2"
-					onclick={() => selectOption(i)}
+					tabindex={activeIndex === i ? 0 : -1}
+					aria-selected={i === selectedIndex}
+					class:bg-success-200={i === selectedIndex}
+					class="hover:bg-success-100 cursor-pointer p-2 {optionButtonFocusOverrideClasses}"
+					onclick={() => selectOption(i, option.value)}
 				>
 					{option.label}
 				</button>
