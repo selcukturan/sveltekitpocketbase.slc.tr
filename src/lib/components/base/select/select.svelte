@@ -205,7 +205,7 @@
 			tabindex={-1}
 			onkeydown={handleListboxKeydown}
 			class="bg-warning-300 absolute flex max-h-80 w-full flex-col overflow-y-auto select-none"
-			transition:fly={{ y: 3, duration: 150 }}
+			transition:fly={{ y: 5, duration: 300 }}
 		>
 			<!-- Select Options -->
 			{#each options as option, i (i)}
