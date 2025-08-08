@@ -4,7 +4,10 @@
 	import { config } from '$lib/client/app';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 
-	const loginPageToaster = createToaster('login-page-toaster');
+	const loginPageToaster = createToaster({
+		name: 'login-page-toaster',
+		position: 'bottom-center'
+	});
 
 	let isLoading = false;
 </script>
@@ -16,7 +19,7 @@
 	<meta name="description" content={`Login - ${config.appName}`} />
 </svelte:head>
 
-<Toasts id="login-page-toaster" position="bottom-center" />
+<Toasts toasterName="login-page-toaster" />
 
 <!-- <button
 	class="bg-info-400 text-info-50 rounded"
