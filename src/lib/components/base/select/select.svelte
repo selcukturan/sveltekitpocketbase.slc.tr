@@ -9,6 +9,7 @@
 <script lang="ts" generics="T extends Option">
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import { is } from 'valibot';
 
 	let {
 		value = $bindable(undefined),
@@ -23,10 +24,15 @@
 	// ciddi anlamda basitleştireceği için en önemli iyileştirme olabilir.
 
 	const id = $props.id();
+	const baseId = `slc-select-${id}`;
+	const triggerId = `${baseId}-trigger`;
+	const listboxId = `${baseId}-listbox`;
+	const optionId = `${baseId}-option`;
+
 	let container: HTMLDivElement | null = null;
 	let trigger: HTMLButtonElement | null = null;
-	let listbox: HTMLDivElement | null = $state(null);
-	let optionButtons: HTMLButtonElement[] = $state([]);
+	let listbox: HTMLUListElement | null = $state(null);
+	let optionsLi: HTMLLIElement[] = $state([]);
 	let active = $state(false);
 	let isOutsideMouseDown = $state(false);
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi
@@ -46,7 +52,7 @@
 
 		// optionButtons[activeIndex]?.focus();
 		// VE SEÇİLİ ELEMANI GÖRÜNÜR KIL
-		optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
+		optionsLi[activeIndex]?.scrollIntoView({ block: 'center' });
 	};
 	const close = async () => {
 		active = false;
@@ -87,6 +93,17 @@
 		}
 	}
 
+	const handleTriggerKeyDown = (e: KeyboardEvent) => {
+		switch (e.code) {
+			case 'ArrowDown':
+			case 'ArrowUp': {
+				e.preventDefault();
+				toggle();
+				break;
+			}
+		}
+	};
+
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 	let searchString = ''; // Arama metni
 	const handleListboxKeydown = (e: KeyboardEvent) => {
@@ -109,7 +126,7 @@
 			if (matchIndex !== -1) {
 				activeIndex = matchIndex;
 				// optionButtons[activeIndex]?.focus();
-				optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
+				optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
 			}
 
 			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla (örn: 500ms sonra)
@@ -143,7 +160,7 @@
 				if (nextIndex !== activeIndex) {
 					activeIndex = nextIndex;
 					// optionButtons[activeIndex]?.focus();
-					optionButtons[activeIndex]?.scrollIntoView({ block: 'nearest' });
+					optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
 				}
 				break;
 			}
@@ -175,7 +192,9 @@
 		close();
 	}
 
-	const optionButtonFocusOverrideClasses = 'focus-override focus-visible:outline-error-400 focus-visible:outline-2 focus-visible:-outline-offset-2';
+	// const optionButtonFocusOverrideClasses = 'focus-override focus-visible:outline-error-400 focus-visible:outline-2 focus-visible:-outline-offset-2';
+
+	let activeOptionId = $derived(active ? `${optionId}-${activeIndex}` : undefined);
 </script>
 
 <svelte:window onclick={handleOutsideClick} onmousedown={handleOutsideMousedown} onkeydown={handleEscPress} onfocusin={handleFocusChange} />
@@ -185,44 +204,79 @@
 	<!-- Select Trigger -->
 	<button
 		bind:this={trigger}
+		id={triggerId}
 		role="combobox"
-		id={`slc-combobox-button-${id}`}
-		aria-controls={`slc-listbox-popup-${id}`}
-		aria-haspopup="listbox"
+		type="button"
+		aria-controls={listboxId}
 		aria-expanded={active}
-		aria-activedescendant={active ? `slc-option-${id}-${activeIndex}` : undefined}
+		aria-haspopup="listbox"
+		aria-labelledby={triggerId}
+		aria-activedescendant={activeOptionId}
 		tabindex={disabled || readonly ? -1 : 0}
-		class="bg-error-300 w-full select-none"
-		onclick={() => toggle()}>{selectedIndex === -1 ? '--Seçiniz--' : options[selectedIndex].label}</button
+		class="bg-error-300 inline-flex w-full min-w-52 cursor-pointer items-center justify-center px-4 py-1 text-start select-none"
+		onclick={() => toggle()}
+		onkeydown={handleTriggerKeyDown}
 	>
+		<span class="flex-1 p-1">{selectedIndex === -1 ? '--Seçiniz--' : options[selectedIndex].label}</span>
+		<svg
+			stroke="currentColor"
+			fill="currentColor"
+			stroke-width="0"
+			viewBox="0 0 1024 1024"
+			height="1em"
+			width="1em"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
+		</svg>
+	</button>
 	<!-- Select Listbox -->
 	{#if active && options.length > 0 && !disabled && !readonly}
-		<div
+		<ul
 			bind:this={listbox}
+			id={listboxId}
 			role="listbox"
-			aria-labelledby={`slc-combobox-button-${id}`}
-			id={`slc-listbox-popup-${id}`}
+			aria-labelledby={triggerId}
 			tabindex={-1}
 			onkeydown={handleListboxKeydown}
-			class="bg-warning-300 absolute flex max-h-80 w-full flex-col overflow-y-auto select-none"
+			class=" bg-warning-300 pointer-events-auto absolute isolate mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
 			transition:fly={{ y: 5, duration: 300 }}
 		>
 			<!-- Select Options -->
 			{#each options as option, i (i)}
-				<button
-					id={`slc-option-${id}-${i}`}
-					bind:this={optionButtons[i]}
+				{@const isSelected = i === selectedIndex}
+				{@const isActive = i === activeIndex}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<li
+					bind:this={optionsLi[i]}
+					id="{optionId}-{i}"
 					role="option"
 					tabindex={-1}
-					aria-selected={i === selectedIndex}
-					class:bg-success-200={i === selectedIndex}
-					class:bg-success-400={i === activeIndex}
-					class="hover:bg-success-100 cursor-pointer p-2 {optionButtonFocusOverrideClasses}"
+					aria-selected={isSelected}
+					class:bg-success-200={isSelected}
+					class:bg-success-400={isActive}
+					class="hover:bg-success-100 flex cursor-pointer items-center px-2 py-1"
 					onclick={() => selectOption(i, option.value)}
 				>
-					{option.label}
-				</button>
+					<span class="flex-1">
+						{option.label}
+					</span>
+					<span aria-hidden={true} hidden={!isSelected}>
+						<svg
+							stroke="currentColor"
+							fill="currentColor"
+							stroke-width="0"
+							viewBox="0 0 24 24"
+							height="1em"
+							width="1em"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path fill="none" d="M0 0h24v24H0z"></path>
+							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+						</svg>
+					</span>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	{/if}
 </div>
