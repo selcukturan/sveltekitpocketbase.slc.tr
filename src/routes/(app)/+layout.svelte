@@ -3,7 +3,8 @@
 	import { initGlobalContext } from '$lib/client/app/global.svelte';
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
-	import { createToaster, Toasts } from '$lib/components/base/toast';
+	import { Toasts, createToaster } from '$lib/components/base/toast';
+	// import { appToaster } from '$lib/components/base/toast';
 
 	let { children } = $props();
 
@@ -42,12 +43,15 @@
 		}
 	];
 
-	const appToaster = createToaster('app-toaster');
+	const appToaster = createToaster({
+		id: 'app-toaster',
+		position: 'bottom-right'
+	});
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<Toasts id="app-toaster" position="bottom-right" />
+<Toasts id="app-toaster" />
 
 <ProgressBar navigate={navigating}>
 	<AppLayout {sidebarData}>

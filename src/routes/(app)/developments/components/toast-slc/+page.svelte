@@ -4,7 +4,10 @@
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 
 	const appToaster = getToaster('app-toaster');
-	const pageToaster = createToaster('page-toaster');
+	const pageToaster = createToaster({
+		id: 'page-toaster',
+		position: 'bottom-center'
+	});
 </script>
 
 <Head>
@@ -12,7 +15,7 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
-<Toasts id="page-toaster" position="bottom-center" />
+<Toasts id="page-toaster" />
 
 <Page>
 	<Page.Header>

@@ -1,22 +1,22 @@
 <script lang="ts">
 	// https://github.com/huntabyte/svelte-5-context-classes
-	import type { Toaster, Toast } from './types';
-	import { getToaster } from './toaster.svelte';
+	import type { ToasterParams, Toast, ToastsProps } from './types';
+	import { getToaster, Toaster } from './toaster.svelte';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
-	let { id, position = 'bottom-right' }: Toaster = $props();
+	let { id }: ToastsProps = $props();
 
 	const toaster = getToaster(id);
 
-	const positionsClasses: Record<Required<Toaster>['position'], string> = {
+	const positionsClasses: Record<Required<ToasterParams>['position'], string> = {
 		'bottom-left': 'bottom-2 left-2 items-start',
 		'top-left': 'top-2 left-2 items-start',
 		'bottom-right': 'bottom-2 right-2 items-end',
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
 	};
-	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-3000 flex flex-col gap-2 px-2 ${positionsClasses[position]}`;
+	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-3000 flex flex-col gap-2 px-2 ${positionsClasses[toaster.position]}`;
 	const toastRootClasses: Record<Required<Toast>['type'] | 'base', string> = {
 		base: 'relative flex items-center break-words rounded-sm border p-2 shadow-lg min-w-full sm:min-w-sm sm:max-w-lg',
 		info: 'bg-info-400 text-info-950 border-info-600 border',
@@ -56,7 +56,7 @@
 		<!-- Toast -->
 		<div
 			in:slide={{ duration: 200 }}
-			out:fly={{ y: 7, duration: 200 }}
+			out:fly={{ y: toaster.position.startsWith('top') ? -20 : 20, duration: 200 }}
 			animate:flip={{ duration: 200 }}
 			class={`${toastRootClasses.base} ${toastRootClasses[toastType]}`}
 		>

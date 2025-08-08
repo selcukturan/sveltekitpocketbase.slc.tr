@@ -1,10 +1,13 @@
 <script lang="ts">
-	import type { Attachment } from 'svelte/attachments';
+	import { focustrap } from '$lib/client/attachments';
 	import { tick, type Snippet } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
-	import { focustrap, portal } from '$lib/client/attachments';
-	import { isInput } from '$lib/client/utils';
+	import type { Attachment } from 'svelte/attachments';
 
+	/**
+	 * KISIT TARAYICI UYUMLULUĞU:
+	 * https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#browser_compatibility
+	 * https://caniuse.com/dialog
+	 */
 	let {
 		children,
 		onOpen,
@@ -12,111 +15,239 @@
 		onBeforeClose,
 		escClose = true
 	}: {
-		children?: Snippet<[() => void]>;
+		children?: Snippet;
 		onOpen?: () => void;
 		onClose?: () => void;
 		onBeforeClose?: () => Promise<boolean>;
 		escClose?: boolean;
 	} = $props();
 
-	const id = $props.id();
-	let openDrawer = $state(false);
-	let drawer: HTMLElement | null = $state(null);
-	let startingZindex = $state(1000);
-	let waitingForClose = false;
+	let dialog: HTMLDialogElement | null = $state(null);
+	let isOpen = $state(false);
+	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
+	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
+	/**
+	 * KISIT TARAYICI UYUMLULUĞU:
+	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/closedBy#browser_compatibility
+	 * https://caniuse.com/mdn-html_elements_dialog_closedby
+	 *
+	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
+	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
+	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
+	 */
+	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
 
 	export const open = () => {
-		openDrawer = true;
-		tick().then(() => {
-			onOpen?.();
-		});
+		show();
 	};
 
-	export const close = () => {
+	export const close = async () => {
+		hide('close');
+	};
+
+	const show = async () => {
+		if (isOpen) return; // Eğer zaten açıksa tekrar açma
+		isOpen = true; // Artık açık durumda. Kapatma işlemi CSS `.
+
+		await tick();
+
+		dialog?.showModal(); // Dialog elementini aç
+		onOpen?.();
+	};
+
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+	const hide = async (log: string) => {
+		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
+
+		// console.log('hide - ' + log);
+
+		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
+
 		if (onBeforeClose) {
-			waitingForClose = true;
-			onBeforeClose().then((shouldClose) => {
-				waitingForClose = false;
-				if (shouldClose) {
-					performClose();
-				}
-			});
-		} else {
-			performClose();
-		}
-	};
-
-	const performClose = () => {
-		openDrawer = false;
-		tick().then(() => {
-			onClose?.();
-		});
-	};
-
-	const length = () => {
-		return document.querySelectorAll('.slc-app-drawer-panel').length;
-	};
-
-	const backdropAttach: Attachment = (element) => {
-		if (!(element instanceof HTMLDivElement)) {
-			throw new Error('Backdrop element is not an HTMLDivElement');
+			canClose = await onBeforeClose(); // "await" ile onBeforeClose fonksiyonunun tamamlanmasını beklenir.
 		}
 
-		const click = (event: MouseEvent) => {
-			if (event.target === element) {
-				close();
+		if (!canClose) return; // Kapatma izni yoksa fonksiyondan erken çık
+
+		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
+		await sleep(ANIMATION_DURATION); // CSS animasyonu için bekleniyor. Kod burada duraklar.
+		isClosing = false; // Bekleme bittikten sonraki işlemler. Kapatma işlemi CSS `.closing` animasyonu bitti. Diyalog kapatılıyor.
+
+		isOpen = false; // Artık kapalı durumda. Kapatma işlemi CSS `.closing` animasyonu bitti.
+		await tick();
+
+		dialog?.close();
+		onClose?.();
+	};
+
+	const dialogAttach: Attachment = (element) => {
+		if (!(element instanceof HTMLDialogElement)) {
+			throw new Error('Dialog element is not an HTMLDialogElement');
+		}
+
+		const handleKeydown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && escClose) {
+				e.preventDefault();
+				hide('drawer - handleKeydown - Esc key pressed');
 			}
 		};
 
-		element.addEventListener('click', click);
+		/**
+		 * oncancel olayı, bir diyalogun kapatılma niyetinin bir "iptal" eylemi olduğunu belirtir.
+		 * oncancel: Diyalog sadece kullanıcı tarafından "iptal edildiğinde" tetiklenir. Bu genellikle Esc tuşuna basılmasıdır.
+		 *
+		 * Ne zaman tetiklenir?
+		 * Kullanıcı klavyeden Esc tuşuna bastığında.
+		 *
+		 * En Önemli Özelliği Nedir?
+		 * oncancel olayının en güçlü yanı, event.preventDefault() metodu ile diyalogun kapanmasını engelleyebilmenizdir.
+		 * Bu, özellikle kullanıcıya "Değişiklikleri kaydetmeden çıkmak istediğinize emin misiniz?" gibi bir soru sormak için idealdir.
+		 *
+		 * Kullanım Amacı:
+		 * Kullanıcının yaptığı bir işlemi (örneğin bir formu doldurmayı) yarıda bırakıp Esc ile çıkmaya çalıştığı durumları yönetmek için kullanılır.
+		 */
+		const handleCancel = (e: Event) => {
+			e.preventDefault();
+			hide('handleCancel - Backdrop click');
+		};
 
+		/**
+		 * onclose: Diyalog, sebebi ne olursa olsun, her kapandığında tetiklenir.
+		 * onclose olayı, diyalog penceresi kapandığında her zaman tetiklenir. Kapanma sebebinin bir önemi yoktur.
+		 *
+		 * Ne zaman tetiklenir?
+		 * Kullanıcı Esc tuşuna bastığında (eğer oncancel ile engellenmediyse).
+		 * JavaScript ile dialog.close() metodu çağrıldığında.
+		 * Diyalog içindeki bir formda method="dialog" olan bir buton tıklandığında.
+		 *
+		 * En Önemli Özelliği Nedir?
+		 * onclose olayı engellenemez. Sadece diyalog kapandıktan sonra ne yapılacağını belirlemek için kullanılır.
+		 * Genellikle temizlik işlemleri (örneğin form alanlarını sıfırlamak) için idealdir.
+		 *
+		 * Kullanım Amacı:
+		 * Diyalog kapatıldıktan sonra arayüzü veya verileri sıfırlamak, temizlemek veya son bir işlem yapmak için kullanılır.
+		 */
+		/* const handleClose = (e: Event) => {
+			// console.log('handleClose');
+		}; */
+
+		element.addEventListener('cancel', handleCancel);
+		// element.addEventListener('close', handleClose);
+		element.addEventListener('keydown', handleKeydown);
 		return () => {
-			element.removeEventListener('click', click);
+			element.removeEventListener('cancel', handleCancel);
+			// element.removeEventListener('close', handleClose);
+			element.removeEventListener('keydown', handleKeydown);
 		};
 	};
 
-	const onkeydown = (e: KeyboardEvent) => {
-		const target = e.target as HTMLElement;
-		if (!drawer) return;
-		const { index } = drawer.dataset;
-		if (!waitingForClose && openDrawer && escClose && e.code == 'Escape' && !isInput(target) && index === `${length() - 1}`) {
-			e.preventDefault();
-			close();
-		}
-	};
-
-	const zindex = $derived(startingZindex + length());
+	const dialogClasses = 'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
+	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 
-<svelte:window {onkeydown} />
-
-<!-- Portal -->
-<div {@attach portal} class:slc-app-drawer-wrapper={true} data-id={id}>
-	{#if openDrawer}
-		<!-- Backdrop -->
-		<div
-			{@attach backdropAttach}
-			class:slc-app-drawer-backdrop={true}
-			class="bg-surface-300/50 fixed inset-0"
-			style:z-index={zindex}
-			transition:fade={{ duration: 150 }}
-		></div>
-
-		<!-- Drawer -->
-		<div
-			bind:this={drawer}
-			{@attach focustrap}
-			class:slc-app-drawer-panel={true}
-			class="bg-surface-50 fixed top-0 right-0 h-full w-full max-w-2xl shadow-xl"
-			style:z-index={zindex}
-			data-index={zindex - startingZindex}
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="drawer-title"
-			in:fly={{ duration: 150, x: 50 }}
-			out:fly={{ duration: 150, x: 50 }}
-		>
-			{@render children?.(close)}
+{#if isOpen}
+	<dialog
+		{closedby}
+		class:closing={isClosing}
+		class="{dialogClasses} {dialogFocusOverrideClasses}"
+		bind:this={dialog}
+		{@attach focustrap}
+		{@attach dialogAttach}
+	>
+		<div class="h-full w-full">
+			{@render children?.()}
 		</div>
-	{/if}
-</div>
+	</dialog>
+{/if}
+
+<style>
+	dialog {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		left: auto;
+
+		/* max-height bug fixed */
+		max-height: none;
+		max-height: 100%;
+		height: 100%;
+		/* Başlangıçta dialog görünmez ve animasyona hazır */
+		opacity: 0;
+	}
+
+	dialog::backdrop {
+		background-color: var(--color-surface-300);
+		/* Başlangıçta backdrop görünmez ve animasyona hazır */
+		opacity: 0;
+	}
+
+	/* Animate In */
+	dialog[open] {
+		animation: dialog-enter-from-right 0.15s ease-out forwards;
+	}
+	dialog[open]::backdrop {
+		animation: backdrop-fade-in 0.15s ease-out forwards;
+	}
+
+	/* Starting style for entry animation */
+	@starting-style {
+		dialog[open] {
+			/* Başlangıçta dialog görünmez ve animasyona hazır */
+			opacity: 0;
+		}
+
+		dialog[open]::backdrop {
+			/* Başlangıçta backdrop görünmez ve animasyona hazır */
+			opacity: 0;
+		}
+	}
+
+	dialog[open].closing {
+		animation: dialog-exit-to-right 0.15s ease-out forwards;
+	}
+
+	dialog[open].closing::backdrop {
+		animation: backdrop-fade-out 0.15s ease-out forwards;
+	}
+
+	@keyframes dialog-enter-from-right {
+		from {
+			opacity: 0;
+			transform: translateX(200px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	@keyframes dialog-exit-to-right {
+		from {
+			opacity: 1;
+			transform: translateX(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateX(200px);
+		}
+	}
+
+	@keyframes backdrop-fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 0.5;
+		}
+	}
+
+	@keyframes backdrop-fade-out {
+		from {
+			opacity: 0.5;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+</style>

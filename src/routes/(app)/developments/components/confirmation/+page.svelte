@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { confirmDialog, confirm } from '$lib/components/base/confirm';
+	import { confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
-	let answer1 = $state('init');
-	let answer2 = $state('init');
+	let answer = $state('init');
 </script>
 
 <Head>
@@ -22,27 +21,12 @@
 				<div class="flex flex-col gap-4">
 					<button
 						onclick={async () => {
-							answer1 = 'waiting';
+							answer = 'waiting';
 							const isConfirmed = await confirm();
 							if (isConfirmed) {
-								answer1 = 'true';
+								answer = 'true';
 							} else {
-								answer1 = 'false';
-							}
-						}}
-						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
-					>
-						Confirmation (html div)
-					</button>
-					<p>{answer1}</p>
-					<button
-						onclick={async () => {
-							answer2 = 'waiting';
-							const isConfirmed = await confirmDialog();
-							if (isConfirmed) {
-								answer2 = 'true';
-							} else {
-								answer2 = 'false';
+								answer = 'false';
 							}
 						}}
 						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
@@ -50,7 +34,7 @@
 						Confirmation (html dialog)
 					</button>
 
-					<p>{answer2}</p>
+					<p>{answer}</p>
 				</div>
 			</main>
 		</Page.Main.Panel>
