@@ -2,15 +2,15 @@
 
 import type { Attachment } from 'svelte/attachments';
 import { getContext, onDestroy, setContext } from 'svelte';
-import type { Toast, ToastTimerData, ToasterParams } from './types';
+import type { Toast, ToastTimerData, ToasterOptions } from './types';
 
-export class Toaster {
-	position: Required<ToasterParams>['position'];
+class Toaster {
+	options: Required<ToasterOptions>;
 	toasts = $state<Toast[]>([]);
 	#toastTimerData = new Map<string, ToastTimerData>();
 
-	constructor(position: Required<ToasterParams>['position']) {
-		this.position = position;
+	constructor({ name, position }: Required<ToasterOptions>) {
+		this.options = { name, position };
 
 		onDestroy(() => {
 			// console.log('1 destroyed: Toaster');
@@ -45,20 +45,15 @@ export class Toaster {
 		const defaultDuration = longDurationTypes.includes(type) ? 5000 : 2000;
 		const duration = data.duration ?? defaultDuration;
 
-		if (this.position.startsWith('top')) {
-			// Eğer pozisyon 'top' ile başlıyorsa, toast'ı başa ekle
-			this.toasts = [{ id, type, duration, ...data }, ...this.toasts];
+		if (this.options.position.startsWith('top')) {
+			// Dizinin başına eleman ekler.
+			this.toasts.unshift({ id, type, duration, ...data });
+			// this.toasts = [{ id, type, duration, ...data }, ...this.toasts];
 		} else {
-			// Diğer pozisyonlar için toast'ı sona ekle
-			this.toasts = [...this.toasts, { id, type, duration, ...data }];
+			// Dizinin sonuna eleman ekler.
+			// this.toasts = [...this.toasts, { id, type, duration, ...data }];
+			this.toasts.push({ id, type, duration, ...data });
 		}
-
-		/* this.toasts.push({
-			id,
-			type,
-			duration,
-			...data
-		}); */
 
 		// Zamanlayıcıyı başlat
 		if (duration > 0) {
@@ -158,19 +153,32 @@ export class Toaster {
 	};
 }
 
-export function createToaster({ id, position }: ToasterParams) {
-	let defaultPosition: Required<ToasterParams>['position'] = 'bottom-right';
-	if (position) {
-		defaultPosition = position;
+export function createToaster({ name, position }: ToasterOptions) {
+	if (!name) {
+		throw new Error('Toaster name is required');
 	}
 
-	return setContext(id, new Toaster(defaultPosition));
+	const defaultPosition: Required<ToasterOptions>['position'] = position ?? 'bottom-right';
+
+	const toasterInstance = new Toaster({ name, position: defaultPosition });
+
+	if (!toasterInstance) {
+		throw new Error('Failed to create toaster instance');
+	}
+
+	return setContext(name, toasterInstance);
 }
 
-export function getToaster(id: string) {
-	const toasterInstance = getContext<ReturnType<typeof createToaster>>(id);
+export function getToaster(toasterName: string) {
+	if (!toasterName) {
+		throw new Error('Toaster name is required');
+	}
+
+	const toasterInstance = getContext<ReturnType<typeof createToaster>>(toasterName);
+
 	if (!toasterInstance) {
 		throw new Error('Toaster context not found. Make sure you have called createToaster in an ancestor component.');
 	}
+
 	return toasterInstance;
 }

@@ -43,15 +43,12 @@
 		}
 	];
 
-	const appToaster = createToaster({
-		id: 'app-toaster',
-		position: 'bottom-right'
-	});
+	createToaster({ name: 'app-toaster' });
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<Toasts id="app-toaster" />
+<Toasts toasterName="app-toaster" />
 
 <ProgressBar navigate={navigating}>
 	<AppLayout {sidebarData}>

@@ -4,10 +4,7 @@
 	import { Page, Head } from '$lib/components/templates';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
 
-	const dialogToaster = createToaster({
-		id: 'dialog-toaster',
-		position: 'top-center'
-	});
+	const dialogToaster = createToaster({ name: 'dialog-toaster', position: 'top-center' });
 
 	let drawer1: Drawer;
 	let drawer2: Drawer;
@@ -45,7 +42,7 @@
 </Page>
 
 <Drawer bind:this={drawer1}>
-	<Toasts id="dialog-toaster" />
+	<Toasts toasterName="dialog-toaster" />
 	<Page>
 		<Page.Header class="flex items-center justify-between border-b p-4">
 			<div class="flex w-full items-center justify-between">

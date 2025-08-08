@@ -11,13 +11,13 @@ export type Toast = {
 	};
 };
 
-export type ToastsProps = {
-	id: string;
+export type ToasterOptions = {
+	name: string;
+	position?: 'top-center' | 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-left';
 };
 
-export type ToasterParams = {
-	id: string;
-	position?: 'top-center' | 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-left';
+export type ToastsProps = {
+	toasterName: ToasterOptions['name'];
 };
 
 // Her bir toast'ın zamanlayıcı verilerini tutmak için bir tip tanımı
