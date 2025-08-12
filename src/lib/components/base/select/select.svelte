@@ -111,8 +111,6 @@
 		return 0;
 	});
 
-	$inspect('selectedIndexes', selectedIndexes);
-
 	const open = async () => {
 		if (disabled || readonly) return;
 
@@ -239,6 +237,12 @@
 					activeIndex = nextIndex;
 					optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
 				}
+				break;
+			}
+
+			case 'Tab': {
+				e.preventDefault();
+				close();
 				break;
 			}
 
