@@ -2,8 +2,6 @@
 	import { Page, Head } from '$lib/components/templates';
 	import { Select } from '$lib/components/base/select';
 
-	import { SelectPopover } from '$lib/components/base/select';
-
 	const options = [
 		{ value: 'apple', label: 'Apple' },
 		{ value: 'banana', label: 'Banana' },
@@ -31,8 +29,11 @@
 		{ value: 'tangerine', label: 'Tangerine' }
 	];
 
-	let value = $state('raspberry'); // Başlangıçta seçili olan değer
-	let selectedIndex = $derived(options.findIndex((option) => option.value === value) || -1);
+	let value = $state(''); // Başlangıçta seçili olan değer
+	let value1 = $state(['raspberry', 'mango', 'apple']); // Başlangıçta seçili olan değer
+
+	let value2 = $state(''); // Başlangıçta seçili olan değer
+	let value3 = $state(['tangerine', 'onange', 'kiwi']); // Başlangıçta seçili olan değer
 </script>
 
 <Head>
@@ -46,26 +47,21 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<h1 class="py-2 text-2xl">Svelte 5 Div Select</h1>
-
-			<Select {options} bind:value bind:selectedIndex />
-
+			<h1 class="py-2 text-2xl">Single - Select Not Required</h1>
+			<Select {options} bind:value />
 			<p>Selected Value: {value}</p>
-			<p>Selected Index: {selectedIndex}</p>
 
-			<h1 class="py-2 text-2xl">HTML Popover ve CSS Anchor Positioning Select</h1>
-			<SelectPopover
-				data={[
-					{ label: '20', value: '20' },
-					{ label: '21', value: '21' }
-				]}
-			/>
-			<SelectPopover
-				data={[
-					{ label: '24', value: '24' },
-					{ label: '25', value: '25' }
-				]}
-			/>
+			<h1 class="py-2 text-2xl">Single - Select Required</h1>
+			<Select {options} bind:value={value2} required />
+			<p>Selected Value: {value2}</p>
+
+			<h1 class="py-2 text-2xl">Multiple - Select Not Required</h1>
+			<Select {options} bind:value={value1} multiple />
+			<p>Selected Value: {JSON.stringify(value1)}</p>
+
+			<h1 class="py-2 text-2xl">Multiple - Select Required</h1>
+			<Select {options} bind:value={value3} multiple required />
+			<p>Selected Value: {JSON.stringify(value3)}</p>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>

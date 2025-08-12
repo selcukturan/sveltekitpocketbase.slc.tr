@@ -1,27 +1,32 @@
-<script lang="ts" module>
-	type Option = {
-		value: unknown;
+<script lang="ts">
+	import { tick } from 'svelte';
+	import { fly } from 'svelte/transition';
+
+	type ValueType = string | string[];
+	type OptionsType = {
+		value: ValueType;
 		label: string;
 		extras?: Record<string, unknown>;
 	};
-</script>
-
-<script lang="ts" generics="T extends Option">
-	import { tick } from 'svelte';
-	import { fly } from 'svelte/transition';
-	import { is } from 'valibot';
+	type PropsType = {
+		multiple?: boolean;
+		value?: ValueType;
+		options: OptionsType[];
+		disabled?: boolean;
+		readonly?: boolean;
+		required?: boolean;
+		escClose?: boolean;
+	};
 
 	let {
-		value = $bindable(undefined),
-		selectedIndex = $bindable(-1),
+		multiple = false,
+		value = $bindable(multiple ? [] : ''),
 		options,
 		disabled,
 		readonly,
+		required = false,
 		escClose = true
-	}: { value?: T['value']; selectedIndex?: number; options: T[]; disabled?: boolean; readonly?: boolean; escClose?: boolean } = $props();
-
-	// öneri (value ve selectedIndex senkronizasyonu), bileşeninizin API'sini (yani nasıl kullanılacağını)
-	// ciddi anlamda basitleştireceği için en önemli iyileştirme olabilir.
+	}: PropsType = $props();
 
 	const id = $props.id();
 	const baseId = `slc-select-${id}`;
@@ -33,62 +38,129 @@
 	let trigger: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
-	let active = $state(false);
-	let isOutsideMouseDown = $state(false);
-	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi
+	let isOpenPopup = $state(false);
+	let isOutsideMouseDown = false;
+
+	// --Seçiniz-- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
+	let canDeselect = $derived(!multiple && !required);
+
+	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
+
+	let displayOptions = $derived.by(() => {
+		// Seçimi geri alma imkanı var mı? (Tekli seçim ve zorunlu değil)
+		if (canDeselect) {
+			// Listenin başına "Seçiniz" seçeneğini ekle
+			// orjinal indexi bir kaydırır. Orijinal options[0] artık displayOptions[1] olur
+			return [{ value: '', label: '-- Seçiniz --' }, ...options];
+		}
+
+		// Diğer tüm durumlarda orijinal seçenekleri kullan
+		return options;
+	});
+
+	let isValid = $derived.by(() => {
+		// Zorunlu değilse her zaman geçerlidir.
+		if (!required) return true;
+
+		// Zorunluysa, seçim durumuna göre geçerliliği belirle.
+		if (multiple) {
+			return Array.isArray(value) && value.length > 0;
+		} else {
+			return typeof value === 'string' && value !== '';
+		}
+	});
+
+	let selectedIndexes = $derived.by(() => {
+		if (multiple && Array.isArray(value) && value.length > 0) {
+			return value
+				.map((v) => displayOptions.findIndex((opt) => opt.value === v)) // bulduğu ilk öğenin indeksini döndürür, yoksa -1 döndürür.
+				.sort((a, b) => a - b);
+		}
+		return [displayOptions.findIndex((opt) => opt.value === value)]; // yoksa -1 döner.
+	});
+
+	let selectedLabels = $derived.by(() => {
+		const labels = selectedIndexes
+			.map((i) => displayOptions[i]?.label)
+			.filter(Boolean);
+		return labels.length > 0 ? labels.join(', ') : '-- Seçiniz --';
+	});
+
+	let activeOptionId = $derived.by(() => {
+		return isOpenPopup ? `${optionId}-${activeIndex}` : undefined;
+	});
+
+	let initialFocusIndex = $derived.by(() => {
+		const firstIndex = selectedIndexes.at(0);
+
+		// 1. Önce en özel durumu kontrol et: "--Seçiniz--" mi seçili?
+		// Eğer `canDeselect` true ise ve seçili index 0 ise, bu durum odur.
+		if (canDeselect && firstIndex === 0) {
+			// İlk gerçek seçeneğe odaklan.
+			return 1;
+		}
+
+		// 2. Şimdi diğer geçerli seçimleri kontrol et:
+		// Eğer bir seçim varsa (ve yukarıdaki özel duruma girmediyse), o seçime odaklan.
+		if (firstIndex !== undefined && firstIndex > 0) {
+			return firstIndex;
+		}
+
+		// 3. Geriye kalan tüm "boş" durumlar için en başa odaklan.
+		// (Örn: çoklu seçim ve value=[], zorunlu tekli seçim ve value='')
+		return 0;
+	});
+
+	$inspect('selectedIndexes', selectedIndexes);
 
 	const open = async () => {
 		if (disabled || readonly) return;
 
-		// Açıldığında klavye navigasyonunu seçili olanla senkronize et
-		activeIndex = selectedIndex !== -1 ? selectedIndex : 0;
+		// Açıldığında klavye navigasyonunu seçili olanla senkronize edilir.
+		activeIndex = initialFocusIndex;
 
-		active = true;
+		isOpenPopup = true;
 
-		await tick(); // Bekle, DOM güncellensin
+		await tick(); // Bekle, DOM güncelleniyor.
 
-		// ODAĞI LİSTBOX'A VER
 		listbox?.focus();
-
-		// optionButtons[activeIndex]?.focus();
-		// VE SEÇİLİ ELEMANI GÖRÜNÜR KIL
 		optionsLi[activeIndex]?.scrollIntoView({ block: 'center' });
 	};
+
 	const close = async () => {
-		active = false;
-		await tick(); // Bekle, DOM güncellensin
+		isOpenPopup = false;
+
+		await tick(); // Bekle, DOM güncelleniyor.
+
 		trigger?.focus();
 	};
-	const toggle = () => {
-		if (active) {
-			close();
-		} else {
-			open();
-		}
-	};
 
-	function handleOutsideMousedown(e: MouseEvent) {
-		if (!active) return;
+	const toggle = () => (isOpenPopup ? close() : open());
+
+	function handleWindowOutsideMousedown(e: MouseEvent) {
+		if (!isOpenPopup) return;
 		const target = e.target as HTMLElement;
 		isOutsideMouseDown = !container?.contains(target);
 	}
-	function handleOutsideClick(e: MouseEvent) {
+	function handleWindowOutsideClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
-		if (active && isOutsideMouseDown && !container?.contains(target)) {
-			console.log('handleOutsideClick');
+		if (isOpenPopup && isOutsideMouseDown && !container?.contains(target)) {
 			close();
 		}
 	}
-	function handleEscPress(e: KeyboardEvent) {
-		if (active && escClose && e.code === 'Escape') {
+	function handleWindowEscPress(e: KeyboardEvent) {
+		if (isOpenPopup && escClose && e.code === 'Escape') {
 			e.preventDefault();
 			close();
 		}
 	}
-	function handleFocusChange(e: FocusEvent) {
+	function handleWindowFocusChange(e: FocusEvent) {
 		const target = e.target as HTMLElement;
-		if (active && !trigger?.contains(target) && !container?.contains(target)) {
-			console.log('handleFocusChange');
+		if (
+			isOpenPopup &&
+			!trigger?.contains(target) &&
+			!container?.contains(target)
+		) {
 			toggle();
 		}
 	}
@@ -105,12 +177,17 @@
 	};
 
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
-	let searchString = ''; // Arama metni
+	let searchString = '';
 	const handleListboxKeydown = (e: KeyboardEvent) => {
 		// 1. Arama (Typeahead) Mantığı
-		//----------------------------------------------------
 		// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
-		if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+		if (
+			e.key !== ' ' &&
+			e.key.length === 1 &&
+			!e.ctrlKey &&
+			!e.altKey &&
+			!e.metaKey
+		) {
 			e.preventDefault();
 
 			// Önceki zamanlayıcıyı temizle
@@ -120,25 +197,25 @@
 			searchString += e.key.toLocaleLowerCase('tr-TR'); // Türkçe'ye uygun küçük harf çevrimi
 
 			// Arama metnine uyan ilk opsiyonu bul
-			const matchIndex = options.findIndex((opt) => opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString));
+			const matchIndex = displayOptions.findIndex((opt) =>
+				opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString)
+			);
 
 			// Eğer bir eşleşme bulunursa
 			if (matchIndex !== -1) {
 				activeIndex = matchIndex;
-				// optionButtons[activeIndex]?.focus();
 				optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
 			}
 
-			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla (örn: 500ms sonra)
+			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla
 			searchTimeout = setTimeout(() => {
 				searchString = '';
-			}, 500); // Yarım saniye bekleme süresi iyi bir başlangıçtır.
+			}, 500);
 
 			return; // Arama yapıldı, fonksiyonun geri kalanına gerek yok.
 		}
 
 		// 2. Navigasyon ve Seçim Mantığı
-		//----------------------------------------------------
 		switch (e.code) {
 			case 'ArrowUp':
 			case 'ArrowDown':
@@ -148,18 +225,18 @@
 				let nextIndex = activeIndex;
 
 				if (e.code === 'ArrowUp') {
-					nextIndex = (activeIndex - 1 + options.length) % options.length;
+					nextIndex =
+						(activeIndex - 1 + displayOptions.length) % displayOptions.length;
 				} else if (e.code === 'ArrowDown') {
-					nextIndex = (activeIndex + 1) % options.length;
+					nextIndex = (activeIndex + 1) % displayOptions.length;
 				} else if (e.code === 'Home') {
 					nextIndex = 0;
 				} else if (e.code === 'End') {
-					nextIndex = options.length - 1;
+					nextIndex = displayOptions.length - 1;
 				}
 
 				if (nextIndex !== activeIndex) {
 					activeIndex = nextIndex;
-					// optionButtons[activeIndex]?.focus();
 					optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
 				}
 				break;
@@ -169,7 +246,7 @@
 			case 'Space': {
 				e.preventDefault();
 				if (activeIndex !== -1) {
-					selectOption(activeIndex, options[activeIndex].value);
+					selectOption(activeIndex);
 				}
 				break;
 			}
@@ -186,18 +263,34 @@
 		}
 	};
 
-	function selectOption(index: number, val: T['value']) {
-		value = val;
-		selectedIndex = index;
-		close();
+	function selectOption(index: number) {
+		activeIndex = index;
+
+		const newValue = displayOptions[index].value;
+		if (multiple && Array.isArray(value) && typeof newValue === 'string') {
+			listbox?.focus();
+			optionsLi[index]?.scrollIntoView({ block: 'nearest' });
+
+			if (value.includes(newValue)) {
+				// REMOVE
+				value = value.filter((v) => v !== newValue);
+			} else {
+				// ADD
+				value = [...value, newValue];
+			}
+		} else if (typeof newValue === 'string') {
+			value = newValue;
+			close();
+		}
 	}
-
-	// const optionButtonFocusOverrideClasses = 'focus-override focus-visible:outline-error-400 focus-visible:outline-2 focus-visible:-outline-offset-2';
-
-	let activeOptionId = $derived(active ? `${optionId}-${activeIndex}` : undefined);
 </script>
 
-<svelte:window onclick={handleOutsideClick} onmousedown={handleOutsideMousedown} onkeydown={handleEscPress} onfocusin={handleFocusChange} />
+<svelte:window
+	onclick={handleWindowOutsideClick}
+	onmousedown={handleWindowOutsideMousedown}
+	onkeydown={handleWindowEscPress}
+	onfocusin={handleWindowFocusChange}
+/>
 
 <!-- Select Container -->
 <div bind:this={container} class="relative select-none">
@@ -208,16 +301,19 @@
 		role="combobox"
 		type="button"
 		aria-controls={listboxId}
-		aria-expanded={active}
+		aria-expanded={isOpenPopup}
 		aria-haspopup="listbox"
 		aria-labelledby={triggerId}
 		aria-activedescendant={activeOptionId}
-		tabindex={disabled || readonly ? -1 : 0}
-		class="bg-error-300 inline-flex w-full min-w-52 cursor-pointer items-center justify-center px-4 py-1 text-start select-none"
+		aria-invalid={!isValid}
+		class:!bg-error-500={!isValid}
+		class="bg-surface-300 inline-flex w-full min-w-52 cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none"
 		onclick={() => toggle()}
 		onkeydown={handleTriggerKeyDown}
+		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
+		disabled={disabled || displayOptions.length === 0}
 	>
-		<span class="flex-1 p-1">{selectedIndex === -1 ? '--Seçiniz--' : options[selectedIndex].label}</span>
+		<span class="flex-1 p-1">{selectedLabels}</span>
 		<svg
 			stroke="currentColor"
 			fill="currentColor"
@@ -227,11 +323,13 @@
 			width="1em"
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
+			<path
+				d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"
+			></path>
 		</svg>
 	</button>
 	<!-- Select Listbox -->
-	{#if active && options.length > 0 && !disabled && !readonly}
+	{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
 		<ul
 			bind:this={listbox}
 			id={listboxId}
@@ -239,12 +337,12 @@
 			aria-labelledby={triggerId}
 			tabindex={-1}
 			onkeydown={handleListboxKeydown}
-			class=" bg-warning-300 pointer-events-auto absolute isolate mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
+			class="bg-warning-300 pointer-events-auto absolute isolate z-3000 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
 			transition:fly={{ y: 5, duration: 300 }}
 		>
 			<!-- Select Options -->
-			{#each options as option, i (i)}
-				{@const isSelected = i === selectedIndex}
+			{#each displayOptions as option, i (i)}
+				{@const isSelected = selectedIndexes.includes(i)}
 				{@const isActive = i === activeIndex}
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<li
@@ -254,9 +352,9 @@
 					tabindex={-1}
 					aria-selected={isSelected}
 					class:bg-success-200={isSelected}
-					class:bg-success-400={isActive}
+					class:outline-2={isActive}
 					class="hover:bg-success-100 flex cursor-pointer items-center px-2 py-1"
-					onclick={() => selectOption(i, option.value)}
+					onclick={() => selectOption(i)}
 				>
 					<span class="flex-1">
 						{option.label}
@@ -272,7 +370,8 @@
 							xmlns="http://www.w3.org/2000/svg"
 						>
 							<path fill="none" d="M0 0h24v24H0z"></path>
-							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+							></path>
 						</svg>
 					</span>
 				</li>

@@ -16,7 +16,7 @@
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
 	};
-	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-3000 flex flex-col gap-2 px-2 ${positionClasses[toaster.options.position]}`;
+	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-4000 flex flex-col gap-2 px-2 ${positionClasses[toaster.options.position]}`;
 	const toastRootClasses: Record<Required<Toast>['type'] | 'base', string> = {
 		base: 'relative flex items-center break-words rounded-sm border p-2 shadow-lg min-w-full sm:min-w-sm sm:max-w-lg',
 		info: 'bg-info-400 text-info-950 border-info-600 border',
