@@ -13,6 +13,7 @@
 		readonly?: boolean;
 		required?: boolean;
 		escClose?: boolean;
+		deSelectText?: string;
 	};
 </script>
 
@@ -27,7 +28,8 @@
 		disabled,
 		readonly,
 		required = false,
-		escClose = true
+		escClose = true,
+		deSelectText = '-- Seçiniz --'
 	}: PropsType = $props();
 
 	const id = $props.id();
@@ -42,17 +44,16 @@
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
 	let isOutsideMouseDown = false;
-
-	let canDeselect = $derived(!multiple && !required); // --Seçiniz-- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
-
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
+
+	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
 
 	let displayOptions = $derived.by(() => {
 		// Seçimi geri alma imkanı var mı? (Tekli seçim ve zorunlu değil)
 		if (canDeselect) {
-			// Listenin başına "Seçiniz" seçeneğini ekle
+			// Listenin başına "-- Seçiniz --" seçeneğini ekle
 			// orjinal indexi bir kaydırır. Orijinal options[0] artık displayOptions[1] olur
-			return [{ value: '', label: '-- Seçiniz --' }, ...options];
+			return [{ value: '', label: deSelectText }, ...options];
 		}
 
 		// Diğer tüm durumlarda orijinal seçenekleri kullan
@@ -81,10 +82,15 @@
 	});
 
 	let selectedLabels = $derived.by(() => {
+		const selectedCount = multiple ? `(${selectedIndexes.length}) ` : '';
+
 		const labels = selectedIndexes
 			.map((i) => displayOptions[i]?.label)
 			.filter(Boolean);
-		return labels.length > 0 ? labels.join(', ') : '-- Seçiniz --';
+
+		return labels.length > 0
+			? `${selectedCount}${labels.join(', ')}`
+			: deSelectText;
 	});
 
 	let activeOptionId = $derived.by(() => {
@@ -94,7 +100,7 @@
 	let initialFocusIndex = $derived.by(() => {
 		const firstIndex = selectedIndexes.at(0);
 
-		// 1. Önce en özel durumu kontrol et: "--Seçiniz--" mi seçili?
+		// 1. Önce en özel durumu kontrol et: "-- Seçiniz --" mi seçili?
 		// Eğer `canDeselect` true ise ve seçili index 0 ise, bu durum odur.
 		if (canDeselect && firstIndex === 0) {
 			// İlk gerçek seçeneğe odaklan.
@@ -129,22 +135,6 @@
 			behavior: 'smooth',
 			block: 'nearest'
 		});
-
-		/* listbox?.focus({ preventScroll: true });
-
-		if (listbox && targetOption) {
-			// Gerekli değerleri alalım:
-			const listboxHeight = listbox.clientHeight; // Liste kutusunun görünür yüksekliği
-			const optionTop = targetOption.offsetTop; // Seçeneğin liste kutusunun tepesine olan uzaklığı
-			const optionHeight = targetOption.clientHeight; // Seçeneğin kendi yüksekliği
-
-			// Yeni scrollTop değerini hesaplayalım:
-			// Formül: (Seçeneğin başlangıç pozisyonu) - (Liste yüksekliğinin yarısı) + (Seçenek yüksekliğinin yarısı)
-			const newScrollTop = optionTop - listboxHeight / 2 + optionHeight / 2;
-
-			// Hesaplanan değeri ata
-			listbox.scrollTop = newScrollTop;
-		} */
 	};
 
 	const close = async () => {
@@ -264,7 +254,7 @@
 
 			case 'Tab': {
 				e.preventDefault();
-				// close();
+				close();
 				break;
 			}
 
@@ -345,7 +335,9 @@
 		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
 		disabled={disabled || displayOptions.length === 0}
 	>
-		<span class="flex-1 p-1">{selectedLabels}</span>
+		<span class="flex-1 overflow-hidden p-1 text-ellipsis whitespace-nowrap"
+			>{selectedLabels}</span
+		>
 		<svg
 			stroke="currentColor"
 			fill="currentColor"

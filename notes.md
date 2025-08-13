@@ -58,7 +58,6 @@ npm-check --update
 
 - Drawer z-index >= 1000
 - Confirm z-index >= 2000
-- Select Popup z-index = 3000
 - Toasts z-index = 4000
 
 # Table Parent ID System
