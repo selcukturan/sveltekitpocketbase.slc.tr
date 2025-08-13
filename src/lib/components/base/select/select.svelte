@@ -1,7 +1,4 @@
-<script lang="ts">
-	import { tick } from 'svelte';
-	import { fly } from 'svelte/transition';
-
+<script module>
 	type ValueType = string | string[];
 	type OptionsType = {
 		value: ValueType;
@@ -17,6 +14,11 @@
 		required?: boolean;
 		escClose?: boolean;
 	};
+</script>
+
+<script lang="ts">
+	import { tick } from 'svelte';
+	import { fly } from 'svelte/transition';
 
 	let {
 		multiple = false,
@@ -41,8 +43,7 @@
 	let isOpenPopup = $state(false);
 	let isOutsideMouseDown = false;
 
-	// --Seçiniz-- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
-	let canDeselect = $derived(!multiple && !required);
+	let canDeselect = $derived(!multiple && !required); // --Seçiniz-- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
 
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
 
@@ -62,7 +63,7 @@
 		// Zorunlu değilse her zaman geçerlidir.
 		if (!required) return true;
 
-		// Zorunluysa, seçim durumuna göre geçerliliği belirle.
+		// Zorunluysa, seçim durumuna göre geçerlilik belirlenir.
 		if (multiple) {
 			return Array.isArray(value) && value.length > 0;
 		} else {
@@ -121,8 +122,29 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
-		listbox?.focus();
-		optionsLi[activeIndex]?.scrollIntoView({ block: 'center' });
+		const targetOption = optionsLi[activeIndex];
+
+		listbox?.focus({ preventScroll: true });
+		targetOption?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'nearest'
+		});
+
+		/* listbox?.focus({ preventScroll: true });
+
+		if (listbox && targetOption) {
+			// Gerekli değerleri alalım:
+			const listboxHeight = listbox.clientHeight; // Liste kutusunun görünür yüksekliği
+			const optionTop = targetOption.offsetTop; // Seçeneğin liste kutusunun tepesine olan uzaklığı
+			const optionHeight = targetOption.clientHeight; // Seçeneğin kendi yüksekliği
+
+			// Yeni scrollTop değerini hesaplayalım:
+			// Formül: (Seçeneğin başlangıç pozisyonu) - (Liste yüksekliğinin yarısı) + (Seçenek yüksekliğinin yarısı)
+			const newScrollTop = optionTop - listboxHeight / 2 + optionHeight / 2;
+
+			// Hesaplanan değeri ata
+			listbox.scrollTop = newScrollTop;
+		} */
 	};
 
 	const close = async () => {
@@ -242,7 +264,7 @@
 
 			case 'Tab': {
 				e.preventDefault();
-				close();
+				// close();
 				break;
 			}
 
@@ -272,8 +294,11 @@
 
 		const newValue = displayOptions[index].value;
 		if (multiple && Array.isArray(value) && typeof newValue === 'string') {
-			listbox?.focus();
-			optionsLi[index]?.scrollIntoView({ block: 'nearest' });
+			listbox?.focus({ preventScroll: true });
+			optionsLi[index]?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest'
+			});
 
 			if (value.includes(newValue)) {
 				// REMOVE
@@ -297,7 +322,10 @@
 />
 
 <!-- Select Container -->
-<div bind:this={container} class="relative select-none">
+<div
+	bind:this={container}
+	class="relative inline-block w-full min-w-52 select-none"
+>
 	<!-- Select Trigger -->
 	<button
 		bind:this={trigger}
@@ -311,7 +339,7 @@
 		aria-activedescendant={activeOptionId}
 		aria-invalid={!isValid}
 		class:!bg-error-500={!isValid}
-		class="bg-surface-300 inline-flex w-full min-w-52 cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none"
+		class="bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none"
 		onclick={() => toggle()}
 		onkeydown={handleTriggerKeyDown}
 		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
@@ -341,7 +369,7 @@
 			aria-labelledby={triggerId}
 			tabindex={-1}
 			onkeydown={handleListboxKeydown}
-			class="bg-warning-300 pointer-events-auto absolute isolate z-3000 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
+			class="bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
 			transition:fly={{ y: 5, duration: 300 }}
 		>
 			<!-- Select Options -->
