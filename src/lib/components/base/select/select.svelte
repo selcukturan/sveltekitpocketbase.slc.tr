@@ -1,14 +1,16 @@
 <script module>
-	type ValueType = string | string[];
-	type OptionsType = {
-		value: ValueType;
-		label: string;
-		extras?: Record<string, unknown>;
-	};
 	type PropsType = {
 		multiple?: boolean;
-		value?: ValueType;
-		options: OptionsType[];
+		value?: string | string[];
+		options: {
+			value: string;
+			label: string;
+			extras?: Record<string, unknown>;
+		}[];
+		class?: string;
+		triggerClass?: string;
+		listboxClass?: string;
+		optionClass?: string;
 		disabled?: boolean;
 		readonly?: boolean;
 		required?: boolean;
@@ -25,6 +27,10 @@
 		multiple = false,
 		value = $bindable(multiple ? [] : ''),
 		options,
+		class: classes = '',
+		triggerClass = '',
+		listboxClass = '',
+		optionClass = '',
 		disabled,
 		readonly,
 		required = false,
@@ -76,17 +82,19 @@
 		if (multiple && Array.isArray(value) && value.length > 0) {
 			return value
 				.map((v) => displayOptions.findIndex((opt) => opt.value === v)) // bulduğu ilk öğenin indeksini döndürür, yoksa -1 döndürür.
+				.filter((i) => i !== -1) // -1 olanları çıkar
 				.sort((a, b) => a - b);
 		}
-		return [displayOptions.findIndex((opt) => opt.value === value)]; // yoksa -1 döner.
+		const idx = displayOptions.findIndex((opt) => opt.value === value);
+		return idx !== -1 ? [idx] : [];
 	});
 
 	let selectedLabels = $derived.by(() => {
-		const selectedCount = multiple ? `(${selectedIndexes.length}) ` : '';
-
 		const labels = selectedIndexes
 			.map((i) => displayOptions[i]?.label)
 			.filter(Boolean);
+
+		const selectedCount = multiple ? `(${labels.length}) ` : '';
 
 		return labels.length > 0
 			? `${selectedCount}${labels.join(', ')}`
@@ -128,19 +136,18 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
-		const targetOption = optionsLi[activeIndex];
+		listbox?.focus(); // { preventScroll: true }
 
-		listbox?.focus({ preventScroll: true });
-		targetOption?.scrollIntoView({
+		optionsLi[activeIndex]?.scrollIntoView({
 			behavior: 'smooth',
 			block: 'nearest'
 		});
 	};
 
-	const close = async () => {
+	const close = () => {
 		isOpenPopup = false;
 
-		await tick(); // Bekle, DOM güncelleniyor.
+		// await tick(); // Bekle, DOM güncelleniyor.
 
 		trigger?.focus();
 	};
@@ -207,14 +214,17 @@
 			searchString += e.key.toLocaleLowerCase('tr-TR'); // Türkçe'ye uygun küçük harf çevrimi
 
 			// Arama metnine uyan ilk opsiyonu bul
-			const matchIndex = displayOptions.findIndex((opt) =>
-				opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString)
+			const matchIndex = displayOptions.findIndex(
+				(opt) => opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString) // findIndex() bulamazsa -1 döndürür.
 			);
 
 			// Eğer bir eşleşme bulunursa
 			if (matchIndex !== -1) {
 				activeIndex = matchIndex;
-				optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
+				optionsLi[activeIndex]?.scrollIntoView({
+					behavior: 'smooth',
+					block: 'nearest'
+				});
 			}
 
 			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla
@@ -247,26 +257,24 @@
 
 				if (nextIndex !== activeIndex) {
 					activeIndex = nextIndex;
-					optionsLi[activeIndex]?.scrollIntoView({ block: 'nearest' });
+					optionsLi[activeIndex]?.scrollIntoView({
+						behavior: 'smooth',
+						block: 'nearest'
+					});
 				}
-				break;
-			}
-
-			case 'Tab': {
-				e.preventDefault();
-				close();
 				break;
 			}
 
 			case 'Enter':
 			case 'Space': {
 				e.preventDefault();
-				if (activeIndex !== -1) {
-					selectOption(activeIndex);
-				}
+				/* if (activeIndex !== -1) { */
+				selectOption(activeIndex);
+				/* } */
 				break;
 			}
 
+			case 'Tab':
 			case 'Escape': {
 				e.preventDefault();
 				close();
@@ -282,26 +290,38 @@
 	function selectOption(index: number) {
 		activeIndex = index;
 
-		const newValue = displayOptions[index].value;
-		if (multiple && Array.isArray(value) && typeof newValue === 'string') {
-			listbox?.focus({ preventScroll: true });
-			optionsLi[index]?.scrollIntoView({
+		const newSelectedValue = displayOptions[activeIndex].value;
+
+		if (multiple && Array.isArray(value)) {
+			listbox?.focus(); // { preventScroll: true }
+			optionsLi[activeIndex]?.scrollIntoView({
 				behavior: 'smooth',
 				block: 'nearest'
 			});
 
-			if (value.includes(newValue)) {
+			if (value.includes(newSelectedValue)) {
 				// REMOVE
-				value = value.filter((v) => v !== newValue);
+				value = value.filter((v) => v !== newSelectedValue);
 			} else {
 				// ADD
-				value = [...value, newValue];
+				value = [...value, newSelectedValue];
 			}
-		} else if (typeof newValue === 'string') {
-			value = newValue;
+		} else {
+			value = newSelectedValue;
 			close();
 		}
 	}
+
+	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
+	const internalContainerClasses =
+		'relative inline-block max-w-full min-w-52 select-none';
+	const internalTriggerClasses =
+		'bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none';
+	const internalListboxClasses =
+		'bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
+	const internalOptionClasses =
+		'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1';
+	const internalInvalidTriggerClasses = ' !bg-error-400';
 </script>
 
 <svelte:window
@@ -312,10 +332,7 @@
 />
 
 <!-- Select Container -->
-<div
-	bind:this={container}
-	class="relative inline-block w-full min-w-52 select-none"
->
+<div bind:this={container} class="{internalContainerClasses} {classes}">
 	<!-- Select Trigger -->
 	<button
 		bind:this={trigger}
@@ -328,16 +345,15 @@
 		aria-labelledby={triggerId}
 		aria-activedescendant={activeOptionId}
 		aria-invalid={!isValid}
-		class:!bg-error-500={!isValid}
-		class="bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none"
+		class="{internalTriggerClasses} {triggerClass} {!isValid
+			? internalInvalidTriggerClasses
+			: ''}"
 		onclick={() => toggle()}
 		onkeydown={handleTriggerKeyDown}
 		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
 		disabled={disabled || displayOptions.length === 0}
 	>
-		<span class="flex-1 overflow-hidden p-1 text-ellipsis whitespace-nowrap"
-			>{selectedLabels}</span
-		>
+		<span class="flex-1 p-1 {textEllipsisClasses}">{selectedLabels}</span>
 		<svg
 			stroke="currentColor"
 			fill="currentColor"
@@ -361,7 +377,7 @@
 			aria-labelledby={triggerId}
 			tabindex={-1}
 			onkeydown={handleListboxKeydown}
-			class="bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none"
+			class="{internalListboxClasses} {listboxClass}"
 			transition:fly={{ y: 5, duration: 300 }}
 		>
 			<!-- Select Options -->
@@ -377,10 +393,10 @@
 					aria-selected={isSelected}
 					class:bg-success-200={isSelected}
 					class:outline-2={isActive}
-					class="hover:bg-success-100 flex cursor-pointer items-center px-2 py-1"
+					class="{internalOptionClasses} {optionClass}"
 					onclick={() => selectOption(i)}
 				>
-					<span class="flex-1">
+					<span class="flex-1 {textEllipsisClasses}">
 						{option.label}
 					</span>
 					<span aria-hidden={true} hidden={!isSelected}>

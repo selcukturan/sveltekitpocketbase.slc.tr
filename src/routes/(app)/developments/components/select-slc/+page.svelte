@@ -7,7 +7,10 @@
 		{ value: 'banana', label: 'Banana' },
 		{ value: 'cherry', label: 'Cherry' },
 		{ value: 'date', label: 'Date' },
-		{ value: 'elderberry', label: 'Elderberry' },
+		{
+			value: 'elderberry',
+			label: 'Elderberry'
+		},
 		{ value: 'feg', label: 'Feg' },
 		{ value: 'fig', label: 'Fig' },
 		{ value: 'grape', label: 'Grape' },
@@ -48,19 +51,19 @@
 	<Page.Main>
 		<Page.Main.Panel>
 			<h1 class="py-2 text-2xl">Single - Select Not Required</h1>
-			<Select {options} bind:value />
+			<Select {options} bind:value class="w-full" />
 			<p>Selected Value: {value}</p>
 
 			<h1 class="py-2 text-2xl">Single - Select Required</h1>
-			<Select {options} bind:value={value2} required />
+			<Select {options} bind:value={value2} required class="w-full" />
 			<p>Selected Value: {value2}</p>
 
 			<h1 class="py-2 text-2xl">Multiple - Select Not Required</h1>
-			<Select {options} bind:value={value1} multiple />
+			<Select {options} bind:value={value1} multiple class="w-full" />
 			<p>Selected Value: {JSON.stringify(value1)}</p>
 
 			<h1 class="py-2 text-2xl">Multiple - Select Required</h1>
-			<Select {options} bind:value={value3} multiple required />
+			<Select {options} bind:value={value3} multiple required class="w-full" />
 			<p>Selected Value: {JSON.stringify(value3)}</p>
 		</Page.Main.Panel>
 	</Page.Main>
