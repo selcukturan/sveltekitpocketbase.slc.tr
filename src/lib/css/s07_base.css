@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-surface-300, currentColor);
+	}
+
+	* {
+		@apply border-surface-200;
+	}
+	html {
+		-webkit-tap-highlight-color: color-mix(
+			in oklab,
+			var(--color-primary-500) 30%,
+			transparent
+		);
+	}
+
+	body {
+		@apply bg-surface-50 text-surface-950 font-sans text-base font-normal;
+	}
+
+	html,
+	body {
+		@apply m-0 h-full w-full overflow-hidden p-0;
+	}
+
+	::selection {
+		background-color: color-mix(
+			in srgb,
+			var(--color-primary-200) 50%,
+			transparent
+		);
+	}
+
+	/* States --- */
+
+	/* *:disabled,
+	.disabled {
+		opacity: 0.5;
+		& > * {
+			pointer-events: none;
+		}
+	} */
+
+	/* Outlines and Focus --- */
+	/*
+		REMINDER: Never disabled focus and outlines
+		as this would be harmful to accessibility!
+		Source: http://www.outlinenone.com/
+
+		EXAMPLE: Set a global focus style.
+		Apply this in your app's global stylesheet: */
+	/* :focus {
+		@apply focus:outline-primary-800;
+	} */
+
+	/* Component Focus Utility */
+	/* .focused {
+		@apply ring-[2px] ring-surface-950 dark:ring-surface-50 ring-inset;
+	} */
+}
+
+@layer components {
+	*:not(body):not(.focus-override):focus {
+		/* Varsayılanı temizliyoruz, çünkü kendi stilimizi :focus-visible ile ekleyeceğiz */
+		outline: none;
+	}
+	*:not(body):not(.focus-override):focus-visible {
+		@apply outline-primary-400 outline-2 outline-offset-2;
+	}
+}

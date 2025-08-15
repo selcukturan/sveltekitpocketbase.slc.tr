@@ -1,0 +1,37 @@
+@layer base {
+	/* sm: 640px >  < ∞ */
+	@media (width >= 640px) {
+		/* ==========================================================================
+        Global Sayfa Davranışları (Sadece HTML elementine uygulanmalı)
+        ========================================================================== */
+		html {
+			/* Sayfa içi linklerde yumuşak kaydırma sağlar */
+			scroll-behavior: smooth;
+		}
+
+		/* ==========================================================================
+        Tüm Kaydırma Çubukları İçin Genel Stiller
+        ========================================================================== */
+
+		/* Firefox için evrensel scrollbar stilleri */
+		* {
+			scrollbar-width: thin;
+			/* scrollbar-color: <thumb> <track>; */
+			scrollbar-color: var(--color-surface-200) transparent;
+		}
+
+		/* WebKit tabanlı tarayıcılar için evrensel scrollbar stilleri (Chrome, Safari, Edge) */
+		*::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+
+		*::-webkit-scrollbar-thumb {
+			background-color: var(--color-surface-200);
+		}
+
+		*::-webkit-scrollbar-track {
+			background: transparent;
+		}
+	}
+}
