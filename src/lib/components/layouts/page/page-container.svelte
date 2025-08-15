@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { ChildrenPropsType } from './types';
-	let { children }: ChildrenPropsType = $props();
+	let { children, class: classes, ...attributes }: ChildrenPropsType = $props();
 </script>
 
-<main class="relative flex-1 overflow-hidden">
+<main class="{classes} {'relative flex-1 overflow-hidden'}" {...attributes}>
 	{#if children}
 		{@render children()}
 	{/if}

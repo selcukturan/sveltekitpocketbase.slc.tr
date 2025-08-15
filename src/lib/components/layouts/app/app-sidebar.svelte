@@ -4,15 +4,26 @@
 	import type { PropsAppSidebarType } from './types';
 	import { tooltip } from '$lib/client/attachments';
 
-	let { sidebarData }: PropsAppSidebarType = $props();
+	let {
+		sidebarData,
+		class: classes,
+		...attributes
+	}: PropsAppSidebarType = $props();
 
 	const global = getGlobalContext();
 </script>
 
-<section class="flex h-full w-full flex-row overflow-hidden sm:flex-col">
+<section
+	class="{classes} {'flex h-full w-full flex-row overflow-hidden sm:flex-col'}"
+	{...attributes}
+>
 	<header class="flex items-center justify-center px-2 sm:py-2">
 		<a href="/" class="flex h-10 w-10 items-center justify-center select-none">
-			<img class="h-10 w-10 select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
+			<img
+				class="h-10 w-10 select-none"
+				src="/images/logo/logo_512.png"
+				alt="SLC Web logo"
+			/>
 		</a>
 	</header>
 	<nav
@@ -34,7 +45,10 @@
 			<a
 				href={`${d.href}`}
 				aria-label={d.title}
-				{@attach tooltip({ text: d.title, position: global.isMobileBreakpoint ? 'bottom' : 'right' })}
+				{@attach tooltip({
+					text: d.title,
+					position: global.isMobileBreakpoint ? 'bottom' : 'right'
+				})}
 				aria-current={d.href === '/' && page.url.pathname === '/'
 					? 'page'
 					: d.href !== '/' && page.url.pathname.startsWith(`${d.href}`)

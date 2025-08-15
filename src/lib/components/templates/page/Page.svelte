@@ -1,10 +1,18 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+	type Props = SvelteHTMLElements['section'] & {
+		children?: Snippet;
+	};
+
+	let { children, class: classes, style, ...attributes }: Props = $props();
+
+	const internalStyle =
+		'display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;';
 </script>
 
-<section class={classes} style="display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;">
+<section class={classes} style="{internalStyle} {style}" {...attributes}>
 	{#if children}
 		{@render children()}
 	{:else}

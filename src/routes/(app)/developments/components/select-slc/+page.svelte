@@ -7,10 +7,7 @@
 		{ value: 'banana', label: 'Banana' },
 		{ value: 'cherry', label: 'Cherry' },
 		{ value: 'date', label: 'Date' },
-		{
-			value: 'elderberry',
-			label: 'Elderberry'
-		},
+		{ value: 'elderberry', label: 'Elderberry' },
 		{ value: 'feg', label: 'Feg' },
 		{ value: 'fig', label: 'Fig' },
 		{ value: 'grape', label: 'Grape' },
@@ -48,7 +45,7 @@
 	<Page.Header>
 		<p>Page Header Text</p>
 	</Page.Header>
-	<Page.Main>
+	<Page.Main style="scrollbar-gutter: stable;">
 		<Page.Main.Panel>
 			<h1 class="py-2 text-2xl">Single - Select Not Required</h1>
 			<Select {options} bind:value class="w-full" />

@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
-	/* import { getContext } from './context'; */
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+	type Props = SvelteHTMLElements['div'] & {
+		children?: Snippet;
+	};
 
-	// Get Context
-	/* const ctx = getContext(); */
+	let { children, class: classes, ...attributes }: Props = $props();
 </script>
 
-<div class={classes} style:display="contents">
+<div class={classes} style:display="contents" {...attributes}>
 	{#if children}
 		{@render children()}
 	{:else}

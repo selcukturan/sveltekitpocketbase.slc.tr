@@ -1,15 +1,21 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
-	/* import { getContext } from './context'; */
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+	type Props = SvelteHTMLElements['div'] & {
+		children?: Snippet;
+	};
 
-	// Get Context
-	/* const ctx = getContext(); */
+	let { children, class: classes, ...attributes }: Props = $props();
 </script>
 
-<div class="{classes} {`wrapper relative mx-auto w-4xl max-w-full p-6`}">
-	<div class="panel bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40">
+<div
+	class="{classes} {`wrapper relative mx-auto w-4xl max-w-full p-6`}"
+	{...attributes}
+>
+	<div
+		class="panel bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40"
+	>
 		{#if children}
 			{@render children()}
 		{:else}

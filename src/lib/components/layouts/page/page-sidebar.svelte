@@ -2,10 +2,17 @@
 	import { page } from '$app/state';
 	import type { PageSidebarPropsType } from './types';
 
-	let { pageSidebardata }: PageSidebarPropsType = $props();
+	let {
+		pageSidebardata,
+		class: classes,
+		...attributes
+	}: PageSidebarPropsType = $props();
 </script>
 
-<aside class="flex h-full w-full flex-col overflow-hidden">
+<aside
+	class="{classes} {'flex h-full w-full flex-col overflow-hidden'}"
+	{...attributes}
+>
 	<header class="p-2"></header>
 
 	<main class="relative flex-1 overflow-x-hidden overflow-y-auto px-4 py-0">
@@ -29,7 +36,11 @@
 				<a
 					href={c.href}
 					aria-label={c.title}
-					aria-current={c.root && page.url.pathname == c.href ? 'page' : !c.root && page.url.pathname == c.href ? 'page' : undefined}
+					aria-current={c.root && page.url.pathname == c.href
+						? 'page'
+						: !c.root && page.url.pathname == c.href
+							? 'page'
+							: undefined}
 					class="text-surface-500
 					hover:bg-surface-200
 					hover:text-surface-900
@@ -56,7 +67,9 @@
 					<span>
 						<i class={`${c.icon} !text-xl`}></i>
 					</span>
-					<span class="inline-block overflow-hidden align-top text-ellipsis whitespace-nowrap">
+					<span
+						class="inline-block overflow-hidden align-top text-ellipsis whitespace-nowrap"
+					>
 						{c.title}
 					</span>
 				</a>

@@ -1,11 +1,18 @@
 <script lang="ts">
-	/* import { enhance } from '$app/forms'; */
-	/* import { getGlobalStates } from '@/states/global.svelte'; */
-	/* import { ThemeToggle } from '@/components/base/theme-toggle/view';
+	import { type Snippet } from 'svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	let globalStates = getGlobalStates(); */
+	type Props = SvelteHTMLElements['footer'] & {
+		children?: Snippet;
+	};
+
+	let { children, class: classes, style, ...attributes }: Props = $props();
 </script>
 
-<footer class="border-t">
-	<p>App Footer</p>
+<footer class="{classes} {'border-t'}" {...attributes}>
+	{#if children}
+		{@render children()}
+	{:else}
+		<p>App Footer</p>
+	{/if}
 </footer>

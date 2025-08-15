@@ -1,10 +1,20 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	let { children, class: classes }: { children?: Snippet; class?: string } = $props();
+	type Props = SvelteHTMLElements['footer'] & {
+		children?: Snippet;
+	};
+
+	let { children, class: classes, ...attributes }: Props = $props();
 </script>
 
-<footer class="{classes} {`bg-surface-100/80`}" style:border-bottom="0px" style:border-left="0px">
+<footer
+	class="{classes} {`bg-surface-100/80`}"
+	style:border-bottom="0px"
+	style:border-left="0px"
+	{...attributes}
+>
 	{#if children}
 		{@render children()}
 	{:else}

@@ -4,6 +4,10 @@
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';
 	import { config } from '$lib/client/app';
+	import type { SvelteHTMLElements } from 'svelte/elements';
+
+	type Props = SvelteHTMLElements['header'];
+	let { class: classes, style, ...attributes }: Props = $props();
 
 	const global = getGlobalContext();
 
@@ -13,7 +17,7 @@
 	};
 </script>
 
-<header class="border-b">
+<header class="{classes} {'border-b'}" {...attributes}>
 	<nav class="flex h-full w-full items-stretch">
 		<div class="flex items-stretch gap-3">
 			<button
@@ -21,7 +25,9 @@
 				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 items-center justify-center rounded-md p-0.5 text-center select-none`}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
-				<i class={`${global.hideSidebar ? `ri-sidebar-unfold-line` : `ri-sidebar-fold-line`} !text-xl`}></i>
+				<i
+					class={`${global.hideSidebar ? `ri-sidebar-unfold-line` : `ri-sidebar-fold-line`} !text-xl`}
+				></i>
 			</button>
 		</div>
 		<div class="flex flex-1 items-center justify-center gap-4">

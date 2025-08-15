@@ -1,3 +1,6 @@
+import { type Snippet } from 'svelte';
+import type { SvelteHTMLElements } from 'svelte/elements';
+
 type PageSidebarChildType = {
 	title: string;
 	href: string;
@@ -10,13 +13,15 @@ export type PageSidebarDataType = {
 	child: PageSidebarChildType[];
 };
 
-export type ChildrenPropsType = { children: Snippet };
+export type ChildrenPropsType = SvelteHTMLElements['main'] & {
+	children: Snippet;
+};
 
 export type PageLayoutPropsType = {
 	pageSidebardata: PageSidebarDataType[];
 	children: ChildrenPropsType['children'];
 };
 
-export type PageSidebarPropsType = {
+export type PageSidebarPropsType = SvelteHTMLElements['aside'] & {
 	pageSidebardata: PageSidebarDataType[];
 };
