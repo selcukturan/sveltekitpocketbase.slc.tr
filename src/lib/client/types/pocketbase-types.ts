@@ -300,6 +300,7 @@ export type AppLogsRecord = {
 	content?: string
 	created?: IsoDateString
 	id: string
+	slug?: string
 	title?: string
 	updated?: IsoDateString
 }

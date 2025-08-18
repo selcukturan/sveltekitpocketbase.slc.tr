@@ -3,20 +3,20 @@
 </script>
 
 <Head>
-	<title>Tanstack Form - SLC Web Applications</title>
+	<title>Remote [command] - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
 <Page>
 	<Page.Header>
-		<p>Form validation with valibot and tanstack form</p>
+		<p>Remote [command]</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<div>Tanstack Form Validation</div>
+			<div>Remote [command]</div>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
-		<p>Form validation Page Footer</p>
+		<p>Remote [command] Page Footer</p>
 	</Page.Footer>
 </Page>

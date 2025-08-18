@@ -5,6 +5,7 @@ import env from '$lib/server/env';
 import { Collections } from '$lib/client/types/pocketbase-types';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	console.log('hooks.server.ts');
 	const isProduction = env.NODE_ENV === 'production';
 	// 🚀 `auth.pb.authStore` ve `auth` aynı nesneyi işaret eder ####################################################################
 	const auth = new Auth(event);

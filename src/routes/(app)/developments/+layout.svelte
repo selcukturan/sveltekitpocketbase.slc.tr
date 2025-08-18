@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '$lib/components/layouts/page';
+	import {
+		PageLayout,
+		type PageSidebarDataType,
+		type ChildrenPropsType
+	} from '$lib/components/layouts/page';
 
 	let { children }: ChildrenPropsType = $props();
 
@@ -29,55 +33,56 @@
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Form Validation with Tanstack',
-					href: `/developments/components/form-tanstack`,
-					icon: 'ri-file-line'
-				},
-				{
-					title: 'Tree (SLC Draft)',
-					href: `/developments/components/tree`,
+					title: 'Form Validation with SLC',
+					href: `/developments/components/form-slc`,
 					icon: 'ri-file-line'
 				},
 
 				{
-					title: 'Tooltip (SLC)',
+					title: 'Tooltip',
 					href: `/developments/components/tooltip`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Toast (zagjs ui)',
+					title: 'Toast',
 					href: `/developments/components/toast`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Drawer Panel (SLC)',
-					href: `/developments/components/drawer`,
+					title: 'Confirmation',
+					href: `/developments/components/confirmation`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Select (zagjs ui)',
+					title: 'Drawer Panel',
+					href: `/developments/components/drawer`,
+					icon: 'ri-file-line'
+				},
+
+				{
+					title: 'Select',
 					href: `/developments/components/select`,
 					icon: 'ri-file-line'
 				},
 
 				{
-					title: 'Select (SLC)',
-					href: `/developments/components/select-slc`,
+					title: 'Remote [query]',
+					href: `/developments/components/remote-query`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Toast (SLC)',
-					href: `/developments/components/toast-slc`,
+					title: 'Remote [form]',
+					href: `/developments/components/remote-form`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Form Validation with SLC',
-					href: `/developments/components/form-slc`,
+					title: 'Remote [command]',
+					href: `/developments/components/remote-command`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Confirmation (SLC)',
-					href: `/developments/components/confirmation`,
+					title: 'Tree (Draft)',
+					href: `/developments/components/tree`,
 					icon: 'ri-file-line'
 				}
 			]

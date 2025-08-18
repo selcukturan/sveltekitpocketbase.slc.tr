@@ -8,7 +8,7 @@
 	::before,
 	::backdrop,
 	::file-selector-button {
-		border-color: var(--color-surface-300, currentColor);
+		@apply border-surface-300;
 	}
 
 	* {
@@ -41,30 +41,15 @@
 
 	/* States --- */
 
-	/* *:disabled,
+	/*
+	*:disabled,
 	.disabled {
 		opacity: 0.5;
 		& > * {
 			pointer-events: none;
 		}
-	} */
-
-	/* Outlines and Focus --- */
-	/*
-		REMINDER: Never disabled focus and outlines
-		as this would be harmful to accessibility!
-		Source: http://www.outlinenone.com/
-
-		EXAMPLE: Set a global focus style.
-		Apply this in your app's global stylesheet: */
-	/* :focus {
-		@apply focus:outline-primary-800;
-	} */
-
-	/* Component Focus Utility */
-	/* .focused {
-		@apply ring-[2px] ring-surface-950 dark:ring-surface-50 ring-inset;
-	} */
+	}
+	*/
 }
 
 @layer components {
