@@ -34,6 +34,9 @@
 
 	let value2 = $state(''); // Başlangıçta seçili olan değer
 	let value3 = $state(['tangerine', 'onange', 'kiwi']); // Başlangıçta seçili olan değer
+
+	let valueDisabled = $state(''); // Başlangıçta seçili olan değer
+	let valueReadonly = $state(''); // Başlangıçta seçili olan değer
 </script>
 
 <Head>
@@ -62,6 +65,14 @@
 			<h1 class="py-2 text-2xl">Multiple - Select Required</h1>
 			<Select {options} bind:value={value3} multiple required class="w-full" />
 			<p>Selected Value: {JSON.stringify(value3)}</p>
+
+			<h1 class="py-2 text-2xl">[DISABLED] Single - Select Not Required</h1>
+			<Select {options} bind:value={valueDisabled} class="w-full" disabled />
+			<p>Selected Value: {valueDisabled}</p>
+
+			<h1 class="py-2 text-2xl">[READONLY] Single - Select Not Required</h1>
+			<Select {options} bind:value={valueReadonly} class="w-full" readonly />
+			<p>Selected Value: {valueReadonly}</p>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
