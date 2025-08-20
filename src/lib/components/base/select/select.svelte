@@ -136,10 +136,10 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
-		listbox?.focus({ preventScroll: true }); // { preventScroll: true }
+		listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
 
 		optionsLi[activeIndex]?.scrollIntoView({
-			behavior: 'smooth',
+			behavior: 'auto', // 'smooth' yerine 'auto' kullanıldı, çünkü 'smooth' bazen performans sorunlarına yol açabilir.
 			block: 'nearest'
 		});
 	};
@@ -222,7 +222,7 @@
 			if (matchIndex !== -1) {
 				activeIndex = matchIndex;
 				optionsLi[activeIndex]?.scrollIntoView({
-					behavior: 'smooth',
+					behavior: 'auto',
 					block: 'nearest'
 				});
 			}
@@ -258,7 +258,7 @@
 				if (nextIndex !== activeIndex) {
 					activeIndex = nextIndex;
 					optionsLi[activeIndex]?.scrollIntoView({
-						behavior: 'smooth',
+						behavior: 'auto',
 						block: 'nearest'
 					});
 				}
@@ -293,9 +293,9 @@
 		const newSelectedValue = displayOptions[activeIndex].value;
 
 		if (multiple && Array.isArray(value)) {
-			listbox?.focus(); // { preventScroll: true }
+			listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
 			optionsLi[activeIndex]?.scrollIntoView({
-				behavior: 'smooth',
+				behavior: 'auto',
 				block: 'nearest'
 			});
 
@@ -320,7 +320,7 @@
 	const internalListboxClasses =
 		'bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
 	const internalOptionClasses =
-		'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1';
+		'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 </script>
 
