@@ -1,6 +1,6 @@
-<script lang="ts" module>
+<!-- <script lang="ts" module>
 	type T = Record<string, unknown>;
-</script>
+</script> -->
 
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import type { Snippet } from 'svelte';
@@ -8,40 +8,31 @@
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type Props = SvelteHTMLElements['form'] & {
-		remoteFunction: RemoteForm<T>;
-		children?: Snippet;
+		children: Snippet;
+		remoteForm: RemoteForm<T>;
 	};
 
-	let {
-		children,
-		remoteFunction,
-		class: classes,
-		...attributes
-	}: Props = $props();
+	let { children, remoteForm, class: classes, ...attributes }: Props = $props();
 </script>
 
 <form
 	class={classes}
 	{...attributes}
-	{...remoteFunction.enhance(async ({ form, data, submit }) => {
+	{...remoteForm.enhance(async ({ form, data, submit }) => {
 		try {
 			// await submit().updates(getLogs()); // client single-flight mutations
 			await submit();
 			form.reset();
 
-			alert('Successfully published!');
+			console.log('Successfully published!');
 		} catch (error) {
-			alert('Oh no! Something went wrong');
+			console.error('Oh no! Something went wrong');
 		}
 	})}
 >
-	{#if children}
-		{@render children()}
-	{:else}
-		<span>İçerik yok.</span>
-	{/if}
+	{@render children?.()}
 </form>
 
-{#if remoteFunction.result?.success}
+<!-- {#if remoteForm.result?.success}
 	<p>Successfully published!</p>
-{/if}
+{/if} -->

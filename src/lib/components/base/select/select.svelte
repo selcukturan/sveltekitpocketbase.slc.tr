@@ -136,7 +136,7 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
-		listbox?.focus(); // { preventScroll: true }
+		listbox?.focus({ preventScroll: true }); // { preventScroll: true }
 
 		optionsLi[activeIndex]?.scrollIntoView({
 			behavior: 'smooth',

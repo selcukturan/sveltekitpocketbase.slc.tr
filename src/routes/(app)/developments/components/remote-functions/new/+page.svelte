@@ -16,7 +16,7 @@
 	<Page.Main>
 		<Page.Main.Panel>
 			<h1>Create a new Log</h1>
-			<Form remoteFunction={createLog}>
+			<Form remoteForm={createLog}>
 				<label>
 					<h2>Title</h2>
 					<input name="title" />

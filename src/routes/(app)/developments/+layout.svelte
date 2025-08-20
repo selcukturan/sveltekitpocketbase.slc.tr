@@ -66,18 +66,18 @@
 				},
 
 				{
-					title: 'Remote [query]',
-					href: `/developments/components/remote-query`,
+					title: 'Remote Functions',
+					href: `/developments/components/remote-functions`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Remote [form]',
-					href: `/developments/components/remote-form`,
+					title: 'Link Routing',
+					href: `/developments/components/link-routing`,
 					icon: 'ri-file-line'
 				},
 				{
-					title: 'Remote [command]',
-					href: `/developments/components/remote-command`,
+					title: 'Empty',
+					href: `/developments/components/empty`,
 					icon: 'ri-file-line'
 				},
 				{
