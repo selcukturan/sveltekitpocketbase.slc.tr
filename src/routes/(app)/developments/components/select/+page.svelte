@@ -45,7 +45,7 @@
 	<Page.Header>
 		<p>Page Header Text</p>
 	</Page.Header>
-	<Page.Main style="scrollbar-gutter: stable;">
+	<Page.Main>
 		<Page.Main.Panel>
 			<h1 class="py-2 text-2xl">Single - Select Not Required</h1>
 			<Select {options} bind:value class="w-full" />
