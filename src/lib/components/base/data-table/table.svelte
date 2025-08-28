@@ -372,7 +372,7 @@
 							class="slc-table-th-action-trigger"
 							{@attach t.actionAttach({ type, roi })}
 							type="button"
-							tabindex="0"
+							tabindex="-1"
 						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
@@ -396,7 +396,7 @@
 													action: item.action
 												})}
 											role="menuitem"
-											tabindex="0"
+											tabindex="-1"
 										>
 											<span>{item.label + ' - ' + roi}</span>
 										</button>
@@ -411,7 +411,7 @@
 							class="slc-table-td-action-trigger"
 							{@attach t.actionAttach({ type, roi })}
 							type="button"
-							tabindex="0"
+							tabindex="-1"
 						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
@@ -435,7 +435,7 @@
 													action: item.action
 												})}
 											role="menuitem"
-											tabindex="0"
+											tabindex="-1"
 										>
 											<span>{item.label + ' - ' + roi}</span>
 										</button>

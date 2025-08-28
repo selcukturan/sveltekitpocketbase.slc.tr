@@ -504,6 +504,8 @@ class Table<TData extends Row> {
 			if (!(buttonNode instanceof HTMLButtonElement)) return;
 			// kurulum buraya gidiyor
 			const click = (e: Event) => {
+				// e.preventDefault();
+				e.stopPropagation();
 				const target = e.currentTarget as HTMLElement;
 				const parentContainer = target.parentElement;
 				if (!parentContainer || !(parentContainer instanceof HTMLElement))
@@ -515,12 +517,18 @@ class Table<TData extends Row> {
 					this.toggleActionPopup(roi);
 				}
 			};
+			const mousedown = (e: Event) => {
+				// e.preventDefault();
+				e.stopPropagation();
+			};
 
 			buttonNode.addEventListener('click', click);
+			buttonNode.addEventListener('mousedown', mousedown);
 
 			return () => {
 				// söküm buraya gidiyor
 				buttonNode.removeEventListener('click', click);
+				buttonNode.removeEventListener('mousedown', mousedown);
 			};
 		};
 	};
@@ -536,29 +544,30 @@ class Table<TData extends Row> {
 		} */
 	};
 	private handleWindowEscPress = (e: KeyboardEvent) => {
-		/* if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
+		if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
 			e.preventDefault();
 			this.hideActionPopup();
-		} */
+		}
 	};
 	private handleWindowOutsideMousedown = (e: MouseEvent) => {
-		/* if (
+		if (
 			this.#actionActiveRowIndex == null ||
 			this.#actionActiveContainerNode == null
 		)
 			return;
+
 		const target = e.target as HTMLElement;
 		this.#actionIsOutsideMouseDown =
-			!this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur */
+			!this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
 	};
 	private handleWindowOutsideClick = (e: MouseEvent) => {
-		/* if (
+		if (
 			this.#actionIsOutsideMouseDown &&
 			this.#actionActiveRowIndex != null &&
 			this.#actionActiveContainerNode != null
 		) {
 			this.hideActionPopup();
-		} */
+		}
 	};
 	// ################################## END Row Action Methods #####################################################################################################################
 
