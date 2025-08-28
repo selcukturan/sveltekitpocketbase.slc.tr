@@ -36,6 +36,9 @@
 		console.log('hashSearchParamsDerived', hashSearchParamsDerived.get('sort'));
 		console.log('convert string', hashSearchParamsDerived.toString());
 
+		// HASH DEĞİŞİNCE YAPILACAK İŞLEMLER BURADA
+		// CODE
+
 		return () => {
 			// destroy
 		};

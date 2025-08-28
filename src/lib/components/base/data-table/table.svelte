@@ -12,7 +12,11 @@
 <div {...t.mainProps}>
 	<div {...t.containerProps}>
 		<!-- TABLE -->
-		<div {...t.tableProps} bind:this={t.element} {@attach t.virtualScrollAttach()}>
+		<div
+			{...t.tableProps}
+			bind:this={t.element}
+			{@attach t.virtualScrollAttach()}
+		>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.trhProps}>
@@ -43,7 +47,9 @@
 				{@const roi = rowWrapper.roi}
 				{@const rowStart = roi + t.headerRowsCountState + 1}
 				{@const checked = t.selectedRows.has(roi)}
-				{@const cancelEditable = typeof row.subtotal === 'string' && row.subtotal.startsWith('subtotal')}
+				{@const cancelEditable =
+					typeof row.subtotal === 'string' &&
+					row.subtotal.startsWith('subtotal')}
 				<!-- ********** TRD ********** -->
 				<div
 					{...t.trdProps}
@@ -55,9 +61,18 @@
 					class:slc-table-trd-subtotal3={row.subtotal === 'subtotal3'}
 				>
 					{#if t.srcRowSelection !== 'none'}
-						{@const originalCell = { rowIndex: roi, colIndex: -1, cancelEditable }}
-						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
+						{@const originalCell = {
+							rowIndex: roi,
+							colIndex: -1,
+							cancelEditable
+						}}
+						{@const isCellFocused =
+							t.focusedCellState?.originalCell ===
+							`${originalCell.rowIndex}_${originalCell.colIndex}`}
+						{@const tabindex =
+							isCellFocused && t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						<!-- TD selection -->
 						<div
 							{...t.tdSelectionProps}
@@ -77,10 +92,21 @@
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 						{@const col = colWrapper.data}
 						{@const coi = colWrapper.coi}
-						{@const isEditable = t.editingCellPath === `r${roi}c${ci}` && col.editable}
-						{@const originalCell = { rowIndex: roi, colIndex: ci, field: col.field, cancelEditable }}
-						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
+						{@const isEditable =
+							t.editingCellPath === `r${roi}c${ci}` && col.editable}
+						{@const originalCell = {
+							rowIndex: roi,
+							colIndex: ci,
+							field: col.field,
+							cancelEditable
+						}}
+						{@const isCellFocused =
+							t.focusedCellState?.originalCell ===
+							`${originalCell.rowIndex}_${originalCell.colIndex}`}
+						{@const tabindex =
+							isCellFocused && t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						<!-- TD -->
 						<div
 							{...t.tdProps}
@@ -98,9 +124,18 @@
 						</div>
 					{/each}
 					{#if t.srcRowAction}
-						{@const originalCell = { rowIndex: roi, colIndex: t.visibleColumns.length, cancelEditable }}
-						{@const isCellFocused = t.focusedCellState?.originalCell === `${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex = isCellFocused && t.focusedCellState?.tabIndex != null ? t.focusedCellState?.tabIndex : -1}
+						{@const originalCell = {
+							rowIndex: roi,
+							colIndex: t.visibleColumns.length,
+							cancelEditable
+						}}
+						{@const isCellFocused =
+							t.focusedCellState?.originalCell ===
+							`${originalCell.rowIndex}_${originalCell.colIndex}`}
+						{@const tabindex =
+							isCellFocused && t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						<!-- TD action -->
 						<div
 							{...t.tdActionProps}
@@ -122,13 +157,18 @@
 			<!-- ########## FOOTER ########## -->
 			{#if t.srcData.length > 0 && t.srcFooters.length > 0}
 				{#each t.srcFooters as foot, footerindex (footerindex)}
-					{@const rowStart = t.srcData.length + t.headerRowsCountState + footerindex + 1}
+					{@const rowStart =
+						t.srcData.length + t.headerRowsCountState + footerindex + 1}
 					{@const bottom = `${(t.srcFooters.length - footerindex - 1) * t.srcTfootRowHeight}px`}
 					<!-- ********** TRF ********** -->
 					<div {...t.trfProps}>
 						{#if t.srcRowSelection !== 'none'}
 							<!-- TF selection -->
-							<div {...t.tfSelectionProps} style:bottom style:grid-row-start={rowStart}>
+							<div
+								{...t.tfSelectionProps}
+								style:bottom
+								style:grid-row-start={rowStart}
+							>
 								{@render selectionContent({ type: 'footer' })}
 							</div>
 						{/if}
@@ -142,7 +182,11 @@
 						{/each}
 						{#if t.srcRowAction}
 							<!-- TF action -->
-							<div {...t.tfActionProps} style:bottom style:grid-row-start={rowStart}>
+							<div
+								{...t.tfActionProps}
+								style:bottom
+								style:grid-row-start={rowStart}
+							>
 								{@render actionContent({ type: 'footer' })}
 							</div>
 						{/if}
@@ -154,10 +198,22 @@
 </div>
 
 <!-- ############################################################ SNIPPETS ############################################################ -->
-{#snippet editableInput({ roi, col, coi }: { roi: number; col: Column<TData>; coi: number })}
-	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+{#snippet editableInput({
+	roi,
+	col,
+	coi
+}: {
+	roi: number;
+	col: Column<TData>;
+	coi: number;
+})}
+	<div
+		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
+	>
 		<div style="display: none; align-items: center;">x</div>
-		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;">
+		<div
+			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
+		>
 			<span style="overflow: hidden; width:100%">
 				<input
 					type="text"
@@ -190,7 +246,9 @@
 	coi: number;
 	foot?: Footer<TData>;
 })}
-	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+	<div
+		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
+	>
 		<div style="display: none; align-items: center;">x</div>
 		<div
 			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
@@ -214,7 +272,9 @@
 								: 'flex-start'
 						: 'flex-start'}
 		>
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+			<span
+				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+			>
 				{#if type === 'header' && col.label}
 					{col.label}
 				{:else if type === 'data' && row}
@@ -229,15 +289,34 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 	{#if type === 'header' && col.resizeable}
-		<div {...t.thResizeProps} {@attach t.colResizePointerAttach((e) => t.colResizeUpdate(e, coi, col.field))}></div>
+		<div
+			{...t.thResizeProps}
+			{@attach t.colResizePointerAttach((e) =>
+				t.colResizeUpdate(e, coi, col.field)
+			)}
+		></div>
 	{/if}
 {/snippet}
 
-{#snippet selectionContent({ type, checked, roi }: { type: 'header' | 'footer' | 'data'; checked?: boolean; roi?: number })}
-	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+{#snippet selectionContent({
+	type,
+	checked,
+	roi
+}: {
+	type: 'header' | 'footer' | 'data';
+	checked?: boolean;
+	roi?: number;
+})}
+	<div
+		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
+	>
 		<div style="display: none; align-items: center;">x</div>
-		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+		<div
+			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;"
+		>
+			<span
+				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+			>
 				{#if type === 'header' && t.srcRowSelection === 'multiple-all'}
 					<input
 						aria-label="Select All"
@@ -270,27 +349,52 @@
 	</div>
 {/snippet}
 
-{#snippet actionContent({ type, roi }: { type: 'header' | 'footer' | 'data'; roi?: number })}
-	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
+{#snippet actionContent({
+	type,
+	roi
+}: {
+	type: 'header' | 'footer' | 'data';
+	roi?: number;
+})}
+	<div
+		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
+	>
 		<div style="display: none; align-items: center;">x</div>
-		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
-			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+		<div
+			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;"
+		>
+			<span
+				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+			>
 				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
 					<div class="slc-table-th-action-container" tabindex="-1">
-						<button class="slc-table-th-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
+						<button
+							class="slc-table-th-action-trigger"
+							{@attach t.actionAttach({ type, roi })}
+							type="button"
+							tabindex="-1"
+						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
 						</button>
 						{#if t.actionActiveRowIndex === roi}
-							<div class="slc-table-th-action-popup" transition:fly={{ y: 3, duration: 300 }}>
+							<div
+								class="slc-table-th-action-popup"
+								transition:fly={{ y: 3, duration: 300 }}
+							>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.tableActions as item}
 										<button
 											class="slc-table-th-action-popup-item"
 											data-action={item.action}
 											type="button"
-											onclick={() => t.handleItemClick({ type: 'table', rowIndex: roi, action: item.action })}
+											onclick={() =>
+												t.handleItemClick({
+													type: 'table',
+													rowIndex: roi,
+													action: item.action
+												})}
 											role="menuitem"
 											tabindex="-1"
 										>
@@ -303,20 +407,33 @@
 					</div>
 				{:else if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
 					<div class="slc-table-td-action-container" tabindex="-1">
-						<button class="slc-table-td-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
+						<button
+							class="slc-table-td-action-trigger"
+							{@attach t.actionAttach({ type, roi })}
+							type="button"
+							tabindex="-1"
+						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
 						</button>
 						{#if t.actionActiveRowIndex === roi}
-							<div class="slc-table-td-action-popup" transition:fly={{ y: 5, duration: 300 }}>
+							<div
+								class="slc-table-td-action-popup"
+								transition:fly={{ y: 5, duration: 300 }}
+							>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.rowActions as item}
 										<button
 											class="slc-table-td-action-popup-item"
 											data-action={item.action}
 											type="button"
-											onclick={() => t.handleItemClick({ type: 'row', rowIndex: roi, action: item.action })}
+											onclick={() =>
+												t.handleItemClick({
+													type: 'row',
+													rowIndex: roi,
+													action: item.action
+												})}
 											role="menuitem"
 											tabindex="-1"
 										>
@@ -337,8 +454,9 @@
 {/snippet}
 
 <!-- ############################################################ STYLE ############################################################ -->
-<style lang="postcss">
-	@reference "tailwindcss";
+<!-- <style lang="postcss"> @reference "tailwindcss"; -->
+
+<style>
 	/******************************************************/
 	.slc-table-main {
 		display: flex;
@@ -360,7 +478,7 @@
 		/* content-visibility: auto; */
 		box-sizing: border-box;
 		overflow: auto;
-		overscroll-behavior: none;
+		/* overscroll-behavior: none; */
 		background-color: var(--color-surface-50);
 	}
 	/******************************************************/
