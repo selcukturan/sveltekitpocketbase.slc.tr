@@ -75,14 +75,18 @@ class Table<TData extends Row> {
 				window.addEventListener('focusin', this.handleWindowFocusChange);
 				return () => {
 					window.removeEventListener('click', this.handleWindowOutsideClick);
-					window.removeEventListener('mousedown', this.handleWindowOutsideMousedown);
+					window.removeEventListener(
+						'mousedown',
+						this.handleWindowOutsideMousedown
+					);
 					window.removeEventListener('keydown', this.handleWindowEscPress);
 					window.removeEventListener('focusin', this.handleWindowFocusChange);
 				};
 			}
 
 			if (currentHeaderCheckbox != null) {
-				currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate === true;
+				currentHeaderCheckbox.indeterminate =
+					this.#headerIsIndeterminate === true;
 				return () => {};
 			}
 
@@ -95,7 +99,10 @@ class Table<TData extends Row> {
 	// ################################## END Constructor ##########################################################################################################################
 
 	// ################################## BEGIN Source Setter Method for Global Use. `table.setSource('width','100px')` or `this.setSource('width','100px')` #######################
-	readonly setSource = <K extends keyof RequiredSources<TData>>(key: K, value: RequiredSources<TData>[K]) => {
+	readonly setSource = <K extends keyof RequiredSources<TData>>(
+		key: K,
+		value: RequiredSources<TData>[K]
+	) => {
 		// Önce özel işlemler için kontrolleri yapalım
 		if (key === 'data' || key === 'rowSelection') {
 			this.clearSelectedRows();
@@ -114,17 +121,33 @@ class Table<TData extends Row> {
 	readonly srcData = $derived(this.#src.data || this.#defSrc.data);
 	readonly srcWidth = $derived(this.#src.width || this.#defSrc.width);
 	readonly srcHeight = $derived(this.#src.height || this.#defSrc.height);
-	readonly srcRowSelection = $derived(this.#src.rowSelection || this.#defSrc.rowSelection);
-	readonly srcRowSelectionColumnWidth = $derived(this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth);
+	readonly srcRowSelection = $derived(
+		this.#src.rowSelection || this.#defSrc.rowSelection
+	);
+	readonly srcRowSelectionColumnWidth = $derived(
+		this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth
+	);
 	readonly srcSubtotal = $derived(this.#src.subtotal || this.#defSrc.subtotal);
 	readonly srcActions = $derived(this.#src.actions || this.#defSrc.actions);
-	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
-	readonly srcRowActionColumnWidth = $derived(this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth);
+	readonly srcRowAction = $derived(
+		this.#src.rowAction ?? this.#defSrc.rowAction
+	);
+	readonly srcRowActionColumnWidth = $derived(
+		this.#src.rowActionColumnWidth || this.#defSrc.rowActionColumnWidth
+	);
 	readonly srcZebra = $derived(this.#src.zebra || this.#defSrc.zebra);
-	readonly srcHoverableRows = $derived(this.#src.hoverableRows || this.#defSrc.hoverableRows);
-	readonly srcTheadRowHeight = $derived(this.#src.theadRowHeight || this.#defSrc.theadRowHeight);
-	readonly srcTbodyRowHeight = $derived(this.#src.tbodyRowHeight || this.#defSrc.tbodyRowHeight);
-	readonly srcTfootRowHeight = $derived(this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight);
+	readonly srcHoverableRows = $derived(
+		this.#src.hoverableRows || this.#defSrc.hoverableRows
+	);
+	readonly srcTheadRowHeight = $derived(
+		this.#src.theadRowHeight || this.#defSrc.theadRowHeight
+	);
+	readonly srcTbodyRowHeight = $derived(
+		this.#src.tbodyRowHeight || this.#defSrc.tbodyRowHeight
+	);
+	readonly srcTfootRowHeight = $derived(
+		this.#src.tfootRowHeight || this.#defSrc.tfootRowHeight
+	);
 	readonly srcColumns = $derived(this.#src.columns || this.#defSrc.columns);
 	readonly srcFooters = $derived(this.#src.footers || this.#defSrc.footers);
 	// ################################## END Methods that reactively return sources for global use. #################################################################################
@@ -154,9 +177,18 @@ class Table<TData extends Row> {
 	}
 
 	readonly #gridTemplateRows = $derived.by(() => {
-		const repeatThead = this.headerRowsCountState >= 1 ? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)` : ``;
-		const repeatTbody = this.srcData.length > 0 ? `repeat(${this.srcData.length}, ${this.srcTbodyRowHeight}px)` : ``;
-		const repeatTfoot = this.srcFooters.length > 0 ? `repeat(${this.srcFooters.length}, ${this.srcTfootRowHeight}px)` : ``;
+		const repeatThead =
+			this.headerRowsCountState >= 1
+				? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)`
+				: ``;
+		const repeatTbody =
+			this.srcData.length > 0
+				? `repeat(${this.srcData.length}, ${this.srcTbodyRowHeight}px)`
+				: ``;
+		const repeatTfoot =
+			this.srcFooters.length > 0
+				? `repeat(${this.srcFooters.length}, ${this.srcTfootRowHeight}px)`
+				: ``;
 		return `${repeatThead} ${repeatTbody} ${repeatTfoot}`;
 	});
 
@@ -246,10 +278,16 @@ class Table<TData extends Row> {
 
 		// 3. Mevcut Index Değerleri. Odaklanmış Satır Değişti mi?
 		const currentIndices = this.#rowIndices;
-		const focusedChanged = focusedCellRowIndex !== currentIndices.focusedCellRowIndex;
+		const focusedChanged =
+			focusedCellRowIndex !== currentIndices.focusedCellRowIndex;
 
 		// 4. Erken Çıkış Kontrolü
-		if (currentIndices.scrollTop === scrollTop && currentIndices.clientHeight === clientHeight && !force && !focusedChanged) {
+		if (
+			currentIndices.scrollTop === scrollTop &&
+			currentIndices.clientHeight === clientHeight &&
+			!force &&
+			!focusedChanged
+		) {
 			return;
 		}
 
@@ -265,7 +303,10 @@ class Table<TData extends Row> {
 		// 6. Erken Çıkış Kontrolü (Veri Yok veya Satır Yüksekliği Geçersizse Resetle).
 		if (dataLength === 0 || dataRowHeight <= 0) {
 			// Sadece mevcut state resetlenmemişse resetle.
-			if (this.#rowIndices.visibleStart !== undefined || this.#rowIndices.overscanStart !== undefined) {
+			if (
+				this.#rowIndices.visibleStart !== undefined ||
+				this.#rowIndices.overscanStart !== undefined
+			) {
 				this.#rowIndices = {
 					visibleStart: undefined,
 					visibleEnd: undefined,
@@ -280,14 +321,31 @@ class Table<TData extends Row> {
 		}
 
 		// 7. Yeni Indexleri Hesapla
-		const currentContentHeight = Math.max(0, clientHeight - headerRowsHeight - footerRowsHeight); // Negatif olmamasını sağla
-		const visibleStartIndex = Math.max(0, Math.floor(scrollTop / dataRowHeight));
-		const visibleEndIndex = Math.min(dataLength - 1, Math.floor((scrollTop + currentContentHeight) / dataRowHeight));
-		const overscanStartIndex = Math.max(0, visibleStartIndex - overscanThreshold);
-		const overscanEndIndex = Math.min(dataLength - 1, visibleEndIndex + overscanThreshold);
+		const currentContentHeight = Math.max(
+			0,
+			clientHeight - headerRowsHeight - footerRowsHeight
+		); // Negatif olmamasını sağla
+		const visibleStartIndex = Math.max(
+			0,
+			Math.floor(scrollTop / dataRowHeight)
+		);
+		const visibleEndIndex = Math.min(
+			dataLength - 1,
+			Math.floor((scrollTop + currentContentHeight) / dataRowHeight)
+		);
+		const overscanStartIndex = Math.max(
+			0,
+			visibleStartIndex - overscanThreshold
+		);
+		const overscanEndIndex = Math.min(
+			dataLength - 1,
+			visibleEndIndex + overscanThreshold
+		);
 
 		// 8. Mevcut Overscan Indexler Değişti mi?
-		const indicesChanged = overscanStartIndex !== currentIndices.overscanStart || overscanEndIndex !== currentIndices.overscanEnd;
+		const indicesChanged =
+			overscanStartIndex !== currentIndices.overscanStart ||
+			overscanEndIndex !== currentIndices.overscanEnd;
 
 		// 9. Mevcut Odaklanmış Satır, Yeni Index Aralığında mı?
 		const isFocusedRowAlreadyIncluded =
@@ -296,7 +354,11 @@ class Table<TData extends Row> {
 			currentIndices.focusedCellRowIndex <= overscanEndIndex;
 
 		// 10. State'i Güncelle: Indexler Değiştiyse VEYA Güncelleme Zorlandıysa VEYA Odaklanmış Satır Değiştiyse ve Yeni Aralıkta Değilse
-		if (indicesChanged || force || (focusedChanged && !isFocusedRowAlreadyIncluded)) {
+		if (
+			indicesChanged ||
+			force ||
+			(focusedChanged && !isFocusedRowAlreadyIncluded)
+		) {
 			this.#rowIndices = {
 				visibleStart: visibleStartIndex,
 				visibleEnd: visibleEndIndex,
@@ -321,7 +383,13 @@ class Table<TData extends Row> {
 		const dataLength = rawData.length; // Sadece uzunluk kontrolü için
 
 		// Geçerli indexler yoksa veya data yoksa boş dizi
-		if (startIndex == null || endIndex == null || dataLength === 0 || startIndex > endIndex) return [];
+		if (
+			startIndex == null ||
+			endIndex == null ||
+			dataLength === 0 ||
+			startIndex > endIndex
+		)
+			return [];
 
 		const processedData: Array<{ data: TData; roi: number }> = [];
 
@@ -334,7 +402,8 @@ class Table<TData extends Row> {
 
 		if (focusedCellRowIndex != null && focusedCellRowIndex < dataLength) {
 			// Odaklanmış satır zaten işlenen aralıkta mı?
-			const isFocusedRowAlreadyIncluded = focusedCellRowIndex >= startIndex && focusedCellRowIndex <= endIndex;
+			const isFocusedRowAlreadyIncluded =
+				focusedCellRowIndex >= startIndex && focusedCellRowIndex <= endIndex;
 			if (!isFocusedRowAlreadyIncluded) {
 				// Eğer dahil değilse, odaklanmış satırı al ve ekle
 				const focusedCellRow = rawData[focusedCellRowIndex];
@@ -413,7 +482,10 @@ class Table<TData extends Row> {
 		this.#actionActiveContainerNode = undefined;
 		this.#actionIsOutsideMouseDown = false;
 	};
-	private toggleActionPopup = (roi: number) => (this.#actionActiveRowIndex === roi ? this.hideActionPopup() : this.showActionPopup(roi));
+	private toggleActionPopup = (roi: number) =>
+		this.#actionActiveRowIndex === roi
+			? this.hideActionPopup()
+			: this.showActionPopup(roi);
 
 	readonly handleItemClick = (params: OnActionParams) => {
 		this.hideActionPopup();
@@ -421,7 +493,10 @@ class Table<TData extends Row> {
 		/* alert('Item clicked: ' + params.action); */
 	};
 
-	readonly actionAttach = (params: { roi: number; type: 'header' | 'footer' | 'data' }): Attachment => {
+	readonly actionAttach = (params: {
+		roi: number;
+		type: 'header' | 'footer' | 'data';
+	}): Attachment => {
 		// düğüm DOM'a monte edilmiştir
 		const { roi, type } = params;
 
@@ -431,7 +506,8 @@ class Table<TData extends Row> {
 			const click = (e: Event) => {
 				const target = e.currentTarget as HTMLElement;
 				const parentContainer = target.parentElement;
-				if (!parentContainer || !(parentContainer instanceof HTMLElement)) return;
+				if (!parentContainer || !(parentContainer instanceof HTMLElement))
+					return;
 
 				this.#actionActiveContainerNode = parentContainer;
 
@@ -452,7 +528,10 @@ class Table<TData extends Row> {
 	// `window: Window` Event Listeners
 	private handleWindowFocusChange = (e: FocusEvent) => {
 		const target = e.target as HTMLElement;
-		if (this.#actionActiveRowIndex != null && !this.#actionActiveContainerNode?.contains(target)) {
+		if (
+			this.#actionActiveRowIndex != null &&
+			!this.#actionActiveContainerNode?.contains(target)
+		) {
 			this.hideActionPopup();
 		}
 	};
@@ -463,12 +542,21 @@ class Table<TData extends Row> {
 		}
 	};
 	private handleWindowOutsideMousedown = (e: MouseEvent) => {
-		if (this.#actionActiveRowIndex == null || this.#actionActiveContainerNode == null) return;
+		if (
+			this.#actionActiveRowIndex == null ||
+			this.#actionActiveContainerNode == null
+		)
+			return;
 		const target = e.target as HTMLElement;
-		this.#actionIsOutsideMouseDown = !this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
+		this.#actionIsOutsideMouseDown =
+			!this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
 	};
 	private handleWindowOutsideClick = (e: MouseEvent) => {
-		if (this.#actionIsOutsideMouseDown && this.#actionActiveRowIndex != null && this.#actionActiveContainerNode != null) {
+		if (
+			this.#actionIsOutsideMouseDown &&
+			this.#actionActiveRowIndex != null &&
+			this.#actionActiveContainerNode != null
+		) {
 			this.hideActionPopup();
 		}
 	};
@@ -502,7 +590,10 @@ class Table<TData extends Row> {
 			} else {
 				this.clearSelectedRows();
 			}
-		} else if (this.srcRowSelection === 'multiple-all' || this.srcRowSelection === 'multiple') {
+		} else if (
+			this.srcRowSelection === 'multiple-all' ||
+			this.srcRowSelection === 'multiple'
+		) {
 			// Çoklu seçim için toggle işlemi
 			if (this.#selectedRows.has(rowIndex)) {
 				this.#selectedRows.delete(rowIndex);
@@ -511,10 +602,16 @@ class Table<TData extends Row> {
 			}
 		}
 
-		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < this.countableRowsLength() ? true : false;
+		this.#headerIsIndeterminate =
+			this.#selectedRows.size > 0 &&
+			this.#selectedRows.size < this.countableRowsLength()
+				? true
+				: false;
 
 		await tick();
-		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
+		this.onRowSelectionChangeRun?.({
+			selectedRows: Array.from(this.#selectedRows)
+		});
 	};
 
 	// UYARI: `cancelEditable` kullanılarak eklenen `subtotal`leri de ekler.
@@ -525,7 +622,10 @@ class Table<TData extends Row> {
 		if (select) {
 			// Tüm indeksleri Set'e ekle
 			this.srcData.forEach((row, index) => {
-				if (typeof row.subtotal !== 'string' || !row.subtotal.startsWith('subtotal')) {
+				if (
+					typeof row.subtotal !== 'string' ||
+					!row.subtotal.startsWith('subtotal')
+				) {
 					this.#selectedRows.add(index);
 				}
 			});
@@ -535,10 +635,15 @@ class Table<TData extends Row> {
 		this.#headerIsChecked = select;
 
 		await tick();
-		this.onRowSelectionChangeRun?.({ selectedRows: Array.from(this.#selectedRows) });
+		this.onRowSelectionChangeRun?.({
+			selectedRows: Array.from(this.#selectedRows)
+		});
 	};
 
-	readonly selectAttach = (params: { roi?: number; type: 'header' | 'footer' | 'data' }): Attachment => {
+	readonly selectAttach = (params: {
+		roi?: number;
+		type: 'header' | 'footer' | 'data';
+	}): Attachment => {
 		// düğüm DOM'a monte edilmiştir
 		const { roi, type } = params;
 		return (checkInput) => {
@@ -548,7 +653,8 @@ class Table<TData extends Row> {
 				// e.preventDefault();
 
 				if (type === 'header') {
-					const allSelected = this.#selectedRows.size === this.countableRowsLength();
+					const allSelected =
+						this.#selectedRows.size === this.countableRowsLength();
 					this.toggleAllRows(!allSelected);
 				} else if (roi != null) {
 					this.toggleRowSelection(roi);
@@ -597,7 +703,12 @@ class Table<TData extends Row> {
 			this.#editingCellPath = '';
 		}
 	};
-	private createCellInput = (key: string, rowIndex: number, colIndex: number, field: Field<TData>) => {
+	private createCellInput = (
+		key: string,
+		rowIndex: number,
+		colIndex: number,
+		field: Field<TData>
+	) => {
 		const oldValue = this.srcData[rowIndex][field] as TData[Field<TData>];
 		const oldValueForInput = oldValue != null ? oldValue.toString() : '';
 		this.#editingCellOldValue = oldValueForInput;
@@ -605,17 +716,32 @@ class Table<TData extends Row> {
 		this.#editingCell = true;
 		this.#editingCellPath = `r${rowIndex}c${colIndex}`;
 	};
-	private setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
+	private setCellValue = (
+		newValue: unknown,
+		oldValue: unknown,
+		rowIndex: number,
+		colIndex: number,
+		field: Field<TData>
+	) => {
 		if (newValue === oldValue) return;
 
-		if (this.#src.data && typeof this.#src.data[rowIndex][field] === typeof newValue) {
+		if (
+			this.#src.data &&
+			typeof this.#src.data[rowIndex][field] === typeof newValue
+		) {
 			this.#src.data[rowIndex][field] = newValue as TData[Field<TData>];
 			this.onCellEditRun?.({ newValue, oldValue, rowIndex, colIndex, field });
 		} else {
-			console.error(`Type mismatch: Field ${field} expects ${typeof this.#src.data?.[rowIndex][field]}, but got ${typeof newValue}`);
+			console.error(
+				`Type mismatch: Field ${field} expects ${typeof this.#src.data?.[rowIndex][field]}, but got ${typeof newValue}`
+			);
 		}
 	};
-	readonly editInputAttach = (params: { roi: number; coi: number; col: Column<TData> }): Attachment => {
+	readonly editInputAttach = (params: {
+		roi: number;
+		coi: number;
+		col: Column<TData>;
+	}): Attachment => {
 		// düğüm DOM'a monte edilmiştir
 		const { roi, coi, col } = params;
 		return (input) => {
@@ -667,7 +793,11 @@ class Table<TData extends Row> {
 	#colResizePointerDownWidth = 0;
 	#colResizeIsAllWidth = false;
 
-	private setColumnWidth = (colIndex: number, width: number, field: Field<TData>) => {
+	private setColumnWidth = (
+		colIndex: number,
+		width: number,
+		field: Field<TData>
+	) => {
 		const minWidth = 50;
 		if (width > minWidth) {
 			this.#src.columns[colIndex].width = `${Math.max(minWidth, width)}px`;
@@ -675,14 +805,23 @@ class Table<TData extends Row> {
 		}
 	};
 
-	readonly colResizeUpdate = (event: PointerEvent, coi: number, field: Field<TData>) => {
-		const width = this.#colResizePointerDownWidth + (event.clientX - this.#colResizePointerDownClientX);
+	readonly colResizeUpdate = (
+		event: PointerEvent,
+		coi: number,
+		field: Field<TData>
+	) => {
+		const width =
+			this.#colResizePointerDownWidth +
+			(event.clientX - this.#colResizePointerDownClientX);
 		this.setColumnWidth(coi, width, field);
 
 		if (!this.#colResizeIsAllWidth) {
 			this.srcColumns.forEach((column, index) => {
 				if (index !== coi && column?.width?.startsWith('minmax')) {
-					const width = this.element?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect().width || 100;
+					const width =
+						this.element
+							?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)
+							?.getBoundingClientRect().width || 100;
 					this.setColumnWidth(index, width, field);
 				}
 			});
@@ -690,19 +829,26 @@ class Table<TData extends Row> {
 		}
 	};
 
-	readonly colResizePointerAttach = (callback: (event: PointerEvent) => void): Attachment => {
+	readonly colResizePointerAttach = (
+		callback: (event: PointerEvent) => void
+	): Attachment => {
 		// düğüm DOM'a monte edilmiştir
 		return (node) => {
 			if (!(node instanceof HTMLElement)) return;
 			// kurulum buraya gidiyor
 			const pointerdown = (event: PointerEvent) => {
-				if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
+				if (
+					(event.pointerType === 'mouse' && event.button === 2) ||
+					(event.pointerType !== 'mouse' && !event.isPrimary)
+				)
+					return;
 
 				const parentNode = node.parentNode;
 				if (!parentNode || !(parentNode instanceof HTMLElement)) return;
 
 				this.#colResizePointerDownClientX = event.clientX;
-				this.#colResizePointerDownWidth = parentNode.getBoundingClientRect().width;
+				this.#colResizePointerDownWidth =
+					parentNode.getBoundingClientRect().width;
 
 				node.setPointerCapture(event.pointerId);
 				event.preventDefault();
@@ -719,7 +865,10 @@ class Table<TData extends Row> {
 				window.addEventListener('pointerup', onpointerup, false);
 			};
 
-			node.addEventListener('pointerdown', pointerdown, { capture: true, passive: false });
+			node.addEventListener('pointerdown', pointerdown, {
+				capture: true,
+				passive: false
+			});
 
 			return () => {
 				// söküm buraya gidiyor
@@ -730,28 +879,12 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	/* // argümanlı Attachment
-	readonly myAttach = (data: string): Attachment => {
-		// element DOM'a monte edilmiştir
-		return (element) => {
-			// setup buraya
-			element.addEventListener('scroll', handleScroll);
-			return () => {
-				// destroy buraya
-				element.removeEventListener('scroll', handleScroll);
-			};
-		};
-	}; */
-	/* // argümansız attach
-	readonly myAttach: Attachment = (element) => {
-		// element DOM'a monte edilmiştir
-		// setup buraya
-		return () => {
-			// destroy buraya
-			element.removeEventListener('scroll', handleScroll);
-		};
-	}; */
-	readonly tdFocusAttach = (params: { rowIndex: number; colIndex: number; field?: Field<TData>; cancelEditable?: boolean }): Attachment => {
+	readonly tdFocusAttach = (params: {
+		rowIndex: number;
+		colIndex: number;
+		field?: Field<TData>;
+		cancelEditable?: boolean;
+	}): Attachment => {
 		// düğüm DOM'a monte edilmiştir
 		return (node) => {
 			if (!(node instanceof HTMLDivElement)) return;
@@ -765,14 +898,18 @@ class Table<TData extends Row> {
 					tabIndex: 0
 				};
 
-				if (cellToFocus.originalCell === this.focusedCellState?.originalCell) return;
+				if (cellToFocus.originalCell === this.focusedCellState?.originalCell)
+					return;
 
 				this.#focusedCellState = cellToFocus;
 				this.updateVisibleIndexes();
 				tick().then(() => {
 					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 					node.focus({ preventScroll: true });
-					this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
+					this.onCellFocusChangeRun?.({
+						rowIndex: cellToFocus.rowIndex,
+						colIndex: cellToFocus.colIndex
+					});
 				});
 			};
 
@@ -780,8 +917,10 @@ class Table<TData extends Row> {
 				// e.stopPropagation();
 				// e.preventDefault();
 
-				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
-				if (rowIndex == null || colIndex == null || originalCell == null) return;
+				const { rowIndex, colIndex, originalCell } =
+					this.focusedCellState ?? {};
+				if (rowIndex == null || colIndex == null || originalCell == null)
+					return;
 
 				const column = this.visibleColumns[colIndex];
 				if (this.#editingCell || !column || !column.data.editable) return;
@@ -809,20 +948,41 @@ class Table<TData extends Row> {
 				const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 
 				// --- İzin Verilmeyen Tuşları Filtrele ---
-				const isNavigationKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Tab'].includes(
+				const isNavigationKey = [
+					'ArrowUp',
+					'ArrowDown',
+					'ArrowLeft',
+					'ArrowRight',
+					'Home',
+					'End',
+					'PageUp',
+					'PageDown',
+					'Enter',
+					'Tab'
+				].includes(key);
+				const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(
 					key
-				);
-				const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
-				const isTypable = typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
+				); // Boşluk, F2, Kopyala/Yapıştır, Escape
+				const isTypable =
+					typableNumber.includes(key) ||
+					typableLower.includes(key) ||
+					typableUpper.includes(key) ||
+					typableOther.includes(key);
 
 				// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
 				if (!isNavigationKey && !isActionKey && !isTypable) {
-					if (!((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C' || key === 'v' || key === 'V'))) {
+					if (
+						!(
+							(e.ctrlKey || e.metaKey) &&
+							(key === 'c' || key === 'C' || key === 'v' || key === 'V')
+						)
+					) {
 						return; // İzin verilmeyen tuş
 					}
 				}
 
-				const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+				const { rowIndex, colIndex, originalCell } =
+					this.focusedCellState ?? {};
 				if (rowIndex == null || colIndex == null || originalCell == null) {
 					return; // Odak yoksa (şimdilik) çık
 				}
@@ -836,10 +996,16 @@ class Table<TData extends Row> {
 					(key === 'Escape' && !cancelEditable) ||
 					(key === 'F2' && !cancelEditable) ||
 					(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
-					(key === ' ' && this.srcRowAction && colIndex === this.visibleColumns.length) ||
+					(key === ' ' &&
+						this.srcRowAction &&
+						colIndex === this.visibleColumns.length) ||
 					((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 					((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-					(!e.ctrlKey && !e.metaKey && isTypable && !this.#editingCell && !cancelEditable)
+					(!e.ctrlKey &&
+						!e.metaKey &&
+						isTypable &&
+						!this.#editingCell &&
+						!cancelEditable)
 				) {
 					if (key === 'Escape' && this.#editingCell) {
 						e.preventDefault();
@@ -848,14 +1014,27 @@ class Table<TData extends Row> {
 						node.focus({ preventScroll: true });
 						this.onCellFocusChangeRun?.({ rowIndex, colIndex });
 					} else if (isTypable || key === 'F2') {
-						if (this.#editingCell || field == null || !this.visibleColumns[colIndex].data.editable) return;
+						if (
+							this.#editingCell ||
+							field == null ||
+							!this.visibleColumns[colIndex].data.editable
+						)
+							return;
 						e.preventDefault();
 						this.createCellInput(key, rowIndex, colIndex, field);
 					} else if (key === ' ') {
 						e.preventDefault();
-						if (this.srcRowSelection !== 'none' && colIndex === -1 && !cancelEditable) {
+						if (
+							this.srcRowSelection !== 'none' &&
+							colIndex === -1 &&
+							!cancelEditable
+						) {
 							this.toggleRowSelection(rowIndex);
-						} else if (this.srcRowAction && colIndex === this.visibleColumns.length && !cancelEditable) {
+						} else if (
+							this.srcRowAction &&
+							colIndex === this.visibleColumns.length &&
+							!cancelEditable
+						) {
 							this.toggleActionPopup(rowIndex);
 						} else {
 							// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
@@ -869,51 +1048,82 @@ class Table<TData extends Row> {
 					// e.preventDefault();
 					ticking = true;
 
-					let cellToFocus: Required<FocucedCell> = { rowIndex, colIndex, originalCell, tabIndex: 0 };
+					let cellToFocus: Required<FocucedCell> = {
+						rowIndex,
+						colIndex,
+						originalCell,
+						tabIndex: 0
+					};
 					const initialOriginalCell = cellToFocus.originalCell;
 
 					const rowFirstIndex = 0;
 					const rowLastIndex = this.srcData.length - 1;
 					const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
-					const colLastIndex = this.srcRowAction ? this.visibleColumns.length : this.visibleColumns.length - 1;
+					const colLastIndex = this.srcRowAction
+						? this.visibleColumns.length
+						: this.visibleColumns.length - 1;
 
 					let forceUpdate = false;
 
 					if (key === 'ArrowUp') {
 						e.preventDefault();
-						cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
+						cellToFocus.rowIndex = Math.max(
+							rowFirstIndex,
+							cellToFocus.rowIndex - 1
+						);
 					} else if (key === 'ArrowDown' || key === 'Enter') {
 						e.preventDefault();
-						cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
+						cellToFocus.rowIndex = Math.min(
+							rowLastIndex,
+							cellToFocus.rowIndex + 1
+						);
 					} else if (key === 'ArrowLeft') {
 						if (!this.#editingCell) {
 							e.preventDefault();
 							cellToFocus.colIndex = cellToFocus.colIndex - 1;
-							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex); // LEFT
+							cellToFocus.colIndex = Math.max(
+								colFirstIndex,
+								cellToFocus.colIndex
+							); // LEFT
 						}
 					} else if (e.shiftKey && key === 'Tab') {
 						e.preventDefault();
 						cellToFocus.colIndex = cellToFocus.colIndex - 1;
 						if (cellToFocus.colIndex < colFirstIndex) {
-							cellToFocus.rowIndex = Math.max(rowFirstIndex, cellToFocus.rowIndex - 1);
+							cellToFocus.rowIndex = Math.max(
+								rowFirstIndex,
+								cellToFocus.rowIndex - 1
+							);
 							cellToFocus.colIndex = colLastIndex;
 						} else {
-							cellToFocus.colIndex = Math.max(colFirstIndex, cellToFocus.colIndex); // LEFT
+							cellToFocus.colIndex = Math.max(
+								colFirstIndex,
+								cellToFocus.colIndex
+							); // LEFT
 						}
 					} else if (key === 'ArrowRight') {
 						if (!this.#editingCell) {
 							e.preventDefault();
 							cellToFocus.colIndex = cellToFocus.colIndex + 1;
-							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
+							cellToFocus.colIndex = Math.min(
+								colLastIndex,
+								cellToFocus.colIndex
+							); // RIGHT
 						}
 					} else if (!e.shiftKey && key === 'Tab') {
 						e.preventDefault();
 						cellToFocus.colIndex = cellToFocus.colIndex + 1;
 						if (cellToFocus.colIndex > colLastIndex) {
-							cellToFocus.rowIndex = Math.min(rowLastIndex, cellToFocus.rowIndex + 1);
+							cellToFocus.rowIndex = Math.min(
+								rowLastIndex,
+								cellToFocus.rowIndex + 1
+							);
 							cellToFocus.colIndex = colFirstIndex;
 						} else {
-							cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
+							cellToFocus.colIndex = Math.min(
+								colLastIndex,
+								cellToFocus.colIndex
+							); // RIGHT
 						}
 					} else if (key === 'Home') {
 						if (!this.#editingCell) {
@@ -967,11 +1177,20 @@ class Table<TData extends Row> {
 					this.#focusedCellState = cellToFocus;
 					this.updateVisibleIndexes(forceUpdate);
 					tick().then(() => {
-						const nextFocusedCellNode = this.element?.querySelector<HTMLDivElement>('.slc-table-td-focused');
+						const nextFocusedCellNode =
+							this.element?.querySelector<HTMLDivElement>(
+								'.slc-table-td-focused'
+							);
 						if (nextFocusedCellNode != null) {
-							nextFocusedCellNode.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+							nextFocusedCellNode.scrollIntoView({
+								block: 'nearest',
+								inline: 'nearest'
+							});
 							nextFocusedCellNode.focus({ preventScroll: true });
-							this.onCellFocusChangeRun?.({ rowIndex: cellToFocus.rowIndex, colIndex: cellToFocus.colIndex });
+							this.onCellFocusChangeRun?.({
+								rowIndex: cellToFocus.rowIndex,
+								colIndex: cellToFocus.colIndex
+							});
 						}
 						ticking = false;
 					});
@@ -984,6 +1203,13 @@ class Table<TData extends Row> {
 			node.addEventListener('click', click);
 
 			return () => {
+				/* if (
+					params.cancelEditable &&
+					this.cancelEditableIndex.has(params.rowIndex)
+				) {
+					this.cancelEditableIndex.delete(params.rowIndex);
+				} */
+
 				node.removeEventListener('keydown', keydown);
 				node.removeEventListener('mousedown', mousedown);
 				node.removeEventListener('dblclick', dblclick);
@@ -1020,7 +1246,13 @@ class Table<TData extends Row> {
 	// ################################## END Utils #############################################################################################################################################
 
 	// ################################## BEGIN General Methods #################################################################################################################################
-	readonly getFooter = ({ field, foot }: { field: Field<TData>; foot: Footer<TData> }): number | string => {
+	readonly getFooter = ({
+		field,
+		foot
+	}: {
+		field: Field<TData>;
+		foot: Footer<TData>;
+	}): number | string => {
 		const footer = foot[field]; // sum, avg, count or footer content
 		if (footer == null) return '';
 
@@ -1068,7 +1300,8 @@ class Table<TData extends Row> {
 			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.srcRowAction === false ? 'unset' : `${this.srcRowActionColumnWidth}px`};			
 		`,
 		'aria-colcount': this.visibleColumns.length,
-		'aria-rowcount': this.srcData.length + this.srcFooters.length + this.headerRowsCountState
+		'aria-rowcount':
+			this.srcData.length + this.srcFooters.length + this.headerRowsCountState
 	});
 	trhProps = {
 		role: 'row',

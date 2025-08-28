@@ -367,12 +367,12 @@
 				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
 			>
 				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
-					<div class="slc-table-th-action-container" tabindex="-1">
+					<div class="slc-table-th-action-container">
 						<button
 							class="slc-table-th-action-trigger"
 							{@attach t.actionAttach({ type, roi })}
 							type="button"
-							tabindex="-1"
+							tabindex="0"
 						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
@@ -396,7 +396,7 @@
 													action: item.action
 												})}
 											role="menuitem"
-											tabindex="-1"
+											tabindex="0"
 										>
 											<span>{item.label + ' - ' + roi}</span>
 										</button>
@@ -406,12 +406,12 @@
 						{/if}
 					</div>
 				{:else if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
-					<div class="slc-table-td-action-container" tabindex="-1">
+					<div class="slc-table-td-action-container">
 						<button
 							class="slc-table-td-action-trigger"
 							{@attach t.actionAttach({ type, roi })}
 							type="button"
-							tabindex="-1"
+							tabindex="0"
 						>
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
@@ -435,7 +435,7 @@
 													action: item.action
 												})}
 											role="menuitem"
-											tabindex="-1"
+											tabindex="0"
 										>
 											<span>{item.label + ' - ' + roi}</span>
 										</button>

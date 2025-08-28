@@ -1,0 +1,37 @@
+[
+	{
+		"id": 1,
+		"name": "Ali Veli",
+		"email": "ali.veli@example.com",
+		"age": 28,
+		"city": "Istanbul"
+	},
+	{
+		"id": 2,
+		"name": "Ayşe Yılmaz",
+		"email": "ayse.yilmaz@example.com",
+		"age": 34,
+		"city": "Ankara"
+	},
+	{
+		"id": 3,
+		"name": "Mehmet Demir",
+		"email": "mehmet.demir@example.com",
+		"age": 41,
+		"city": "Izmir"
+	},
+	{
+		"id": 4,
+		"name": "Fatma Kaya",
+		"email": "fatma.kaya@example.com",
+		"age": 25,
+		"city": "Bursa"
+	},
+	{
+		"id": 5,
+		"name": "Can Öz",
+		"email": "can.oz@example.com",
+		"age": 30,
+		"city": "Antalya"
+	}
+]
