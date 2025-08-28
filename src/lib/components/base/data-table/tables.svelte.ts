@@ -527,38 +527,38 @@ class Table<TData extends Row> {
 
 	// `window: Window` Event Listeners
 	private handleWindowFocusChange = (e: FocusEvent) => {
-		const target = e.target as HTMLElement;
+		/* const target = e.target as HTMLElement;
 		if (
 			this.#actionActiveRowIndex != null &&
 			!this.#actionActiveContainerNode?.contains(target)
 		) {
 			this.hideActionPopup();
-		}
+		} */
 	};
 	private handleWindowEscPress = (e: KeyboardEvent) => {
-		if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
+		/* if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
 			e.preventDefault();
 			this.hideActionPopup();
-		}
+		} */
 	};
 	private handleWindowOutsideMousedown = (e: MouseEvent) => {
-		if (
+		/* if (
 			this.#actionActiveRowIndex == null ||
 			this.#actionActiveContainerNode == null
 		)
 			return;
 		const target = e.target as HTMLElement;
 		this.#actionIsOutsideMouseDown =
-			!this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
+			!this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur */
 	};
 	private handleWindowOutsideClick = (e: MouseEvent) => {
-		if (
+		/* if (
 			this.#actionIsOutsideMouseDown &&
 			this.#actionActiveRowIndex != null &&
 			this.#actionActiveContainerNode != null
 		) {
 			this.hideActionPopup();
-		}
+		} */
 	};
 	// ################################## END Row Action Methods #####################################################################################################################
 
