@@ -482,9 +482,17 @@
 		/* content-visibility: auto; */
 		box-sizing: border-box;
 		overflow: auto;
-		/* overscroll-behavior: none; */
+		overscroll-behavior: none;
 		background-color: var(--color-surface-50);
 	}
+	/* .slc-table:focus-within {
+		outline: 2px solid var(--color-error-400);
+		outline-offset: -2px;
+	}
+	.slc-table:focus {
+		outline: 2px solid var(--color-success-400);
+		outline-offset: -2px;
+	} */
 	/******************************************************/
 	.slc-table-trh {
 		outline: none;

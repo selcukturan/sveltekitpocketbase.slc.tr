@@ -428,7 +428,7 @@ class Table<TData extends Row> {
 			this.cachedClientHeight = Math.round(tableNode.clientHeight);
 			this.cachedScrollTop = Math.round(tableNode.scrollTop);
 
-			const handleScroll = () => {
+			const scroll = () => {
 				if (!ticking) {
 					const newScrollTop = Math.round(tableNode.scrollTop);
 					const cachedScrollTop = this.cachedScrollTop ?? 0;
@@ -449,11 +449,18 @@ class Table<TData extends Row> {
 				}
 			};
 
-			tableNode.addEventListener('scroll', handleScroll, { passive: true });
+			// mouse ile sürükleyerek scroll yapıldığında veya scrollbara bir şekilde tıklandığında, hücre focus'unun kaybolmaması için. Bu tablonun focus olmasını engeller.
+			const mousedown = (e: Event) => {
+				e.preventDefault();
+			};
+
+			tableNode.addEventListener('scroll', scroll, { passive: true });
+			tableNode.addEventListener('mousedown', mousedown);
 
 			return () => {
 				// Tablo DOM'dan kaldırıldı
-				tableNode.removeEventListener('scroll', handleScroll);
+				tableNode.removeEventListener('scroll', scroll);
+				tableNode.removeEventListener('mousedown', mousedown);
 			};
 		};
 	};
