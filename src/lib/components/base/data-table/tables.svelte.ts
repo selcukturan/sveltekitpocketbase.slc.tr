@@ -475,6 +475,9 @@ class Table<TData extends Row> {
 	private hideActionPopup = () => {
 		if (this.#actionActiveRowIndex == null) return;
 		this.#actionActiveRowIndex = undefined;
+		this.element
+			?.querySelector<HTMLDivElement>('.slc-table-td-focused')
+			?.focus();
 		// flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
 		this.#actionActiveContainerNode = undefined;
 		this.#actionIsOutsideMouseDown = false;
@@ -487,10 +490,6 @@ class Table<TData extends Row> {
 	readonly actionSelect = (params: OnActionParams) => {
 		this.hideActionPopup();
 		this.actionTrigger(params);
-		this.element
-			?.querySelector<HTMLDivElement>('.slc-table-td-focused')
-			?.focus();
-		/* alert('Item clicked: ' + params.action); */
 	};
 
 	readonly actionAttach = (params: {
@@ -510,25 +509,18 @@ class Table<TData extends Row> {
 				const parentContainer = target.parentElement;
 				if (!parentContainer || !(parentContainer instanceof HTMLElement))
 					return;
-				console.log(parentContainer);
+
 				this.#actionActiveContainerNode = parentContainer;
 
 				if (type === 'header' || type === 'data') {
 					this.toggleActionPopup(roi);
 				}
 			};
-			const mousedown = (e: Event) => {
-				// e.preventDefault();
-				e.stopPropagation();
-			};
 
 			buttonNode.addEventListener('click', click);
-			buttonNode.addEventListener('mousedown', mousedown);
 
 			return () => {
-				// söküm buraya gidiyor
 				buttonNode.removeEventListener('click', click);
-				buttonNode.removeEventListener('mousedown', mousedown);
 			};
 		};
 	};
@@ -622,11 +614,6 @@ class Table<TData extends Row> {
 					case 'Tab':
 					case 'Escape': {
 						this.toggleActionPopup(roi);
-
-						this.element
-							?.querySelector<HTMLDivElement>('.slc-table-td-focused')
-							?.focus();
-
 						break;
 					}
 
@@ -636,11 +623,9 @@ class Table<TData extends Row> {
 				}
 			};
 
-			console.log("node.addEventListener('keydown', keydown);");
 			node.addEventListener('keydown', keydown);
 
 			return () => {
-				console.log("node.removeEventListener('keydown', keydown);");
 				node.removeEventListener('keydown', keydown);
 			};
 		};
