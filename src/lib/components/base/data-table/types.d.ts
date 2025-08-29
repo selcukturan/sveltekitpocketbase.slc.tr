@@ -5,7 +5,10 @@ export type Row = Record<RowKey, RowValue>;
 export type Field<TData> = Extract<keyof TData, RowKey>;
 
 // 100px | minmax(100px,1.25fr) | minmax(1fr,1.25fr)
-export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(${number}fr,${number}fr)`;
+export type Width =
+	| `${number}px`
+	| `minmax(${number}px,${number}fr)`
+	| `minmax(${number}fr,${number}fr)`;
 
 export type Column<TData> = {
 	field: Field<TData>; // required
@@ -53,10 +56,23 @@ export type FocucedCell = {
 };
 
 // Events Types
-export type OnCellFocusChange = (params: { rowIndex: number; colIndex: number }) => void;
+export type OnCellFocusChange = (params: {
+	rowIndex: number;
+	colIndex: number;
+}) => void;
 export type OnRowSelectionChange = (params: { selectedRows: number[] }) => void;
-export type OnCellEdit = (params: { newValue: unknown; oldValue: unknown; rowIndex: number; colIndex: number; field: Field<TData> }) => void;
-export type OnColumnResize = (params: { colIndex: number; width: number; field: Field<TData> }) => void;
+export type OnCellEdit = (params: {
+	newValue: unknown;
+	oldValue: unknown;
+	rowIndex: number;
+	colIndex: number;
+	field: Field<TData>;
+}) => void;
+export type OnColumnResize = (params: {
+	colIndex: number;
+	width: number;
+	field: Field<TData>;
+}) => void;
 export type OnVirtualDataChange = (params: {
 	visibleStart?: number;
 	visibleEnd?: number;
@@ -66,6 +82,10 @@ export type OnVirtualDataChange = (params: {
 	clientHeight?: number;
 	focusedCellRowIndex?: number;
 }) => void;
-export type OnActionParams = { type: 'row' | 'table'; rowIndex?: number; action: string };
+export type OnActionParams = {
+	type: 'data' | 'header' | 'footer';
+	rowIndex: number;
+	action: string;
+};
 export type OnRowAction = (params: OnActionParams) => void;
 export type OnTableAction = (params: OnActionParams) => void;

@@ -35,7 +35,7 @@
 	let value2 = $state(''); // Başlangıçta seçili olan değer
 	let value3 = $state(['tangerine', 'onange', 'kiwi']); // Başlangıçta seçili olan değer
 
-	let valueDisabled = $state(''); // Başlangıçta seçili olan değer
+	let valueDisabled = $state('mango'); // Başlangıçta seçili olan değer
 	let valueReadonly = $state(''); // Başlangıçta seçili olan değer
 </script>
 

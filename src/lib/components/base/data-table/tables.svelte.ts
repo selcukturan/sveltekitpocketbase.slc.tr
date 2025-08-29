@@ -17,7 +17,7 @@ import type {
 } from './types';
 import { getContext, setContext } from 'svelte';
 import { tick, flushSync } from 'svelte';
-import { SvelteSet } from 'svelte/reactivity';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { Attachment } from 'svelte/attachments';
 
 class Table<TData extends Row> {
@@ -71,16 +71,13 @@ class Table<TData extends Row> {
 			if (currentActionActiveRowIndex != null) {
 				window.addEventListener('click', this.handleWindowOutsideClick);
 				window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
-				window.addEventListener('keydown', this.handleWindowEscPress);
-				window.addEventListener('focusin', this.handleWindowFocusChange);
+
 				return () => {
 					window.removeEventListener('click', this.handleWindowOutsideClick);
 					window.removeEventListener(
 						'mousedown',
 						this.handleWindowOutsideMousedown
 					);
-					window.removeEventListener('keydown', this.handleWindowEscPress);
-					window.removeEventListener('focusin', this.handleWindowFocusChange);
 				};
 			}
 
@@ -238,9 +235,9 @@ class Table<TData extends Row> {
 	// ################################## END Events #######################################################################################################################################
 
 	readonly actionTrigger = (params: OnActionParams) => {
-		if (params.type === 'row') {
+		if (params.type === 'data') {
 			this.onRowActionRun?.(params);
-		} else if (params.type === 'table') {
+		} else if (params.type === 'header') {
 			this.onTableActionRun?.(params);
 		}
 	};
@@ -473,12 +470,12 @@ class Table<TData extends Row> {
 	private showActionPopup = (roi: number) => {
 		if (this.#actionActiveRowIndex === roi) return;
 		this.#actionActiveRowIndex = roi;
-		flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
+		// flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
 	};
 	private hideActionPopup = () => {
 		if (this.#actionActiveRowIndex == null) return;
 		this.#actionActiveRowIndex = undefined;
-		flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
+		// flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
 		this.#actionActiveContainerNode = undefined;
 		this.#actionIsOutsideMouseDown = false;
 	};
@@ -487,9 +484,12 @@ class Table<TData extends Row> {
 			? this.hideActionPopup()
 			: this.showActionPopup(roi);
 
-	readonly handleItemClick = (params: OnActionParams) => {
+	readonly actionSelect = (params: OnActionParams) => {
 		this.hideActionPopup();
 		this.actionTrigger(params);
+		this.element
+			?.querySelector<HTMLDivElement>('.slc-table-td-focused')
+			?.focus();
 		/* alert('Item clicked: ' + params.action); */
 	};
 
@@ -510,7 +510,7 @@ class Table<TData extends Row> {
 				const parentContainer = target.parentElement;
 				if (!parentContainer || !(parentContainer instanceof HTMLElement))
 					return;
-
+				console.log(parentContainer);
 				this.#actionActiveContainerNode = parentContainer;
 
 				if (type === 'header' || type === 'data') {
@@ -533,28 +533,142 @@ class Table<TData extends Row> {
 		};
 	};
 
+	readonly actionPopupAttach = (params: {
+		roi: number;
+		type: 'header' | 'footer' | 'data';
+	}): Attachment => {
+		// düğüm DOM'a monte edilmiştir
+		const { roi, type } = params;
+
+		return (node) => {
+			if (!(node instanceof HTMLDivElement)) return;
+
+			node.focus({ preventScroll: true });
+
+			let nextIndex = 0;
+
+			const itemClassName =
+				type === 'header'
+					? 'slc-table-th-action-popup'
+					: 'slc-table-td-action-popup';
+
+			const selectedItem = this.element?.querySelector<HTMLElement>(
+				`.${itemClassName}-item[data-index="${nextIndex}"]`
+			);
+			let action = selectedItem?.dataset.action;
+
+			const length =
+				type === 'data' && this.srcActions.rowActions
+					? this.srcActions.rowActions.length
+					: type === 'header' && this.srcActions.tableActions
+						? this.srcActions.tableActions.length
+						: 0;
+
+			this.element
+				?.querySelector<HTMLElement>(
+					`.${itemClassName}-item[data-index="${nextIndex}"]`
+				)
+				?.classList.add(`${itemClassName}-item-nav`);
+
+			const keydown = (e: KeyboardEvent) => {
+				e.preventDefault();
+				e.stopPropagation();
+
+				// 2. Navigasyon ve Seçim Mantığı
+				switch (e.code) {
+					case 'ArrowUp':
+					case 'ArrowDown':
+					case 'Home':
+					case 'End': {
+						if (e.code === 'ArrowUp') {
+							nextIndex = (nextIndex - 1 + length) % length;
+						} else if (e.code === 'ArrowDown') {
+							nextIndex = (nextIndex + 1) % length;
+						} else if (e.code === 'Home') {
+							nextIndex = 0;
+						} else if (e.code === 'End') {
+							nextIndex = length - 1;
+						}
+
+						if (nextIndex >= 0 && nextIndex < length) {
+							this.element
+								?.querySelectorAll<HTMLElement>(`.${itemClassName}-item`)
+								.forEach((item) =>
+									item.classList.remove(`${itemClassName}-item-nav`)
+								);
+
+							const selectedItem = this.element?.querySelector<HTMLElement>(
+								`.${itemClassName}-item[data-index="${nextIndex}"]`
+							);
+							action = selectedItem?.dataset.action;
+							selectedItem?.classList.add(`${itemClassName}-item-nav`);
+						}
+						break;
+					}
+
+					case 'Enter':
+					case 'Space': {
+						if (action == null) return;
+
+						this.actionSelect({
+							type,
+							rowIndex: roi,
+							action
+						});
+
+						break;
+					}
+
+					case 'Tab':
+					case 'Escape': {
+						this.toggleActionPopup(roi);
+
+						this.element
+							?.querySelector<HTMLDivElement>('.slc-table-td-focused')
+							?.focus();
+
+						break;
+					}
+
+					// Diğer tuşlar için bir şey yapma
+					default:
+						return;
+				}
+			};
+
+			console.log("node.addEventListener('keydown', keydown);");
+			node.addEventListener('keydown', keydown);
+
+			return () => {
+				console.log("node.removeEventListener('keydown', keydown);");
+				node.removeEventListener('keydown', keydown);
+			};
+		};
+	};
+
+	readonly actionPopupItemAttach = (params: OnActionParams): Attachment => {
+		return (buttonNode) => {
+			if (!(buttonNode instanceof HTMLButtonElement)) return;
+			const click = () => {
+				this.actionSelect({ ...params });
+			};
+
+			buttonNode.addEventListener('click', click);
+
+			return () => {
+				buttonNode.removeEventListener('click', click);
+			};
+		};
+	};
+
 	// `window: Window` Event Listeners
-	private handleWindowFocusChange = (e: FocusEvent) => {
-		/* const target = e.target as HTMLElement;
-		if (
-			this.#actionActiveRowIndex != null &&
-			!this.#actionActiveContainerNode?.contains(target)
-		) {
-			this.hideActionPopup();
-		} */
-	};
-	private handleWindowEscPress = (e: KeyboardEvent) => {
-		if (this.#actionActiveRowIndex != null && e.code === 'Escape') {
-			e.preventDefault();
-			this.hideActionPopup();
-		}
-	};
 	private handleWindowOutsideMousedown = (e: MouseEvent) => {
 		if (
 			this.#actionActiveRowIndex == null ||
 			this.#actionActiveContainerNode == null
-		)
+		) {
 			return;
+		}
 
 		const target = e.target as HTMLElement;
 		this.#actionIsOutsideMouseDown =
@@ -695,6 +809,9 @@ class Table<TData extends Row> {
 	// ################################## END Row Selection Methods ########################################################################################################################
 
 	// ################################## BEGIN Cell Edit ##################################################################################################################################
+	/**
+	 * edit input var mı?
+	 */
 	#editingCell: boolean = $state(false);
 	editingCellInput: HTMLInputElement | undefined = $state(undefined);
 	editingCellValue: unknown = $state('');
@@ -898,7 +1015,6 @@ class Table<TData extends Row> {
 		return (node) => {
 			if (!(node instanceof HTMLDivElement)) return;
 
-			// kurulum buraya gidiyor
 			const mousedown = (e: Event) => {
 				const cellToFocus: Required<FocucedCell> = {
 					rowIndex: params.rowIndex,
@@ -1004,10 +1120,7 @@ class Table<TData extends Row> {
 				if (
 					(key === 'Escape' && !cancelEditable) ||
 					(key === 'F2' && !cancelEditable) ||
-					(key === ' ' && this.srcRowSelection !== 'none' && colIndex === -1) ||
-					(key === ' ' &&
-						this.srcRowAction &&
-						colIndex === this.visibleColumns.length) ||
+					key === ' ' ||
 					((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
 					((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
 					(!e.ctrlKey &&
@@ -1032,7 +1145,10 @@ class Table<TData extends Row> {
 						e.preventDefault();
 						this.createCellInput(key, rowIndex, colIndex, field);
 					} else if (key === ' ') {
-						e.preventDefault();
+						// hücre düzenleniyorsa boşluk engellenmesin
+						if (!this.#editingCell) {
+							e.preventDefault();
+						}
 						if (
 							this.srcRowSelection !== 'none' &&
 							colIndex === -1 &&
@@ -1300,6 +1416,7 @@ class Table<TData extends Row> {
 	tableProps = $derived({
 		role: 'grid',
 		class: 'slc-table',
+		tabindex: -1,
 		style: `
 			grid-template-rows: ${this.#gridTemplateRows};
 			grid-template-columns: ${this.#gridTemplateColumns};

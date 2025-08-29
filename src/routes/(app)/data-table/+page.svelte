@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
+	import {
+		DataTable,
+		createTable,
+		type Sources
+	} from '$lib/components/base/data-table';
 	import { generateProducedData } from '$lib/client/demo/produced-grapes-generate-data';
 
 	import type { ProducedGrapes } from '$lib/client/demo/produced-grapes-schema';
@@ -27,17 +31,83 @@
 			]
 		},
 		columns: [
-			{ field: 'subtotal', label: 'Sub Total', width: 'minmax(75px,1fr)', hidden: true },
-			{ field: 'order', label: 'Order', width: 'minmax(75px,1fr)', hidden: false, resizeable: true },
-			{ field: 'producer', label: 'Producer (editable)', width: 'minmax(75px,1fr)', editable: true, hidden: false, resizeable: true },
-			{ field: 'province', label: 'Province (editable)', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
-			{ field: 'district', label: 'District', width: 'minmax(75px,1fr)', resizeable: true, hidden: true },
-			{ field: 'village', label: 'Village (editable)', width: 'minmax(75px,1fr)', editable: true, resizeable: true },
-			{ field: 'grape', label: 'Grape', width: 'minmax(75px,1fr)', resizeable: true },
-			{ field: 'grapeColor', label: 'Grape Color', width: 'minmax(75px,1fr)', hidden: false, resizeable: true },
-			{ field: 'quantity', label: 'Quantity', align: 'right', width: 'minmax(75px,1fr)', editable: false, resizeable: true },
-			{ field: 'price', label: 'Price', align: 'right', width: 'minmax(75px,1fr)', resizeable: true },
-			{ field: 'amount', label: 'Amount', align: 'right', width: 'minmax(75px,1fr)', resizeable: true }
+			{
+				field: 'subtotal',
+				label: 'Sub Total',
+				width: 'minmax(75px,1fr)',
+				hidden: true
+			},
+			{
+				field: 'order',
+				label: 'Order',
+				width: 'minmax(75px,1fr)',
+				hidden: false,
+				resizeable: true
+			},
+			{
+				field: 'producer',
+				label: 'Producer (editable)',
+				width: 'minmax(75px,1fr)',
+				editable: true,
+				hidden: false,
+				resizeable: true
+			},
+			{
+				field: 'province',
+				label: 'Province (editable)',
+				width: 'minmax(75px,1fr)',
+				editable: true,
+				resizeable: true
+			},
+			{
+				field: 'district',
+				label: 'District',
+				width: 'minmax(75px,1fr)',
+				resizeable: true,
+				hidden: true
+			},
+			{
+				field: 'village',
+				label: 'Village (editable)',
+				width: 'minmax(75px,1fr)',
+				editable: true,
+				resizeable: true
+			},
+			{
+				field: 'grape',
+				label: 'Grape',
+				width: 'minmax(75px,1fr)',
+				resizeable: true
+			},
+			{
+				field: 'grapeColor',
+				label: 'Grape Color',
+				width: 'minmax(75px,1fr)',
+				hidden: false,
+				resizeable: true
+			},
+			{
+				field: 'quantity',
+				label: 'Quantity',
+				align: 'right',
+				width: 'minmax(75px,1fr)',
+				editable: false,
+				resizeable: true
+			},
+			{
+				field: 'price',
+				label: 'Price',
+				align: 'right',
+				width: 'minmax(75px,1fr)',
+				resizeable: true
+			},
+			{
+				field: 'amount',
+				label: 'Amount',
+				align: 'right',
+				width: 'minmax(75px,1fr)',
+				resizeable: true
+			}
 		],
 		footers: [{ order: 'any footer' }, { quantity: 'maybe sum' }]
 	};
@@ -63,31 +133,31 @@
 		console.log('onTableAction', data);
 		switch (data.action) {
 			case 'add':
-				alert('Add new row');
+				console.log('Add new row');
 				break;
 			case 'delete_all':
-				alert('Delete selected rows');
+				console.log('Delete selected rows');
 				break;
 			case 'excel':
-				alert('Export to Excel');
+				console.log('Export to Excel');
 				break;
 			default:
-				alert('Unknown table action: ' + data.action);
+				console.error('Unknown table action: ' + data.action);
 		}
 	});
 	table.onRowAction((data) => {
 		switch (data.action) {
 			case 'edit':
-				alert('Edit rowIndex: ' + data.rowIndex);
+				console.log('Edit rowIndex: ' + data.rowIndex);
 				break;
 			case 'delete':
-				alert('Delete rowIndex: ' + data.rowIndex);
+				console.log('Delete rowIndex: ' + data.rowIndex);
 				break;
 			case 'detail':
-				alert('Detail rowIndex: ' + data.rowIndex);
+				console.log('Detail rowIndex: ' + data.rowIndex);
 				break;
 			default:
-				alert('Unknown table action: ' + data.action);
+				console.error('Unknown table action: ' + data.action);
 		}
 	});
 

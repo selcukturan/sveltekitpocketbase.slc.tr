@@ -378,23 +378,25 @@
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
 						</button>
+						<!-- transition:fly={{ y: 3, duration: 300 }} -->
 						{#if t.actionActiveRowIndex === roi}
 							<div
 								class="slc-table-th-action-popup"
-								transition:fly={{ y: 3, duration: 300 }}
+								tabindex="-1"
+								{@attach t.actionPopupAttach({ type, roi })}
 							>
 								<div style:display="grid" role="menu">
-									{#each t.srcActions.tableActions as item}
+									{#each t.srcActions.tableActions as item, i (i)}
 										<button
 											class="slc-table-th-action-popup-item"
 											data-action={item.action}
+											data-index={i}
 											type="button"
-											onclick={() =>
-												t.handleItemClick({
-													type: 'table',
-													rowIndex: roi,
-													action: item.action
-												})}
+											{@attach t.actionPopupItemAttach({
+												type,
+												rowIndex: roi,
+												action: item.action
+											})}
 											role="menuitem"
 											tabindex="-1"
 										>
@@ -417,23 +419,25 @@
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
 						</button>
+						<!-- transition:fly={{ y: 5, duration: 300 }} -->
 						{#if t.actionActiveRowIndex === roi}
 							<div
 								class="slc-table-td-action-popup"
-								transition:fly={{ y: 5, duration: 300 }}
+								tabindex="-1"
+								{@attach t.actionPopupAttach({ type, roi })}
 							>
 								<div style:display="grid" role="menu">
-									{#each t.srcActions.rowActions as item}
+									{#each t.srcActions.rowActions as item, i (i)}
 										<button
 											class="slc-table-td-action-popup-item"
 											data-action={item.action}
+											data-index={i}
 											type="button"
-											onclick={() =>
-												t.handleItemClick({
-													type: 'row',
-													rowIndex: roi,
-													action: item.action
-												})}
+											{@attach t.actionPopupItemAttach({
+												type,
+												rowIndex: roi,
+												action: item.action
+											})}
 											role="menuitem"
 											tabindex="-1"
 										>
@@ -666,6 +670,11 @@
 	/* .slc-table-th-action-popup-item[data-action='delete_all'] {
 		background-color: var(--color-secondary-100);
 	} */
+	.slc-table-th-action-popup-item-nav,
+	.slc-table-td-action-popup-item-nav {
+		outline: 2px solid var(--color-error-500);
+		outline-offset: -3px;
+	}
 	.slc-table-th-action-popup-item:hover,
 	.slc-table-td-action-popup-item:hover {
 		background-color: var(--color-surface-100);
