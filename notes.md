@@ -37,7 +37,7 @@ npm run pb:typegen
 migrate collections komutu, manuel olarak yazmanıza gerek kalmadan mevcut collections yapılandırmanızın tam bir anlık görüntüsünü oluşturur. migrate create komutuna benzer şekilde, bu pb_migrations dizininde yeni bir geçiş dosyası oluşturacaktır.
 
 ```bash
-./pocketbase migrate collections
+./pb/pocketbase migrate collections
 ```
 
 Varsayılan olarak collections anlık görüntüsü genişletme modunda içe aktarılır, yani anlık görüntüde bulunmayan koleksiyonlar ve alanlar korunur. Anlık görüntünün eksik koleksiyonları ve alanları silmesini istiyorsanız, oluşturulan dosyayı düzenleyebilir ve importCollections öğesinin son bağımsız değişkenini true olarak değiştirebilirsiniz.

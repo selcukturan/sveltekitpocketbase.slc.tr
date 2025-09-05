@@ -6,7 +6,7 @@ import { city } from '@/server/db/schemas/'; */
 
 export const load: PageServerLoad = async ({ locals }) => {
 	/* const cityx = await db.select().from(city); */
-	const userID = locals.auth.user?.id || '';
+	
 	const userRole = locals.auth.user?.role || '';
 	const acl_roles_perms_menu = await locals.auth.pb.collection('acl_roles_perms_menu').getFullList({
 		expand: `perm,role,perm.parent_id`,
