@@ -1,6 +1,7 @@
 import type {
 	SysMenusResponse,
-	SysMenuItemsResponse
+	SysMenuItemsResponse,
+	AclRolesMenusViewResponse
 } from './pocketbase-types';
 
 /**
@@ -19,7 +20,14 @@ type AclRolesType =
 	| ':superadmin:'
 	| ':system:';
 
-type SysMenuItems_available_permissions = [
+type Menu_available_permissions = [
+	':list:',
+	':view:',
+	':create:',
+	':update:',
+	':delete:'
+];
+type Menu_valid_permissions = [
 	':list:',
 	':view:',
 	':create:',
@@ -27,12 +35,13 @@ type SysMenuItems_available_permissions = [
 	':delete:'
 ];
 type SysMenusExpand = {
-	sys_menu_item: SysMenuItemsResponse<
-		SysMenuItems_available_permissions,
-		unknown
-	>;
+	sys_menu_item: SysMenuItemsResponse<Menu_available_permissions, unknown>;
 };
 
-export type MenuNode = SysMenusResponse<SysMenusExpand> & {
+export type MenuNode = AclRolesMenusViewResponse<
+	Menu_available_permissions,
+	Menu_valid_permissions,
+	SysMenusExpand
+> & {
 	sub: MenuNode[];
 };

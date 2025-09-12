@@ -11,32 +11,32 @@
 	// console.log(data.treeMenu);
 	// console.log(data.treeMenuUser);
 	// console.log('data.treeMenuUserView', data.treeMenuUserView);
-	console.log('xxxx', data.xxxx);
+	console.log('xxxx', data.treeMenu);
 	function buildTreeMenu(flatRecord: MenuNode[]): MenuNode[] {
 		// Tüm elemanları ID'leri ile eşleyerek hızlı erişim için bir Map oluştur.
 		const map = new Map<string, MenuNode>();
 
 		flatRecord.forEach((item) => {
 			// if (item.status !== 'active') return; // Sadece aktif olanları işle
-			map.set(item.id, { ...item, sub: [] }); // Her eleman için sub dizisi hazırla
+			map.set(item.id_sys_menus, { ...item, sub: [] }); // Her eleman için sub dizisi hazırla
 		});
 
 		const tree: MenuNode[] = [];
 
 		flatRecord.forEach((item) => {
 			// Eğer elemanın bir ebeveyni (parent) varsa, onu bul ve altına Map referansını ekle
-			if (item.parent_id) {
-				const parentNodeMapReference = map.get(item.parent_id); // 1. Ebeveyn (parent) objesinin referansını Map'ten al
+			if (item.id_sys_menus_parent) {
+				const parentNodeMapReference = map.get(item.id_sys_menus_parent); // 1. Ebeveyn (parent) objesinin referansını Map'ten al
 				if (!parentNodeMapReference) return; // bu iterasyonu atla (sonraki elemana geç)
 
-				const childNodeMapReference = map.get(item.id); // 2. Mevcut child (çocuk) objesinin referansını Map'ten al
+				const childNodeMapReference = map.get(item.id_sys_menus); // 2. Mevcut child (çocuk) objesinin referansını Map'ten al
 				if (!childNodeMapReference) return; // bu iterasyonu atla (sonraki elemana geç)
 
 				parentNodeMapReference.sub.push(childNodeMapReference); // 3. Child (çocuk) objesinin referansını, ebeveyn (parent) objesi referansının 'sub' dizisine ekle
 			}
 			// Eğer ebeveyni yoksa, bu bir kök elemandır. Doğrudan tree'ye push() ile Map referansını ekle
 			else {
-				const rootNodeMapReference = map.get(item.id);
+				const rootNodeMapReference = map.get(item.id_sys_menus);
 				if (!rootNodeMapReference) return; // bu iterasyonu atla (sonraki elemana geç)
 
 				tree.push(rootNodeMapReference); // objelerinin referanslarını kopyaladığı anlamına gelir. Artık tree ve map, aynı bellek adresindeki objelere işaret ediyorlar.
@@ -125,22 +125,21 @@
 			<ul>
 				{#each resultsForSearch as item}
 					{@const title = item.title ?? 'CAPTION'}
-					{@const url = item.expand.sys_menu_item?.url ?? '#'}
+					{@const url = item.url ?? '#'}
 					<li>
 						{title} - <a href={url}>{item.id}</a>
 						{#if item.sub.length > 0}
 							<ul>
 								{#each item.sub as subItem}
 									{@const subTitle = subItem.title ?? 'CAPTION'}
-									{@const url = subItem.expand.sys_menu_item?.url ?? '#'}
+									{@const url = subItem.url ?? '#'}
 									<li>
 										{subTitle} - <a href={url}>{subItem.id}</a>
 										{#if subItem.sub.length > 0}
 											<ul>
 												{#each subItem.sub as subSubItem}
 													{@const subSubTitle = subSubItem.title ?? 'CAPTION'}
-													{@const url =
-														subSubItem.expand.sys_menu_item?.url ?? '#'}
+													{@const url = subSubItem.url ?? '#'}
 													<li>
 														{subSubTitle} - <a href={url}>{subSubItem.id}</a>
 													</li>

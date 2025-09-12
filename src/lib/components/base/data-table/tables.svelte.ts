@@ -16,8 +16,8 @@ import type {
 	OnActionParams
 } from './types';
 import { getContext, setContext } from 'svelte';
-import { tick, flushSync } from 'svelte';
-import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+import { tick } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 import type { Attachment } from 'svelte/attachments';
 
 class Table<TData extends Row> {
@@ -44,7 +44,7 @@ class Table<TData extends Row> {
 	// ################################## END Default Sources #######################################################################################################################
 
 	// ################################## BEGIN Constructor #########################################################################################################################
-	version = 'v0.0.1-alpha.165';
+	version = 'v0.0.1-alpha.166';
 	element?: HTMLDivElement = $state();
 	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
@@ -477,15 +477,18 @@ class Table<TData extends Row> {
 	private showActionPopup = (roi: number) => {
 		if (this.#actionActiveRowIndex === roi) return;
 		this.#actionActiveRowIndex = roi;
-		// flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
 	};
 	private hideActionPopup = () => {
 		if (this.#actionActiveRowIndex == null) return;
+
+		// -1 ise header action kapatılıyor demektir, o zaman focus verme
+		if (this.#actionActiveRowIndex !== -1) {
+			this.element
+				?.querySelector<HTMLDivElement>('.slc-table-td-focused')
+				?.focus();
+		}
+
 		this.#actionActiveRowIndex = undefined;
-		this.element
-			?.querySelector<HTMLDivElement>('.slc-table-td-focused')
-			?.focus();
-		// flushSync(); // this.#actionActiveRowIndex değiştikten sonra $effect içindeki değişikliklerin hemen işlenmesi için flushSync kullanılır
 		this.#actionActiveContainerNode = undefined;
 		this.#actionIsOutsideMouseDown = false;
 	};
