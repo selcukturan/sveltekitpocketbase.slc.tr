@@ -585,8 +585,8 @@ migrate((app) => {
         "body": "<p>Hello,</p>\n<p>Click on the button below to confirm your new email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-email-change/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Confirm new email</a>\n</p>\n<p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>",
         "subject": "Confirm your {APP_NAME} new email address"
       },
-      "createRule": null,
-      "deleteRule": "id = @request.auth.id",
+      "createRule": "id = @request.auth.id && \n(\n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "id = @request.auth.id && \n(\n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "emailChangeToken": {
         "duration": 1800
       },
@@ -776,7 +776,7 @@ migrate((app) => {
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `sys_users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `sys_users` (`email`) WHERE `email` != ''"
       ],
-      "listRule": "id = @request.auth.id",
+      "listRule": "id = @request.auth.id && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "manageRule": null,
       "mfa": {
         "duration": 1800,
@@ -817,7 +817,7 @@ migrate((app) => {
       },
       "system": false,
       "type": "auth",
-      "updateRule": "id = @request.auth.id",
+      "updateRule": "id = @request.auth.id && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "verificationTemplate": {
         "body": "<p>Hello,</p>\n<p>Thank you for joining us at {APP_NAME}.</p>\n<p>Click on the button below to verify your email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-verification/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Verify</a>\n</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>",
         "subject": "Verify your {APP_NAME} email"
@@ -825,11 +825,11 @@ migrate((app) => {
       "verificationToken": {
         "duration": 259200
       },
-      "viewRule": "id = @request.auth.id"
+      "viewRule": "id = @request.auth.id && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -997,16 +997,16 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_S44QVXTTm2` ON `sys_companys` (\n  `value`,\n  `parent_id`\n)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "sys_companys",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1125,16 +1125,16 @@ migrate((app) => {
       ],
       "id": "pbc_498656437",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "sys_menus",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1267,16 +1267,16 @@ migrate((app) => {
       ],
       "id": "pbc_2916609340",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "app_regions",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1350,16 +1350,16 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_XFLHYkuFco` ON `sys_settings` (`key`)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "sys_settings",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n( \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "",
@@ -1458,16 +1458,16 @@ migrate((app) => {
       ],
       "id": "pbc_1452049888",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_roles",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1558,16 +1558,16 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_uxk7CFqwIW` ON `acl_roles_companys` (\n  `role`,\n  `perm`\n)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_roles_companys",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1658,16 +1658,16 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_nirVC1ythv` ON `acl_roles_menus` (\n  `role`,\n  `menu`\n)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_roles_menus",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1758,12 +1758,12 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_ochBwESb2f` ON `acl_roles_app_regions` (\n  `role`,\n  `perm`\n)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_roles_app_regions",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
       "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
@@ -1848,16 +1848,16 @@ migrate((app) => {
       ],
       "id": "pbc_3052387301",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "sys_logs",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
-      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -2016,16 +2016,16 @@ migrate((app) => {
       ],
       "id": "pbc_869937432",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "test_form",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -2146,12 +2146,12 @@ migrate((app) => {
       "indexes": [
         "CREATE UNIQUE INDEX `idx_SP4enV2nD0` ON `sys_menu_items` (`url`)"
       ],
-      "listRule": "@request.auth.id != \"\"",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "sys_menu_items",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
       "createRule": null,
@@ -2185,7 +2185,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_3641971933",
           "hidden": false,
-          "id": "_clone_GwgO",
+          "id": "_clone_d1z3",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "parent_id",
@@ -2196,7 +2196,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_LNbC",
+          "id": "_clone_DLVY",
           "max": 9999,
           "min": 1,
           "name": "sorder",
@@ -2208,7 +2208,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_gX6d",
+          "id": "_clone_naF5",
           "maxSelect": 1,
           "name": "type",
           "presentable": false,
@@ -2223,7 +2223,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_09XS",
+          "id": "_clone_96GV",
           "max": 9999,
           "min": 1000,
           "name": "value",
@@ -2236,7 +2236,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_hZuq",
+          "id": "_clone_dKFu",
           "max": 0,
           "min": 0,
           "name": "title",
@@ -2250,7 +2250,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_jr31",
+          "id": "_clone_IGAI",
           "max": 0,
           "min": 0,
           "name": "caption",
@@ -2264,13 +2264,13 @@ migrate((app) => {
       ],
       "id": "pbc_33793606622",
       "indexes": [],
-      "listRule": null,
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_companys_view",
       "system": false,
       "type": "view",
       "updateRule": null,
       "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  IIF(parent_id = \"\", id, parent_id) AS effective_parent_id,\n  parent_id,\n  sorder,\n  type,\n  value,\n  title,\n  caption\nFROM\n  sys_companys\nWHERE\n  status=\"active\"\nORDER BY \n  sorder, type, value ASC",
-      "viewRule": null
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
       "createRule": null,
@@ -2306,7 +2306,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_N5KC",
+          "id": "_clone_xvmE",
           "max": 0,
           "min": 0,
           "name": "region",
@@ -2333,7 +2333,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_m7Vb",
+          "id": "_clone_hNjz",
           "max": 0,
           "min": 0,
           "name": "province",
@@ -2360,7 +2360,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_6hiY",
+          "id": "_clone_4O4Y",
           "max": 0,
           "min": 0,
           "name": "district",
@@ -2387,7 +2387,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_tN83",
+          "id": "_clone_ou0T",
           "max": 0,
           "min": 0,
           "name": "village",
@@ -2414,7 +2414,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_G4Wu",
+          "id": "_clone_rmJM",
           "max": 0,
           "min": 0,
           "name": "location",
@@ -2428,13 +2428,13 @@ migrate((app) => {
       ],
       "id": "pbc_3379360662",
       "indexes": [],
-      "listRule": null,
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "name": "acl_app_regions_view",
       "system": false,
       "type": "view",
       "updateRule": null,
       "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  t5.id AS region_id, t5.caption AS region,\n  t4.id AS province_id, t4.caption AS province,\n  t3.id AS district_id, t3.caption AS district,\n  t2.id AS village_id, t2.caption AS village,\n  t1.id AS location_id, t1.caption AS location\nFROM app_regions t1\n  JOIN app_regions t2 ON t1.parent_id = t2.id AND t2.status=\"active\"\n  JOIN app_regions t3 ON t2.parent_id = t3.id AND t3.status=\"active\"\n  JOIN app_regions t4 ON t3.parent_id = t4.id AND t4.status=\"active\"\n  JOIN app_regions t5 ON t4.parent_id = t5.id AND t5.status=\"active\"\nWHERE\n  t1.status=\"active\"",
-      "viewRule": null
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
       "createRule": null,
@@ -2456,7 +2456,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_B6IK",
+          "id": "_clone_oyAI",
           "maxSize": 0,
           "name": "valid_permissions",
           "presentable": false,
@@ -2481,7 +2481,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_368526849",
           "hidden": false,
-          "id": "_clone_7t8p",
+          "id": "_clone_iivf",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "id_sys_menu_item",
@@ -2494,7 +2494,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_498656437",
           "hidden": false,
-          "id": "_clone_9E7g",
+          "id": "_clone_8NFW",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "id_sys_menus_parent",
@@ -2505,7 +2505,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_zsps",
+          "id": "_clone_ausp",
           "max": 9999,
           "min": 1,
           "name": "sorder",
@@ -2518,7 +2518,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_Ex1W",
+          "id": "_clone_KDIb",
           "max": 0,
           "min": 0,
           "name": "title",
@@ -2532,7 +2532,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_VeJy",
+          "id": "_clone_6u1D",
           "max": 0,
           "min": 0,
           "name": "caption",
@@ -2558,7 +2558,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_TTHj",
+          "id": "_clone_B8sY",
           "maxSize": 0,
           "name": "available_permissions",
           "presentable": false,
@@ -2569,7 +2569,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_gEWF",
+          "id": "_clone_6wQP",
           "max": 0,
           "min": 0,
           "name": "url",
@@ -2582,7 +2582,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_bcLR",
+          "id": "_clone_uRrg",
           "maxSelect": 1,
           "name": "status_acl_roles_menu",
           "presentable": false,
@@ -2596,7 +2596,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_eqU8",
+          "id": "_clone_dGDb",
           "maxSelect": 1,
           "name": "status_sys_menus",
           "presentable": false,
@@ -2610,7 +2610,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_44EX",
+          "id": "_clone_Rzxg",
           "maxSelect": 1,
           "name": "status_acl_roles",
           "presentable": false,
@@ -2624,7 +2624,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_dQxm",
+          "id": "_clone_l6Lq",
           "maxSelect": 1,
           "name": "status_sys_menu_items",
           "presentable": false,

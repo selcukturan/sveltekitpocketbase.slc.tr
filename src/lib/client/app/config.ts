@@ -3,16 +3,10 @@
 // kritik güvenlik ayarları burada tutulmaz.
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.1.0-alpha.170',
+	version: 'v0.1.0-alpha.172',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`,
 	defaultLanguage: 'tr',
 	supportedLanguages: ['tr', 'en']
 } as const; // `as const` eklemek, objenin değerlerini readonly ve türlerini daha spesifik yapar.
 
 export type AppConfigType = typeof config;
-
-// ["authorized"]
-
-// ["list", "view", "create", "update", "delete"]
-
-// ["list"]
