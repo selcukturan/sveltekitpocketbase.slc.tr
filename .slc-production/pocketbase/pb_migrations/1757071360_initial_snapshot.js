@@ -732,6 +732,40 @@ migrate((app) => {
           "presentable": false,
           "system": false,
           "type": "autodate"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1579384326",
+          "max": 255,
+          "min": 0,
+          "name": "name",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "file376926767",
+          "maxSelect": 1,
+          "maxSize": 0,
+          "mimeTypes": [
+            "image/jpeg",
+            "image/png",
+            "image/svg+xml",
+            "image/gif",
+            "image/webp"
+          ],
+          "name": "avatar",
+          "presentable": false,
+          "protected": false,
+          "required": false,
+          "system": false,
+          "thumbs": null,
+          "type": "file"
         }
       ],
       "fileToken": {
@@ -739,8 +773,8 @@ migrate((app) => {
       },
       "id": "_pb_users_auth_",
       "indexes": [
-        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
-        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `sys_users` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `sys_users` (`email`) WHERE `email` != ''"
       ],
       "listRule": "id = @request.auth.id",
       "manageRule": null,
@@ -749,7 +783,7 @@ migrate((app) => {
         "enabled": false,
         "rule": ""
       },
-      "name": "users",
+      "name": "sys_users",
       "oauth2": {
         "enabled": false,
         "mappedFields": {
@@ -825,20 +859,6 @@ migrate((app) => {
           "type": "relation"
         },
         {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text4113142680",
-          "max": 0,
-          "min": 0,
-          "name": "sorder",
-          "pattern": "^\\d{3}(\\.\\d{3}){0,8}$",
-          "presentable": false,
-          "primaryKey": false,
-          "required": true,
-          "system": false,
-          "type": "text"
-        },
-        {
           "hidden": false,
           "id": "select2363381545",
           "maxSelect": 1,
@@ -855,9 +875,21 @@ migrate((app) => {
         },
         {
           "hidden": false,
+          "id": "number260029001",
+          "max": 9999,
+          "min": 1,
+          "name": "sorder",
+          "onlyInt": true,
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
           "id": "number494360628",
-          "max": 2100,
-          "min": 1900,
+          "max": 9999,
+          "min": 1000,
           "name": "value",
           "onlyInt": true,
           "presentable": false,
@@ -963,10 +995,10 @@ migrate((app) => {
       ],
       "id": "pbc_3641971933",
       "indexes": [
-        "CREATE UNIQUE INDEX `idx_S44QVXTTm2` ON `acl_perms_company` (\n  `value`,\n  `parent_id`\n)"
+        "CREATE UNIQUE INDEX `idx_S44QVXTTm2` ON `sys_companys` (\n  `value`,\n  `parent_id`\n)"
       ],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_perms_company",
+      "name": "sys_companys",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
@@ -1004,47 +1036,29 @@ migrate((app) => {
           "type": "relation"
         },
         {
-          "autogeneratePattern": "",
+          "cascadeDelete": true,
+          "collectionId": "pbc_368526849",
           "hidden": false,
-          "id": "text4113142680",
-          "max": 0,
-          "min": 0,
-          "name": "sorder",
-          "pattern": "^\\d{3}(\\.\\d{3}){0,8}$",
-          "presentable": false,
-          "primaryKey": false,
-          "required": true,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "hidden": false,
-          "id": "select2363381545",
+          "id": "relation348295111",
           "maxSelect": 1,
-          "name": "type",
+          "minSelect": 0,
+          "name": "sys_menu_item",
           "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "select",
-          "values": [
-            "app_sidebar_item",
-            "page_sidebar_title",
-            "page_sidebar_item"
-          ]
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text4101391790",
-          "max": 0,
-          "min": 0,
-          "name": "url",
-          "pattern": "^/[-a-zA-Z0-9/]*$",
-          "presentable": false,
-          "primaryKey": false,
           "required": true,
           "system": false,
-          "type": "text"
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "number260029001",
+          "max": 9999,
+          "min": 1,
+          "name": "sorder",
+          "onlyInt": true,
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "number"
         },
         {
           "autogeneratePattern": "",
@@ -1076,16 +1090,6 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "json1940732548",
-          "maxSize": 0,
-          "name": "available_permissions",
-          "presentable": false,
-          "required": true,
-          "system": false,
-          "type": "json"
-        },
-        {
-          "hidden": false,
           "id": "select2063623452",
           "maxSelect": 1,
           "name": "status",
@@ -1097,20 +1101,6 @@ migrate((app) => {
             "active",
             "passive"
           ]
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text3485334036",
-          "max": 0,
-          "min": 0,
-          "name": "note",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
         },
         {
           "hidden": false,
@@ -1134,11 +1124,9 @@ migrate((app) => {
         }
       ],
       "id": "pbc_498656437",
-      "indexes": [
-        "CREATE UNIQUE INDEX `idx_qOUjQfT2p0` ON `acl_perms_menu` (`url`)"
-      ],
+      "indexes": [],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_perms_menu",
+      "name": "sys_menus",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
@@ -1176,18 +1164,16 @@ migrate((app) => {
           "type": "relation"
         },
         {
-          "autogeneratePattern": "",
           "hidden": false,
-          "id": "text4113142680",
-          "max": 0,
-          "min": 0,
+          "id": "number260029001",
+          "max": 9999,
+          "min": 1,
           "name": "sorder",
-          "pattern": "^\\d{3}(\\.\\d{3}){0,8}$",
+          "onlyInt": true,
           "presentable": false,
-          "primaryKey": false,
           "required": true,
           "system": false,
-          "type": "text"
+          "type": "number"
         },
         {
           "hidden": false,
@@ -1282,15 +1268,15 @@ migrate((app) => {
       "id": "pbc_2916609340",
       "indexes": [],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_perms_region",
+      "name": "app_regions",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
       "viewRule": "@request.auth.id != \"\""
     },
     {
-      "createRule": null,
-      "deleteRule": null,
+      "createRule": "@request.auth.id != \"\"",
+      "deleteRule": "@request.auth.id != \"\"",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1361,26 +1347,28 @@ migrate((app) => {
         }
       ],
       "id": "pbc_1811418561",
-      "indexes": [],
-      "listRule": null,
-      "name": "acl_perms_system",
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_XFLHYkuFco` ON `sys_settings` (`key`)"
+      ],
+      "listRule": "@request.auth.id != \"\"",
+      "name": "sys_settings",
       "system": false,
       "type": "base",
-      "updateRule": null,
-      "viewRule": null
+      "updateRule": "@request.auth.id != \"\"",
+      "viewRule": "@request.auth.id != \"\""
     },
     {
       "createRule": "@request.auth.id != \"\"",
       "deleteRule": "@request.auth.id != \"\"",
       "fields": [
         {
-          "autogeneratePattern": "[a-z0-9]{15}",
+          "autogeneratePattern": "",
           "hidden": false,
           "id": "text3208210256",
-          "max": 15,
-          "min": 15,
+          "max": 56,
+          "min": 6,
           "name": "id",
-          "pattern": "^[a-z0-9]+$",
+          "pattern": "^(:demo:|:user:|:superuser:|:admin:|:superadmin:|:system:)[a-z0-9-]+$",
           "presentable": false,
           "primaryKey": true,
           "required": true,
@@ -1397,10 +1385,12 @@ migrate((app) => {
           "system": false,
           "type": "select",
           "values": [
-            "user",
-            "admin",
             "demo",
-            "developer"
+            "user",
+            "superuser",
+            "admin",
+            "superadmin",
+            "system"
           ]
         },
         {
@@ -1410,6 +1400,20 @@ migrate((app) => {
           "max": 255,
           "min": 3,
           "name": "title",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text4135340389",
+          "max": 255,
+          "min": 3,
+          "name": "caption",
           "pattern": "",
           "presentable": false,
           "primaryKey": false,
@@ -1552,10 +1556,10 @@ migrate((app) => {
       ],
       "id": "pbc_4171238976",
       "indexes": [
-        "CREATE UNIQUE INDEX `idx_uxk7CFqwIW` ON `acl_roles_perms_company` (\n  `role`,\n  `perm`\n)"
+        "CREATE UNIQUE INDEX `idx_uxk7CFqwIW` ON `acl_roles_companys` (\n  `role`,\n  `perm`\n)"
       ],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_roles_perms_company",
+      "name": "acl_roles_companys",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
@@ -1599,7 +1603,7 @@ migrate((app) => {
           "id": "relation711815386",
           "maxSelect": 1,
           "minSelect": 0,
-          "name": "perm",
+          "name": "menu",
           "presentable": false,
           "required": true,
           "system": false,
@@ -1652,10 +1656,10 @@ migrate((app) => {
       ],
       "id": "pbc_10054391592",
       "indexes": [
-        "CREATE UNIQUE INDEX `idx_nirVC1ythv` ON `acl_roles_perms_menu` (\n  `role`,\n  `perm`\n)"
+        "CREATE UNIQUE INDEX `idx_nirVC1ythv` ON `acl_roles_menus` (\n  `role`,\n  `menu`\n)"
       ],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_roles_perms_menu",
+      "name": "acl_roles_menus",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
@@ -1752,95 +1756,18 @@ migrate((app) => {
       ],
       "id": "pbc_2906244360",
       "indexes": [
-        "CREATE UNIQUE INDEX `idx_ochBwESb2f` ON `acl_roles_perms_region` (\n  `role`,\n  `perm`\n)"
+        "CREATE UNIQUE INDEX `idx_ochBwESb2f` ON `acl_roles_app_regions` (\n  `role`,\n  `perm`\n)"
       ],
       "listRule": "@request.auth.id != \"\"",
-      "name": "acl_roles_perms_region",
+      "name": "acl_roles_app_regions",
       "system": false,
       "type": "base",
       "updateRule": "@request.auth.id != \"\"",
       "viewRule": "@request.auth.id != \"\""
     },
     {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
-      "fields": [
-        {
-          "autogeneratePattern": "[a-z0-9]{15}",
-          "hidden": false,
-          "id": "text3208210256",
-          "max": 15,
-          "min": 15,
-          "name": "id",
-          "pattern": "^[a-z0-9]+$",
-          "presentable": false,
-          "primaryKey": true,
-          "required": true,
-          "system": true,
-          "type": "text"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text724990059",
-          "max": 0,
-          "min": 0,
-          "name": "title",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "hidden": false,
-          "id": "select3632233996",
-          "maxSelect": 3,
-          "name": "test",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "select",
-          "values": [
-            "1x001xl1v1c1u1d0",
-            "1x002xl1v1c1u1d0",
-            "1x003xl1v1c1u1d0"
-          ]
-        },
-        {
-          "hidden": false,
-          "id": "autodate2990389176",
-          "name": "created",
-          "onCreate": true,
-          "onUpdate": false,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        },
-        {
-          "hidden": false,
-          "id": "autodate3332085495",
-          "name": "updated",
-          "onCreate": true,
-          "onUpdate": true,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        }
-      ],
-      "id": "pbc_299578993",
-      "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
-      "name": "app_grapes",
-      "system": false,
-      "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
-    },
-    {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1921,237 +1848,12 @@ migrate((app) => {
       ],
       "id": "pbc_3052387301",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
-      "name": "app_logs",
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "name": "sys_logs",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
-    },
-    {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
-      "fields": [
-        {
-          "autogeneratePattern": "[a-z0-9]{15}",
-          "hidden": false,
-          "id": "text3208210256",
-          "max": 15,
-          "min": 15,
-          "name": "id",
-          "pattern": "^[a-z0-9]+$",
-          "presentable": false,
-          "primaryKey": true,
-          "required": true,
-          "system": true,
-          "type": "text"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text724990059",
-          "max": 0,
-          "min": 0,
-          "name": "title",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "hidden": false,
-          "id": "autodate2990389176",
-          "name": "created",
-          "onCreate": true,
-          "onUpdate": false,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        },
-        {
-          "hidden": false,
-          "id": "autodate3332085495",
-          "name": "updated",
-          "onCreate": true,
-          "onUpdate": true,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        }
-      ],
-      "id": "pbc_3575048635",
-      "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
-      "name": "app_producers",
-      "system": false,
-      "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
-    },
-    {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
-      "fields": [
-        {
-          "autogeneratePattern": "[a-z0-9]{15}",
-          "hidden": false,
-          "id": "text3208210256",
-          "max": 15,
-          "min": 15,
-          "name": "id",
-          "pattern": "^[a-z0-9]+$",
-          "presentable": false,
-          "primaryKey": true,
-          "required": true,
-          "system": true,
-          "type": "text"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text724990059",
-          "max": 0,
-          "min": 0,
-          "name": "title",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "hidden": false,
-          "id": "autodate2990389176",
-          "name": "created",
-          "onCreate": true,
-          "onUpdate": false,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        },
-        {
-          "hidden": false,
-          "id": "autodate3332085495",
-          "name": "updated",
-          "onCreate": true,
-          "onUpdate": true,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        }
-      ],
-      "id": "pbc_3946717155",
-      "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
-      "name": "app_regions",
-      "system": false,
-      "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
-    },
-    {
-      "createRule": "@request.auth.id != \"\"",
-      "deleteRule": "@request.auth.id != \"\"",
-      "fields": [
-        {
-          "autogeneratePattern": "[a-z0-9]{15}",
-          "hidden": false,
-          "id": "text3208210256",
-          "max": 15,
-          "min": 15,
-          "name": "id",
-          "pattern": "^[a-z0-9]+$",
-          "presentable": false,
-          "primaryKey": true,
-          "required": true,
-          "system": true,
-          "type": "text"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text724990059",
-          "max": 0,
-          "min": 0,
-          "name": "title",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "cascadeDelete": false,
-          "collectionId": "pbc_3575048635",
-          "hidden": false,
-          "id": "relation2310428926",
-          "maxSelect": 1,
-          "minSelect": 0,
-          "name": "producer_id",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "relation"
-        },
-        {
-          "cascadeDelete": false,
-          "collectionId": "pbc_3946717155",
-          "hidden": false,
-          "id": "relation2552627541",
-          "maxSelect": 1,
-          "minSelect": 0,
-          "name": "region_id",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "relation"
-        },
-        {
-          "cascadeDelete": false,
-          "collectionId": "pbc_299578993",
-          "hidden": false,
-          "id": "relation1803129066",
-          "maxSelect": 1,
-          "minSelect": 0,
-          "name": "grape_id",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "relation"
-        },
-        {
-          "hidden": false,
-          "id": "autodate2990389176",
-          "name": "created",
-          "onCreate": true,
-          "onUpdate": false,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        },
-        {
-          "hidden": false,
-          "id": "autodate3332085495",
-          "name": "updated",
-          "onCreate": true,
-          "onUpdate": true,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        }
-      ],
-      "id": "pbc_1653305621",
-      "indexes": [],
-      "listRule": "@request.auth.id != \"\"",
-      "name": "app_vineyards",
-      "system": false,
-      "type": "base",
-      "updateRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\""
+      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     },
     {
       "createRule": "@request.auth.id != \"\"",
@@ -2322,6 +2024,136 @@ migrate((app) => {
       "viewRule": "@request.auth.id != \"\""
     },
     {
+      "createRule": "@request.auth.id != \"\"",
+      "deleteRule": "@request.auth.id != \"\"",
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text4101391790",
+          "max": 0,
+          "min": 0,
+          "name": "url",
+          "pattern": "^(/[a-zA-Z0-9/-]*|#)$",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text724990059",
+          "max": 0,
+          "min": 0,
+          "name": "title",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text4135340389",
+          "max": 0,
+          "min": 0,
+          "name": "caption",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "json1940732548",
+          "maxSize": 0,
+          "name": "available_permissions",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "select2063623452",
+          "maxSelect": 1,
+          "name": "status",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "select",
+          "values": [
+            "active",
+            "passive"
+          ]
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text3485334036",
+          "max": 0,
+          "min": 0,
+          "name": "note",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_368526849",
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_SP4enV2nD0` ON `sys_menu_items` (`url`)"
+      ],
+      "listRule": "@request.auth.id != \"\"",
+      "name": "sys_menu_items",
+      "system": false,
+      "type": "base",
+      "updateRule": "@request.auth.id != \"\"",
+      "viewRule": "@request.auth.id != \"\""
+    },
+    {
       "createRule": null,
       "deleteRule": null,
       "fields": [
@@ -2353,7 +2185,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_3641971933",
           "hidden": false,
-          "id": "_clone_jfrw",
+          "id": "_clone_GwgO",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "parent_id",
@@ -2363,22 +2195,20 @@ migrate((app) => {
           "type": "relation"
         },
         {
-          "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_gS1x",
-          "max": 0,
-          "min": 0,
+          "id": "_clone_LNbC",
+          "max": 9999,
+          "min": 1,
           "name": "sorder",
-          "pattern": "^\\d{3}(\\.\\d{3}){0,8}$",
+          "onlyInt": true,
           "presentable": false,
-          "primaryKey": false,
           "required": true,
           "system": false,
-          "type": "text"
+          "type": "number"
         },
         {
           "hidden": false,
-          "id": "_clone_YfPP",
+          "id": "_clone_gX6d",
           "maxSelect": 1,
           "name": "type",
           "presentable": false,
@@ -2393,9 +2223,9 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_ibQq",
-          "max": 2100,
-          "min": 1900,
+          "id": "_clone_09XS",
+          "max": 9999,
+          "min": 1000,
           "name": "value",
           "onlyInt": true,
           "presentable": false,
@@ -2406,7 +2236,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_u7ql",
+          "id": "_clone_hZuq",
           "max": 0,
           "min": 0,
           "name": "title",
@@ -2420,7 +2250,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_FmXD",
+          "id": "_clone_jr31",
           "max": 0,
           "min": 0,
           "name": "caption",
@@ -2435,11 +2265,11 @@ migrate((app) => {
       "id": "pbc_33793606622",
       "indexes": [],
       "listRule": null,
-      "name": "acl_perms_company_view",
+      "name": "acl_companys_view",
       "system": false,
       "type": "view",
       "updateRule": null,
-      "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  IIF(parent_id = \"\", id, parent_id) AS effective_parent_id,\n  parent_id,\n  sorder,\n  type,\n  value,\n  title,\n  caption\nFROM\n  acl_perms_company\nWHERE\n  status=\"active\"\nORDER BY \n  sorder, type, value ASC",
+      "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  IIF(parent_id = \"\", id, parent_id) AS effective_parent_id,\n  parent_id,\n  sorder,\n  type,\n  value,\n  title,\n  caption\nFROM\n  sys_companys\nWHERE\n  status=\"active\"\nORDER BY \n  sorder, type, value ASC",
       "viewRule": null
     },
     {
@@ -2476,7 +2306,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_mNa3",
+          "id": "_clone_N5KC",
           "max": 0,
           "min": 0,
           "name": "region",
@@ -2503,7 +2333,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_ZM2k",
+          "id": "_clone_m7Vb",
           "max": 0,
           "min": 0,
           "name": "province",
@@ -2530,7 +2360,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_vGKX",
+          "id": "_clone_6hiY",
           "max": 0,
           "min": 0,
           "name": "district",
@@ -2557,7 +2387,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_NPfy",
+          "id": "_clone_tN83",
           "max": 0,
           "min": 0,
           "name": "village",
@@ -2584,7 +2414,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_f0lT",
+          "id": "_clone_G4Wu",
           "max": 0,
           "min": 0,
           "name": "location",
@@ -2599,16 +2429,227 @@ migrate((app) => {
       "id": "pbc_3379360662",
       "indexes": [],
       "listRule": null,
-      "name": "acl_perms_region_view",
+      "name": "acl_app_regions_view",
       "system": false,
       "type": "view",
       "updateRule": null,
-      "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  t5.id AS region_id, t5.caption AS region,\n  t4.id AS province_id, t4.caption AS province,\n  t3.id AS district_id, t3.caption AS district,\n  t2.id AS village_id, t2.caption AS village,\n  t1.id AS location_id, t1.caption AS location\nFROM acl_perms_region t1\n  JOIN acl_perms_region t2 ON t1.parent_id = t2.id AND t2.status=\"active\"\n  JOIN acl_perms_region t3 ON t2.parent_id = t3.id AND t3.status=\"active\"\n  JOIN acl_perms_region t4 ON t3.parent_id = t4.id AND t4.status=\"active\"\n  JOIN acl_perms_region t5 ON t4.parent_id = t5.id AND t5.status=\"active\"\nWHERE\n  t1.status=\"active\"",
+      "viewQuery": "SELECT\n  (ROW_NUMBER() OVER()) as id,\n  t5.id AS region_id, t5.caption AS region,\n  t4.id AS province_id, t4.caption AS province,\n  t3.id AS district_id, t3.caption AS district,\n  t2.id AS village_id, t2.caption AS village,\n  t1.id AS location_id, t1.caption AS location\nFROM app_regions t1\n  JOIN app_regions t2 ON t1.parent_id = t2.id AND t2.status=\"active\"\n  JOIN app_regions t3 ON t2.parent_id = t3.id AND t3.status=\"active\"\n  JOIN app_regions t4 ON t3.parent_id = t4.id AND t4.status=\"active\"\n  JOIN app_regions t5 ON t4.parent_id = t5.id AND t5.status=\"active\"\nWHERE\n  t1.status=\"active\"",
       "viewRule": null
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 0,
+          "min": 0,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "_clone_B6IK",
+          "maxSize": 0,
+          "name": "valid_permissions",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "pbc_498656437",
+          "hidden": false,
+          "id": "relation2281853540",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "id_sys_menus",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "pbc_368526849",
+          "hidden": false,
+          "id": "_clone_7t8p",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "id_sys_menu_item",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "pbc_498656437",
+          "hidden": false,
+          "id": "_clone_9E7g",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "id_sys_menus_parent",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "_clone_zsps",
+          "max": 9999,
+          "min": 1,
+          "name": "sorder",
+          "onlyInt": true,
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "_clone_Ex1W",
+          "max": 0,
+          "min": 0,
+          "name": "title",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "_clone_VeJy",
+          "max": 0,
+          "min": 0,
+          "name": "caption",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "pbc_1452049888",
+          "hidden": false,
+          "id": "relation3695810152",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "id_role",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "_clone_TTHj",
+          "maxSize": 0,
+          "name": "available_permissions",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "_clone_gEWF",
+          "max": 0,
+          "min": 0,
+          "name": "url",
+          "pattern": "^(/[a-zA-Z0-9/-]*|#)$",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "_clone_bcLR",
+          "maxSelect": 1,
+          "name": "status_acl_roles_menu",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "select",
+          "values": [
+            "active",
+            "passive"
+          ]
+        },
+        {
+          "hidden": false,
+          "id": "_clone_eqU8",
+          "maxSelect": 1,
+          "name": "status_sys_menus",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "select",
+          "values": [
+            "active",
+            "passive"
+          ]
+        },
+        {
+          "hidden": false,
+          "id": "_clone_44EX",
+          "maxSelect": 1,
+          "name": "status_acl_roles",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "select",
+          "values": [
+            "active",
+            "passive"
+          ]
+        },
+        {
+          "hidden": false,
+          "id": "_clone_dQxm",
+          "maxSelect": 1,
+          "name": "status_sys_menu_items",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "select",
+          "values": [
+            "active",
+            "passive"
+          ]
+        }
+      ],
+      "id": "pbc_2926740490",
+      "indexes": [],
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "name": "acl_roles_menus_view",
+      "system": false,
+      "type": "view",
+      "updateRule": null,
+      "viewQuery": "SELECT\n  t1.id,\n  t1.valid_permissions, \n  t2.id as id_sys_menus, \n  t2.sys_menu_item as id_sys_menu_item, \n  t2.parent_id as id_sys_menus_parent, \n  t2.sorder,\n  t2.title,\n  t2.caption,\n  t3.id as id_role,\n  t4.available_permissions,\n  t4.url,\n  t1.status as status_acl_roles_menu,\n  t2.status as status_sys_menus,\n  t3.status as status_acl_roles,\n  t4.status as status_sys_menu_items\nFROM acl_roles_menus as t1\nJOIN sys_menus as t2 ON t1.menu=t2.id\nJOIN acl_roles as t3 ON t1.role=t3.id\nJOIN sys_menu_items as t4 ON t2.sys_menu_item=t4.id\nORDER BY t2.sorder ASC\n\n\n\n",
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
     }
   ];
 
   return app.importCollections(snapshot, false);
-}, (app) => {
+}, (/* app */) => {
   return null;
-})
+});

@@ -12,7 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// ⌛🔒 Token kontrolü ve yenileme ###############################################################################################
 	if (auth.isValid) {
 		try {
-			await auth.pb.collection(Collections.Users).authRefresh();
+			await auth.pb.collection(Collections.SysUsers).authRefresh();
 		} catch (err) {
 			auth.clear();
 		}

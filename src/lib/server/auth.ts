@@ -1,5 +1,15 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit';
-import PocketBase, { LocalAuthStore, type AuthRecord, type SerializeOptions, ClientResponseError, isTokenExpired, getTokenPayload } from 'pocketbase';
+import PocketBase, {
+	LocalAuthStore,
+	type AuthRecord,
+	type SerializeOptions,
+	ClientResponseError,
+	isTokenExpired,
+	getTokenPayload
+} from 'pocketbase';
+
+import { Collections } from '$lib/client/types/pocketbase-types';
+
 import env from '$lib/server/env';
 
 /**
@@ -88,7 +98,7 @@ export class Auth extends LocalAuthStore {
 	save(token: string, record?: AuthRecord) {
 		// loadFromCookie, authWithPassword ve authRefresh'ten sonra otomatik calisir. class içinde onChange yerine kullanilabilir.
 		super.save(token, record);
-		if (record?.collectionName === 'users') {
+		if (record?.collectionName === Collections.SysUsers) {
 			this.#user = structuredClone(record);
 		}
 	}

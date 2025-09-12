@@ -1,6 +1,9 @@
 import type { Actions } from './$types';
 import { ClientResponseError, type RecordAuthResponse } from 'pocketbase';
-import { Collections, type UsersResponse } from '$lib/client/types/pocketbase-types';
+import {
+	Collections,
+	type SysUsersResponse
+} from '$lib/client/types/pocketbase-types';
 import { fail, redirect } from '@sveltejs/kit';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,10 +19,12 @@ export const actions: Actions = {
 			return fail(400, { email, missing: true });
 		}
 
-		let authData: RecordAuthResponse<UsersResponse> | null = null;
+		let authData: RecordAuthResponse<SysUsersResponse> | null = null;
 
 		try {
-			authData = await locals.auth.pb.collection(Collections.Users).authWithPassword<UsersResponse>(email, password);
+			authData = await locals.auth.pb
+				.collection(Collections.SysUsers)
+				.authWithPassword<SysUsersResponse>(email, password);
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.clear();

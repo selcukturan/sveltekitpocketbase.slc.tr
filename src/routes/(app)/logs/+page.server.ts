@@ -12,10 +12,15 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		sort: `-created,id`
 	}); */
 
-	const acl_roles_perms_menu = await locals.auth.pb.collection('acl_roles_perms_menu').getFullList({
-		expand: `perm,role,perm.parent_id`,
-		filter: auth.pb.filter(`role.status = "active" && perm.status = "active" && status = "active" && role = {:userRole}`, { userRole })
-	});
+	const acl_roles_menus = await locals.auth.pb
+		.collection('acl_roles_menus')
+		.getFullList({
+			expand: `menu,role,menu.parent_id`,
+			filter: auth.pb.filter(
+				`role.status = "active" && menu.status = "active" && status = "active" && role = {:userRole}`,
+				{ userRole }
+			)
+		});
 
 	/* const transformedData = collection.map((item) => {
 		if (item.expand && item.expand.perm && item.expand.perm.type) {
@@ -31,6 +36,6 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	return {
 		envTest: PUBLIC_ENV_TEST,
 		user: auth.user,
-		acl_roles_perms_menu
+		acl_roles_menus
 	};
 };
