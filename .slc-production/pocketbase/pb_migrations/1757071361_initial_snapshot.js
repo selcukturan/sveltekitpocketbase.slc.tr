@@ -4,6 +4,12 @@
  * ```bash
  * ./pb/pocketbase migrate collections
  * ```
+ * - "Containers - Attach Shell"den yukarıdaki komut çalıştırılır. 
+ *      Kod mevcut koleksiyonları ve yapılarını bir "snapshot" olarak kaydeder. 
+ *      Oluşan dosya içeriği `1757071360_initial_snapshot.js` dosyasına aktarılır.
+ * - `_initial_` orta ekine sahip dosyalar kurulum dosyalarıdır ve sıraları önemlidir. Başlangıç verileri içerirler.
+ * - Temiz bir ilk kurulum için `_initial_` dosyaları haricindeki tüm dosyalar silinir.
+ * - `_initial_` dışındaki dosyalar, geliştirme ve değişiklikler için kullanılan migration dosyalarıdır.
  */
 migrate((/* app */) => {
     // migrate up

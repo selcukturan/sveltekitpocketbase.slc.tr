@@ -44,7 +44,7 @@ class Table<TData extends Row> {
 	// ################################## END Default Sources #######################################################################################################################
 
 	// ################################## BEGIN Constructor #########################################################################################################################
-	version = 'v0.0.1-alpha.166';
+	version = 'v0.0.1-alpha.167';
 	element?: HTMLDivElement = $state();
 	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
@@ -55,8 +55,6 @@ class Table<TData extends Row> {
 
 		$effect(() => {
 			const currentElement = this.element;
-			const currentHeaderCheckbox = this.headerCheckbox;
-			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
 
 			if (currentElement && this.#resizeObserver == null) {
 				this.#resizeObserver = new ResizeObserver((entries) => {
@@ -68,29 +66,39 @@ class Table<TData extends Row> {
 				this.#resizeObserver.observe(currentElement);
 			}
 
+			return () => {
+				this.#resizeObserver?.disconnect();
+				this.#resizeObserver = null;
+			};
+		});
+
+		$effect(() => {
+			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
+
 			if (currentActionActiveRowIndex != null) {
 				window.addEventListener('click', this.handleWindowOutsideClick);
 				window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
+			}
 
-				return () => {
+			return () => {
+				if (currentActionActiveRowIndex != null) {
 					window.removeEventListener('click', this.handleWindowOutsideClick);
 					window.removeEventListener(
 						'mousedown',
 						this.handleWindowOutsideMousedown
 					);
-				};
-			}
+				}
+			};
+		});
+
+		$effect(() => {
+			const currentHeaderCheckbox = this.headerCheckbox;
 
 			if (currentHeaderCheckbox != null) {
-				currentHeaderCheckbox.indeterminate =
-					this.#headerIsIndeterminate === true;
-				return () => {};
+				currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate;
 			}
 
-			return () => {
-				this.#resizeObserver?.disconnect();
-				this.#resizeObserver = null;
-			};
+			return () => {};
 		});
 	}
 	// ################################## END Constructor ##########################################################################################################################
@@ -482,7 +490,7 @@ class Table<TData extends Row> {
 		if (this.#actionActiveRowIndex == null) return;
 
 		// -1 ise header action kapatılıyor demektir, o zaman focus verme
-		if (this.#actionActiveRowIndex !== -1) {
+		if (this.#actionActiveRowIndex >= 0) {
 			this.element
 				?.querySelector<HTMLDivElement>('.slc-table-td-focused')
 				?.focus();
@@ -720,11 +728,15 @@ class Table<TData extends Row> {
 			}
 		}
 
+		const countableRowsLength = this.countableRowsLength();
+
 		this.#headerIsIndeterminate =
 			this.#selectedRows.size > 0 &&
-			this.#selectedRows.size < this.countableRowsLength()
+			this.#selectedRows.size < countableRowsLength
 				? true
 				: false;
+
+		this.#headerIsChecked = this.#selectedRows.size === countableRowsLength;
 
 		await tick();
 		this.onRowSelectionChangeRun?.({
@@ -733,12 +745,20 @@ class Table<TData extends Row> {
 	};
 
 	// UYARI: `cancelEditable` kullanılarak eklenen `subtotal`leri de ekler.
-	private toggleAllRows = async (select: boolean) => {
+	private toggleAllRows = async () => {
 		if (this.srcRowSelection !== 'multiple-all') return;
 
+		const currentSelectedCount = this.#selectedRows.size;
+		const isAllSelected =
+			this.#selectedRows.size === this.countableRowsLength();
+
 		this.clearSelectedRows();
-		if (select) {
-			// Tüm indeksleri Set'e ekle
+		this.#headerIsChecked = false;
+		this.#headerIsIndeterminate = false;
+
+		// tümü seçili değil ve hiç seçim yoksa, tümünü seç
+		if (!isAllSelected && currentSelectedCount === 0) {
+			console.log(2);
 			this.srcData.forEach((row, index) => {
 				if (
 					typeof row.subtotal !== 'string' ||
@@ -747,10 +767,8 @@ class Table<TData extends Row> {
 					this.#selectedRows.add(index);
 				}
 			});
+			this.#headerIsChecked = true;
 		}
-
-		this.#headerIsIndeterminate = false;
-		this.#headerIsChecked = select;
 
 		await tick();
 		this.onRowSelectionChangeRun?.({
@@ -762,18 +780,14 @@ class Table<TData extends Row> {
 		roi?: number;
 		type: 'header' | 'footer' | 'data';
 	}): Attachment => {
-		// düğüm DOM'a monte edilmiştir
+		// DOM'a monte edilmiştir
 		const { roi, type } = params;
 		return (checkInput) => {
 			if (!(checkInput instanceof HTMLInputElement)) return;
-			// kurulum buraya gidiyor
-			const change = (e: Event) => {
-				// e.preventDefault();
 
+			const change = () => {
 				if (type === 'header') {
-					const allSelected =
-						this.#selectedRows.size === this.countableRowsLength();
-					this.toggleAllRows(!allSelected);
+					this.toggleAllRows();
 				} else if (roi != null) {
 					this.toggleRowSelection(roi);
 				}
@@ -781,7 +795,6 @@ class Table<TData extends Row> {
 
 			checkInput.addEventListener('change', change);
 			return () => {
-				// söküm buraya gidiyor
 				checkInput.removeEventListener('change', change);
 			};
 		};

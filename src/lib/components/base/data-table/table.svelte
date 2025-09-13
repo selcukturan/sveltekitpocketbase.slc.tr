@@ -60,6 +60,7 @@
 					class:slc-table-trd-subtotal2={row.subtotal === 'subtotal2'}
 					class:slc-table-trd-subtotal3={row.subtotal === 'subtotal3'}
 				>
+					<!-- TD selection -->
 					{#if t.srcRowSelection !== 'none'}
 						{@const originalCell = {
 							rowIndex: roi,
@@ -73,7 +74,6 @@
 							isCellFocused && t.focusedCellState?.tabIndex != null
 								? t.focusedCellState?.tabIndex
 								: -1}
-						<!-- TD selection -->
 						<div
 							{...t.tdSelectionProps}
 							role="gridcell"
@@ -83,12 +83,13 @@
 							{tabindex}
 						>
 							{#if cancelEditable}
-								{@render selectionContent({ type: 'footer' })}
+								{@html ``}
 							{:else}
 								{@render selectionContent({ type: 'data', checked, roi })}
 							{/if}
 						</div>
 					{/if}
+					<!-- TD data -->
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 						{@const col = colWrapper.data}
 						{@const coi = colWrapper.coi}
@@ -107,7 +108,6 @@
 							isCellFocused && t.focusedCellState?.tabIndex != null
 								? t.focusedCellState?.tabIndex
 								: -1}
-						<!-- TD -->
 						<div
 							{...t.tdProps}
 							role="gridcell"
@@ -123,6 +123,7 @@
 							{/if}
 						</div>
 					{/each}
+					<!-- TD action -->
 					{#if t.srcRowAction}
 						{@const originalCell = {
 							rowIndex: roi,
@@ -136,7 +137,6 @@
 							isCellFocused && t.focusedCellState?.tabIndex != null
 								? t.focusedCellState?.tabIndex
 								: -1}
-						<!-- TD action -->
 						<div
 							{...t.tdActionProps}
 							role="gridcell"
@@ -146,7 +146,7 @@
 							{tabindex}
 						>
 							{#if cancelEditable}
-								{@render actionContent({ type: 'footer' })}
+								{@html ``}
 							{:else}
 								{@render actionContent({ type: 'data', roi })}
 							{/if}
@@ -155,6 +155,7 @@
 				</div>
 			{/each}
 			<!-- ########## FOOTER ########## -->
+
 			{#if t.srcData.length > 0 && t.srcFooters.length > 0}
 				{#each t.srcFooters as foot, footerindex (footerindex)}
 					{@const rowStart =
@@ -162,8 +163,8 @@
 					{@const bottom = `${(t.srcFooters.length - footerindex - 1) * t.srcTfootRowHeight}px`}
 					<!-- ********** TRF ********** -->
 					<div {...t.trfProps}>
+						<!-- TF selection -->
 						{#if t.srcRowSelection !== 'none'}
-							<!-- TF selection -->
 							<div
 								{...t.tfSelectionProps}
 								style:bottom
@@ -172,16 +173,16 @@
 								{@render selectionContent({ type: 'footer' })}
 							</div>
 						{/if}
+						<!-- TF data -->
 						{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 							{@const col = colWrapper.data}
 							{@const coi = colWrapper.coi}
-							<!-- TF -->
 							<div {...t.tfProps} style:bottom style:grid-row-start={rowStart}>
 								{@render baseContent({ type: 'footer', foot, col, coi })}
 							</div>
 						{/each}
+						<!-- TF action -->
 						{#if t.srcRowAction}
-							<!-- TF action -->
 							<div
 								{...t.tfActionProps}
 								style:bottom
@@ -322,11 +323,14 @@
 						aria-label="Select All"
 						bind:this={t.headerCheckbox}
 						tabindex="-1"
-						id={`slcTableSelectionCheckboxHeaderInput${roi}`}
+						id={`slcTableSelectionCheckboxHeaderInput`}
 						type="checkbox"
 						class="slc-table-selection-checkbox"
 						{@attach t.selectAttach({ type })}
-						checked={t.headerIsIndeterminate ? false : t.headerIsChecked}
+						checked={t.headerIsIndeterminate ? undefined : t.headerIsChecked}
+						data-checked={t.headerIsIndeterminate
+							? 'indeterminate'
+							: t.headerIsChecked}
 					/>
 				{:else if type === 'data' && roi != null}
 					<input
