@@ -199,7 +199,7 @@ export type AclRolesMenusRecord<Tvalid_permissions = unknown> = {
 	valid_permissions?: null | Tvalid_permissions
 }
 
-export enum AclRolesMenusViewStatusAclRolesMenuOptions {
+export enum AclRolesMenusViewStatusAclRolesMenusOptions {
 	"active" = "active",
 	"passive" = "passive",
 }
@@ -228,7 +228,7 @@ export type AclRolesMenusViewRecord<Tavailable_permissions = unknown, Tvalid_per
 	id_sys_menus_parent?: RecordIdString
 	sorder: number
 	status_acl_roles: AclRolesMenusViewStatusAclRolesOptions
-	status_acl_roles_menu: AclRolesMenusViewStatusAclRolesMenuOptions
+	status_acl_roles_menus: AclRolesMenusViewStatusAclRolesMenusOptions
 	status_sys_menu_items: AclRolesMenusViewStatusSysMenuItemsOptions
 	status_sys_menus: AclRolesMenusViewStatusSysMenusOptions
 	title: string
