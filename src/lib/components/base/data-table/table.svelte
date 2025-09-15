@@ -216,6 +216,7 @@
 			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
 		>
 			<span style="overflow: hidden; width:100%">
+				<!-- background-color:transparent; -->
 				<input
 					type="text"
 					spellcheck="false"
@@ -224,7 +225,7 @@
 					bind:this={t.editingCellInput}
 					bind:value={t.editingCellValue}
 					style:text-align={col.align || 'left'}
-					style="margin:0px; height:100%; width:100%; border:none; background-color:transparent; padding:0px; outline:none; box-shadow:none; transition:none;"
+					style="background-color:red; margin:0px; height:100%; width:100%; border:none; padding:0px; outline:none; box-shadow:none; transition:none;"
 				/>
 			</span>
 		</div>
