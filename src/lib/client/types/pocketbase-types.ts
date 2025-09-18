@@ -25,7 +25,10 @@ export enum Collections {
 	SysMenus = "sys_menus",
 	SysSettings = "sys_settings",
 	SysUsers = "sys_users",
+	TestDatatable = "test_datatable",
 	TestForm = "test_form",
+	TestSubtotal = "test_subtotal",
+	TestSubtotalView = "test_subtotal_view",
 }
 
 // Alias types for improved usability
@@ -354,6 +357,27 @@ export type SysUsersRecord = {
 	verified?: boolean
 }
 
+export type TestDatatableRecord = {
+	active?: boolean
+	amount?: number
+	created?: IsoDateString
+	district?: string
+	grape?: string
+	grape_color?: string
+	id: string
+	kn?: number
+	kt?: IsoDateString
+	order?: number
+	price?: number
+	producer?: string
+	province?: string
+	purchase_date?: IsoDateString
+	quantity?: number
+	region?: string
+	updated?: IsoDateString
+	village?: string
+}
+
 export type TestFormRecord = {
 	created?: IsoDateString
 	date_optional?: IsoDateString
@@ -368,6 +392,29 @@ export type TestFormRecord = {
 	text_optional?: string
 	text_required: string
 	updated?: IsoDateString
+}
+
+export type TestSubtotalRecord = {
+	created?: IsoDateString
+	id: string
+	kg?: number
+	kn?: number
+	kt?: IsoDateString
+	note?: string
+	producer?: string
+	region?: string
+	updated?: IsoDateString
+}
+
+export type TestSubtotalViewRecord<Tkg = unknown, Tkn = unknown, Tkt = unknown, Tnote = unknown, Tproducer = unknown, Tregion = unknown, Tsubtotal = unknown> = {
+	id: string
+	kg?: null | Tkg
+	kn?: null | Tkn
+	kt?: null | Tkt
+	note?: null | Tnote
+	producer?: null | Tproducer
+	region?: null | Tregion
+	subtotal?: null | Tsubtotal
 }
 
 // Response types include system fields and match responses from the PocketBase API
@@ -390,7 +437,10 @@ export type SysMenuItemsResponse<Tavailable_permissions = unknown, Texpand = unk
 export type SysMenusResponse<Texpand = unknown> = Required<SysMenusRecord> & BaseSystemFields<Texpand>
 export type SysSettingsResponse<Textra = unknown, Texpand = unknown> = Required<SysSettingsRecord<Textra>> & BaseSystemFields<Texpand>
 export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
+export type TestDatatableResponse<Texpand = unknown> = Required<TestDatatableRecord> & BaseSystemFields<Texpand>
 export type TestFormResponse<Texpand = unknown> = Required<TestFormRecord> & BaseSystemFields<Texpand>
+export type TestSubtotalResponse<Texpand = unknown> = Required<TestSubtotalRecord> & BaseSystemFields<Texpand>
+export type TestSubtotalViewResponse<Tkg = unknown, Tkn = unknown, Tkt = unknown, Tnote = unknown, Tproducer = unknown, Tregion = unknown, Tsubtotal = unknown, Texpand = unknown> = Required<TestSubtotalViewRecord<Tkg, Tkn, Tkt, Tnote, Tproducer, Tregion, Tsubtotal>> & BaseSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
@@ -414,7 +464,10 @@ export type CollectionRecords = {
 	sys_menus: SysMenusRecord
 	sys_settings: SysSettingsRecord
 	sys_users: SysUsersRecord
+	test_datatable: TestDatatableRecord
 	test_form: TestFormRecord
+	test_subtotal: TestSubtotalRecord
+	test_subtotal_view: TestSubtotalViewRecord
 }
 
 export type CollectionResponses = {
@@ -437,7 +490,10 @@ export type CollectionResponses = {
 	sys_menus: SysMenusResponse
 	sys_settings: SysSettingsResponse
 	sys_users: SysUsersResponse
+	test_datatable: TestDatatableResponse
 	test_form: TestFormResponse
+	test_subtotal: TestSubtotalResponse
+	test_subtotal_view: TestSubtotalViewResponse
 }
 
 // Type for usage with type asserted PocketBase instance
@@ -463,5 +519,8 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'sys_menus'): RecordService<SysMenusResponse>
 	collection(idOrName: 'sys_settings'): RecordService<SysSettingsResponse>
 	collection(idOrName: 'sys_users'): RecordService<SysUsersResponse>
+	collection(idOrName: 'test_datatable'): RecordService<TestDatatableResponse>
 	collection(idOrName: 'test_form'): RecordService<TestFormResponse>
+	collection(idOrName: 'test_subtotal'): RecordService<TestSubtotalResponse>
+	collection(idOrName: 'test_subtotal_view'): RecordService<TestSubtotalViewResponse>
 }
