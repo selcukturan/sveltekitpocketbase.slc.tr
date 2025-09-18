@@ -5,10 +5,14 @@
 		createTable,
 		type Sources
 	} from '$lib/components/base/data-table';
-	import { generateProducedData } from '$lib/client/demo/produced-grapes-generate-data';
+	import {
+		generateProducedData,
+		generateProducedData2
+	} from '$lib/client/demo/produced-grapes-generate-data';
 
 	import type { ProducedGrapes } from '$lib/client/demo/produced-grapes-schema';
 
+	console.log('generateProducedData2', generateProducedData2(10000));
 	// initial sources setup
 	const sources: Sources<ProducedGrapes> = {
 		id: 'table22',

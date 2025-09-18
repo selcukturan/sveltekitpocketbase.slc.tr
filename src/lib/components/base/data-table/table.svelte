@@ -196,6 +196,15 @@
 			{/if}
 		</div>
 	</div>
+	<div
+		class="bg-tertiary-50 border-tertiary-200 flex h-14 items-center border-t"
+	>
+		<span class="flex-1">Count: {t.srcData.length}</span>
+		<span class="flex flex-1 items-center justify-center">
+			<button>Load More</button>
+		</span>
+		<span class="flex-1 text-right">{t.version}</span>
+	</div>
 </div>
 
 <!-- ############################################################ SNIPPETS ############################################################ -->

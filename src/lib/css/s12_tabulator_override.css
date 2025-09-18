@@ -83,3 +83,20 @@
 .slc-tabulator.tabulator .tabulator-tableholder .tabulator-range-overlay .tabulator-range-cell-active {
 	border: 2px solid var(--color-secondary-800);
 }
+
+
+.slc-tabulator.tabulator .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+	border-right: 5px solid var(--color-surface-200);
+}
+
+.slc-tabulator.tabulator .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-right {
+	border-left: 5px solid var(--color-surface-200);
+}
+
+.slc-tabulator.tabulator .tabulator-header .tabulator-frozen.tabulator-frozen-left {
+	border-right: 5px solid var(--color-surface-200);
+}
+
+.slc-tabulator.tabulator .tabulator-header .tabulator-frozen.tabulator-frozen-right {
+	border-left: 5px solid var(--color-surface-200);
+}
