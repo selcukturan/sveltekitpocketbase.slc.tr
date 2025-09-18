@@ -57,6 +57,11 @@ class Table<TData extends Row> {
 			const currentElement = this.element;
 
 			if (currentElement && this.#resizeObserver == null) {
+				// ilk kurulum
+				this.cachedClientHeight = Math.round(currentElement.clientHeight);
+				this.updateVisibleIndexes();
+
+				// Debounced Resize Handler
 				this.#resizeObserver = new ResizeObserver((entries) => {
 					const entry = entries[0];
 					if (entry?.contentRect.height > 0) {

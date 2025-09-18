@@ -22,8 +22,19 @@ export const load = (async ({ locals }) => {
 		console.error('Menü verileri çekilirken hata oluştu:', error);
 	}
 
+	let test: any[] = [];
+	try {
+		const xxx = await locals.auth.pb
+			.collection('test_subtotal')
+			.getFullList<MenuNode>();
+		test = xxx;
+	} catch (error) {
+		console.error('Menü verileri çekilirken hata oluştu:', error);
+	}
+
 	return {
 		user: locals.auth.user,
-		treeMenu
+		treeMenu,
+		test
 	};
 }) satisfies PageServerLoad;

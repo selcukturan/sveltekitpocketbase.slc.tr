@@ -2185,7 +2185,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_3641971933",
           "hidden": false,
-          "id": "_clone_d1z3",
+          "id": "_clone_hwXH",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "parent_id",
@@ -2196,7 +2196,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_DLVY",
+          "id": "_clone_J0mX",
           "max": 9999,
           "min": 1,
           "name": "sorder",
@@ -2208,7 +2208,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_naF5",
+          "id": "_clone_QFxD",
           "maxSelect": 1,
           "name": "type",
           "presentable": false,
@@ -2223,7 +2223,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_96GV",
+          "id": "_clone_jvYU",
           "max": 9999,
           "min": 1000,
           "name": "value",
@@ -2236,7 +2236,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_dKFu",
+          "id": "_clone_fNbW",
           "max": 0,
           "min": 0,
           "name": "title",
@@ -2250,7 +2250,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_IGAI",
+          "id": "_clone_gNMT",
           "max": 0,
           "min": 0,
           "name": "caption",
@@ -2306,7 +2306,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_xvmE",
+          "id": "_clone_ph8k",
           "max": 0,
           "min": 0,
           "name": "region",
@@ -2333,7 +2333,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_hNjz",
+          "id": "_clone_HeN5",
           "max": 0,
           "min": 0,
           "name": "province",
@@ -2360,7 +2360,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_4O4Y",
+          "id": "_clone_G4HU",
           "max": 0,
           "min": 0,
           "name": "district",
@@ -2387,7 +2387,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_ou0T",
+          "id": "_clone_Ngk7",
           "max": 0,
           "min": 0,
           "name": "village",
@@ -2414,7 +2414,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_rmJM",
+          "id": "_clone_yJpC",
           "max": 0,
           "min": 0,
           "name": "location",
@@ -2456,7 +2456,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_oyAI",
+          "id": "_clone_8sd9",
           "maxSize": 0,
           "name": "valid_permissions",
           "presentable": false,
@@ -2481,7 +2481,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_368526849",
           "hidden": false,
-          "id": "_clone_iivf",
+          "id": "_clone_2ClL",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "id_sys_menu_item",
@@ -2494,7 +2494,7 @@ migrate((app) => {
           "cascadeDelete": true,
           "collectionId": "pbc_498656437",
           "hidden": false,
-          "id": "_clone_8NFW",
+          "id": "_clone_8B3P",
           "maxSelect": 1,
           "minSelect": 0,
           "name": "id_sys_menus_parent",
@@ -2505,7 +2505,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_ausp",
+          "id": "_clone_vzsS",
           "max": 9999,
           "min": 1,
           "name": "sorder",
@@ -2518,7 +2518,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_KDIb",
+          "id": "_clone_md4Q",
           "max": 0,
           "min": 0,
           "name": "title",
@@ -2532,7 +2532,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_6u1D",
+          "id": "_clone_PBGW",
           "max": 0,
           "min": 0,
           "name": "caption",
@@ -2558,7 +2558,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_B8sY",
+          "id": "_clone_3K6p",
           "maxSize": 0,
           "name": "available_permissions",
           "presentable": false,
@@ -2569,7 +2569,7 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "_clone_6wQP",
+          "id": "_clone_qFej",
           "max": 0,
           "min": 0,
           "name": "url",
@@ -2582,9 +2582,9 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_uRrg",
+          "id": "_clone_tbAx",
           "maxSelect": 1,
-          "name": "status_acl_roles_menu",
+          "name": "status_acl_roles_menus",
           "presentable": false,
           "required": true,
           "system": false,
@@ -2596,7 +2596,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_dGDb",
+          "id": "_clone_Up02",
           "maxSelect": 1,
           "name": "status_sys_menus",
           "presentable": false,
@@ -2610,7 +2610,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_Rzxg",
+          "id": "_clone_EqUU",
           "maxSelect": 1,
           "name": "status_acl_roles",
           "presentable": false,
@@ -2624,7 +2624,7 @@ migrate((app) => {
         },
         {
           "hidden": false,
-          "id": "_clone_l6Lq",
+          "id": "_clone_JMWQ",
           "maxSelect": 1,
           "name": "status_sys_menu_items",
           "presentable": false,
@@ -2644,8 +2644,232 @@ migrate((app) => {
       "system": false,
       "type": "view",
       "updateRule": null,
-      "viewQuery": "SELECT\n  t1.id,\n  t1.valid_permissions, \n  t2.id as id_sys_menus, \n  t2.sys_menu_item as id_sys_menu_item, \n  t2.parent_id as id_sys_menus_parent, \n  t2.sorder,\n  t2.title,\n  t2.caption,\n  t3.id as id_role,\n  t4.available_permissions,\n  t4.url,\n  t1.status as status_acl_roles_menu,\n  t2.status as status_sys_menus,\n  t3.status as status_acl_roles,\n  t4.status as status_sys_menu_items\nFROM acl_roles_menus as t1\nJOIN sys_menus as t2 ON t1.menu=t2.id\nJOIN acl_roles as t3 ON t1.role=t3.id\nJOIN sys_menu_items as t4 ON t2.sys_menu_item=t4.id\nORDER BY t2.sorder ASC\n\n\n\n",
+      "viewQuery": "SELECT\n  t1.id,\n  t1.valid_permissions, \n  t2.id as id_sys_menus, \n  t2.sys_menu_item as id_sys_menu_item, \n  t2.parent_id as id_sys_menus_parent, \n  t2.sorder,\n  t2.title,\n  t2.caption,\n  t3.id as id_role,\n  t4.available_permissions,\n  t4.url,\n  t1.status as status_acl_roles_menus,\n  t2.status as status_sys_menus,\n  t3.status as status_acl_roles,\n  t4.status as status_sys_menu_items\nFROM acl_roles_menus as t1\nJOIN sys_menus as t2 ON t1.menu=t2.id\nJOIN acl_roles as t3 ON t1.role=t3.id\nJOIN sys_menu_items as t4 ON t2.sys_menu_item=t4.id\nORDER BY t2.sorder ASC\n\n\n\n",
       "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":user:%\" || \n  @request.auth.role ~ \":superuser:%\" || \n  @request.auth.role ~ \":admin:%\" || \n  @request.auth.role ~ \":superadmin:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "number1843064012",
+          "max": null,
+          "min": null,
+          "name": "kn",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "date2427983286",
+          "max": "",
+          "min": "",
+          "name": "kt",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text2539932124",
+          "max": 0,
+          "min": 0,
+          "name": "producer",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text258142582",
+          "max": 0,
+          "min": 0,
+          "name": "region",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "number335959144",
+          "max": null,
+          "min": null,
+          "name": "kg",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text3485334036",
+          "max": 0,
+          "min": 0,
+          "name": "note",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_3301652643",
+      "indexes": [],
+      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)",
+      "name": "test_subtotal",
+      "system": false,
+      "type": "base",
+      "updateRule": null,
+      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ~ \":demo:%\" || \n  @request.auth.role ~ \":system:%\"\n)"
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 0,
+          "min": 0,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "json3097235076",
+          "maxSize": 1,
+          "name": "subtotal",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json1843064012",
+          "maxSize": 1,
+          "name": "kn",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json2427983286",
+          "maxSize": 1,
+          "name": "kt",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json2539932124",
+          "maxSize": 1,
+          "name": "producer",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json258142582",
+          "maxSize": 1,
+          "name": "region",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json3485334036",
+          "maxSize": 1,
+          "name": "note",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "json335959144",
+          "maxSize": 1,
+          "name": "kg",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        }
+      ],
+      "id": "pbc_1075535434",
+      "indexes": [],
+      "listRule": null,
+      "name": "test_subtotal_view",
+      "system": false,
+      "type": "view",
+      "updateRule": null,
+      "viewQuery": "-- ----------------------------------------------------------------\n-- Format: 00000999_00_20250912_00000011\n-- -\n-- 1. KIRILIM\n-- 00000999 = İŞLEM GÖRMEMİŞ KAYITLAR\n-- 00001888 = ALINMAYACAK OLARAK İŞARETLENEN KAYITLAR\n-- 00008888 = ALINAN KAYITTAN KALAN KAYITLAR\n-- ZZZZZZZZ = EN ALT TOPLAM KIRILIMI\n-- -\n-- 2. KIRILIM\n-- 00 = KAYITTA HEM KN HEM KT VAR\n-- 99 = KAYITTA KN VEYA KT YOK\n-- ZZ = EN ALT TOPLAM KIRILIMI\n-- -\n-- 3. KIRILIM\n-- 20250912 = KT VAR\n-- 99999999 = KT YOK\n-- ZZZZZZZZ = EN ALT TOPLAM KIRILIMI\n-- -\n-- 4. KIRILIM\n-- 00000011 = KN VAR\n-- 00000999 = KN YOK\n-- ZZZZZZZZ = EN ALT TOPLAM KIRILIMI\n-- ----------------------------------------------------------------\n-- QUERY WITH CTE\nWITH BaseRecords AS (\n    SELECT\n        t1.id,\n        t1.kn,\n        t1.kt,\n        t1.producer,\n        t1.region,\n        t1.note,\n        t1.kg,\n        (\n            CASE\n                WHEN t1.kn = 1888\n                OR t1.kn = 8888 THEN printf('%08d', t1.kn)\n                ELSE printf('%08d', 999)\n            END || '_' || CASE\n                WHEN t1.kn > 0\n                AND t1.kt != '' THEN '00'\n                ELSE '99'\n            END || '_' || CASE\n                WHEN t1.kt = '' THEN '99999999'\n                ELSE strftime('%Y%m%d', t1.kt)\n            END || '_' || CASE\n                WHEN t1.kn = 0 THEN printf('%08d', 999)\n                ELSE printf('%08d', t1.kn)\n            END\n        ) AS calculated_subtotal_level1,\n        (\n            CASE\n                WHEN t1.kn = 1888\n                OR t1.kn = 8888 THEN printf('%08d', t1.kn)\n                ELSE printf('%08d', 999)\n            END || '_' || CASE\n                WHEN t1.kn > 0\n                AND t1.kt != '' THEN '00'\n                ELSE '99'\n            END || '_' || CASE\n                WHEN t1.kt = '' THEN '99999999'\n                ELSE strftime('%Y%m%d', t1.kt)\n            END || '_ZZZZZZZZ'\n        ) AS calculated_subtotal_level2,\n        (\n            CASE\n                WHEN kn = 1888\n                OR kn = 8888 THEN printf('%08d', kn)\n                ELSE printf('%08d', 999)\n            END || '_' || CASE\n                WHEN kn > 0\n                AND kt != '' THEN '00'\n                ELSE '99'\n            END || '_ZZZZZZZZ_ZZZZZZZZ'\n        ) AS calculated_subtotal_level3,\n        (\n            CASE\n                WHEN t1.kn = 1888\n                OR t1.kn = 8888 THEN printf('%08d', t1.kn)\n                ELSE printf('%08d', 999)\n            END || '_ZZ_ZZZZZZZZ_ZZZZZZZZ'\n        ) AS calculated_subtotal_level4,\n        ('ZZZZZZZZ_ZZ_ZZZZZZZZ_ZZZZZZZZ') AS calculated_subtotal_level5\n    FROM\n        test_subtotal as t1\n)\nSELECT\n    id,\n    subtotal,\n    kn,\n    kt,\n    producer,\n    region,\n    note,\n    kg\nFROM\n    (\n        SELECT\n            -- ALL RECORDS\n            id,\n            calculated_subtotal_level1 AS subtotal,\n            kn,\n            kt,\n            producer,\n            region,\n            note,\n            kg\n        FROM\n            BaseRecords\n        UNION\n        ALL\n        SELECT\n            -- SUB TOTAL 1\n            ('subtotal1_' || (ROW_NUMBER() OVER())) AS id,\n            calculated_subtotal_level1 AS subtotal,\n            MAX(kn) as kn,\n            MAX(kt) as kt,\n            'SUB-1' as producer,\n            'SUB-1' as region,\n            'SUB-1' as note,\n            SUM(kg) AS kg\n        FROM\n            BaseRecords\n        GROUP BY\n            calculated_subtotal_level1\n        UNION\n        ALL\n        SELECT\n            -- SUB TOTAL 2\n            ('subtotal2_' || (ROW_NUMBER() OVER())) AS id,\n            calculated_subtotal_level2 AS subtotal,\n            0 as kn,\n            MAX(kt) as kt,\n            'SUB-2' as producer,\n            'SUB-2' as region,\n            'SUB-2' as note,\n            SUM(kg) AS kg\n        FROM\n            BaseRecords\n        GROUP BY\n            calculated_subtotal_level2\n        UNION\n        ALL\n        SELECT\n            -- SUB TOTAL 3\n            ('subtotal3_' || (ROW_NUMBER() OVER())) AS id,\n            calculated_subtotal_level3 AS subtotal,\n            0 as kn,\n            '' as kt,\n            'SUB-3' as producer,\n            'SUB-3' as region,\n            'SUB-3' as note,\n            SUM(kg) AS kg\n        FROM\n            BaseRecords\n        GROUP BY\n            calculated_subtotal_level3\n        UNION\n        ALL\n        SELECT\n            -- SUB TOTAL 4\n            ('subtotal4_' || (ROW_NUMBER() OVER())) AS id,\n            calculated_subtotal_level4 AS subtotal,\n            0 as kn,\n            '' as kt,\n            'SUB-4' as producer,\n            'SUB-4' as region,\n            'SUB-4' as note,\n            SUM(kg) AS kg\n        FROM\n            BaseRecords\n        GROUP BY\n            calculated_subtotal_level4\n        UNION\n        ALL\n        SELECT\n            -- SUB TOTAL 5\n            ('subtotal5_' || (ROW_NUMBER() OVER())) AS id,\n            calculated_subtotal_level5 AS subtotal,\n            0 as kn,\n            '' as kt,\n            'SUB-5' as producer,\n            'SUB-5' as region,\n            'SUB-5' as note,\n            SUM(kg) AS kg\n        FROM\n            BaseRecords\n        GROUP BY\n            calculated_subtotal_level5\n    )\nORDER BY\n    subtotal,\n    producer;",
+      "viewRule": null
     }
   ];
 

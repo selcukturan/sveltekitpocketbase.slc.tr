@@ -11,7 +11,7 @@
 	// console.log(data.treeMenu);
 	// console.log(data.treeMenuUser);
 	// console.log('data.treeMenuUserView', data.treeMenuUserView);
-	console.log('xxxx', data.treeMenu);
+	console.log('xxxx', data.test);
 	function buildTreeMenu(flatRecord: MenuNode[]): MenuNode[] {
 		// Tüm elemanları ID'leri ile eşleyerek hızlı erişim için bir Map oluştur.
 		const map = new Map<string, MenuNode>();

@@ -28,3 +28,4 @@ vite.config.ts.timestamp-*
 # /.slc-production/pocketbase/pb_public
 # .vscode
 package-lock.json
+/src/lib/server/dev-sql

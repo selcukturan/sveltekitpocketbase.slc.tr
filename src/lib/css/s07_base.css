@@ -3,6 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
+
 	*,
 	::after,
 	::before,
@@ -14,12 +15,11 @@
 	* {
 		@apply border-surface-200;
 	}
+
 	html {
-		-webkit-tap-highlight-color: color-mix(
-			in oklab,
-			var(--color-primary-500) 30%,
-			transparent
-		);
+		-webkit-tap-highlight-color: color-mix(in oklab,
+				var(--color-primary-500) 30%,
+				transparent);
 	}
 
 	body {
@@ -32,11 +32,9 @@
 	}
 
 	::selection {
-		background-color: color-mix(
-			in srgb,
-			var(--color-primary-200) 50%,
-			transparent
-		);
+		background-color: color-mix(in srgb,
+				var(--color-primary-200) 50%,
+				transparent);
 	}
 
 	/* States --- */
@@ -57,6 +55,7 @@
 		/* Varsayılanı temizliyoruz, çünkü kendi stilimizi :focus-visible ile ekleyeceğiz */
 		outline: none;
 	}
+
 	*:not(body):not(.focus-override):focus-visible {
 		@apply outline-primary-400 outline-2 outline-offset-2;
 	}

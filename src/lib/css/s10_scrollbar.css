@@ -1,6 +1,8 @@
 @layer base {
+
 	/* sm: 640px >  < ∞ */
-	@media (width >= 640px) {
+	@media (width >=640px) {
+
 		/* ==========================================================================
         Global Sayfa Davranışları (Sadece HTML elementine uygulanmalı)
         ========================================================================== */
@@ -17,7 +19,7 @@
 		* {
 			scrollbar-width: thin;
 			/* scrollbar-color: <thumb> <track>; */
-			scrollbar-color: var(--color-surface-200) transparent;
+			scrollbar-color: var(--color-surface-300) transparent;
 		}
 
 		/* WebKit tabanlı tarayıcılar için evrensel scrollbar stilleri (Chrome, Safari, Edge) */
@@ -27,7 +29,7 @@
 		}
 
 		*::-webkit-scrollbar-thumb {
-			background-color: var(--color-surface-200);
+			background-color: var(--color-surface-300);
 		}
 
 		*::-webkit-scrollbar-track {
