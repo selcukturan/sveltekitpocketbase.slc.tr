@@ -47,18 +47,18 @@
 				{@const roi = rowWrapper.roi}
 				{@const rowStart = roi + t.headerRowsCountState + 1}
 				{@const checked = t.selectedRows.has(roi)}
-				{@const cancelEditable =
-					typeof row.subtotal === 'string' &&
-					row.subtotal.startsWith('subtotal')}
+				{@const cancelEditable = String(row.id).startsWith('subtotal')}
 				<!-- ********** TRD ********** -->
 				<div
 					{...t.trdProps}
 					class:slc-table-trd-even={t.srcZebra && roi % 2}
 					class:slc-table-trd-selected={checked}
 					class:slc-table-trd-hoverable={t.srcHoverableRows}
-					class:slc-table-trd-subtotal1={row.subtotal === 'subtotal1'}
-					class:slc-table-trd-subtotal2={row.subtotal === 'subtotal2'}
-					class:slc-table-trd-subtotal3={row.subtotal === 'subtotal3'}
+					class:slc-table-trd-subtotal1={String(row.id).startsWith('subtotal1')}
+					class:slc-table-trd-subtotal2={String(row.id).startsWith('subtotal2')}
+					class:slc-table-trd-subtotal3={String(row.id).startsWith('subtotal3')}
+					class:slc-table-trd-subtotal4={String(row.id).startsWith('subtotal4')}
+					class:slc-table-trd-subtotal5={String(row.id).startsWith('subtotal5')}
 				>
 					<!-- TD selection -->
 					{#if t.srcRowSelection !== 'none'}
@@ -538,6 +538,12 @@
 	}
 	.slc-table-trd-subtotal3 {
 		background-color: var(--color-error-50) !important;
+	}
+	.slc-table-trd-subtotal4 {
+		background-color: var(--color-warning-50) !important;
+	}
+	.slc-table-trd-subtotal5 {
+		background-color: var(--color-warning-200) !important;
 	}
 	/******************************************************/
 	.slc-table-th {

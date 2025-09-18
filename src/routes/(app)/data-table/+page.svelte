@@ -1,25 +1,26 @@
 <script lang="ts">
+	import type { TestDatatableResponse } from '$lib/client/types/pocketbase-types';
+	/* import { getFullList } from '$lib/remotes/testDataTable.remote'; */
+
 	import { Page, Head } from '$lib/components/templates';
 	import {
 		DataTable,
 		createTable,
 		type Sources
 	} from '$lib/components/base/data-table';
-	import {
-		generateProducedData,
-		generateProducedData2
-	} from '$lib/client/demo/produced-grapes-generate-data';
 
-	import type { ProducedGrapes } from '$lib/client/demo/produced-grapes-schema';
+	let { data } = $props();
 
-	console.log('generateProducedData2', generateProducedData2(10000));
+	console.log('data.resultList', data.resultList);
+	console.log('data.records', data.records);
+
 	// initial sources setup
-	const sources: Sources<ProducedGrapes> = {
+	const sources: Sources<TestDatatableResponse> = {
 		id: 'table22',
-		data: generateProducedData(1000),
+		data: data.resultList.items,
 		rowSelection: 'multiple-all',
 		rowAction: true,
-		subtotal: true,
+		subtotal: false,
 		zebra: false,
 		hoverableRows: false,
 		actions: {
@@ -35,12 +36,6 @@
 			]
 		},
 		columns: [
-			{
-				field: 'subtotal',
-				label: 'Sub Total',
-				width: 'minmax(75px,1fr)',
-				hidden: true
-			},
 			{
 				field: 'order',
 				label: 'Order',
@@ -84,7 +79,7 @@
 				resizeable: true
 			},
 			{
-				field: 'grapeColor',
+				field: 'grape_color',
 				label: 'Grape Color',
 				width: 'minmax(75px,1fr)',
 				hidden: false,
@@ -116,7 +111,7 @@
 		footers: [{ order: 'any footer' }, { quantity: 'maybe sum' }]
 	};
 
-	const table = createTable<ProducedGrapes>(sources);
+	const table = createTable<TestDatatableResponse>(sources);
 
 	table.onCellFocusChange((data) => {
 		console.log('onCellFocusChange', data);
@@ -166,6 +161,9 @@
 	});
 
 	// $inspect('$inspect-rowIndices', table.rowIndices);
+
+	/* const fullList = $derived(await getFullList());
+	$inspect('fullList', fullList); */
 </script>
 
 <Head>

@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '$lib/components/layouts/page';
+	import {
+		PageLayout,
+		type PageSidebarDataType,
+		type ChildrenPropsType
+	} from '$lib/components/layouts/page';
 
 	let { children }: ChildrenPropsType = $props();
 
@@ -33,6 +37,12 @@
 	];
 </script>
 
-<PageLayout {pageSidebardata}>
-	{@render children()}
-</PageLayout>
+<svelte:boundary>
+	<PageLayout {pageSidebardata}>
+		{@render children()}
+	</PageLayout>
+
+	{#snippet pending()}
+		<p>loading...</p>
+	{/snippet}
+</svelte:boundary>
