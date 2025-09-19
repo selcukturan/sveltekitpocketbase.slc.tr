@@ -9036,26 +9036,13 @@
 			clipboardPasteParser: 'range',
 			clipboardPasteAction: 'range',
 
-			/* rowHeader: {
+			rowHeader: {
 				resizable: false,
 				frozen: false,
 				width: 40,
 				hozAlign: 'center',
 				formatter: 'rownum'
 				// editable: false
-			}, */
-			rowHeader: {
-				headerSort: false,
-				resizable: false,
-				frozen: true,
-				width: 50,
-				headerHozAlign: 'center',
-				hozAlign: 'center',
-				formatter: 'rowSelection',
-				titleFormatter: 'rowSelection',
-				cellClick: function (e, cell) {
-					cell.getRow().toggleSelect();
-				}
 			},
 
 			//setup cells to work as a spreadsheet

@@ -39,7 +39,7 @@
 				field: 'subtotal',
 				label: 'Subtotal',
 				width: '100px',
-				hidden: true,
+				hidden: false,
 				resizeable: true
 			},
 			{
