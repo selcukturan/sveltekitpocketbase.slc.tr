@@ -9020,7 +9020,7 @@
 			selectableRange: true,
 			selectableRangeColumns: true,
 			selectableRangeRows: true,
-			selectableRangeClearCells: true,
+			// selectableRangeClearCells: false,
 
 			//change edit trigger mode to make cell navigation smoother
 			editTriggerEvent: 'dblclick',
@@ -9038,8 +9038,8 @@
 
 			rowHeader: {
 				resizable: false,
-				frozen: false,
-				width: 40,
+				frozen: true,
+				width: 50,
 				hozAlign: 'center',
 				formatter: 'rownum'
 				// editable: false
@@ -9050,12 +9050,12 @@
 				headerSort: false,
 				headerHozAlign: 'center',
 				vertAlign: 'middle', // text-ellipsis'i bozuyor
-				editor: 'input',
+				// editor: 'input',
 				resizable: 'header',
 				width: 100
 			},
 			columns: [
-				{ title: 'Name', field: 'name', width: 200 },
+				{ title: 'Name', field: 'name', width: 200, editor: 'input' },
 				{
 					title: 'Progress',
 					field: 'progress',
@@ -9085,7 +9085,7 @@
 			const typableNumber = '1234567890';
 			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
 			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-			const typableOther = " =-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
 			const { key } = e;
 
 			if (
