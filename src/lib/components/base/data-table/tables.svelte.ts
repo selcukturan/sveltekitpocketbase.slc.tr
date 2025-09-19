@@ -765,10 +765,8 @@ class Table<TData extends Row> {
 		if (!isAllSelected && currentSelectedCount === 0) {
 			console.log(2);
 			this.srcData.forEach((row, index) => {
-				if (
-					typeof row.subtotal !== 'string' ||
-					!row.subtotal.startsWith('subtotal')
-				) {
+				const isSubtotalRow = String(row.id).startsWith('subtotal');
+				if (!isSubtotalRow) {
 					this.#selectedRows.add(index);
 				}
 			});
@@ -810,8 +808,9 @@ class Table<TData extends Row> {
 	private countableRowsLength = () => {
 		if (this.srcSubtotal === true) {
 			return this.srcData.filter((row) => {
-				if (row && typeof row.subtotal === 'string') {
-					return !row.subtotal.startsWith('subtotal');
+				const isSubtotalRow = String(row.id).startsWith('subtotal');
+				if (isSubtotalRow) {
+					return false; // subtotal satırlarını sayma
 				}
 				return true; // subtotal yoksa veya string değilse, sayıma dahil et
 			}).length;
