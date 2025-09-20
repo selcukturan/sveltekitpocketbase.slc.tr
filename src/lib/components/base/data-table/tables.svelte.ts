@@ -449,16 +449,16 @@ class Table<TData extends Row> {
 					const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
 					const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
-					if (scrollDelta > scrollThreshold) {
-						ticking = true;
-						/* requestAnimationFrame(() => { */
-						this.cachedScrollTop = newScrollTop;
-						this.updateVisibleIndexes();
-						tick().then(() => {
-							ticking = false;
-						});
-						/* }); */
-					}
+					/* if (scrollDelta > scrollThreshold) { */
+					ticking = true;
+					/* requestAnimationFrame(() => { */
+					this.cachedScrollTop = newScrollTop;
+					this.updateVisibleIndexes();
+					tick().then(() => {
+						ticking = false;
+					});
+					/* }); */
+					/* } */
 				}
 			};
 
