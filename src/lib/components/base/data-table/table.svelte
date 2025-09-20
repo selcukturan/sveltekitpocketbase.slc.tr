@@ -1,7 +1,7 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Sources, Row, Column, Footer } from './types';
 	import { getTable } from './tables.svelte';
-	import { fly } from 'svelte/transition';
+	/* import { fly } from 'svelte/transition'; */
 
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
@@ -199,11 +199,15 @@
 	<div
 		class="bg-tertiary-50 border-tertiary-200 flex h-14 items-center border-t"
 	>
-		<span class="flex-1">Count: {t.srcData.length}</span>
+		<!-- <span class="flex-1">Count: {t.srcData.length}</span>
 		<span class="flex flex-1 items-center justify-center">
 			<button>Load More</button>
 		</span>
-		<span class="flex-1 text-right">{t.version}</span>
+		<span class="flex-1 text-right">{t.version}</span> -->
+
+		<span>{t.rowIndices.overscanStart}-</span>
+		<span>{t.rowIndices.overscanEnd}-</span>
+		<span>{t.rowIndices.scrollTop}</span>
 	</div>
 </div>
 
