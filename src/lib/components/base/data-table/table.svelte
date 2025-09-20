@@ -22,21 +22,28 @@
 			<div {...t.trhProps}>
 				{#if t.srcRowSelection !== 'none'}
 					<!-- TH selection -->
-					<div {...t.thSelectionProps}>
+					<div {...t.thSelectionProps} style:grid-area={`1 / 1 / 2 / 2;`}>
 						{@render selectionContent({ type: 'header' })}
 					</div>
 				{/if}
 				{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 					{@const col = colWrapper.data}
 					{@const coi = colWrapper.coi}
-					<!-- TH -->
-					<div {...t.thProps} data-coi={coi}>
+					<!-- TH-->
+					<div
+						{...t.thProps}
+						data-coi={coi}
+						style:grid-area={`1 / ${ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / 2 / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
+					>
 						{@render baseContent({ type: 'header', col, coi })}
 					</div>
 				{/each}
 				{#if t.srcRowAction}
 					<!-- TH action -->
-					<div {...t.thActionProps}>
+					<div
+						{...t.thActionProps}
+						style:grid-area={`1 / ${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / 2 / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
+					>
 						{@render actionContent({ type: 'header', roi: -1 })}
 					</div>
 				{/if}
@@ -114,6 +121,9 @@
 							{@attach t.tdFocusAttach(originalCell)}
 							class:slc-table-td-focused={isCellFocused}
 							style:grid-row-start={rowStart}
+							style:grid-column={ci +
+								1 +
+								(t.srcRowSelection !== 'none' ? 1 : 0)}
 							{tabindex}
 						>
 							{#if isEditable}

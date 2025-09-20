@@ -1466,8 +1466,7 @@ class Table<TData extends Row> {
 	};
 	thProps = {
 		role: 'columnheader',
-		class: 'slc-table-th',
-		style: `grid-row-start: 1;`
+		class: 'slc-table-th'
 	};
 	thResizeProps = {
 		class: 'slc-table-th-resize',
@@ -1475,13 +1474,11 @@ class Table<TData extends Row> {
 	};
 	thSelectionProps = {
 		role: 'columnheader',
-		class: 'slc-table-th slc-table-th-selection',
-		style: `grid-row-start: 1;`
+		class: 'slc-table-th slc-table-th-selection'
 	};
 	thActionProps = {
 		role: 'columnheader',
-		class: 'slc-table-th slc-table-th-action',
-		style: `grid-row-start: 1;`
+		class: 'slc-table-th slc-table-th-action'
 	};
 	trdProps = {
 		role: 'row',
