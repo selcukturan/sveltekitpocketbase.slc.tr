@@ -209,8 +209,6 @@
 		<span>{t.rowIndices.overscanEnd}-</span>
 		<span>{t.rowIndices.scrollTop}</span>
 		<span> | </span>
-		<span>{t.gridTemplateRows}</span>
-		<span> | </span>
 		<span>{t.srcData.length}</span>
 	</div>
 </div>
