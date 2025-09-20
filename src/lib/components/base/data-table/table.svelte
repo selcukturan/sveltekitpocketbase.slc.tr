@@ -208,6 +208,8 @@
 		<span>{t.rowIndices.overscanStart}-</span>
 		<span>{t.rowIndices.overscanEnd}-</span>
 		<span>{t.rowIndices.scrollTop}</span>
+		<span> | </span>
+		<span>{t.gridTemplateRows}</span>
 	</div>
 </div>
 

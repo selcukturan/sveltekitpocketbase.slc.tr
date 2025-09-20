@@ -186,7 +186,7 @@ class Table<TData extends Row> {
 		return this.#headerRowsCountState;
 	}
 
-	readonly #gridTemplateRows = $derived.by(() => {
+	readonly gridTemplateRows = $derived.by(() => {
 		const repeatThead =
 			this.headerRowsCountState >= 1
 				? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)`
@@ -449,16 +449,16 @@ class Table<TData extends Row> {
 					const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
 					const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
-					/* if (scrollDelta > scrollThreshold) { */
-					ticking = true;
-					/* requestAnimationFrame(() => { */
-					this.cachedScrollTop = newScrollTop;
-					this.updateVisibleIndexes();
-					tick().then(() => {
-						ticking = false;
-					});
-					/* }); */
-					/* } */
+					if (scrollDelta > scrollThreshold) {
+						ticking = true;
+						/* requestAnimationFrame(() => { */
+						this.cachedScrollTop = newScrollTop;
+						this.updateVisibleIndexes();
+						tick().then(() => {
+							ticking = false;
+						});
+						/* }); */
+					}
 				}
 			};
 
@@ -1430,7 +1430,7 @@ class Table<TData extends Row> {
 		class: 'slc-table',
 		tabindex: -1,
 		style: `
-			grid-template-rows: ${this.#gridTemplateRows};
+			grid-template-rows: ${this.gridTemplateRows};
 			grid-template-columns: ${this.#gridTemplateColumns};
 			scroll-padding-block-start: ${this.headerRowsCountState > 0 ? `${this.headerRowsCountState * this.srcTheadRowHeight}px` : 'unset'};
 			scroll-padding-block-end: ${this.srcFooters.length > 0 ? `${this.srcFooters.length * this.srcTfootRowHeight}px` : 'unset'};
