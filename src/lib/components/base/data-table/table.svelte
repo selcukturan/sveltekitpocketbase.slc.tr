@@ -488,19 +488,9 @@
 		/* contain: inline-size; */
 	}
 	.slc-table-container {
-		/* flex: 1 1 0%; */
-		/* overflow: hidden; */
-		/* contain: inline-size;
-		display: flex;
-		block-size: 100%;
-		position: relative; */
-
-		display: flex;
-		flex-direction: column;
-		box-sizing: border-box;
-		block-size: 100vh;
-
-		contain: inline-size;
+		flex: 1 1 0%;
+		overflow: hidden;
+		/* contain: inline-size; */
 	}
 	/******************************************************/
 	.slc-table {

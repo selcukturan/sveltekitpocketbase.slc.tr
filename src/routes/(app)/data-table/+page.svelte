@@ -107,8 +107,8 @@
 				width: 'minmax(75px,1fr)',
 				resizeable: true
 			}
-		],
-		footers: [{ order: 'any footer' }, { quantity: 'maybe sum' }]
+		] /* ,
+		footers: [{ order: 'any footer' }, { quantity: 'maybe sum' }] */
 	};
 
 	const table = createTable<TestDatatableResponse>(sources);
