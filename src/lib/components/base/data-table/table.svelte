@@ -219,11 +219,11 @@
 		</span>
 		<span class="flex-1 text-right">{t.version}</span> -->
 
-		<span>{t.rowIndices.overscanStart}-</span>
+		<!-- <span>{t.rowIndices.overscanStart}-</span>
 		<span>{t.rowIndices.overscanEnd}-</span>
 		<span>{t.rowIndices.scrollTop}</span>
 		<span> | </span>
-		<span>{t.srcData.length}</span>
+		<span>{t.srcData.length}</span> -->
 	</div>
 </div>
 
@@ -499,41 +499,29 @@
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
-		/* contain: inline-size; */
+		contain: inline-size;
 	}
 	.slc-table-container {
 		flex: 1 1 0%;
 		overflow: hidden;
-		/* contain: inline-size; */
+		contain: inline-size;
+		block-size: 100%;
 	}
 	/******************************************************/
 	.slc-table {
 		display: grid;
 		block-size: 100%;
-		/* width: 100%;
-		height: 100%; */
-		contain: content; /* content; */
+		contain: content;
 		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
-		overscroll-behavior: none;
+		/* overscroll-behavior: none; */
 		background-color: var(--color-surface-50);
 	}
 	.slc-table:before {
 		content: '';
-
-		content: '';
 		grid-column: 1 / -1;
 		grid-row: 1 / -1;
-
-		/* 2. Adım: Hesaplanmış toplam yüksekliği ver */
-		/* height: 1650px; */ /* (1*40px) + (46*35px) */
-
-		/* 3. Adım: Tıklama gibi olayları engelle */
-		/* pointer-events: none; */
-
-		/* İçeriğin görünmemesini sağla */
-		/* visibility: hidden; */
 	}
 	/* .slc-table:focus-within {
 		outline: 2px solid var(--color-error-400);
