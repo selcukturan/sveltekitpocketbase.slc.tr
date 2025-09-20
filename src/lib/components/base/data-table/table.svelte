@@ -505,6 +505,21 @@
 		overscroll-behavior: none;
 		background-color: var(--color-surface-50);
 	}
+	.slc-table:before {
+		content: '';
+		/* Grid'in en başına yerleşsin */
+		grid-column: 1 / -1; /* Tüm sütunları kapla */
+		grid-row: 1;
+
+		/* 2. Adım: Hesaplanmış toplam yüksekliği ver */
+		/* height: 1650px; */ /* (1*40px) + (46*35px) */
+
+		/* 3. Adım: Tıklama gibi olayları engelle */
+		pointer-events: none;
+
+		/* İçeriğin görünmemesini sağla */
+		visibility: hidden;
+	}
 	/* .slc-table:focus-within {
 		outline: 2px solid var(--color-error-400);
 		outline-offset: -2px;

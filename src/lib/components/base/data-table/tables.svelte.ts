@@ -1440,6 +1440,8 @@ class Table<TData extends Row> {
 			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.srcRowAction === false ? 'unset' : `${this.srcRowActionColumnWidth}px`};`
 					: ''
 			}
+
+			
 					*/
 	tableProps = $derived({
 		role: 'grid',
