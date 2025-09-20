@@ -17,6 +17,7 @@
 			bind:this={t.element}
 			{@attach t.virtualScrollAttach()}
 		>
+			<div class="grid-sizer"></div>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.trhProps}>
@@ -505,14 +506,13 @@
 		overscroll-behavior: none;
 		background-color: var(--color-surface-50);
 	}
-	.slc-table:before {
-		content: '';
+	.grid-sizer {
 		/* Grid'in en başına yerleşsin */
 		grid-column: 1 / -1; /* Tüm sütunları kapla */
 		grid-row: 1;
 
 		/* 2. Adım: Hesaplanmış toplam yüksekliği ver */
-		/* height: 1650px; */ /* (1*40px) + (46*35px) */
+		height: 1650px; /* (1*40px) + (46*35px) */
 
 		/* 3. Adım: Tıklama gibi olayları engelle */
 		pointer-events: none;
