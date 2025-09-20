@@ -488,15 +488,9 @@
 		/* contain: inline-size; */
 	}
 	.slc-table-container {
-		/* flex: 1 1 0%;
-		overflow: hidden; */
+		flex: 1 1 0%;
+		overflow: hidden;
 		/* contain: inline-size; */
-		display: flex;
-		flex-direction: column;
-		box-sizing: border-box;
-		block-size: 100vh;
-		padding: 8px;
-		contain: inline-size;
 	}
 	/******************************************************/
 	.slc-table {
@@ -504,8 +498,8 @@
 		block-size: 100%;
 		/* width: 100%;
 		height: 100%; */
-		contain: strict; /* content; */
-		/* content-visibility: auto; */
+		contain: content; /* content; */
+		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
