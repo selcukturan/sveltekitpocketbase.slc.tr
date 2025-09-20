@@ -515,7 +515,7 @@
 		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
-		/* overscroll-behavior: none; */
+		overscroll-behavior: none;
 		background-color: var(--color-surface-50);
 	}
 	.slc-table:before {
