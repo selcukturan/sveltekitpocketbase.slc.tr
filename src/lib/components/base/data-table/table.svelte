@@ -66,6 +66,7 @@
 					class:slc-table-trd-subtotal3={String(row.id).startsWith('subtotal3')}
 					class:slc-table-trd-subtotal4={String(row.id).startsWith('subtotal4')}
 					class:slc-table-trd-subtotal5={String(row.id).startsWith('subtotal5')}
+					style:--slc-grid-row-start={rowStart}
 				>
 					<!-- TD selection -->
 					{#if t.srcRowSelection !== 'none'}
@@ -86,7 +87,7 @@
 							role="gridcell"
 							{@attach t.tdFocusAttach(originalCell)}
 							class:slc-table-td-focused={isCellFocused}
-							style:grid-row-start={rowStart}
+							style:grid-column={`1 / 2`}
 							{tabindex}
 						>
 							{#if cancelEditable}
@@ -120,10 +121,9 @@
 							role="gridcell"
 							{@attach t.tdFocusAttach(originalCell)}
 							class:slc-table-td-focused={isCellFocused}
-							style:grid-row-start={rowStart}
-							style:grid-column={ci +
-								1 +
-								(t.srcRowSelection !== 'none' ? 1 : 0)}
+							style:grid-column={`${
+								ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
+							} / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							{tabindex}
 						>
 							{#if isEditable}
@@ -152,7 +152,7 @@
 							role="gridcell"
 							{@attach t.tdFocusAttach(originalCell)}
 							class:slc-table-td-focused={isCellFocused}
-							style:grid-row-start={rowStart}
+							style:grid-column={`${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							{tabindex}
 						>
 							{#if cancelEditable}
@@ -595,6 +595,7 @@
 		background-color: inherit;
 	}
 	.slc-table-td {
+		grid-row-start: var(--slc-grid-row-start);
 		position: relative;
 		border-color: var(--color-surface-200);
 		border-right-width: 1px;
