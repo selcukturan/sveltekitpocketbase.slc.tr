@@ -1434,7 +1434,8 @@ class Table<TData extends Row> {
 		style: `
 			grid-template-rows: ${this.#gridTemplateRows};
 			grid-template-columns: ${this.#gridTemplateColumns};
-			scroll-padding-block: ${`${this.headerRowsCountState * this.srcTheadRowHeight}px ${this.srcFooters.length * this.srcTfootRowHeight}px`};			
+			${this.headerRowsCountState > 0 ? `scroll-padding-block-start: ${this.headerRowsCountState * this.srcTheadRowHeight}px` : ''};
+			${this.srcFooters.length > 0 ? `scroll-padding-block-end: ${this.srcFooters.length * this.srcTfootRowHeight}px` : ''};
 			scroll-padding-inline-start: ${this.focusedCellState?.colIndex === -1 || this.srcRowSelection === 'none' ? 'unset' : `${this.srcRowSelectionColumnWidth}px`};
 			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.srcRowAction === false ? 'unset' : `${this.srcRowActionColumnWidth}px`};			
 		`,
