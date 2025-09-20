@@ -1425,8 +1425,7 @@ class Table<TData extends Row> {
 	containerProps = {
 		class: 'slc-table-container'
 	};
-	/* scroll-padding-block-start: ${this.headerRowsCountState > 0 ? `${this.headerRowsCountState * this.srcTheadRowHeight}px` : 'unset'};
-	scroll-padding-block-end: ${this.srcFooters.length > 0 ? `${this.srcFooters.length * this.srcTfootRowHeight}px` : 'unset'}; */
+	/*  */
 	tableProps = $derived({
 		role: 'grid',
 		class: 'slc-table',
@@ -1434,8 +1433,8 @@ class Table<TData extends Row> {
 		style: `
 			grid-template-rows: ${this.#gridTemplateRows};
 			grid-template-columns: ${this.#gridTemplateColumns};
-			${this.headerRowsCountState > 0 ? `scroll-padding-block-start: ${this.headerRowsCountState * this.srcTheadRowHeight}px` : ''};
-			${this.srcFooters.length > 0 ? `scroll-padding-block-end: ${this.srcFooters.length * this.srcTfootRowHeight}px` : ''};
+			scroll-padding-block-start: ${this.headerRowsCountState > 0 ? `${this.headerRowsCountState * this.srcTheadRowHeight}px` : 'unset'};
+			scroll-padding-block-end: ${this.srcFooters.length > 0 ? `${this.srcFooters.length * this.srcTfootRowHeight}px` : 'unset'};
 			scroll-padding-inline-start: ${this.focusedCellState?.colIndex === -1 || this.srcRowSelection === 'none' ? 'unset' : `${this.srcRowSelectionColumnWidth}px`};
 			scroll-padding-inline-end: ${this.focusedCellState?.colIndex === this.visibleColumns.length || this.srcRowAction === false ? 'unset' : `${this.srcRowActionColumnWidth}px`};			
 		`,
