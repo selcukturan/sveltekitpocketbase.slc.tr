@@ -86,7 +86,8 @@
 				editable: true,
 				resizeable: true
 			}
-		]
+		],
+		footers: [{ note: 'c' }, { region: 'x' }]
 	};
 
 	const table = createTable<TestSubtotalViewResponse>(sources);
