@@ -498,8 +498,8 @@
 		block-size: 100%;
 		/* width: 100%;
 		height: 100%; */
-		contain: strict; /* content; */
-		/* content-visibility: auto; */
+		contain: content; /* content; */
+		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
