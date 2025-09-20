@@ -1450,7 +1450,10 @@ class Table<TData extends Row> {
 			grid-template-columns: ${this.#gridTemplateColumns};
 			
 		`,
-		'aria-colcount': this.visibleColumns.length,
+		'aria-colcount':
+			this.visibleColumns.length +
+			(this.srcRowSelection !== 'none' ? 1 : 0) +
+			(this.srcRowAction ? 1 : 0),
 		'aria-rowcount':
 			this.srcData.length + this.srcFooters.length + this.headerRowsCountState
 	});
