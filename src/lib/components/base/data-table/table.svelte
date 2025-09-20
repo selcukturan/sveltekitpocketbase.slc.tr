@@ -172,14 +172,14 @@
 						t.srcData.length + t.headerRowsCountState + footerindex + 1}
 					{@const bottom = `${(t.srcFooters.length - footerindex - 1) * t.srcTfootRowHeight}px`}
 					<!-- ********** TRF ********** -->
-					<div {...t.trfProps}>
+					<div
+						{...t.trfProps}
+						style:--slc-grid-row-start={rowStart}
+						style:--slc-summary-row-bottom={bottom}
+					>
 						<!-- TF selection -->
 						{#if t.srcRowSelection !== 'none'}
-							<div
-								{...t.tfSelectionProps}
-								style:bottom
-								style:grid-row-start={rowStart}
-							>
+							<div {...t.tfSelectionProps} style:grid-column={`1 / 2`}>
 								{@render selectionContent({ type: 'footer' })}
 							</div>
 						{/if}
@@ -187,7 +187,12 @@
 						{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
 							{@const col = colWrapper.data}
 							{@const coi = colWrapper.coi}
-							<div {...t.tfProps} style:bottom style:grid-row-start={rowStart}>
+							<div
+								{...t.tfProps}
+								style:grid-column={`${
+									ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
+								} / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
+							>
 								{@render baseContent({ type: 'footer', foot, col, coi })}
 							</div>
 						{/each}
@@ -195,8 +200,7 @@
 						{#if t.srcRowAction}
 							<div
 								{...t.tfActionProps}
-								style:bottom
-								style:grid-row-start={rowStart}
+								style:grid-column={`${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							>
 								{@render actionContent({ type: 'footer' })}
 							</div>
@@ -517,18 +521,19 @@
 	}
 	.slc-table:before {
 		content: '';
-		/* Grid'in en başına yerleşsin */
-		grid-column: 1 / -1; /* Tüm sütunları kapla */
-		grid-row: 1;
+
+		content: '';
+		grid-column: 1 / -1;
+		grid-row: 1 / -1;
 
 		/* 2. Adım: Hesaplanmış toplam yüksekliği ver */
 		/* height: 1650px; */ /* (1*40px) + (46*35px) */
 
 		/* 3. Adım: Tıklama gibi olayları engelle */
-		pointer-events: none;
+		/* pointer-events: none; */
 
 		/* İçeriğin görünmemesini sağla */
-		visibility: hidden;
+		/* visibility: hidden; */
 	}
 	/* .slc-table:focus-within {
 		outline: 2px solid var(--color-error-400);
@@ -609,6 +614,8 @@
 		background-color: inherit;
 	}
 	.slc-table-tf {
+		grid-row-start: var(--slc-grid-row-start);
+		bottom: var(--slc-summary-row-bottom);
 		border-color: var(--color-surface-200);
 		border-right-width: 1px;
 		border-top-width: 1px;
