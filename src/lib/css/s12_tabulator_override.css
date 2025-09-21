@@ -1,9 +1,12 @@
 .slc-tabulator {
 	--slc-tb-color: var(--color-surface-950);
 	--slc-tb-border-color: var(--color-surface-200);
-	--slc-tb-rownum-bg: var(--color-surface-100);
-	--slc-tb-rownum-bg-highlight: var(--color-surface-200);
-	--slc-tb-rownum-bg-selected: var(--color-secondary-300);
+	--slc-tb-header-bg: var(--color-surface-100);
+	--slc-tb-header-bg-highlight: var(--color-surface-200);
+	--slc-tb-header-bg-selected: var(--color-secondary-300);
+	--slc-tb-rowheader-bg: var(--color-surface-100);
+	--slc-tb-rowheader-bg-highlight: var(--color-surface-200);
+	--slc-tb-rowheader-bg-selected: var(--color-secondary-300);
 }
 
 /* OK */
@@ -14,7 +17,7 @@
 
 /* OK */
 .slc-tabulator.tabulator .tabulator-header {
-	background-color: transparent;
+	background-color: var(--slc-tb-header-bg);
 	color: var(--slc-tb-color);
 	border-bottom: 1px solid var(--slc-tb-border-color);
 	font-weight: var(--font-weight-normal);
@@ -22,29 +25,29 @@
 
 /* OK */
 .slc-tabulator.tabulator .tabulator-header .tabulator-col {
-	background-color: transparent;
+	background-color: var(--slc-tb-header-bg);
 	border-right: 1px solid var(--slc-tb-border-color);
 }
 
 /* COLUMN SELECT */
 .slc-tabulator.tabulator .tabulator-header .tabulator-col.tabulator-range-highlight {
-	background-color: color-mix(in srgb, var(--color-surface-200) 90%, transparent);
+	background-color: var(--slc-tb-header-bg-highlight);
 	color: var(--slc-tb-color);
 }
 
 .slc-tabulator.tabulator .tabulator-header .tabulator-col.tabulator-range-selected {
-	background-color: var(--color-secondary-800);
+	background-color: var(--slc-tb-header-bg-selected);
 	color: var(--slc-tb-color);
 }
 
 /* ROW SELECT */
 .slc-tabulator.tabulator .tabulator-row .tabulator-cell.tabulator-row-header {
-	background: var(--slc-tb-rownum-bg);
+	background: var(--slc-tb-rowheader-bg);
 }
 
 .slc-tabulator.tabulator .tabulator-row.tabulator-range-highlight .tabulator-cell.tabulator-range-row-header {
-	background-color: var(--slc-tb-rownum-bg-highlight);
-	border-right-color: var(--slc-tb-rownum-bg-selected) !important;
+	background-color: var(--slc-tb-rowheader-bg-highlight);
+	border-right-color: var(--slc-tb-rowheader-bg-selected) !important;
 	color: var(--slc-tb-color);
 }
 
@@ -54,7 +57,7 @@
 }
 
 .slc-tabulator.tabulator .tabulator-row.tabulator-range-highlight.tabulator-range-selected .tabulator-cell.tabulator-range-row-header {
-	background-color: var(--slc-tb-rownum-bg-selected);
+	background-color: var(--slc-tb-rowheader-bg-selected);
 	border-right-color: var(--slc-tb-border-color) !important;
 	color: var(--slc-tb-color);
 }
@@ -85,19 +88,26 @@
 
 /* overlay */
 .slc-tabulator.tabulator .tabulator-row .tabulator-cell.tabulator-range-selected:not(.tabulator-range-only-cell-selected):not(.tabulator-range-row-header) {
-	background-color: color-mix(in srgb, var(--color-secondary-200) 20%, transparent);
+	background-color: color-mix(in srgb, var(--color-secondary-200) 50%, transparent);
 }
 
 .slc-tabulator.tabulator .tabulator-tableholder .tabulator-range-overlay .tabulator-range {
-	border: 1px solid var(--color-secondary-800);
+	border: 1px solid transparent;
 }
 
 .slc-tabulator.tabulator .tabulator-tableholder .tabulator-range-overlay .tabulator-range.tabulator-range-active::after {
-	background-color: var(--color-secondary-800);
+	background-color: transparent;
 }
 
 .slc-tabulator.tabulator .tabulator-tableholder .tabulator-range-overlay .tabulator-range-cell-active {
-	border: 2px solid var(--color-secondary-800);
+	border: 2px solid transparent;
+}
+
+.slc-tabulator.tabulator .tabulator-row .tabulator-cell.tabulator-range-only-cell-selected {
+	outline-width: 2px;
+	outline-offset: -2px;
+	outline-style: solid;
+	outline-color: var(--color-secondary-800);
 }
 
 /* frozen columns */

@@ -12,11 +12,7 @@
 <div {...t.mainProps}>
 	<div {...t.containerProps}>
 		<!-- TABLE -->
-		<div
-			{...t.tableProps}
-			bind:this={t.element}
-			{@attach t.virtualScrollAttach()}
-		>
+		<div {...t.tableProps} bind:this={t.element} use:t.mount>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.trhProps}>

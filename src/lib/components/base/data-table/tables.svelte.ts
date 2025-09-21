@@ -19,6 +19,7 @@ import { getContext, setContext } from 'svelte';
 import { tick } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
 import type { Attachment } from 'svelte/attachments';
+import type { Action } from 'svelte/action';
 
 class Table<TData extends Row> {
 	// ################################## BEGIN Default Sources #####################################################################################################################
@@ -52,30 +53,6 @@ class Table<TData extends Row> {
 
 	constructor(sources: Sources<TData>) {
 		this.sources(sources);
-
-		$effect(() => {
-			const currentElement = this.element;
-
-			if (currentElement && this.#resizeObserver == null) {
-				// ilk kurulum
-				// this.cachedClientHeight = Math.round(currentElement.clientHeight);
-				this.updateVisibleIndexes();
-
-				// Debounced Resize Handler
-				this.#resizeObserver = new ResizeObserver((entries) => {
-					const entry = entries[0];
-					if (entry?.contentRect.height > 0) {
-						this.debouncedResizeHandler(entry.contentRect.height);
-					}
-				});
-				this.#resizeObserver.observe(currentElement);
-			}
-
-			return () => {
-				this.#resizeObserver?.disconnect();
-				this.#resizeObserver = null;
-			};
-		});
 
 		$effect(() => {
 			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
@@ -432,49 +409,61 @@ class Table<TData extends Row> {
 		return processedData;
 	});
 
-	readonly virtualScrollAttach = (): Attachment => {
+	readonly mount: Action = (tableNode: HTMLElement) => {
 		// Tablo DOM'a monte edildi
 		let ticking = false;
 
-		return (tableNode) => {
-			// Tablo virtual scroll kurulumu
-			this.cachedClientHeight = Math.round(tableNode.clientHeight);
-			this.cachedScrollTop = Math.round(tableNode.scrollTop);
+		// Tablo virtual scroll kurulumu
+		this.cachedClientHeight = Math.round(tableNode.clientHeight);
+		this.cachedScrollTop = Math.round(tableNode.scrollTop);
+		this.updateVisibleIndexes();
 
-			const scroll = () => {
-				if (!ticking) {
-					const newScrollTop = Math.round(tableNode.scrollTop);
-					const cachedScrollTop = this.cachedScrollTop ?? 0;
-					const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-					const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
-					const scrollThreshold = this.srcTbodyRowHeight * overscan;
-
-					if (scrollDelta > scrollThreshold) {
-						ticking = true;
-						/* requestAnimationFrame(() => { */
-						this.cachedScrollTop = newScrollTop;
-						this.updateVisibleIndexes();
-						tick().then(() => {
-							ticking = false;
-						});
-						/* }); */
-					}
+		if (this.#resizeObserver == null) {
+			// Debounced Resize Handler
+			this.#resizeObserver = new ResizeObserver((entries) => {
+				const entry = entries[0];
+				if (entry?.contentRect.height > 0) {
+					this.debouncedResizeHandler(entry.contentRect.height);
 				}
-			};
+			});
+			this.#resizeObserver.observe(tableNode);
+		}
 
-			// mouse ile sürükleyerek scroll yapıldığında veya scrollbara bir şekilde tıklandığında, hücre focus'unun kaybolmaması için. Bu tablonun focus olmasını engeller.
-			const mousedown = (e: Event) => {
-				e.preventDefault();
-			};
+		const scroll = () => {
+			if (!ticking) {
+				const newScrollTop = Math.round(tableNode.scrollTop);
+				const cachedScrollTop = this.cachedScrollTop ?? 0;
+				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
+				const overscan = Math.max(0, this.#defaultOverscanThreshold - 1);
+				const scrollThreshold = this.srcTbodyRowHeight * overscan;
 
-			tableNode.addEventListener('scroll', scroll, { passive: true });
-			tableNode.addEventListener('mousedown', mousedown);
+				if (scrollDelta > scrollThreshold) {
+					ticking = true;
+					this.cachedScrollTop = newScrollTop;
+					this.updateVisibleIndexes();
+					tick().then(() => {
+						ticking = false;
+					});
+				}
+			}
+		};
 
-			return () => {
+		// mouse ile sürükleyerek scroll yapıldığında veya scrollbara bir şekilde tıklandığında, hücre focus'unun kaybolmaması için. Bu tablonun focus olmasını engeller.
+		const mousedown = (e: Event) => {
+			e.preventDefault();
+		};
+
+		tableNode.addEventListener('scroll', scroll, { passive: true });
+		tableNode.addEventListener('mousedown', mousedown);
+
+		return {
+			destroy: () => {
 				// Tablo DOM'dan kaldırıldı
 				tableNode.removeEventListener('scroll', scroll);
 				tableNode.removeEventListener('mousedown', mousedown);
-			};
+				this.#resizeObserver?.disconnect();
+				this.#resizeObserver = null;
+			}
 		};
 	};
 	// ################################## END Vertical Virtual Data #######################################################################################################################
