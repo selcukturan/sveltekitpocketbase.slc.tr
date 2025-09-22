@@ -45,7 +45,7 @@ class Table<TData extends Row> {
 	// ################################## END Default Sources #######################################################################################################################
 
 	// ################################## BEGIN Constructor #########################################################################################################################
-	version = 'v0.0.1-alpha.167';
+	version = 'v0.0.1-alpha.168';
 	element?: HTMLDivElement = $state();
 	#src: Sources<TData> = $state(this.#defSrc); // UYARI: Veri okumak için kullanmayın. Sadece sınıf içindeyken kaynakları değiştirmek için kullanın. `this.#src.width = '100px'` gibi.
 	private readonly sources = (src: Sources<TData>) => (this.#src = src); // Set All Sources Method
@@ -53,35 +53,6 @@ class Table<TData extends Row> {
 
 	constructor(sources: Sources<TData>) {
 		this.sources(sources);
-
-		$effect(() => {
-			const currentActionActiveRowIndex = this.#actionActiveRowIndex;
-
-			if (currentActionActiveRowIndex != null) {
-				window.addEventListener('click', this.handleWindowOutsideClick);
-				window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
-			}
-
-			return () => {
-				if (currentActionActiveRowIndex != null) {
-					window.removeEventListener('click', this.handleWindowOutsideClick);
-					window.removeEventListener(
-						'mousedown',
-						this.handleWindowOutsideMousedown
-					);
-				}
-			};
-		});
-
-		$effect(() => {
-			const currentHeaderCheckbox = this.headerCheckbox;
-
-			if (currentHeaderCheckbox != null) {
-				currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate;
-			}
-
-			return () => {};
-		});
 	}
 	// ################################## END Constructor ##########################################################################################################################
 
@@ -375,8 +346,9 @@ class Table<TData extends Row> {
 			endIndex == null ||
 			dataLength === 0 ||
 			startIndex > endIndex
-		)
+		) {
 			return [];
+		}
 
 		const processedData: Array<{ data: TData; roi: number }> = [];
 
@@ -456,13 +428,37 @@ class Table<TData extends Row> {
 		tableNode.addEventListener('scroll', scroll, { passive: true });
 		tableNode.addEventListener('mousedown', mousedown);
 
-		return {
-			destroy: () => {
-				// Tablo DOM'dan kaldırıldı
+		$effect(() => {
+			return () => {
+				console.log("Tablo DOM'dan kaldırıldı");
 				tableNode.removeEventListener('scroll', scroll);
 				tableNode.removeEventListener('mousedown', mousedown);
 				this.#resizeObserver?.disconnect();
 				this.#resizeObserver = null;
+			};
+		});
+	};
+
+	readonly mountAttach: Attachment = () => {
+		const currentActionActiveRowIndex = this.#actionActiveRowIndex;
+
+		if (currentActionActiveRowIndex != null) {
+			window.addEventListener('click', this.handleWindowOutsideClick);
+			window.addEventListener('mousedown', this.handleWindowOutsideMousedown);
+		}
+
+		const currentHeaderCheckbox = this.headerCheckbox;
+		if (currentHeaderCheckbox != null) {
+			currentHeaderCheckbox.indeterminate = this.#headerIsIndeterminate;
+		}
+
+		return () => {
+			if (currentActionActiveRowIndex != null) {
+				window.removeEventListener('click', this.handleWindowOutsideClick);
+				window.removeEventListener(
+					'mousedown',
+					this.handleWindowOutsideMousedown
+				);
 			}
 		};
 	};
@@ -1006,342 +1002,337 @@ class Table<TData extends Row> {
 	// ################################## END Set Columns Width ##########################################################################################################################
 
 	// ################################## BEGIN Actions ####################################################################################################################################
-	readonly tdFocusAttach = (params: {
-		rowIndex: number;
-		colIndex: number;
-		field?: Field<TData>;
-		cancelEditable?: boolean;
-	}): Attachment => {
-		// düğüm DOM'a monte edilmiştir
-		return (node) => {
-			if (!(node instanceof HTMLDivElement)) return;
+	readonly tdMount: Action<
+		HTMLElement,
+		{
+			rowIndex: number;
+			colIndex: number;
+			field?: Field<TData>;
+			cancelEditable?: boolean;
+		}
+	> = (
+		node: HTMLElement,
+		params: {
+			rowIndex: number;
+			colIndex: number;
+			field?: Field<TData>;
+			cancelEditable?: boolean;
+		}
+	) => {
+		const mousedown = (e: Event) => {
+			const cellToFocus: Required<FocucedCell> = {
+				rowIndex: params.rowIndex,
+				colIndex: params.colIndex,
+				originalCell: `${params.rowIndex}_${params.colIndex}`,
+				tabIndex: 0
+			};
 
-			const mousedown = (e: Event) => {
-				const cellToFocus: Required<FocucedCell> = {
-					rowIndex: params.rowIndex,
-					colIndex: params.colIndex,
-					originalCell: `${params.rowIndex}_${params.colIndex}`,
-					tabIndex: 0
-				};
+			if (cellToFocus.originalCell === this.focusedCellState?.originalCell) {
+				return;
+			}
 
-				if (cellToFocus.originalCell === this.focusedCellState?.originalCell)
-					return;
+			this.#focusedCellState = cellToFocus;
+			this.updateVisibleIndexes();
+			tick().then(() => {
+				node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+				node.focus({ preventScroll: true });
+				this.onCellFocusChangeRun?.({
+					rowIndex: cellToFocus.rowIndex,
+					colIndex: cellToFocus.colIndex
+				});
+			});
+		};
 
-				this.#focusedCellState = cellToFocus;
-				this.updateVisibleIndexes();
-				tick().then(() => {
+		const dblclick = (e: MouseEvent) => {
+			// e.stopPropagation();
+			// e.preventDefault();
+
+			const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+			if (rowIndex == null || colIndex == null || originalCell == null) return;
+
+			const column = this.visibleColumns[colIndex];
+			if (this.#editingCell || !column || !column.data.editable) return;
+
+			const cancelEditable = params.cancelEditable ?? false;
+			const field = params.field;
+			if (cancelEditable || field == null) return;
+
+			const key = 'F2'; // F2 tuşu ile düzenleme başlatılacak
+
+			this.createCellInput(key, rowIndex, colIndex, field);
+		};
+
+		const click = (e: MouseEvent) => {
+			// e.stopPropagation();
+			// e.preventDefault();
+		};
+
+		let ticking = false;
+		const keydown = (e: KeyboardEvent) => {
+			const { key } = e;
+			const typableNumber = '1234567890';
+			const typableLower = 'abcdefghijklmnopqrstuvwxyz';
+			const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
+
+			// --- İzin Verilmeyen Tuşları Filtrele ---
+			const isNavigationKey = [
+				'ArrowUp',
+				'ArrowDown',
+				'ArrowLeft',
+				'ArrowRight',
+				'Home',
+				'End',
+				'PageUp',
+				'PageDown',
+				'Enter',
+				'Tab'
+			].includes(key);
+			const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(
+				key
+			); // Boşluk, F2, Kopyala/Yapıştır, Escape
+			const isTypable =
+				typableNumber.includes(key) ||
+				typableLower.includes(key) ||
+				typableUpper.includes(key) ||
+				typableOther.includes(key);
+
+			// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
+			if (!isNavigationKey && !isActionKey && !isTypable) {
+				if (
+					!(
+						(e.ctrlKey || e.metaKey) &&
+						(key === 'c' || key === 'C' || key === 'v' || key === 'V')
+					)
+				) {
+					return; // İzin verilmeyen tuş
+				}
+			}
+
+			const { rowIndex, colIndex, originalCell } = this.focusedCellState ?? {};
+			if (rowIndex == null || colIndex == null || originalCell == null) {
+				return; // Odak yoksa (şimdilik) çık
+			}
+
+			const field = params.field;
+			const cancelEditable = params.cancelEditable ?? false;
+
+			// --- Anlık Eylemler ---
+			// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
+			if (
+				(key === 'Escape' && !cancelEditable) ||
+				(key === 'F2' && !cancelEditable) ||
+				key === ' ' ||
+				((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
+				((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
+				(!e.ctrlKey &&
+					!e.metaKey &&
+					isTypable &&
+					!this.#editingCell &&
+					!cancelEditable)
+			) {
+				if (key === 'Escape' && this.#editingCell) {
+					e.preventDefault();
+					this.removeCellInput();
 					node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 					node.focus({ preventScroll: true });
-					this.onCellFocusChangeRun?.({
-						rowIndex: cellToFocus.rowIndex,
-						colIndex: cellToFocus.colIndex
-					});
-				});
-			};
-
-			const dblclick = (e: MouseEvent) => {
-				// e.stopPropagation();
-				// e.preventDefault();
-
-				const { rowIndex, colIndex, originalCell } =
-					this.focusedCellState ?? {};
-				if (rowIndex == null || colIndex == null || originalCell == null)
-					return;
-
-				const column = this.visibleColumns[colIndex];
-				if (this.#editingCell || !column || !column.data.editable) return;
-
-				const cancelEditable = params.cancelEditable ?? false;
-				const field = params.field;
-				if (cancelEditable || field == null) return;
-
-				const key = 'F2'; // F2 tuşu ile düzenleme başlatılacak
-
-				this.createCellInput(key, rowIndex, colIndex, field);
-			};
-
-			const click = (e: MouseEvent) => {
-				// e.stopPropagation();
-				// e.preventDefault();
-			};
-
-			let ticking = false;
-			const keydown = (e: KeyboardEvent) => {
-				const { key } = e;
-				const typableNumber = '1234567890';
-				const typableLower = 'abcdefghijklmnopqrstuvwxyz';
-				const typableUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-				const typableOther = "=-`[\\]';,./ğüşıöçĞÜŞİÖÇ";
-
-				// --- İzin Verilmeyen Tuşları Filtrele ---
-				const isNavigationKey = [
-					'ArrowUp',
-					'ArrowDown',
-					'ArrowLeft',
-					'ArrowRight',
-					'Home',
-					'End',
-					'PageUp',
-					'PageDown',
-					'Enter',
-					'Tab'
-				].includes(key);
-				const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(
-					key
-				); // Boşluk, F2, Kopyala/Yapıştır, Escape
-				const isTypable =
-					typableNumber.includes(key) ||
-					typableLower.includes(key) ||
-					typableUpper.includes(key) ||
-					typableOther.includes(key);
-
-				// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
-				if (!isNavigationKey && !isActionKey && !isTypable) {
+					this.onCellFocusChangeRun?.({ rowIndex, colIndex });
+				} else if (isTypable || key === 'F2') {
 					if (
-						!(
-							(e.ctrlKey || e.metaKey) &&
-							(key === 'c' || key === 'C' || key === 'v' || key === 'V')
-						)
+						this.#editingCell ||
+						field == null ||
+						!this.visibleColumns[colIndex].data.editable
+					)
+						return;
+					e.preventDefault();
+					this.createCellInput(key, rowIndex, colIndex, field);
+				} else if (key === ' ') {
+					// hücre düzenleniyorsa boşluk engellenmesin
+					if (!this.#editingCell) {
+						e.preventDefault();
+					}
+					if (
+						this.srcRowSelection !== 'none' &&
+						colIndex === -1 &&
+						!cancelEditable
 					) {
-						return; // İzin verilmeyen tuş
+						this.toggleRowSelection(rowIndex);
+					} else if (
+						this.srcRowAction &&
+						colIndex === this.visibleColumns.length &&
+						!cancelEditable
+					) {
+						this.toggleActionPopup(rowIndex);
+					} else {
+						// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
 					}
 				}
+				return; // Anlık eylemden sonra çık
+			}
 
-				const { rowIndex, colIndex, originalCell } =
-					this.focusedCellState ?? {};
-				if (rowIndex == null || colIndex == null || originalCell == null) {
-					return; // Odak yoksa (şimdilik) çık
-				}
+			// --- Gezinme Eylemleri ---
+			if (!ticking && isNavigationKey) {
+				// e.preventDefault();
+				ticking = true;
 
-				const field = params.field;
-				const cancelEditable = params.cancelEditable ?? false;
+				let cellToFocus: Required<FocucedCell> = {
+					rowIndex,
+					colIndex,
+					originalCell,
+					tabIndex: 0
+				};
+				const initialOriginalCell = cellToFocus.originalCell;
 
-				// --- Anlık Eylemler ---
-				// İlgili anlık eylemleri buraya ekleyin (kopyala, yapıştır, F2, yazma, boşlukla seçme)
-				if (
-					(key === 'Escape' && !cancelEditable) ||
-					(key === 'F2' && !cancelEditable) ||
-					key === ' ' ||
-					((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'C')) ||
-					((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'V')) ||
-					(!e.ctrlKey &&
-						!e.metaKey &&
-						isTypable &&
-						!this.#editingCell &&
-						!cancelEditable)
-				) {
-					if (key === 'Escape' && this.#editingCell) {
+				const rowFirstIndex = 0;
+				const rowLastIndex = this.srcData.length - 1;
+				const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
+				const colLastIndex = this.srcRowAction
+					? this.visibleColumns.length
+					: this.visibleColumns.length - 1;
+
+				let forceUpdate = false;
+
+				if (key === 'ArrowUp') {
+					e.preventDefault();
+					cellToFocus.rowIndex = Math.max(
+						rowFirstIndex,
+						cellToFocus.rowIndex - 1
+					);
+				} else if (key === 'ArrowDown' || key === 'Enter') {
+					e.preventDefault();
+					cellToFocus.rowIndex = Math.min(
+						rowLastIndex,
+						cellToFocus.rowIndex + 1
+					);
+				} else if (key === 'ArrowLeft') {
+					if (!this.#editingCell) {
 						e.preventDefault();
-						this.removeCellInput();
-						node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-						node.focus({ preventScroll: true });
-						this.onCellFocusChangeRun?.({ rowIndex, colIndex });
-					} else if (isTypable || key === 'F2') {
-						if (
-							this.#editingCell ||
-							field == null ||
-							!this.visibleColumns[colIndex].data.editable
-						)
-							return;
-						e.preventDefault();
-						this.createCellInput(key, rowIndex, colIndex, field);
-					} else if (key === ' ') {
-						// hücre düzenleniyorsa boşluk engellenmesin
-						if (!this.#editingCell) {
-							e.preventDefault();
-						}
-						if (
-							this.srcRowSelection !== 'none' &&
-							colIndex === -1 &&
-							!cancelEditable
-						) {
-							this.toggleRowSelection(rowIndex);
-						} else if (
-							this.srcRowAction &&
-							colIndex === this.visibleColumns.length &&
-							!cancelEditable
-						) {
-							this.toggleActionPopup(rowIndex);
-						} else {
-							// this.createCellInput(key, rowIndex, colIndex, this.visibleColumns[colIndex].field);
-						}
+						cellToFocus.colIndex = cellToFocus.colIndex - 1;
+						cellToFocus.colIndex = Math.max(
+							colFirstIndex,
+							cellToFocus.colIndex
+						); // LEFT
 					}
-					return; // Anlık eylemden sonra çık
-				}
-
-				// --- Gezinme Eylemleri ---
-				if (!ticking && isNavigationKey) {
-					// e.preventDefault();
-					ticking = true;
-
-					let cellToFocus: Required<FocucedCell> = {
-						rowIndex,
-						colIndex,
-						originalCell,
-						tabIndex: 0
-					};
-					const initialOriginalCell = cellToFocus.originalCell;
-
-					const rowFirstIndex = 0;
-					const rowLastIndex = this.srcData.length - 1;
-					const colFirstIndex = this.srcRowSelection !== 'none' ? -1 : 0;
-					const colLastIndex = this.srcRowAction
-						? this.visibleColumns.length
-						: this.visibleColumns.length - 1;
-
-					let forceUpdate = false;
-
-					if (key === 'ArrowUp') {
-						e.preventDefault();
+				} else if (e.shiftKey && key === 'Tab') {
+					e.preventDefault();
+					cellToFocus.colIndex = cellToFocus.colIndex - 1;
+					if (cellToFocus.colIndex < colFirstIndex) {
 						cellToFocus.rowIndex = Math.max(
 							rowFirstIndex,
 							cellToFocus.rowIndex - 1
 						);
-					} else if (key === 'ArrowDown' || key === 'Enter') {
+						cellToFocus.colIndex = colLastIndex;
+					} else {
+						cellToFocus.colIndex = Math.max(
+							colFirstIndex,
+							cellToFocus.colIndex
+						); // LEFT
+					}
+				} else if (key === 'ArrowRight') {
+					if (!this.#editingCell) {
 						e.preventDefault();
+						cellToFocus.colIndex = cellToFocus.colIndex + 1;
+						cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
+					}
+				} else if (!e.shiftKey && key === 'Tab') {
+					e.preventDefault();
+					cellToFocus.colIndex = cellToFocus.colIndex + 1;
+					if (cellToFocus.colIndex > colLastIndex) {
 						cellToFocus.rowIndex = Math.min(
 							rowLastIndex,
 							cellToFocus.rowIndex + 1
 						);
-					} else if (key === 'ArrowLeft') {
-						if (!this.#editingCell) {
-							e.preventDefault();
-							cellToFocus.colIndex = cellToFocus.colIndex - 1;
-							cellToFocus.colIndex = Math.max(
-								colFirstIndex,
-								cellToFocus.colIndex
-							); // LEFT
-						}
-					} else if (e.shiftKey && key === 'Tab') {
+						cellToFocus.colIndex = colFirstIndex;
+					} else {
+						cellToFocus.colIndex = Math.min(colLastIndex, cellToFocus.colIndex); // RIGHT
+					}
+				} else if (key === 'Home') {
+					if (!this.#editingCell) {
 						e.preventDefault();
-						cellToFocus.colIndex = cellToFocus.colIndex - 1;
-						if (cellToFocus.colIndex < colFirstIndex) {
-							cellToFocus.rowIndex = Math.max(
-								rowFirstIndex,
-								cellToFocus.rowIndex - 1
-							);
-							cellToFocus.colIndex = colLastIndex;
-						} else {
-							cellToFocus.colIndex = Math.max(
-								colFirstIndex,
-								cellToFocus.colIndex
-							); // LEFT
-						}
-					} else if (key === 'ArrowRight') {
-						if (!this.#editingCell) {
-							e.preventDefault();
-							cellToFocus.colIndex = cellToFocus.colIndex + 1;
-							cellToFocus.colIndex = Math.min(
-								colLastIndex,
-								cellToFocus.colIndex
-							); // RIGHT
-						}
-					} else if (!e.shiftKey && key === 'Tab') {
-						e.preventDefault();
-						cellToFocus.colIndex = cellToFocus.colIndex + 1;
-						if (cellToFocus.colIndex > colLastIndex) {
-							cellToFocus.rowIndex = Math.min(
-								rowLastIndex,
-								cellToFocus.rowIndex + 1
-							);
+						if (e.ctrlKey || e.metaKey) {
+							cellToFocus.rowIndex = rowFirstIndex;
 							cellToFocus.colIndex = colFirstIndex;
+							forceUpdate = true;
 						} else {
-							cellToFocus.colIndex = Math.min(
-								colLastIndex,
-								cellToFocus.colIndex
-							); // RIGHT
+							cellToFocus.colIndex = colFirstIndex;
 						}
-					} else if (key === 'Home') {
-						if (!this.#editingCell) {
-							e.preventDefault();
-							if (e.ctrlKey || e.metaKey) {
-								cellToFocus.rowIndex = rowFirstIndex;
-								cellToFocus.colIndex = colFirstIndex;
-								forceUpdate = true;
-							} else {
-								cellToFocus.colIndex = colFirstIndex;
-							}
-						}
-					} else if (key === 'End') {
-						if (!this.#editingCell) {
-							e.preventDefault();
-							if (e.ctrlKey || e.metaKey) {
-								cellToFocus.rowIndex = rowLastIndex;
-								cellToFocus.colIndex = colLastIndex;
-								forceUpdate = true;
-							} else {
-								cellToFocus.colIndex = colLastIndex;
-							}
-						}
-					} else if (key === 'PageUp') {
-						e.preventDefault();
-						const visibleEnd = this.#rowIndices.visibleEnd;
-						const visibleStart = this.#rowIndices.visibleStart;
-						if (visibleEnd == null || visibleStart == null) return;
-
-						const index = cellToFocus.rowIndex - (visibleEnd - visibleStart);
-						cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
-						forceUpdate = true;
-					} else if (key === 'PageDown') {
-						e.preventDefault();
-						const visibleEnd = this.#rowIndices.visibleEnd;
-						const visibleStart = this.#rowIndices.visibleStart;
-						if (visibleEnd == null || visibleStart == null) return;
-
-						const index = cellToFocus.rowIndex + (visibleEnd - visibleStart);
-						cellToFocus.rowIndex = Math.min(rowLastIndex, index);
-						forceUpdate = true;
 					}
-
-					cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
-
-					if (cellToFocus.originalCell === initialOriginalCell) {
-						ticking = false;
-						return; // Odaklanmış hücre değişmedi, çık
-					}
-
-					this.#focusedCellState = cellToFocus;
-					this.updateVisibleIndexes(forceUpdate);
-					tick().then(() => {
-						const nextFocusedCellNode =
-							this.element?.querySelector<HTMLDivElement>(
-								'.slc-table-td-focused'
-							);
-						if (nextFocusedCellNode != null) {
-							nextFocusedCellNode.scrollIntoView({
-								block: 'nearest',
-								inline: 'nearest'
-							});
-							nextFocusedCellNode.focus({ preventScroll: true });
-							this.onCellFocusChangeRun?.({
-								rowIndex: cellToFocus.rowIndex,
-								colIndex: cellToFocus.colIndex
-							});
+				} else if (key === 'End') {
+					if (!this.#editingCell) {
+						e.preventDefault();
+						if (e.ctrlKey || e.metaKey) {
+							cellToFocus.rowIndex = rowLastIndex;
+							cellToFocus.colIndex = colLastIndex;
+							forceUpdate = true;
+						} else {
+							cellToFocus.colIndex = colLastIndex;
 						}
-						ticking = false;
-					});
+					}
+				} else if (key === 'PageUp') {
+					e.preventDefault();
+					const visibleEnd = this.#rowIndices.visibleEnd;
+					const visibleStart = this.#rowIndices.visibleStart;
+					if (visibleEnd == null || visibleStart == null) return;
+
+					const index = cellToFocus.rowIndex - (visibleEnd - visibleStart);
+					cellToFocus.rowIndex = Math.max(rowFirstIndex, index);
+					forceUpdate = true;
+				} else if (key === 'PageDown') {
+					e.preventDefault();
+					const visibleEnd = this.#rowIndices.visibleEnd;
+					const visibleStart = this.#rowIndices.visibleStart;
+					if (visibleEnd == null || visibleStart == null) return;
+
+					const index = cellToFocus.rowIndex + (visibleEnd - visibleStart);
+					cellToFocus.rowIndex = Math.min(rowLastIndex, index);
+					forceUpdate = true;
 				}
-			};
 
-			node.addEventListener('keydown', keydown);
-			node.addEventListener('mousedown', mousedown);
-			node.addEventListener('dblclick', dblclick);
-			node.addEventListener('click', click);
+				cellToFocus.originalCell = `${cellToFocus.rowIndex}_${cellToFocus.colIndex}`;
 
+				if (cellToFocus.originalCell === initialOriginalCell) {
+					ticking = false;
+					return; // Odaklanmış hücre değişmedi, çık
+				}
+
+				this.#focusedCellState = cellToFocus;
+				this.updateVisibleIndexes(forceUpdate);
+				tick().then(() => {
+					const nextFocusedCellNode =
+						this.element?.querySelector<HTMLDivElement>(
+							'.slc-table-td-focused'
+						);
+					if (nextFocusedCellNode != null) {
+						nextFocusedCellNode.scrollIntoView({
+							block: 'nearest',
+							inline: 'nearest'
+						});
+						nextFocusedCellNode.focus({ preventScroll: true });
+						this.onCellFocusChangeRun?.({
+							rowIndex: cellToFocus.rowIndex,
+							colIndex: cellToFocus.colIndex
+						});
+					}
+					ticking = false;
+				});
+			}
+		};
+
+		node.addEventListener('keydown', keydown);
+		node.addEventListener('mousedown', mousedown);
+		node.addEventListener('dblclick', dblclick);
+		node.addEventListener('click', click);
+
+		$effect(() => {
 			return () => {
-				/* if (
-					params.cancelEditable &&
-					this.cancelEditableIndex.has(params.rowIndex)
-				) {
-					this.cancelEditableIndex.delete(params.rowIndex);
-				} */
-
 				node.removeEventListener('keydown', keydown);
 				node.removeEventListener('mousedown', mousedown);
 				node.removeEventListener('dblclick', dblclick);
 				node.removeEventListener('click', click);
 			};
-		};
+		});
+
+		/* }; */
 	};
 	// ################################## END Actions ######################################################################################################################################
 

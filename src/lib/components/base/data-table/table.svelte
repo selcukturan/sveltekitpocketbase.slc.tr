@@ -12,7 +12,12 @@
 <div {...t.mainProps}>
 	<div {...t.containerProps}>
 		<!-- TABLE -->
-		<div {...t.tableProps} bind:this={t.element} use:t.mount>
+		<div
+			{...t.tableProps}
+			bind:this={t.element}
+			use:t.mount
+			{@attach t.mountAttach}
+		>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.trhProps}>
@@ -81,7 +86,7 @@
 						<div
 							{...t.tdSelectionProps}
 							role="gridcell"
-							{@attach t.tdFocusAttach(originalCell)}
+							use:t.tdMount={originalCell}
 							class:slc-table-td-focused={isCellFocused}
 							style:grid-column={`1 / 2`}
 							{tabindex}
@@ -115,7 +120,7 @@
 						<div
 							{...t.tdProps}
 							role="gridcell"
-							{@attach t.tdFocusAttach(originalCell)}
+							use:t.tdMount={originalCell}
 							class:slc-table-td-focused={isCellFocused}
 							style:grid-column={`${
 								ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
@@ -146,7 +151,7 @@
 						<div
 							{...t.tdActionProps}
 							role="gridcell"
-							{@attach t.tdFocusAttach(originalCell)}
+							use:t.tdMount={originalCell}
 							class:slc-table-td-focused={isCellFocused}
 							style:grid-column={`${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							{tabindex}
