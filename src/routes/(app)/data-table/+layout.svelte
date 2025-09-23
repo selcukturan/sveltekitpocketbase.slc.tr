@@ -37,12 +37,6 @@
 	];
 </script>
 
-<svelte:boundary>
-	<PageLayout {pageSidebardata}>
-		{@render children()}
-	</PageLayout>
-
-	{#snippet pending()}
-		<p>loading...</p>
-	{/snippet}
-</svelte:boundary>
+<PageLayout {pageSidebardata}>
+	{@render children?.()}
+</PageLayout>
