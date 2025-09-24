@@ -2,6 +2,7 @@
 	import type { TestDatatableResponse } from '$lib/client/types/pocketbase-types';
 	import { getFullList } from '$lib/remotes/testDataTable.remote';
 	import { page } from '$app/state';
+	import { Counter } from '$lib/client/app/router.svelte';
 
 	import {
 		DataTable,
@@ -9,6 +10,35 @@
 		type Sources
 	} from '$lib/components/base/data-table';
 	import { goto } from '$app/navigation';
+
+	/* const router = counter(page.url.hash);
+
+	$inspect('router', router.data); */
+
+	type Router = {
+		getDataTrigger: {
+			filter: { field: string; operator: string; value: unknown }[];
+			sort: string[];
+			page: number;
+			perPage: number;
+			skipTotal: boolean;
+		};
+		actionTrigger: { recordId: string; cmd: string };
+	};
+
+	const routerxx: Router = {
+		getDataTrigger: {
+			filter: [{ field: 'producer', operator: '!=', value: '' }],
+			sort: ['-created'],
+			page: 1,
+			perPage: 10,
+			skipTotal: false
+		},
+		actionTrigger: {
+			recordId: 'v5mi1csejcv2s0o',
+			cmd: 'run'
+		}
+	};
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -187,6 +217,8 @@
 	/* beforeNavigate(({ cancel }) => {
 		cancel();
 	}); */
+
+	const counter = new Counter();
 </script>
 
 <div class="flex h-full flex-col">
@@ -206,6 +238,10 @@
 			class="bg-warning-300 p-3"
 		>
 			RRRR
+		</button>
+
+		<button onclick={counter.increment} class="bg-warning-300 p-3">
+			count: {counter.count} | double: {counter.double}
 		</button>
 	</div>
 	<div class="h-full flex-1 overflow-hidden">
