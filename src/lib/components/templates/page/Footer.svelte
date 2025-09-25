@@ -4,9 +4,15 @@
 
 	type Props = SvelteHTMLElements['footer'] & {
 		children?: Snippet;
+		boundary?: boolean;
 	};
 
-	let { children, class: classes, ...attributes }: Props = $props();
+	let {
+		children,
+		class: classes,
+		boundary = false,
+		...attributes
+	}: Props = $props();
 </script>
 
 <footer
@@ -15,9 +21,20 @@
 	style:border-left="0px"
 	{...attributes}
 >
-	{#if children}
+	{#if boundary}
+		<svelte:boundary>
+			{#if children}
+				{@render children()}
+			{:else}
+				<span>No content available.</span>
+			{/if}
+			{#snippet pending()}
+				<p>Loading...</p>
+			{/snippet}
+		</svelte:boundary>
+	{:else if children}
 		{@render children()}
 	{:else}
-		<span>İçerik yok.</span>
+		<span>No content available.</span>
 	{/if}
 </footer>

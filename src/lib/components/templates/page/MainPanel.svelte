@@ -4,9 +4,15 @@
 
 	type Props = SvelteHTMLElements['div'] & {
 		children?: Snippet;
+		boundary?: boolean;
 	};
 
-	let { children, class: classes, ...attributes }: Props = $props();
+	let {
+		children,
+		class: classes,
+		boundary = false,
+		...attributes
+	}: Props = $props();
 </script>
 
 <div
@@ -16,10 +22,21 @@
 	<div
 		class="panel bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40"
 	>
-		{#if children}
+		{#if boundary}
+			<svelte:boundary>
+				{#if children}
+					{@render children()}
+				{:else}
+					<span>No content available.</span>
+				{/if}
+				{#snippet pending()}
+					<p>Loading...</p>
+				{/snippet}
+			</svelte:boundary>
+		{:else if children}
 			{@render children()}
 		{:else}
-			<span>İçerik yok.</span>
+			<span>No content available.</span>
 		{/if}
 	</div>
 </div>

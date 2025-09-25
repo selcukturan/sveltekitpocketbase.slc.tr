@@ -214,6 +214,14 @@
 	<div
 		class="bg-tertiary-50 border-tertiary-200 flex h-14 items-center border-t"
 	>
+		<p>
+			pending promises:
+			{#if $effect.pending()}
+				{$effect.pending()}
+			{:else}
+				0
+			{/if}
+		</p>
 		<!-- <span class="flex-1">Count: {t.srcData.length}</span>
 		<span class="flex flex-1 items-center justify-center">
 			<button>Load More</button>

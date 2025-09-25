@@ -8,23 +8,16 @@
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 
-<Page boundary>
-	<!-- <Page.Header>
+<Page>
+	<Page.Header>
 		<p>Header</p>
-	</Page.Header> -->
+	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table>
+		<Page.Main.Table boundary>
 			<PageContent />
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
-		<p>
-			pending promises:
-			{#if $effect.pending()}
-				{$effect.pending()}
-			{:else}
-				0
-			{/if}
-		</p>
+		<p>Footer</p>
 	</Page.Footer>
 </Page>
