@@ -20,9 +20,15 @@ export class Counter {
 		console.log('4 - ', this.#count);
 	}
 
+	// Bir metodu bir event handler (olay yöneticisi) veya callback olarak başka bir bileşene veya API'ye geçireceğiniz zaman idealdir. Bu, this bağlamını manuel olarak bind() etmek zorunda kalmadan korur.
 	increment = () => {
 		this.count += 1;
 	};
+
+	// Eğer metodu sadece sınıf içindeki diğer metodlar tarafından çağrılacaksa veya doğrudan instance.method() şeklinde çağrılacaksa, bu daha temiz ve prototip tabanlı yapıyı koruyan bir yaklaşımdır.
+	test() {
+		return 'test';
+	}
 }
 
 /* 
