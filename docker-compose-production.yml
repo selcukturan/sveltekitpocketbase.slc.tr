@@ -42,8 +42,19 @@ networks:
 # Domains for S App: https://sveltekitpocketbase.slc.tr:5554
 # Domains for S Pocketbase: https://sveltekitpocketbasedb.slc.tr:8097
 
-# Custom Build Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production build --pull
-# Custom Start Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d
+# Custom Build Command:
+# docker compose --file ./docker-compose-production.yml --env-file ./.env.production build --pull
+#
+# Bu komut, docker-compose-production.yml dosyasında tanımlanan ve bir Dockerfile ile oluşturulması gereken servislerin imajlarını inşa eder veya yeniden inşa eder. Eğer kodunuzda veya Dockerfile dosyanızda bir değişiklik yaptıysanız, bu değişikliğin imaja yansıması için build komutunu çalıştırmanız gerekir.
+# --pull: Bu bayrak (flag) kritik öneme sahiptir. build işlemi başlamadan önce, Dockerfile dosyanızda belirttiğiniz temel imajın (örneğin FROM node:18 satırındaki node:18 imajı) en güncel versiyonunu her zaman Docker Hub gibi kayıtlı (registry) sunuculardan çekmeye çalışır.
+#
+# Ne Zaman Kullanılır?
+# - Uygulama kodunuzda bir değişiklik yaptığınızda.
+# - Dockerfile dosyasında bir değişiklik yaptığınızda (örneğin yeni bir bağımlılık eklediğinizde).
+# - Projeyi ilk kez kurarken imajları oluşturmak için.
 
+# Custom Start Command:
+# docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d
+#
 # OR (build: anahtar kelimesiyle tanımlanmış servislerin imajlarını yeniden oluşturur)
 # Custom Start Command: docker compose --file ./docker-compose-production.yml --env-file ./.env.production up -d --build
