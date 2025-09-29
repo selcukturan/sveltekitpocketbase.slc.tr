@@ -6,11 +6,16 @@
 		createTable,
 		type Sources
 	} from '$lib/components/base/data-table';
+	import { type FilterDerived } from '$lib/client/utils/filter-string-helper';
 
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/client/app/navigator.svelte';
 
-	const navigator = new Navigator(page.url.hash);
+	type FilterInput = {
+		producer: string;
+		grape: number;
+	};
+	const navigator = new Navigator<FilterInput>(page.url.hash);
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -158,38 +163,55 @@
 		}
 	});
 
-	/**
-	 * &filter=status%3D"active"+%26%26+caption%3D"User+1"
-	 * &sort=-%40rowid
-	 */
-	const hashServerFilter = $derived(navigator.dataGetterTrigger(page.url.hash));
-	let aPromise = $derived(getFullList(hashServerFilter));
-	const filteredData = $derived(await aPromise);
-	/**
-	 * &recordId=%3Auser%3Aad960bad-b126-4167-9f27-9974d676121c
-	 */
-	// const hashClientAction = $derived(hash);
-	// const dataAction = $derived(await getOne(hashClientAction));
+	navigator.filterInput = {
+		producer: (navigator.getFilterInputValue('producer') ||
+			'') as FilterInput['producer'],
+		grape: (navigator.getFilterInputValue('grape') || 0) as FilterInput['grape']
+	};
+	$inspect(navigator.filterInput, 'navigator.filterInput');
+
+	const filterDerived: FilterDerived<FilterInput> = $derived.by(() => {
+		return {
+			type: 'group',
+			operator: '&&',
+			children: [
+				{
+					type: 'condition',
+					field: 'producer',
+					operator: '~',
+					value: navigator.filterInput['producer']
+				},
+				{
+					type: 'condition',
+					field: 'grape',
+					operator: '~',
+					value: navigator.filterInput['grape']
+				}
+			]
+		};
+	});
+
+	const filter = $derived(await getFullList(page.url.hash));
 
 	$effect(() => {
-		table.setSource('data', filteredData.items);
+		table.setSource('data', filter.items);
 	});
 </script>
 
 <div class="flex h-full flex-col">
 	<div>
-		<a href="#Canan" class="bg-warning-300 p-3">FF-1</a>
-		<span> | </span>
-		<button onclick={() => navigator.goto(`Selin`)} class="bg-warning-300 p-3"
-			>FF-2</button
-		>
-		<span> | </span>
-		<button onclick={() => navigator.goto(``)} class="bg-warning-300 p-3"
-			>FF-3</button
+		<input
+			type="text"
+			bind:value={navigator.filterInput.producer}
+			class="border"
+		/>
+		<button
+			onclick={() => navigator.triggerFilter(filterDerived)}
+			class="bg-warning-300 p-3">getFilter</button
 		>
 		<span> | </span>
 		<button
-			onclick={() => getFullList(hashServerFilter).refresh()}
+			onclick={() => getFullList(page.url.hash).refresh()}
 			class="bg-warning-300 p-3"
 		>
 			RRRR
