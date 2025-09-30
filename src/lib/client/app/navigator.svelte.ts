@@ -90,10 +90,11 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		if (Object.keys(this.filterInput).length === 0) return;
 
 		if (hashUrl !== this.currentHash) {
-			goto(hashUrl); // getRemoteFilterParams'ı tetikler
-			console.log('run goto with hashUrl:', hashUrl);
-			this.currentHash = hashUrl;
-			console.log('set currentHash:', this.currentHash);
+			goto(hashUrl).then(() => {
+				console.log('run goto with hashUrl:', hashUrl);
+				this.currentHash = hashUrl;
+				console.log('set currentHash:', this.currentHash);
+			});
 		}
 	}
 
