@@ -65,10 +65,8 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			// Öncelik 2: URL'de hash yoksa ve bir başlangıç filtresi (initialFilterInput) sağlanmışsa.
 			this.filterInput = initialFilterInput;
 
-			tick().then(() => {
-				const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
-				this.goto(hash);
-			});
+			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
+			this.goto(hash);
 		}
 	}
 
@@ -89,16 +87,14 @@ export class Navigator<TInput extends Record<string, unknown>> {
 	}
 
 	goto(hashUrl: string) {
-		console.log(
-			'Object.keys(this.filterInput).length',
-			Object.keys(this.filterInput).length
-		);
 		if (Object.keys(this.filterInput).length === 0) return;
 
-		/* if (hashUrl !== this.currentHash) { */
-		goto(hashUrl); // getRemoteFilterParams'ı tetikler
-		this.currentHash = hashUrl;
-		/* } */
+		if (hashUrl !== this.currentHash) {
+			goto(hashUrl); // getRemoteFilterParams'ı tetikler
+			console.log('run goto with hashUrl:', hashUrl);
+			this.currentHash = hashUrl;
+			console.log('set currentHash:', this.currentHash);
+		}
 	}
 
 	getFilterInputValue(itemKey: keyof TInput) {
