@@ -95,10 +95,10 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		);
 		if (Object.keys(this.filterInput).length === 0) return;
 
-		if (hashUrl !== this.currentHash) {
-			goto(hashUrl); // getRemoteFilterParams'ı tetikler
-			this.currentHash = hashUrl;
-		}
+		/* if (hashUrl !== this.currentHash) { */
+		goto(hashUrl); // getRemoteFilterParams'ı tetikler
+		this.currentHash = hashUrl;
+		/* } */
 	}
 
 	getFilterInputValue(itemKey: keyof TInput) {
