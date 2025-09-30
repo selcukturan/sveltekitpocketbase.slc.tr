@@ -4,6 +4,7 @@ import {
 	hashUrlToFilterObject
 } from '$lib/client/utils/filter-string-helper';
 import { goto } from '$app/navigation';
+import { untrack } from 'svelte';
 
 export class Navigator<TInput extends Record<string, unknown>> {
 	#currentHash = $state('');
@@ -77,10 +78,23 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		} */
 	}
 
-	triggerFilter(filterState: FilterDerived<TInput>) {
-		const hash = filterObjectToHashUrl(this.currentHash, filterState);
-		goto(hash);
-		this.currentHash = hash;
+	getRemoteFilterParams(hashUrl: string) {
+		const hash = filterObjectToHashUrl(
+			hashUrl,
+			untrack(() => this.filterDerived)
+		);
+		return hash;
+	}
+
+	triggerFilter(hashUrl: string) {
+		const hash = filterObjectToHashUrl(
+			hashUrl,
+			untrack(() => this.filterDerived)
+		);
+		if (hash !== this.currentHash) {
+			goto(hash); // getRemoteFilterParams'ı tetikler
+			this.currentHash = hash;
+		}
 	}
 
 	getFilterInputValue(itemKey: keyof TInput) {

@@ -6,7 +6,6 @@
 		createTable,
 		type Sources
 	} from '$lib/components/base/data-table';
-	import { type FilterDerived } from '$lib/client/utils/filter-string-helper';
 
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/client/app/navigator.svelte';
@@ -166,9 +165,11 @@
 		}
 	});
 
-	$inspect('navigator.filterInput', navigator.filterInput);
+	// $inspect('navigator.filterInput', navigator.filterInput);
 
-	const filter = $derived(await getFullList(navigator.currentHash));
+	const filter = $derived(
+		await getFullList(navigator.getRemoteFilterParams(page.url.hash))
+	);
 
 	$effect(() => {
 		table.setSource('data', filter.items);
@@ -183,12 +184,12 @@
 			class="border"
 		/>
 		<button
-			onclick={() => navigator.triggerFilter(navigator.filterDerived)}
+			onclick={() => navigator.triggerFilter(page.url.hash)}
 			class="bg-warning-300 p-3">getFilter</button
 		>
 		<span> | </span>
 		<button
-			onclick={() => getFullList(navigator.currentHash).refresh()}
+			onclick={() => getFullList(page.url.hash).refresh()}
 			class="bg-warning-300 p-3"
 		>
 			RRRR
