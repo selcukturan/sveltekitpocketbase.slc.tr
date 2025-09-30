@@ -173,7 +173,8 @@
 
 	let filter = $derived(await promise);
 
-	// $inspect('page.url.hash', page.url.hash);
+	$inspect('page.url.hash', page.url.hash);
+	$inspect('filter', filter);
 
 	$effect(() => {
 		table.setSource('data', filter.items);
