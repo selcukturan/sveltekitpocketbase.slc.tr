@@ -16,7 +16,7 @@
 		quantity: number;
 	};
 	const navigator = new Navigator<FilterInput>(page.url.hash, {
-		producer: 't',
+		producer: 'taş',
 		quantity: 22
 	});
 
@@ -166,27 +166,6 @@
 		}
 	});
 
-	const filterDerived: FilterDerived<FilterInput> = $derived.by(() => {
-		return {
-			type: 'group',
-			operator: '&&',
-			children: [
-				{
-					type: 'condition',
-					field: 'producer',
-					operator: '~',
-					value: navigator.filterInput['producer']
-				},
-				{
-					type: 'condition',
-					field: 'quantity',
-					operator: '>',
-					value: navigator.filterInput['quantity']
-				}
-			]
-		};
-	});
-
 	$inspect('navigator.filterInput', navigator.filterInput);
 
 	const filter = $derived(await getFullList(navigator.currentHash));
@@ -204,12 +183,12 @@
 			class="border"
 		/>
 		<button
-			onclick={() => navigator.triggerFilter(filterDerived)}
+			onclick={() => navigator.triggerFilter(navigator.filterDerived)}
 			class="bg-warning-300 p-3">getFilter</button
 		>
 		<span> | </span>
 		<button
-			onclick={() => getFullList(page.url.hash).refresh()}
+			onclick={() => getFullList(navigator.currentHash).refresh()}
 			class="bg-warning-300 p-3"
 		>
 			RRRR

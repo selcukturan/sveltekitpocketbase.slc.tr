@@ -22,6 +22,27 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		this.#filterInput = v;
 	}
 
+	filterDerived: FilterDerived<TInput> = $derived.by(() => {
+		return {
+			type: 'group',
+			operator: '&&',
+			children: [
+				{
+					type: 'condition',
+					field: 'producer',
+					operator: '~',
+					value: this.filterInput['producer'] as TInput[keyof TInput]
+				},
+				{
+					type: 'condition',
+					field: 'quantity',
+					operator: '>',
+					value: this.filterInput['quantity'] as TInput[keyof TInput]
+				}
+			]
+		};
+	});
+
 	constructor(initialHashUrl: string, initialFilterInput?: TInput) {
 		if (initialHashUrl.replace('#', '') !== '') {
 			const filterHashFlatObject = this.getFilterHashFlatObject(initialHashUrl);
@@ -32,11 +53,15 @@ export class Navigator<TInput extends Record<string, unknown>> {
 					] as TInput[typeof key];
 				}
 			}
+			this.currentHash = initialHashUrl;
 		} else if (initialFilterInput) {
 			this.filterInput = initialFilterInput;
+
+			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
+			goto(hash);
+			this.currentHash = hash;
 		}
 
-		this.currentHash = initialHashUrl;
 		/* if (initialFilterInput) {
 			this.filterInput = initialFilterInput;
 		} else {
