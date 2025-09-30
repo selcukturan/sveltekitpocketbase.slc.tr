@@ -89,6 +89,10 @@ export class Navigator<TInput extends Record<string, unknown>> {
 	}
 
 	goto(hashUrl: string) {
+		console.log(
+			'Object.keys(this.filterInput).length',
+			Object.keys(this.filterInput).length
+		);
 		if (Object.keys(this.filterInput).length === 0) return;
 
 		if (hashUrl !== this.currentHash) {
