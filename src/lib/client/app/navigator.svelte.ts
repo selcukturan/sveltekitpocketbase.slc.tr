@@ -6,15 +6,15 @@ import {
 import { goto } from '$app/navigation';
 
 export class Navigator<TInput extends Record<string, unknown>> {
-	#currentHash = '';
-	private get currentHash() {
+	#currentHash = $state('');
+	get currentHash() {
 		return this.#currentHash;
 	}
 	private set currentHash(v) {
 		this.#currentHash = v;
 	}
 
-	#filterInput: TInput = {} as TInput;
+	#filterInput: TInput = $state({} as TInput);
 	get filterInput() {
 		return this.#filterInput;
 	}
@@ -22,14 +22,40 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		this.#filterInput = v;
 	}
 
-	constructor(initialHash: string) {
-		this.currentHash = initialHash;
+	constructor(initialHashUrl: string, initialFilterInput?: TInput) {
+		if (initialHashUrl.replace('#', '') !== '') {
+			const filterHashFlatObject = this.getFilterHashFlatObject(initialHashUrl);
+			for (const key in filterHashFlatObject) {
+				if (filterHashFlatObject[key] !== null) {
+					this.filterInput[key] = filterHashFlatObject[
+						key
+					] as TInput[typeof key];
+				}
+			}
+		} else if (initialFilterInput) {
+			this.filterInput = initialFilterInput;
+		}
+
+		this.currentHash = initialHashUrl;
+		/* if (initialFilterInput) {
+			this.filterInput = initialFilterInput;
+		} else {
+			for (const key in this.filterInput) {
+				if (typeof this.filterInput[key] === 'string') {
+					this.filterInput[key] = '' as TInput[typeof key];
+				} else if (typeof this.filterInput[key] === 'number') {
+					this.filterInput[key] = 0 as TInput[typeof key];
+				} else {
+					this.filterInput[key] = null as TInput[typeof key];
+				}
+			}
+		} */
 	}
 
 	triggerFilter(filterState: FilterDerived<TInput>) {
 		const hash = filterObjectToHashUrl(this.currentHash, filterState);
-		this.currentHash = hash;
 		goto(hash);
+		this.currentHash = hash;
 	}
 
 	getFilterInputValue(itemKey: keyof TInput) {
@@ -54,9 +80,37 @@ export class Navigator<TInput extends Record<string, unknown>> {
 				: null;
 	}
 
-	goto(url: string) {
-		if (this.currentHash.replace('#', '') !== url) {
-			goto(`#${url}`);
+	getFilterHashValueByItemKey(itemKey: keyof TInput) {
+		const restoredFilterState = hashUrlToFilterObject<TInput>(this.currentHash);
+
+		if (restoredFilterState && Array.isArray(restoredFilterState.children)) {
+			const child = restoredFilterState.children.find(
+				(c: any) => c.field === itemKey
+			);
+			if (child && 'value' in child) {
+				return child.value as TInput[keyof TInput];
+			}
+			return null;
 		}
+
+		/* return restoredFilterState
+			? ((restoredFilterState.children[0] as any).value as TInput[keyof TInput])
+			: null; */
+	}
+
+	getFilterHashFlatObject(hashUrl: string) {
+		let returnedObject: Partial<TInput> = {};
+		const restoredFilterState = hashUrlToFilterObject<TInput>(hashUrl);
+		if (restoredFilterState && Array.isArray(restoredFilterState.children)) {
+			restoredFilterState.children.forEach((child: any) => {
+				if (child && 'field' in child && 'value' in child) {
+					returnedObject = {
+						...returnedObject,
+						[child.field]: child.value as TInput[keyof TInput]
+					};
+				}
+			});
+		}
+		return returnedObject;
 	}
 }

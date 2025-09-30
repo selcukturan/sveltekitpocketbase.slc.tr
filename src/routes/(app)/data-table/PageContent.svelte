@@ -13,9 +13,12 @@
 
 	type FilterInput = {
 		producer: string;
-		grape: number;
+		quantity: number;
 	};
-	const navigator = new Navigator<FilterInput>(page.url.hash);
+	const navigator = new Navigator<FilterInput>(page.url.hash, {
+		producer: 't',
+		quantity: 22
+	});
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -163,13 +166,6 @@
 		}
 	});
 
-	navigator.filterInput = {
-		producer: (navigator.getFilterInputValue('producer') ||
-			'') as FilterInput['producer'],
-		grape: (navigator.getFilterInputValue('grape') || 0) as FilterInput['grape']
-	};
-	$inspect(navigator.filterInput, 'navigator.filterInput');
-
 	const filterDerived: FilterDerived<FilterInput> = $derived.by(() => {
 		return {
 			type: 'group',
@@ -183,15 +179,17 @@
 				},
 				{
 					type: 'condition',
-					field: 'grape',
-					operator: '~',
-					value: navigator.filterInput['grape']
+					field: 'quantity',
+					operator: '>',
+					value: navigator.filterInput['quantity']
 				}
 			]
 		};
 	});
 
-	const filter = $derived(await getFullList(page.url.hash));
+	$inspect('navigator.filterInput', navigator.filterInput);
+
+	const filter = $derived(await getFullList(navigator.currentHash));
 
 	$effect(() => {
 		table.setSource('data', filter.items);

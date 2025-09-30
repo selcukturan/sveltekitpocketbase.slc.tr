@@ -7,13 +7,13 @@ import { buildPocketbaseFilterString } from '$lib/client/utils/filter-string-hel
 
 import { getRequestEvent, query } from '$app/server';
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getFullList = query(v.string(), async (hash: string) => {
 	const { locals } = getRequestEvent();
 
 	const filterString = buildPocketbaseFilterString(hash);
-
+	// console.log('filterString', filterString);
 	const records = await locals.auth.pb
 		.collection(Collections.TestDatatable)
 		.getList<TestDatatableResponse>(1, 1000, {
