@@ -4,7 +4,7 @@ import {
 	hashUrlToFilterObject
 } from '$lib/client/utils/filter-string-helper';
 import { goto } from '$app/navigation';
-import { untrack } from 'svelte';
+import { tick, untrack } from 'svelte';
 
 export class Navigator<TInput extends Record<string, unknown>> {
 	#currentHash = $state('');
@@ -65,8 +65,10 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			// Öncelik 2: URL'de hash yoksa ve bir başlangıç filtresi (initialFilterInput) sağlanmışsa.
 			this.filterInput = initialFilterInput;
 
-			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
-			this.goto(hash);
+			tick().then(() => {
+				const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
+				this.goto(hash);
+			});
 		}
 	}
 
