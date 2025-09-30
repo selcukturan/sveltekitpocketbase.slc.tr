@@ -44,8 +44,14 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		};
 	});
 
-	constructor(initialHashUrl: string, initialFilterInput?: TInput) {
-		if (initialHashUrl.replace('#', '') !== '') {
+	constructor(
+		initialHashUrl: string = '',
+		initialFilterInput: TInput = {} as TInput
+	) {
+		const isInitialHashUrl = initialHashUrl.replace('#', '') !== '';
+
+		if (isInitialHashUrl) {
+			// Öncelik 1: URL'de bir hash varsa.
 			const filterHashFlatObject = this.getFilterHashFlatObject(initialHashUrl);
 			for (const key in filterHashFlatObject) {
 				if (filterHashFlatObject[key] !== null) {
@@ -55,27 +61,13 @@ export class Navigator<TInput extends Record<string, unknown>> {
 				}
 			}
 			this.currentHash = initialHashUrl;
-		} else if (initialFilterInput) {
+		} else {
+			// Öncelik 2: URL'de hash yoksa ve bir başlangıç filtresi (initialFilterInput) sağlanmışsa.
 			this.filterInput = initialFilterInput;
 
 			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
-			goto(hash);
-			this.currentHash = hash;
+			this.goto(hash);
 		}
-
-		/* if (initialFilterInput) {
-			this.filterInput = initialFilterInput;
-		} else {
-			for (const key in this.filterInput) {
-				if (typeof this.filterInput[key] === 'string') {
-					this.filterInput[key] = '' as TInput[typeof key];
-				} else if (typeof this.filterInput[key] === 'number') {
-					this.filterInput[key] = 0 as TInput[typeof key];
-				} else {
-					this.filterInput[key] = null as TInput[typeof key];
-				}
-			}
-		} */
 	}
 
 	getRemoteFilterParams(hashUrl: string) {
@@ -91,9 +83,15 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			hashUrl,
 			untrack(() => this.filterDerived)
 		);
-		if (hash !== this.currentHash) {
-			goto(hash); // getRemoteFilterParams'ı tetikler
-			this.currentHash = hash;
+		this.goto(hash);
+	}
+
+	goto(hashUrl: string) {
+		if (Object.keys(this.filterInput).length === 0) return;
+
+		if (hashUrl !== this.currentHash) {
+			goto(hashUrl); // getRemoteFilterParams'ı tetikler
+			this.currentHash = hashUrl;
 		}
 	}
 

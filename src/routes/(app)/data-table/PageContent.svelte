@@ -11,8 +11,8 @@
 	import { Navigator } from '$lib/client/app/navigator.svelte';
 
 	type FilterInput = {
-		producer: string;
-		quantity: number;
+		producer?: string;
+		quantity?: number;
 	};
 	const navigator = new Navigator<FilterInput>(page.url.hash, {
 		producer: 'taş',
@@ -167,9 +167,13 @@
 
 	// $inspect('navigator.filterInput', navigator.filterInput);
 
-	const filter = $derived(
-		await getFullList(navigator.getRemoteFilterParams(page.url.hash))
+	let promise = $derived(
+		getFullList(navigator.getRemoteFilterParams(page.url.hash))
 	);
+
+	let filter = $derived(await promise);
+
+	// $inspect('page.url.hash', page.url.hash);
 
 	$effect(() => {
 		table.setSource('data', filter.items);
@@ -189,7 +193,8 @@
 		>
 		<span> | </span>
 		<button
-			onclick={() => getFullList(page.url.hash).refresh()}
+			onclick={() =>
+				getFullList(navigator.getRemoteFilterParams(page.url.hash)).refresh()}
 			class="bg-warning-300 p-3"
 		>
 			RRRR
