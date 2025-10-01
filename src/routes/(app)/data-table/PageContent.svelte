@@ -166,10 +166,6 @@
 		}
 	});
 
-	// $inspect('navigator.filterInput', navigator.filterInput);
-	// $inspect('page.url.hash', page.url.hash);
-	// $inspect('filter', filter);
-
 	let promise = $derived(
 		getFullList(navigator.getRemoteFilterParams(page.url.hash))
 	);
@@ -177,9 +173,9 @@
 	let filter = $derived(await promise);
 
 	$effect(() => {
-		filter.items;
+		const items = filter.items;
 		tick().then(() => {
-			table.setSource('data', filter.items);
+			table.setSource('data', items);
 		});
 	});
 </script>
