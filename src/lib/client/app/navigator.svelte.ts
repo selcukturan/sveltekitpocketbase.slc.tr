@@ -76,7 +76,6 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			hashUrl,
 			untrack(() => this.filterDerived)
 		);
-		console.log('getRemoteFilterParams', hash);
 		return hash;
 	}
 
@@ -93,9 +92,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 
 		if (hashUrl !== this.currentHash) {
 			goto(hashUrl, { replaceState: true }); // getRemoteFilterParams'ı tetikler
-			console.log('run goto with hashUrl:', hashUrl);
 			this.currentHash = hashUrl;
-			console.log('set currentHash:', this.currentHash);
 		}
 	}
 

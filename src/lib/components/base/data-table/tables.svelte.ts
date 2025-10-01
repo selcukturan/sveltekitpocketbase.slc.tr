@@ -64,6 +64,7 @@ class Table<TData extends Row> {
 		// Önceki işlemler
 		if (key === 'data' || key === 'rowSelection') {
 			this.clearSelectedRows();
+			// this.clearFocusCell();
 		}
 		if (key === 'tbodyRowHeight') {
 			this.updateVisibleIndexes(true);
@@ -76,6 +77,7 @@ class Table<TData extends Row> {
 		// Sonraki işlemler
 		if (key === 'data') {
 			tick().then(() => {
+				this.#focusedCellState = undefined;
 				this.cachedClientHeight = Math.round(
 					this.element != null ? this.element.clientHeight : 0
 				);
@@ -706,11 +708,11 @@ class Table<TData extends Row> {
 	get selectedRows() {
 		return this.#selectedRows;
 	}
-	private clearSelectedRows = () => {
+	private clearSelectedRows() {
 		this.#selectedRows.clear();
 		this.#headerIsChecked = false;
 		this.#headerIsIndeterminate = false;
-	};
+	}
 
 	private toggleRowSelection = async (rowIndex: number) => {
 		if (this.srcRowSelection === 'none') return;

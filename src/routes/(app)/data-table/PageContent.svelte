@@ -9,7 +9,6 @@
 
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/client/app/navigator.svelte';
-	import { tick } from 'svelte';
 
 	type FilterInput = {
 		producer?: string;
@@ -180,10 +179,7 @@
 	let filter = $derived(await promise);
 
 	$effect(() => {
-		const items = filter.items;
-		/* tick().then(() => { */
-		table.setSource('data', items);
-		/* }); */
+		table.setSource('data', filter.items);
 	});
 
 	$inspect('table.virtualData', table.virtualData);
