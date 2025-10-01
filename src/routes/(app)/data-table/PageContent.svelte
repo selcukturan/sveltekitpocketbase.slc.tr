@@ -9,8 +9,6 @@
 
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/client/app/navigator.svelte';
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 
 	type FilterInput = {
 		producer?: string;
@@ -20,8 +18,6 @@
 		producer: 'taş',
 		quantity: 22
 	});
-
-	goto(navigator.currentHash, { replaceState: true });
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -181,11 +177,6 @@
 
 	$effect(() => {
 		table.setSource('data', filter.items);
-	});
-
-	onMount(() => {
-		// initial load
-		// goto(navigator.currentHash, { replaceState: true });
 	});
 </script>
 

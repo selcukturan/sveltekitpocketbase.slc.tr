@@ -76,6 +76,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			hashUrl,
 			untrack(() => this.filterDerived)
 		);
+		console.log('getRemoteFilterParams', hash);
 		return hash;
 	}
 
