@@ -66,8 +66,8 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			this.filterInput = initialFilterInput;
 
 			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
-			// this.goto(hash);
-			this.currentHash = hash;
+			this.goto(hash);
+			// this.currentHash = hash;
 		}
 	}
 
