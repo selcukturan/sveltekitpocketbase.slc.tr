@@ -43,10 +43,17 @@
 		},
 		columns: [
 			{
+				field: 'id',
+				label: 'ID',
+				width: 'minmax(75px,1fr)',
+				hidden: false,
+				resizeable: true
+			},
+			{
 				field: 'order',
 				label: 'Order',
 				width: 'minmax(75px,1fr)',
-				hidden: false,
+				hidden: true,
 				resizeable: true
 			},
 			{
@@ -178,6 +185,8 @@
 			table.setSource('data', items);
 		});
 	});
+
+	$inspect('table.virtualData', table.virtualData);
 </script>
 
 <div class="flex h-full flex-col">

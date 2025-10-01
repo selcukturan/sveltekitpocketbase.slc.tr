@@ -50,7 +50,7 @@
 				{/if}
 			</div>
 			<!-- ########## DATA ########## -->
-			{#each t.virtualData as rowWrapper, ri (rowWrapper.roi)}
+			{#each t.virtualData as rowWrapper, ri (typeof rowWrapper.data.id === 'string' ? `r${rowWrapper.data.id}` : `r${rowWrapper.roi}`)}
 				{@const row = rowWrapper.data}
 				{@const roi = rowWrapper.roi}
 				{@const rowStart = roi + t.headerRowsCountState + 1}
@@ -99,7 +99,7 @@
 						</div>
 					{/if}
 					<!-- TD data -->
-					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
+					{#each t.visibleColumns as colWrapper, ci (colWrapper.data.field || colWrapper.coi)}
 						{@const col = colWrapper.data}
 						{@const coi = colWrapper.coi}
 						{@const isEditable =

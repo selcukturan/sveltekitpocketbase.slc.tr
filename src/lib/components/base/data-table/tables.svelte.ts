@@ -61,7 +61,7 @@ class Table<TData extends Row> {
 		key: K,
 		value: RequiredSources<TData>[K]
 	) => {
-		// Önce özel işlemler için kontrolleri yapalım
+		// Önceki işlemler
 		if (key === 'data' || key === 'rowSelection') {
 			this.clearSelectedRows();
 		}
@@ -69,8 +69,22 @@ class Table<TData extends Row> {
 			this.updateVisibleIndexes(true);
 		}
 
-		// Değeri güncelleyelim (tip güvenli olarak)
+		// 🔼 - Önceki
 		this.#src[key] = value;
+		// 🔽 - Sonraki
+
+		// Sonraki işlemler
+		if (key === 'data') {
+			tick().then(() => {
+				this.cachedClientHeight = Math.round(
+					this.element != null ? this.element.clientHeight : 0
+				);
+				this.cachedScrollTop = Math.round(
+					this.element != null ? this.element.scrollTop : 0
+				);
+				this.updateVisibleIndexes(true);
+			});
+		}
 	};
 	// ################################## END Source Setter Method for Global Use ###################################################################################################
 
@@ -694,6 +708,8 @@ class Table<TData extends Row> {
 	}
 	private clearSelectedRows = () => {
 		this.#selectedRows.clear();
+		this.#headerIsChecked = false;
+		this.#headerIsIndeterminate = false;
 	};
 
 	private toggleRowSelection = async (rowIndex: number) => {
