@@ -181,9 +181,9 @@
 
 	$effect(() => {
 		const items = filter.items;
-		tick().then(() => {
-			table.setSource('data', items);
-		});
+		/* tick().then(() => { */
+		table.setSource('data', items);
+		/* }); */
 	});
 
 	$inspect('table.virtualData', table.virtualData);
