@@ -48,9 +48,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		initialHashUrl: string = '',
 		initialFilterInput: TInput = {} as TInput
 	) {
-		const isInitialHashUrl = initialHashUrl.replace('#', '') !== '';
-
-		if (isInitialHashUrl) {
+		if (initialHashUrl.replace('#', '') !== '') {
 			// Öncelik 1: URL'de bir hash varsa.
 			const filterHashFlatObject = this.getFilterHashFlatObject(initialHashUrl);
 			for (const key in filterHashFlatObject) {
@@ -61,27 +59,28 @@ export class Navigator<TInput extends Record<string, unknown>> {
 				}
 			}
 			this.currentHash = initialHashUrl;
-		} else {
+		} else if (Object.keys(initialFilterInput).length > 0) {
 			// Öncelik 2: URL'de hash yoksa ve bir başlangıç filtresi (initialFilterInput) sağlanmışsa.
 			this.filterInput = initialFilterInput;
 
-			const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
-			this.goto(hash);
-			// this.currentHash = hash;
+			tick().then(() => {
+				const hash = filterObjectToHashUrl(initialHashUrl, this.filterDerived);
+				this.goto(hash);
+			});
 		}
 	}
 
-	getRemoteFilterParams(hashUrl: string) {
+	getRemoteFilterParams = $derived.by(() => {
 		const hash = filterObjectToHashUrl(
-			hashUrl,
+			this.currentHash,
 			untrack(() => this.filterDerived)
 		);
 		return hash;
-	}
+	});
 
-	triggerFilter(hashUrl: string) {
+	triggerFilter() {
 		const hash = filterObjectToHashUrl(
-			hashUrl,
+			this.currentHash,
 			untrack(() => this.filterDerived)
 		);
 		this.goto(hash);
@@ -91,25 +90,13 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		if (Object.keys(this.filterInput).length === 0) return;
 
 		if (hashUrl !== this.currentHash) {
-			goto(hashUrl, { replaceState: true }); // getRemoteFilterParams'ı tetikler
+			goto(hashUrl, { replaceState: true });
 			this.currentHash = hashUrl;
 		}
 	}
 
 	getFilterInputValue(itemKey: keyof TInput) {
 		const restoredFilterState = hashUrlToFilterObject<TInput>(this.currentHash);
-
-		/* return restoredFilterState
-			? ((restoredFilterState.children[0] as any).value as TInput[keyof TInput])
-			: itemKey
-				? this.filterInput[itemKey]
-				: ''; */
-
-		/* return restoredFilterState
-			? ((restoredFilterState.children[0] as any).value as TInput[keyof TInput])
-			: itemKey
-				? this.filterInput[itemKey]
-				: ''; */
 		return this.filterInput[itemKey]
 			? this.filterInput[itemKey]
 			: restoredFilterState
@@ -130,10 +117,6 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			}
 			return null;
 		}
-
-		/* return restoredFilterState
-			? ((restoredFilterState.children[0] as any).value as TInput[keyof TInput])
-			: null; */
 	}
 
 	getFilterHashFlatObject(hashUrl: string) {

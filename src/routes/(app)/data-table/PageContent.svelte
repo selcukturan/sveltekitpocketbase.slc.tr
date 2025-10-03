@@ -10,15 +10,6 @@
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/client/app/navigator.svelte';
 
-	type FilterInput = {
-		producer?: string;
-		quantity?: number;
-	};
-	const navigator = new Navigator<FilterInput>(page.url.hash, {
-		producer: 'taş',
-		quantity: 22
-	});
-
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
 		id: 'table22',
@@ -172,17 +163,22 @@
 		}
 	});
 
-	let promise = $derived(
-		getFullList(navigator.getRemoteFilterParams(page.url.hash))
-	);
+	type FilterInput = {
+		producer?: string;
+		quantity?: number;
+	};
+	const navigator = new Navigator<FilterInput>(page.url.hash, {
+		producer: 'taş',
+		quantity: 22
+	});
+
+	let promise = $derived(getFullList(navigator.getRemoteFilterParams));
 
 	let filter = $derived(await promise);
 
 	$effect(() => {
 		table.setSource('data', filter.items);
 	});
-
-	$inspect('table.virtualData', table.virtualData);
 </script>
 
 <div class="flex h-full flex-col">
@@ -192,14 +188,12 @@
 			bind:value={navigator.filterInput.producer}
 			class="border"
 		/>
-		<button
-			onclick={() => navigator.triggerFilter(page.url.hash)}
-			class="bg-warning-300 p-3">getFilter</button
+		<button onclick={() => navigator.triggerFilter()} class="bg-warning-300 p-3"
+			>getFilter</button
 		>
 		<span> | </span>
 		<button
-			onclick={() =>
-				getFullList(navigator.getRemoteFilterParams(page.url.hash)).refresh()}
+			onclick={() => getFullList(navigator.getRemoteFilterParams).refresh()}
 			class="bg-warning-300 p-3"
 		>
 			RRRR

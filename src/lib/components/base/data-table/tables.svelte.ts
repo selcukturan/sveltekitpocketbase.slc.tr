@@ -64,7 +64,6 @@ class Table<TData extends Row> {
 		// Önceki işlemler
 		if (key === 'data' || key === 'rowSelection') {
 			this.clearSelectedRows();
-			// this.clearFocusCell();
 		}
 		if (key === 'tbodyRowHeight') {
 			this.updateVisibleIndexes(true);
