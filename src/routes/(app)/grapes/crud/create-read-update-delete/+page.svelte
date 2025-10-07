@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
+	import DataTable from '$lib/components/base/DataTable.svelte';
 </script>
 
 <Head>
@@ -9,14 +10,14 @@
 
 <Page>
 	<Page.Header>
-		<p>create-read-update-delete Page Header</p>
+		<p>Header</p>
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Panel>
-			<div>create-read-update-delete</div>
-		</Page.Main.Panel>
+		<Page.Main.Table boundary>
+			<DataTable />
+		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
-		<p>create-read-update-delete Page Footer</p>
+		<p>Footer</p>
 	</Page.Footer>
 </Page>

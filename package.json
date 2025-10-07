@@ -48,6 +48,7 @@
 		"dotenv-expand": "^12.0.3",
 		"pako": "^2.1.0",
 		"pocketbase": "^0.26.2",
+		"runed": "^0.34.0",
 		"sveltekit-superforms": "^2.27.1",
 		"tabulator-tables": "^6.3.1",
 		"valibot": "^1.1.0"
