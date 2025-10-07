@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	// superform
 	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
@@ -46,4 +46,6 @@
 </Form>
 
 <Form.Message {frm} />
-<Form.Debug {frm} label="My Form Data" />
+<Form.Debug {frm} label="My Form Data" /> -->
+
+<div>x</div>

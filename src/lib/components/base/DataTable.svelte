@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ScrollState, AnimationFrames } from 'runed';
+	import { ScrollState, AnimationFrames, ElementSize } from 'runed';
 	import { getFullList } from '$lib/remotes/tabulator.remote';
-	import { untrack } from 'svelte';
+
 	let promise = $derived(getFullList(''));
 	let filter = $derived(await promise);
 	let data = $derived(filter.items);
@@ -15,7 +15,7 @@
 	});
 
 	// --- YENİ EKLENEN KISIM BAŞLANGICI ---
-
+	const size = new ElementSize(() => el);
 	// 1. scroll.y'yi doğrudan kullanmak yerine, bu değişkeni AnimationFrames ile güncelleyeceğiz.
 	let throttledY = $state(0);
 	let frames = $state(0);
@@ -47,22 +47,17 @@
 		const rawData = data;
 		const totalRows = rawData.length;
 		const rowHeight = 35;
-		const clientHeight = el ? Math.round(el.clientHeight) : 0;
-		const startIndex = Math.max(0, Math.floor(throttledY / rowHeight));
+		const clientHeight = size.height || 0;
+		const startIndex = Math.max(0, Math.floor(throttledY / rowHeight) - 15);
 		const endIndex = Math.min(
 			totalRows - 1,
-			Math.floor((throttledY + clientHeight) / rowHeight)
+			Math.floor((throttledY + clientHeight) / rowHeight) + 15
 		);
 
 		return rawData
 			.map((items, i) => ({ items, index: i }))
 			.slice(startIndex, endIndex + 1);
 	});
-
-	// FPS ve diğer istatistikleri göstermek için
-	const stats = $derived(
-		`FPS: ${animation.fps.toFixed(0)}\nScroll Y: ${scroll.y.toFixed(0)}\nThrottled Y: ${throttledY.toFixed(0)}`
-	);
 </script>
 
 <div

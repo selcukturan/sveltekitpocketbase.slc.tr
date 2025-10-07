@@ -4,8 +4,43 @@ import { error } from '@sveltejs/kit';
 
 import {
 	Collections,
-	type AppLogsResponse
+	type SysLogsResponse
 } from '$lib/client/types/pocketbase-types';
+import type { MenuNode } from '$lib/client/types/my-pocketbase-types';
+
+export const getTreeMenu = query(async () => {
+	const { locals } = getRequestEvent();
+
+	let treeMenu: MenuNode[] = [];
+
+	try {
+		const rawData = await locals.auth.pb
+			.collection(Collections.AclRolesMenusView)
+			.getFullList<MenuNode>({
+				filter: `status_acl_roles = "active" && 
+					status_acl_roles_menus = "active" && 
+					status_sys_menu_items = "active" && 
+					status_sys_menus = "active" && 
+					valid_permissions ~ ":view:"`,
+				sort: 'sorder'
+			});
+		treeMenu = rawData;
+	} catch (error) {
+		console.error('Menü verileri çekilirken hata oluştu:', error);
+	}
+
+	/* let test: any[] = [];
+	try {
+		const xxx = await locals.auth.pb
+			.collection('test_subtotal')
+			.getFullList<MenuNode>();
+		test = xxx;
+	} catch (error) {
+		console.error('Menü verileri çekilirken hata oluştu:', error);
+	} */
+
+	return treeMenu;
+});
 
 export const getLogs = query(async () => {
 	const sleep = (ms: number) =>
@@ -14,8 +49,8 @@ export const getLogs = query(async () => {
 	const { locals } = getRequestEvent();
 
 	const logs = await locals.auth.pb
-		.collection(Collections.AppLogs)
-		.getFullList<AppLogsResponse>();
+		.collection(Collections.SysLogs)
+		.getFullList<SysLogsResponse>();
 
 	await sleep(1000);
 
@@ -33,8 +68,8 @@ export const getLog = query(v.string(), async (slug) => {
 	const { locals } = getRequestEvent();
 
 	const log = await locals.auth.pb
-		.collection(Collections.AppLogs)
-		.getOne<AppLogsResponse>(slug);
+		.collection(Collections.SysLogs)
+		.getOne<SysLogsResponse>(slug);
 
 	await sleep(1000);
 
@@ -45,31 +80,36 @@ export const getLog = query(v.string(), async (slug) => {
 	return log;
 });
 
-export const createLog = form(async (data) => {
-	// Check the user is logged in
+export const createLog = form(
+	v.object({
+		title: v.pipe(v.string(), v.nonEmpty()),
+		content: v.pipe(v.string(), v.nonEmpty())
+	}),
+	async ({ title, content }) => {
+		// Check the user is logged in
 
-	const title = data.get('title');
-	const content = data.get('content');
+		// Check the data is valid
+		if (typeof title !== 'string' || typeof content !== 'string') {
+			error(400, {
+				message: 'Title and content are required',
+				errorId: 'missing_fields'
+			});
+		}
 
-	// Check the data is valid
-	if (typeof title !== 'string' || typeof content !== 'string') {
-		error(400, {
-			message: 'Title and content are required',
-			errorId: 'missing_fields'
-		});
+		const slug = title.toLowerCase().replace(/ /g, '-');
+
+		const { locals } = getRequestEvent();
+
+		await locals.auth.pb
+			.collection(Collections.SysLogs)
+			.create<SysLogsResponse>({
+				slug,
+				title,
+				content
+			});
+
+		// await getLogs().refresh(); // server single-flight mutations
+
+		return { success: true };
 	}
-
-	const slug = title.toLowerCase().replace(/ /g, '-');
-
-	const { locals } = getRequestEvent();
-
-	await locals.auth.pb.collection(Collections.AppLogs).create<AppLogsResponse>({
-		slug,
-		title,
-		content
-	});
-
-	// await getLogs().refresh(); // server single-flight mutations
-
-	return { success: true };
-});
+);

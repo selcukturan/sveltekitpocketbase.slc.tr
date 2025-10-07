@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
 
-	import { myFirstFormSchema } from './schema';
+	/* import { myFirstFormSchema } from './schema'; */
 	import Form from '$lib/components/base/form';
 
 	const formInitialData = {
@@ -20,9 +20,10 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<Form schema={myFirstFormSchema} defaultValues={formInitialData}>
+			<!-- <Form schema={myFirstFormSchema} defaultValues={formInitialData}>
 				<Form.iTextbox name="text_optional" />
-			</Form>
+			</Form> -->
+			<div>test</div>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>

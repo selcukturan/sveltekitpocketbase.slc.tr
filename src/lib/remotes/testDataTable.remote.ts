@@ -1,7 +1,8 @@
 import * as v from 'valibot';
 import {
 	Collections,
-	type TestDatatableResponse
+	type TestDatatableResponse,
+	type TestSubtotalViewResponse
 } from '$lib/client/types/pocketbase-types';
 import { buildPocketbaseFilterString } from '$lib/client/utils/filter-string-helper';
 
@@ -22,4 +23,16 @@ export const getFullList = query(v.string(), async (hash: string) => {
 		});
 
 	return records;
+});
+
+export const getFullListSubTotal = query(v.string(), async (hash: string) => {
+	const { locals } = getRequestEvent();
+
+	const resultList = await locals.auth.pb
+		.collection('test_subtotal_view')
+		.getList<TestSubtotalViewResponse>(1, 100, {
+			sort: 'subtotal'
+		});
+
+	return resultList;
 });

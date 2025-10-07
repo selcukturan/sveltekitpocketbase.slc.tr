@@ -2,7 +2,7 @@
 	import { Page, Head } from '$lib/components/templates';
 	import MyFirstForm from './MyFirstForm.svelte';
 
-	let { data } = $props();
+	// let { data } = $props();
 </script>
 
 <Head>
@@ -16,7 +16,8 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<MyFirstForm data={data.myFirstForm} />
+			<!-- <MyFirstForm data={data.myFirstForm} /> -->
+			<MyFirstForm />
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>Footer</Page.Footer>
