@@ -44,19 +44,33 @@
 	// Bu sayede, bu pahalı hesaplama sadece throttledY değiştiğinde,
 	// yani belirlediğimiz FPS limitinde çalışır.
 	let virtualData = $derived.by(() => {
+		const overscan = 10; // Görünür alandan önce ve sonra kaç satır yükleneceğini belirler
 		const rawData = data;
 		const totalRows = rawData.length;
 		const rowHeight = 35;
 		const clientHeight = size.height || 0;
-		const startIndex = Math.max(0, Math.floor(throttledY / rowHeight) - 15);
+		const startIndex = Math.max(
+			0,
+			Math.floor(throttledY / rowHeight) - overscan
+		);
 		const endIndex = Math.min(
 			totalRows - 1,
-			Math.floor((throttledY + clientHeight) / rowHeight) + 15
+			Math.floor((throttledY + clientHeight) / rowHeight) + overscan
 		);
 
-		return rawData
-			.map((items, i) => ({ items, index: i }))
-			.slice(startIndex, endIndex + 1);
+		const processedData: {
+			data: (typeof rawData)[number];
+			originalIndex: number;
+		}[] = [];
+
+		for (let i = startIndex; i <= endIndex; i++) {
+			const row = rawData[i];
+			if (row) {
+				processedData.push({ data: row, originalIndex: i });
+			}
+		}
+
+		return processedData;
 	});
 </script>
 
@@ -70,7 +84,7 @@
 		bind:this={el}
 		role="grid"
 		style:overflow="auto"
-		style:grid-template-rows={`repeat(1, 80px) repeat(1000, 35px) repeat(1, 100px)`}
+		style:grid-template-rows={`repeat(1, 35px) repeat(1000, 35px) repeat(1, 35px)`}
 		style:grid-template-columns={`minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr)
 					minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px,1fr)`}
 		style={`display: grid;
@@ -79,7 +93,6 @@
             content-visibility: auto;
             box-sizing: border-box;
             overflow: auto;
-            overscroll-behavior: none;
             background-color: var(--color-surface-50);`}
 	>
 		<div role="row" style:display="contents">
@@ -149,9 +162,9 @@
 			</div>
 		</div>
 
-		{#each virtualData as rowWrapper, ri (rowWrapper.items.id)}
-			{@const item = rowWrapper.items}
-			{@const index = rowWrapper.index}
+		{#each virtualData as rowWrapper, ri (rowWrapper.data.id)}
+			{@const data = rowWrapper.data}
+			{@const index = rowWrapper.originalIndex}
 			{@const rowStart = index + 2}
 			{@const background =
 				index % 2 === 0
@@ -173,7 +186,7 @@
 					style:background
 					style:grid-column={`2 / 3`}
 				>
-					{item.id}
+					{data.id}
 				</div>
 				<div
 					role="cell"
@@ -181,7 +194,7 @@
 					style:background
 					style:grid-column={`3 / 4`}
 				>
-					{item.producer}
+					{data.producer}
 				</div>
 				<div
 					role="cell"
@@ -189,7 +202,7 @@
 					style:background
 					style:grid-column={`4 / 5`}
 				>
-					{item.province}
+					{data.province}
 				</div>
 				<div
 					role="cell"
@@ -197,7 +210,7 @@
 					style:background
 					style:grid-column={`5 / 6`}
 				>
-					{item.grape}
+					{data.grape}
 				</div>
 				<div
 					role="cell"
@@ -205,7 +218,7 @@
 					style:background
 					style:grid-column={`6 / 7`}
 				>
-					{item.price}
+					{data.price}
 				</div>
 				<div
 					role="cell"
@@ -213,7 +226,7 @@
 					style:background
 					style:grid-column={`7 / 8`}
 				>
-					{item.quantity}
+					{data.quantity}
 				</div>
 				<div
 					role="cell"
@@ -221,7 +234,7 @@
 					style:background
 					style:grid-column={`8 / 9`}
 				>
-					{item.amount}
+					{data.amount}
 				</div>
 			</div>
 		{/each}
