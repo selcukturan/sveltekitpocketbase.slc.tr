@@ -138,13 +138,15 @@
 	style:height={`100%`}
 >
 	{@render toolbar?.()}
-	<div>
-		fps: {fpsLimit} / {animation.fps.toFixed(0)}
+	<div style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);">
+		<div>
+			fps: {fpsLimit} / {animation.fps.toFixed(0)}
+		</div>
+		<div>
+			delta: 16.67 / {delta.toFixed(2)}
+		</div>
+		<div>frames: {frames}</div>
 	</div>
-	<div>
-		delta: 16.67 / {delta.toFixed(2)}
-	</div>
-	<div>frames: {frames}</div>
 
 	<div data-slc-table-container style:flex={`1 1 0%;`} style:overflow={`hidden`}>
 		<div data-slc-table-no-data style:display={items.length > 0 ? 'none' : 'flex'}>Gösterilecek veri yok</div>
