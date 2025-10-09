@@ -17,7 +17,7 @@ export const getFullList = query(v.string(), async (hash: string) => {
 	const records = await locals.auth.pb
 		.collection(Collections.TestDatatable)
 		.getList<TestDatatableResponse>(1, 1000, {
-			/* filter: filterString, */
+			filter: 'producer ~ ""',
 			sort: 'order'
 		});
 

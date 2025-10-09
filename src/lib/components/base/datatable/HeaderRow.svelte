@@ -1,18 +1,27 @@
 <script lang="ts" module>
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import type { Row, VisibleColumn } from './types';
+	import type { Row, HeaderRowType, HeaderCellType } from './types';
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
-		children: Snippet;
+		headerCell: Snippet<[hc: HeaderCellType<TData>]>;
 		class?: string;
-		columns: VisibleColumn<TData>[];
+		hr: HeaderRowType<TData>;
 	};
-	const { children, class: classes, columns, ...attributes }: Props = $props();
+	const { headerCell, class: classes, hr, ...attributes }: Props = $props();
 </script>
 
-<div data-slc-table-headerrow role="row" style:display="contents" class={classes} {...attributes}>
-	{@render children?.()}
+<div
+	data-slc-table-headerrow
+	role="row"
+	style:display="contents"
+	class={classes}
+	{...attributes}
+>
+	{#each hr.columns as col, colVisibleIndex (col.data.field)}
+		{@const label = col.data.label}
+		{@render headerCell?.({ label, col, colVisibleIndex })}
+	{/each}
 </div>

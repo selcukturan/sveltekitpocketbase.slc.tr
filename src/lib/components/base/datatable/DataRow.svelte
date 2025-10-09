@@ -1,35 +1,28 @@
 <script lang="ts" module>
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import type { Row, VisibleColumn } from './types';
+	import type { Row, DataRowType, DataCellType } from './types';
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
-		children: Snippet;
+		dataCell: Snippet<[dc: DataCellType<TData>]>;
 		class?: string;
-		row: TData;
-		columns: VisibleColumn<TData>[];
-		rowVirtualIndex: number;
-		rowOriginalIndex: number;
-		dataLength: number;
-		dataHeight: number;
-		headersCount: number;
+		dr: DataRowType<TData>;
 	};
-	const {
-		children,
-		class: classes,
-		row,
-		columns,
-		rowVirtualIndex,
-		rowOriginalIndex,
-		dataLength,
-		dataHeight,
-		headersCount,
-		...attributes
-	}: Props = $props();
+
+	const { dataCell, class: classes, dr, ...attributes }: Props = $props();
 </script>
 
-<div data-slc-table-datarow role="row" style:display="contents" class={classes} {...attributes}>
-	{@render children?.()}
+<div
+	data-slc-table-datarow
+	role="row"
+	style:display="contents"
+	class={classes}
+	{...attributes}
+>
+	{#each dr.columns as col, colVisibleIndex (col.data.field)}
+		{@const value = dr.row[col.data.field]}
+		{@render dataCell?.({ value, col, colVisibleIndex })}
+	{/each}
 </div>

@@ -1,41 +1,20 @@
 <script lang="ts" module>
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import type { Row, VisibleColumn, Footer } from './types';
+	import type { Row, FooterRowType, FooterCellType } from './types';
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		children: Snippet;
 		class?: string;
-		footerRow: Footer<TData>;
-		columns: VisibleColumn<TData>[];
-		footerIndex: number;
-		col: VisibleColumn<TData>;
-		colVisibleIndex: number;
-		dataLength: number;
-		footerHeight: number;
-		footerLength: number;
-		headersCount: number;
+		fr: FooterRowType<TData>;
+		fc: FooterCellType<TData>;
 	};
-	const {
-		children,
-		class: classes,
-		footerRow,
-		columns,
-		footerIndex,
-		col,
-		colVisibleIndex,
-		dataLength,
-		footerHeight,
-		footerLength,
-		headersCount,
-		...attributes
-	}: Props = $props();
+	const { children, class: classes, fr, fc, ...attributes }: Props = $props();
 
-	const rowStart = dataLength + headersCount + footerIndex + 1;
-
-	const bottom = `${(footerLength - footerIndex - 1) * footerHeight}px`;
+	const rowStart = fr.dataLength + fr.headerCount + fr.footerIndex + 1;
+	const bottom = `${(fr.footerLength - fr.footerIndex - 1) * fr.footerHeight}px`;
 </script>
 
 <div
@@ -45,7 +24,7 @@
 	style:bottom
 	style:background="var(--color-surface-200)"
 	style:grid-row-start={rowStart}
-	style:grid-column={`${colVisibleIndex + 1} / ${colVisibleIndex + 2}`}
+	style:grid-column={`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`}
 	class={classes}
 	{...attributes}
 >
