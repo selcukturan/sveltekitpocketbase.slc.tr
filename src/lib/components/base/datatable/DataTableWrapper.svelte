@@ -1,65 +1,38 @@
-<script lang="ts">
+<script lang="ts" generics="TData extends Record<string, unknown>">
 	import { ScrollState, AnimationFrames, ElementSize } from 'runed';
-	import { getFullList } from '$lib/remotes/tabulator.remote';
 
-	let promise = $derived(getFullList(''));
-	let filter = $derived(await promise);
-	let data = $derived(filter.items);
+	let { results }: { results: TData[] } = $props();
 
 	let el = $state<HTMLElement>();
-	let behavior = $state('smooth');
-	const scroll = new ScrollState({
-		element: () => el,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- for some reason ScrollBehavior is not defined
-		behavior: () => behavior as any
-	});
 
-	// --- YENİ EKLENEN KISIM BAŞLANGICI ---
 	const size = new ElementSize(() => el);
-	// 1. scroll.y'yi doğrudan kullanmak yerine, bu değişkeni AnimationFrames ile güncelleyeceğiz.
-	let throttledY = $state(0);
+	const scroll = new ScrollState({ element: () => el });
+
+	let throttledY = $state(0); // trigger
+	let fpsLimit = $state(60);
 	let frames = $state(0);
-	let fpsLimit = $state(60); // Varsayılan bir FPS limiti belirleyelim.
 	let delta = $state(0);
-	// 2. AnimationFrames'in geri çağırma fonksiyonunu güncelliyoruz.
-	// Her animasyon karesinde, o anki scroll.y değerini throttledY'ye atar.
 	const animation = new AnimationFrames(
 		(args) => {
-			// scroll.y'nin en güncel değerini throttledY'ye atayarak güncellemeyi tetikliyoruz.
 			frames++;
-			throttledY = scroll.y;
 			delta = args.delta;
+			throttledY = scroll.y;
 		},
 		{ fpsLimit: () => fpsLimit }
 	);
 
-	// Animasyonun sayfa yüklendiğinde otomatik başlamasını sağlar.
-	/* $effect(() => {
-		animation.start();
-	}); */
-
-	// --- YENİ EKLENEN KISIM SONU ---
-
-	// 3. virtualData'yı 'scroll.y' yerine 'throttledY'den türetiyoruz.
-	// Bu sayede, bu pahalı hesaplama sadece throttledY değiştiğinde,
-	// yani belirlediğimiz FPS limitinde çalışır.
 	let virtualData = $derived.by(() => {
-		const overscan = 10; // Görünür alandan önce ve sonra kaç satır yükleneceğini belirler
-		const rawData = data;
-		const totalRows = rawData.length;
+		const y = throttledY; // trigger
+		const overscan = 10;
+		const rawData = results; // trigger
+		const totalRows = rawData.length; // trigger
 		const rowHeight = 35;
-		const clientHeight = size.height || 0;
-		const startIndex = Math.max(
-			0,
-			Math.floor(throttledY / rowHeight) - overscan
-		);
-		const endIndex = Math.min(
-			totalRows - 1,
-			Math.floor((throttledY + clientHeight) / rowHeight) + overscan
-		);
+		const clientHeight = size.height; // trigger
+		const startIndex = Math.max(0, Math.floor(y / rowHeight) - overscan);
+		const endIndex = Math.min(totalRows - 1, Math.floor((y + clientHeight) / rowHeight) + overscan);
 
 		const processedData: {
-			data: (typeof rawData)[number];
+			data: TData;
 			originalIndex: number;
 		}[] = [];
 
@@ -75,7 +48,7 @@
 </script>
 
 <div
-	style="    overflow: hidden;
+	style="overflow: hidden;
     contain: inline-size;
     width: 100%;
     height: 100%;"
@@ -96,144 +69,61 @@
             background-color: var(--color-surface-50);`}
 	>
 		<div role="row" style:display="contents">
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				index
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				id
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				producer
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				province
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				grape
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				price
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				quantity
 			</div>
-			<div
-				role="columnheader"
-				style:position="sticky"
-				style:top={0}
-				style:background="var(--color-surface-200)"
-			>
+			<div role="columnheader" style:position="sticky" style:top={0} style:background="var(--color-surface-200)">
 				amount
 			</div>
 		</div>
 
-		{#each virtualData as rowWrapper, ri (rowWrapper.data.id)}
+		{#each virtualData as rowWrapper, virtualIndex (rowWrapper.data.id)}
 			{@const data = rowWrapper.data}
-			{@const index = rowWrapper.originalIndex}
-			{@const rowStart = index + 2}
-			{@const background =
-				index % 2 === 0
-					? 'var(--color-surface-100)'
-					: 'var(--color-surface-50)'}
+			{@const originalIndex = rowWrapper.originalIndex}
+			{@const rowStart = originalIndex + 2}
+			{@const background = originalIndex % 2 === 0 ? 'var(--color-surface-100)' : 'var(--color-surface-50)'}
 
 			<div role="row" style:display="contents">
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`1 / 2`}
-				>
-					{index}
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`1 / 2`}>
+					{originalIndex}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`2 / 3`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`2 / 3`}>
 					{data.id}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`3 / 4`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`3 / 4`}>
 					{data.producer}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`4 / 5`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`4 / 5`}>
 					{data.province}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`5 / 6`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`5 / 6`}>
 					{data.grape}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`6 / 7`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`6 / 7`}>
 					{data.price}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`7 / 8`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`7 / 8`}>
 					{data.quantity}
 				</div>
-				<div
-					role="cell"
-					style:grid-row-start={rowStart}
-					style:background
-					style:grid-column={`8 / 9`}
-				>
+				<div role="cell" style:grid-row-start={rowStart} style:background style:grid-column={`8 / 9`}>
 					{data.amount}
 				</div>
 			</div>

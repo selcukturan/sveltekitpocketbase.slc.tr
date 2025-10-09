@@ -18,9 +18,7 @@
 
 	let initialPos: Length = $derived.by(() => {
 		if (global.isMobileBreakpoint) {
-			return global.pageSidebarSize.vertical
-				? (`${global.pageSidebarSize.vertical}px` as Length)
-				: ('150px' as Length);
+			return global.pageSidebarSize.vertical ? (`${global.pageSidebarSize.vertical}px` as Length) : ('150px' as Length);
 		} else {
 			return global.pageSidebarSize.horizontal
 				? (`${global.pageSidebarSize.horizontal}px` as Length)
@@ -30,13 +28,9 @@
 
 	let icon = $derived.by(() => {
 		if (global.isMobileBreakpoint) {
-			return global.hidePageSidebar
-				? 'ri-arrow-down-s-line'
-				: 'ri-arrow-up-s-line';
+			return global.hidePageSidebar ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line';
 		} else {
-			return global.hidePageSidebar
-				? 'ri-arrow-right-s-line'
-				: 'ri-arrow-left-s-line';
+			return global.hidePageSidebar ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line';
 		}
 	});
 </script>

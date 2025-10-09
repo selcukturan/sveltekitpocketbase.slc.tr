@@ -1,6 +1,6 @@
 <script lang="ts">
+	import PageDataTable from './PageDataTable.svelte';
 	import { Page, Head } from '$lib/components/templates';
-	import DataTable from '$lib/components/base/DataTable.svelte';
 </script>
 
 <Head>
@@ -14,7 +14,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<DataTable />
+			<PageDataTable />
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
