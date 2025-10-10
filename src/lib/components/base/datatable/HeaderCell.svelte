@@ -12,6 +12,11 @@
 		hc: HeaderCellType<TData>;
 	};
 	const { children, class: classes, hr, hc, ...attributes }: Props = $props();
+
+	const gridRowStart = 1;
+	const gridColumn = $derived(
+		`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`
+	);
 </script>
 
 <div
@@ -20,8 +25,8 @@
 	style:position="sticky"
 	style:top={0}
 	style:background="var(--color-surface-200)"
-	style:grid-row-start={1}
-	style:grid-column={`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`}
+	style:grid-row-start={gridRowStart}
+	style:grid-column={gridColumn}
 	class={classes}
 	{...attributes}
 >

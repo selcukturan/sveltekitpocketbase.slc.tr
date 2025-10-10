@@ -4,7 +4,7 @@
 	 * Bu blokta tanımlanan şeyler, o bileşenin tüm örnekleri arasında paylaşılır.
 	 */
 	import type { HTMLAttributes } from 'svelte/elements';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import type {
 		Row,
 		Column,
@@ -13,7 +13,8 @@
 		DataRowType,
 		HeaderRowType
 	} from './types';
-	import { ScrollState, AnimationFrames, ElementSize } from 'runed';
+	import { ScrollState, AnimationFrames, ElementSize, watch } from 'runed';
+	import { setContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -48,12 +49,14 @@
 		...attributes
 	}: Props = $props();
 
+	const context = setContext();
+
 	let el = $state<HTMLElement>();
 
 	const size = new ElementSize(() => el);
 	const scroll = new ScrollState({ element: () => el });
 
-	let throttledY = $state(0); // trigger
+	let throttledY = $state(0);
 	let fpsLimit = $state(60);
 	let frames = $state(0);
 	let delta = $state(0);
@@ -66,22 +69,42 @@
 		{ fpsLimit: () => fpsLimit }
 	);
 
+	// virtualData trigger
+	let rowIndices = $state.raw({
+		start: 0,
+		end: 0
+	});
+
+	watch(
+		[() => throttledY, () => items, () => size.height],
+		([y, items, clientHeight]) => {
+			const overscan = 10;
+			const rowHeight = 35;
+
+			const start = Math.max(0, Math.floor(y / rowHeight) - overscan);
+			const end = Math.min(
+				items.length - 1,
+				Math.floor((y + clientHeight) / rowHeight) + overscan
+			);
+
+			const indicesChanged =
+				start !== rowIndices.start || end !== rowIndices.end;
+
+			if (indicesChanged) {
+				rowIndices = {
+					start: start,
+					end: end
+				};
+			}
+		}
+	);
+
 	const virtualData = $derived.by(() => {
-		const y = throttledY; // trigger
-		const overscan = 10;
-		const rawData = items; // trigger
-		const totalRows = rawData.length; // trigger
-		const rowHeight = 35;
-		const clientHeight = size.height; // trigger
-		const startIndex = Math.max(0, Math.floor(y / rowHeight) - overscan);
-		const endIndex = Math.min(
-			totalRows - 1,
-			Math.floor((y + clientHeight) / rowHeight) + overscan
-		);
+		const rawData = untrack(() => items);
 
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
-		for (let i = startIndex; i <= endIndex; i++) {
+		for (let i = rowIndices.start; i <= rowIndices.end; i++) {
 			const row = rawData[i];
 			if (row) {
 				processedData.push({ data: row, originalIndex: i });
@@ -90,6 +113,8 @@
 
 		return processedData;
 	});
+
+	$inspect('virtualData', virtualData);
 
 	const visibleColumns = $derived.by(() => {
 		const processedColumns: { data: Column<TData>; originalIndex: number }[] =
@@ -150,10 +175,10 @@
 
 	<div class:slc-table-container={true} class={containerClass}>
 		{#if items.length === 0}
-			<div class="slc-table-locked">No data to display</div>
+			<div class="slc-table-nodata">No data to display</div>
 		{/if}
 		{#if loading}
-			<div class="slc-table-locked">Loading...</div>
+			<div class="slc-table-nodata">Loading...</div>
 		{/if}
 		<div
 			class:slc-table={true}
@@ -233,7 +258,7 @@
 		grid-row: 1 / -1;
 	}
 	/******************************************************/
-	.slc-table-locked {
+	.slc-table-nodata {
 		display: flex;
 		position: absolute;
 		top: 0;

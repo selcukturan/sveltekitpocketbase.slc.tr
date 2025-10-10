@@ -13,8 +13,15 @@
 	};
 	const { children, class: classes, fr, fc, ...attributes }: Props = $props();
 
-	const rowStart = fr.dataLength + fr.headerCount + fr.footerIndex + 1;
-	const bottom = `${(fr.footerLength - fr.footerIndex - 1) * fr.footerHeight}px`;
+	const gridRowStart = $derived(
+		fr.dataLength + fr.headerCount + fr.footerIndex + 1
+	);
+	const gridColumn = $derived(
+		`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`
+	);
+	const bottom = $derived(
+		`${(fr.footerLength - fr.footerIndex - 1) * fr.footerHeight}px`
+	);
 </script>
 
 <div
@@ -23,8 +30,8 @@
 	style:position="sticky"
 	style:bottom
 	style:background="var(--color-surface-200)"
-	style:grid-row-start={rowStart}
-	style:grid-column={`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`}
+	style:grid-row-start={gridRowStart}
+	style:grid-column={gridColumn}
 	class={classes}
 	{...attributes}
 >
