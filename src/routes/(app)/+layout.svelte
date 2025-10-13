@@ -7,11 +7,11 @@
 	import { Toasts, createToaster } from '$lib/components/base/toast';
 	// import { appToaster } from '$lib/components/base/toast';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	const global = initGlobalContext();
 
-	let sidebarData: SidebarDataType[] = [
+	let sidebarData: SidebarDataType[] = $state([
 		{
 			title: 'Home',
 			href: '/',
@@ -33,6 +33,11 @@
 			icon: 'ri-line-chart-line'
 		},
 		{
+			title: 'ERP',
+			href: '/erp',
+			icon: 'ri-clapperboard-line'
+		},
+		{
 			title: 'Developments',
 			href: '/developments',
 			icon: 'ri-code-box-line'
@@ -42,7 +47,16 @@
 			href: '/settings',
 			icon: 'ri-tools-line'
 		}
-	];
+	]);
+
+	const role: string = data?.user?.role || '';
+
+	let filteredSidebarData = $derived.by(() => {
+		if (role.startsWith(':demo:')) {
+			return sidebarData.filter((item) => item.title !== 'ERP');
+		}
+		return sidebarData;
+	});
 
 	createToaster({ name: 'app-toaster' });
 </script>
@@ -52,7 +66,7 @@
 <Toasts toasterName="app-toaster" />
 
 <ProgressBar navigate={navigating}>
-	<AppLayout {sidebarData}>
+	<AppLayout sidebarData={filteredSidebarData}>
 		{@render children?.()}
 	</AppLayout>
 </ProgressBar>

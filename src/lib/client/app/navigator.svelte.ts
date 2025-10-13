@@ -23,6 +23,36 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		this.#filterInput = v;
 	}
 
+	/* rootFilter: FilterState = {
+		type: 'group',
+		operator: '||',
+		children: [
+			{
+				type: 'group',
+				operator: '&&',
+				children: [
+					{
+						type: 'condition',
+						field: 'status',
+						operator: '=',
+						value: 'active'
+					},
+					{
+						type: 'condition',
+						field: 'age',
+						operator: '>',
+						value: 18
+					}
+				]
+			},
+			{
+				type: 'condition',
+				field: 'type',
+				operator: '!=',
+				value: 'guest'
+			}
+		]
+	}; */
 	filterDerived: FilterDerived<TInput> = $derived.by(() => {
 		return {
 			type: 'group',

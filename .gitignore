@@ -29,3 +29,4 @@ vite.config.ts.timestamp-*
 # .vscode
 package-lock.json
 /src/lib/server/dev-sql
+/src/routes/(app)/erp
