@@ -1,5 +1,5 @@
 // src/lib/server/permissions.ts
-import { Auth } from '$lib/server/auth';
+/* import { Auth } from '$lib/server/auth';
 
 export async function checkPermission(auth: Auth, permission: string): Promise<boolean> {
 	if (!auth.user) return false;
@@ -68,3 +68,4 @@ export async function checkPermission(auth: Auth, permission: string): Promise<b
 
 	return userPermissions.totalItems > 0;
 }
+ */

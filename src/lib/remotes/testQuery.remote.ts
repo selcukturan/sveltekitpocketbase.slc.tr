@@ -2,10 +2,7 @@ import { getRequestEvent, query, form } from '$app/server';
 import * as v from 'valibot';
 import { error } from '@sveltejs/kit';
 
-import {
-	Collections,
-	type SysLogsResponse
-} from '$lib/client/types/pocketbase-types';
+import { Collections, type SysLogsResponse } from '$lib/client/types/pocketbase-types';
 import type { MenuNode } from '$lib/client/types/my-pocketbase-types';
 
 export const getTreeMenu = query(async () => {
@@ -14,16 +11,14 @@ export const getTreeMenu = query(async () => {
 	let treeMenu: MenuNode[] = [];
 
 	try {
-		const rawData = await locals.auth.pb
-			.collection(Collections.AclRolesMenusView)
-			.getFullList<MenuNode>({
-				filter: `status_acl_roles = "active" && 
+		const rawData = await locals.pb.collection(Collections.AclRolesMenusView).getFullList<MenuNode>({
+			filter: `status_acl_roles = "active" && 
 					status_acl_roles_menus = "active" && 
 					status_sys_menu_items = "active" && 
 					status_sys_menus = "active" && 
 					valid_permissions ~ ":view:"`,
-				sort: 'sorder'
-			});
+			sort: 'sorder'
+		});
 		treeMenu = rawData;
 	} catch (error) {
 		console.error('Menü verileri çekilirken hata oluştu:', error);
@@ -31,7 +26,7 @@ export const getTreeMenu = query(async () => {
 
 	/* let test: any[] = [];
 	try {
-		const xxx = await locals.auth.pb
+		const xxx = await locals.pb
 			.collection('test_subtotal')
 			.getFullList<MenuNode>();
 		test = xxx;
@@ -43,14 +38,11 @@ export const getTreeMenu = query(async () => {
 });
 
 export const getLogs = query(async () => {
-	const sleep = (ms: number) =>
-		new Promise((resolve) => setTimeout(resolve, ms));
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const { locals } = getRequestEvent();
 
-	const logs = await locals.auth.pb
-		.collection(Collections.SysLogs)
-		.getFullList<SysLogsResponse>();
+	const logs = await locals.pb.collection(Collections.SysLogs).getFullList<SysLogsResponse>();
 
 	await sleep(1000);
 
@@ -62,14 +54,11 @@ export const getLogs = query(async () => {
 });
 
 export const getLog = query(v.string(), async (slug) => {
-	const sleep = (ms: number) =>
-		new Promise((resolve) => setTimeout(resolve, ms));
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const { locals } = getRequestEvent();
 
-	const log = await locals.auth.pb
-		.collection(Collections.SysLogs)
-		.getOne<SysLogsResponse>(slug);
+	const log = await locals.pb.collection(Collections.SysLogs).getOne<SysLogsResponse>(slug);
 
 	await sleep(1000);
 
@@ -100,13 +89,11 @@ export const createLog = form(
 
 		const { locals } = getRequestEvent();
 
-		await locals.auth.pb
-			.collection(Collections.SysLogs)
-			.create<SysLogsResponse>({
-				slug,
-				title,
-				content
-			});
+		await locals.pb.collection(Collections.SysLogs).create<SysLogsResponse>({
+			slug,
+			title,
+			content
+		});
 
 		// await getLogs().refresh(); // server single-flight mutations
 

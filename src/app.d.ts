@@ -1,4 +1,6 @@
-import { Auth } from '$lib/server/auth';
+import type { TypedPocketBase } from '$lib/client/types/pocketbase-types';
+import type { AuthRecord } from 'pocketbase';
+import { CustomAuthStore } from '$lib/server/pb';
 
 declare global {
 	namespace App {
@@ -7,7 +9,9 @@ declare global {
 			errorId: string;
 		}
 		interface Locals {
-			auth: Auth;
+			pb: TypedPocketBase;
+			auth: CustomAuthStore;
+			user: AuthRecord | null;
 		}
 		// interface PageData {}
 		// interface PageState {}

@@ -12,5 +12,5 @@ export const load: LayoutServerLoad = async ({ url, depends, locals }) => {
 	 */
 	depends('server:rerun');
 
-	return { user: locals.auth.user };
+	return { user: locals.user };
 };
