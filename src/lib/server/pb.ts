@@ -1,7 +1,7 @@
 import type { TypedPocketBase } from '$lib/client/types/pocketbase-types';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 
-import { env } from '$env/dynamic/private';
+import env from '$lib/server/env';
 import PocketBase, { LocalAuthStore, type AuthRecord, type SerializeOptions, ClientResponseError } from 'pocketbase';
 
 export class CustomAuthStore extends LocalAuthStore {
