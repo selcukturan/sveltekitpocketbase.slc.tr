@@ -21,12 +21,14 @@ export const actions: Actions = {
 		try {
 			authData = await locals.pb.collection(Collections.SysUsers).authWithPassword(email, password);
 		} catch (err) {
+			console.error('!!!!!! LOGIN İŞLEMİNDE HATA OLUŞTU !!!!!!');
+			console.error(err); // Hatayı sunucu loglarına bütün detaylarıyla yazdır.
 			if (err instanceof ClientResponseError) {
 				locals.auth.error(err);
 				locals.auth.clear();
 			}
 		}
-		console.log('authData', authData);
+
 		if (authData != null) {
 			redirect(303, '/');
 		} else {
