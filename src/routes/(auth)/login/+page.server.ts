@@ -19,14 +19,14 @@ export const actions: Actions = {
 		let authData: RecordAuthResponse<SysUsersResponse> | null = null;
 
 		try {
-			authData = await locals.pb.collection(Collections.SysUsers).authWithPassword<SysUsersResponse>(email, password);
+			authData = await locals.pb.collection(Collections.SysUsers).authWithPassword(email, password);
 		} catch (err) {
 			if (err instanceof ClientResponseError) {
 				locals.auth.error(err);
 				locals.auth.clear();
 			}
 		}
-
+		console.log('authData', authData);
 		if (authData != null) {
 			redirect(303, '/');
 		} else {
