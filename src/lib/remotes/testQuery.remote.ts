@@ -2,8 +2,8 @@ import { getRequestEvent, query, form } from '$app/server';
 import * as v from 'valibot';
 import { error } from '@sveltejs/kit';
 
-import { Collections, type SysLogsResponse } from '$lib/client/types/pocketbase-types';
-import type { MenuNode } from '$lib/client/types/my-pocketbase-types';
+import { Collections, type SysLogsResponse } from '$lib/types/pocketbase-types';
+import type { MenuNode } from '$lib/types/my-pocketbase-types';
 
 export const getTreeMenu = query(async () => {
 	const { locals } = getRequestEvent();

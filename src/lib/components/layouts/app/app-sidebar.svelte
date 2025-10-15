@@ -1,29 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getGlobalContext } from '$lib/client/app/global.svelte';
+	import { getGlobalContext } from '$lib/app/global.svelte';
 	import type { PropsAppSidebarType } from './types';
-	import { tooltip } from '$lib/client/attachments';
+	import { tooltip } from '$lib/attachments';
 
-	let {
-		sidebarData,
-		class: classes,
-		...attributes
-	}: PropsAppSidebarType = $props();
+	let { sidebarData, class: classes, ...attributes }: PropsAppSidebarType = $props();
 
 	const global = getGlobalContext();
 </script>
 
-<section
-	class="{classes} {'flex h-full w-full flex-row overflow-hidden sm:flex-col'}"
-	{...attributes}
->
+<section class="{classes} {'flex h-full w-full flex-row overflow-hidden sm:flex-col'}" {...attributes}>
 	<header class="flex items-center justify-center px-2 sm:py-2">
 		<a href="/" class="flex h-10 w-10 items-center justify-center select-none">
-			<img
-				class="h-10 w-10 select-none"
-				src="/images/logo/logo_512.png"
-				alt="SLC Web logo"
-			/>
+			<img class="h-10 w-10 select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</a>
 	</header>
 	<nav

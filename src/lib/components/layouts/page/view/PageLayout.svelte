@@ -2,7 +2,7 @@
 	import { SplitPane } from '$lib/components/base/split-pane';
 	import type { Length } from '$lib/components/base/split-pane/types';
 	import { PageSidebar, PageContainer } from '../';
-	import { getGlobalContext } from '$lib/client/app/global.svelte';
+	import { getGlobalContext } from '$lib/app/global.svelte';
 
 	import type { PageLayoutPropsType } from '../types';
 

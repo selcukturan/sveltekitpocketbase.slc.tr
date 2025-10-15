@@ -1,12 +1,8 @@
 <script lang="ts">
-	import type { TestSubtotalViewResponse } from '$lib/client/types/pocketbase-types';
+	import type { TestSubtotalViewResponse } from '$lib/types/pocketbase-types';
 	import { getFullListSubTotal } from '$lib/remotes/testDataTable.remote';
 
-	import {
-		DataTable,
-		createTable,
-		type Sources
-	} from '$lib/components/base/data-table';
+	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
 
 	// initial sources setup
 	const sources: Sources<TestSubtotalViewResponse> = {

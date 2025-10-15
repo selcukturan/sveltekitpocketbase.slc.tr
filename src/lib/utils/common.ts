@@ -141,3 +141,19 @@ export function validIBAN(value: string): boolean {
 	}
 	return iban; // IBAN gecerliligini doner.
 }
+
+/**
+ * Bir string'i arama için normalize eder:
+ * - Türkçe'ye uygun küçük harfe çevirir.
+ * - Aksan/şapka gibi işaretleri kaldırır (örn: ş -> s, ö -> o).
+ * Girdi: "ÖĞRENCİ IŞIKLARI"
+ * Sonuç: Artık kullanıcı arama kutusuna ister "ogrenci", ister "Öğrenci", ister "ogrencı" yazsın,
+ * hepsi aynı standart formda ("ogrenci isiklari") olarak dönüştürülür.
+ */
+export function normalizeStringForTurkishSearch(str: string): string {
+	return str
+		.normalize('NFD') // 1. Karakterleri ve aksanları ayır
+		.replace(/[\u0300-\u036f]/g, '') // 2. Aksan işaretlerini kaldır
+		.toLocaleLowerCase('tr-TR') // 3. Türkçe'ye uygun küçük harfe çevir
+		.replace(/ı/g, 'i'); // 4. Tüm 'ı' harflerini 'i' yap
+}

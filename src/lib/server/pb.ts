@@ -1,4 +1,4 @@
-import type { TypedPocketBase } from '$lib/client/types/pocketbase-types';
+import type { TypedPocketBase } from '$lib/types/pocketbase-types';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 
 import env from '$lib/server/env';

@@ -33,7 +33,7 @@ export class Counter {
 
 /* 
 <script lang="ts">
-	import { Counter } from '$lib/client/app/counter.svelte';
+	import { Counter } from '$lib/app/counter.svelte';
 	const counter = new Counter();
 </script>
 <button onclick={counter.increment} class="bg-warning-300 p-3">

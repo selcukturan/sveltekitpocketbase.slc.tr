@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance, applyAction } from '$app/forms';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
-	import { config } from '$lib/client/app';
+	import { config } from '$lib/app/config';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 
 	const loginPageToaster = createToaster({
@@ -89,7 +89,11 @@
 		<div class="flex flex-row gap-4">
 			<div class="flex flex-col items-center justify-center gap-1">
 				<p class="text-surface-500">{`${config.appName} | ${config.version}`}</p>
-				<img class="object-fit inset-0 h-6 w-6 brightness-85 grayscale" src="/images/logo/logo_512.png" alt="SLC Web logo" />
+				<img
+					class="object-fit inset-0 h-6 w-6 brightness-85 grayscale"
+					src="/images/logo/logo_512.png"
+					alt="SLC Web logo"
+				/>
 			</div>
 		</div>
 	</div>

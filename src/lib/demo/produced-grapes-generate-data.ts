@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { normalizeStringForTurkishSearch } from '../utils/common';
 import type { ProducedGrapes } from './produced-grapes-schema';
 
 export function generateProducedData(count: number) {
@@ -1113,12 +1114,9 @@ export function generateProducedData(count: number) {
 	const data: ProducedGrapes[] = [];
 
 	for (let i = 1; i <= count; i++) {
-		const randomProducerName =
-			producerName[Math.floor(Math.random() * producerName.length)];
-		const randomProducerSurname =
-			producerSurname[Math.floor(Math.random() * producerSurname.length)];
-		const randomRegionAndGrape =
-			regionAndGrape[Math.floor(Math.random() * regionAndGrape.length)];
+		const randomProducerName = producerName[Math.floor(Math.random() * producerName.length)];
+		const randomProducerSurname = producerSurname[Math.floor(Math.random() * producerSurname.length)];
+		const randomRegionAndGrape = regionAndGrape[Math.floor(Math.random() * regionAndGrape.length)];
 
 		let subtotal: string = '';
 		if (i % 6 === 0) {
@@ -2277,12 +2275,12 @@ export function generateProducedData2(count: number) {
 	const data: any[] = [];
 
 	for (let i = 1; i <= count; i++) {
-		const randomProducerName =
-			producerName[Math.floor(Math.random() * producerName.length)];
-		const randomProducerSurname =
-			producerSurname[Math.floor(Math.random() * producerSurname.length)];
-		const randomRegionAndGrape =
-			regionAndGrape[Math.floor(Math.random() * regionAndGrape.length)];
+		const randomProducerName = producerName[Math.floor(Math.random() * producerName.length)];
+		const randomProducerSurname = producerSurname[Math.floor(Math.random() * producerSurname.length)];
+		const randomRegionAndGrape = regionAndGrape[Math.floor(Math.random() * regionAndGrape.length)];
+
+		const producerCaption = `${randomProducerName} ${randomProducerSurname}`;
+		const producerTitle = normalizeStringForTurkishSearch(producerCaption);
 
 		const id = generateRandomId();
 		const order = i;
@@ -2290,7 +2288,9 @@ export function generateProducedData2(count: number) {
 		const kt = '';
 		const active = true;
 		const purchase_date = '2025-09-18 12:00:00.000Z';
-		const producer = `${randomProducerName} ${randomProducerSurname}`;
+		// const producer = producerName;
+		const producer_title = producerTitle;
+		const producer_caption = producerCaption;
 		const region = randomRegionAndGrape.region;
 		const province = randomRegionAndGrape.province;
 		const district = randomRegionAndGrape.district;
@@ -2309,7 +2309,8 @@ export function generateProducedData2(count: number) {
 			kn,
 			kt,
 			purchase_date,
-			producer,
+			producer_title,
+			producer_caption,
 			region,
 			province,
 			district,

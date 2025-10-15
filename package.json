@@ -14,7 +14,7 @@
 		"lint": "prettier --check . && eslint .",
 		"slc:dev:push": "git add . && git commit -m \"SLC CLI Auto Push\" && git push origin main",
 		"pb": "docker compose --file ./.slc-development/pocketbase/docker-compose.yml --env-file ./.env.development up -d --build",
-		"pb:typegen": "pocketbase-typegen --db ./.slc-production/pocketbase/pb_data/data.db --out ./src/lib/client/types/pocketbase-types.ts",
+		"pb:typegen": "pocketbase-typegen --db ./.slc-production/pocketbase/pb_data/data.db --out ./src/lib/types/pocketbase-types.ts",
 		"slc:production:docker": "docker-compose -f docker-compose-local.yml --env-file ./.env.local up --build -d"
 	},
 	"devDependencies": {

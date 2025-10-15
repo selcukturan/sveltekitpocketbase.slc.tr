@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { focustrap } from '$lib/client/attachments';
-	import { isInput } from '$lib/client/utils';
+	import { focustrap } from '$lib/attachments';
+	import { isInput } from '$lib/utils/common';
 	import { tick, type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
@@ -36,9 +36,7 @@
 	 * closedby="closerequest" | "Kapat" düğmesi veya "Esc" tuşu ile kapatılabilir.
 	 * closedby="any" | "Kapat" düğmesi, Esc tuşu veya iletişim kutusunun dışına tıklayarak kapatılabilir.
 	 */
-	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>(
-		'any'
-	);
+	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
 
 	export const open = () => {
 		show();
@@ -58,8 +56,7 @@
 		onOpen?.();
 	};
 
-	const sleep = (ms: number) =>
-		new Promise((resolve) => setTimeout(resolve, ms));
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const hide = async () => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 
@@ -146,8 +143,7 @@
 		};
 	};
 
-	const dialogClasses =
-		'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
+	const dialogClasses = 'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
 	const dialogFocusOverrideClasses =
 		'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>

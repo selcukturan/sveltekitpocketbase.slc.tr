@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { randomString } from '$lib/client/utils';
+	import { randomString } from '$lib/utils/common';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	/**

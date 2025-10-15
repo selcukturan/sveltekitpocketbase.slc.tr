@@ -1,5 +1,5 @@
 import type { Actions } from './$types';
-import { Collections } from '$lib/client/types/pocketbase-types';
+import { Collections } from '$lib/types/pocketbase-types';
 import { fail, redirect } from '@sveltejs/kit';
 import { ResultAsync } from 'neverthrow';
 import { handleError, mapUnknownToError } from '$lib/server/error.service';

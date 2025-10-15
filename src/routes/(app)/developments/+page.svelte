@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { getGlobalContext } from '$lib/client/app/global.svelte';
+	import { getGlobalContext } from '$lib/app/global.svelte';
 	const global = getGlobalContext();
 </script>
 
@@ -23,7 +23,8 @@
 				<button type="button" onclick={() => localStorage.removeItem('slc:splitpane')}>Clear localStorage</button>
 			</div> -->
 						<div class="p-4">
-							<span class="slc-screen-test bg-error-500 sm:bg-info-500 md:bg-success-500 lg:bg-warning-500 h-3 w-3"></span>
+							<span class="slc-screen-test bg-error-500 sm:bg-info-500 md:bg-success-500 lg:bg-warning-500 h-3 w-3"
+							></span>
 							<span>{@html `< ====== >`}</span>
 							<span class="bg-error-500 h-3 w-3">mobile</span>
 							<span class="bg-info-500 h-3 w-3">sm</span>

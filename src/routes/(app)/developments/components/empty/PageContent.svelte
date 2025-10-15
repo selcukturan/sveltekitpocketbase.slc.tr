@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MenuNode } from '$lib/client/types/my-pocketbase-types';
+	import type { MenuNode } from '$lib/types/my-pocketbase-types';
 	import { getTreeMenu } from '$lib/remotes/testQuery.remote';
 
 	let searchQuery = $state('');
@@ -99,18 +99,11 @@
 	const myMenuHierarchyFromPB = $derived(buildTreeMenu(rawTreeData));
 
 	// Tree menüde arama yap
-	const resultsForSearch = $derived(
-		searchTreeMenu(myMenuHierarchyFromPB, searchQuery)
-	);
+	const resultsForSearch = $derived(searchTreeMenu(myMenuHierarchyFromPB, searchQuery));
 	// $inspect(resultsForSearch);
 </script>
 
-<input
-	type="text"
-	bind:value={searchQuery}
-	placeholder="Ara..."
-	class="bg-success-300"
-/>
+<input type="text" bind:value={searchQuery} placeholder="Ara..." class="bg-success-300" />
 <ul>
 	{#each resultsForSearch as item}
 		{@const title = item.title ?? 'CAPTION'}

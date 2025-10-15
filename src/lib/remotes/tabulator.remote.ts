@@ -1,6 +1,6 @@
 import * as v from 'valibot';
-import { Collections, type TestDatatableResponse } from '$lib/client/types/pocketbase-types';
-import { buildPocketbaseFilterString } from '$lib/client/utils/filter-string-helper';
+import { Collections, type TestDatatableResponse } from '$lib/types/pocketbase-types';
+import { buildPocketbaseFilterString } from '$lib/utils/filter-string-helper';
 
 import { getRequestEvent, query } from '$app/server';
 

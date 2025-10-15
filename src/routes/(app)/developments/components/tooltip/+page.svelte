@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { tooltip } from '$lib/client/attachments';
+	import { tooltip } from '$lib/attachments';
 
 	let content = $state('This is a SLC attachment tooltip');
 	let userSelected = $state('top');

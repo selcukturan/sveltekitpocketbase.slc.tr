@@ -1,8 +1,4 @@
-import {
-	filterObjectToHashUrl,
-	type FilterDerived,
-	hashUrlToFilterObject
-} from '$lib/client/utils/filter-string-helper';
+import { filterObjectToHashUrl, type FilterDerived, hashUrlToFilterObject } from '$lib/utils/filter-string-helper';
 import { goto } from '$app/navigation';
 import { tick, untrack } from 'svelte';
 
@@ -74,18 +70,13 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		};
 	});
 
-	constructor(
-		initialHashUrl: string = '',
-		initialFilterInput: TInput = {} as TInput
-	) {
+	constructor(initialHashUrl: string = '', initialFilterInput: TInput = {} as TInput) {
 		if (initialHashUrl.replace('#', '') !== '') {
 			// Öncelik 1: URL'de bir hash varsa.
 			const filterHashFlatObject = this.getFilterHashFlatObject(initialHashUrl);
 			for (const key in filterHashFlatObject) {
 				if (filterHashFlatObject[key] !== null) {
-					this.filterInput[key] = filterHashFlatObject[
-						key
-					] as TInput[typeof key];
+					this.filterInput[key] = filterHashFlatObject[key] as TInput[typeof key];
 				}
 			}
 			this.currentHash = initialHashUrl;
@@ -130,8 +121,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		return this.filterInput[itemKey]
 			? this.filterInput[itemKey]
 			: restoredFilterState
-				? ((restoredFilterState.children[0] as any)
-						.value as TInput[keyof TInput])
+				? ((restoredFilterState.children[0] as any).value as TInput[keyof TInput])
 				: null;
 	}
 
@@ -139,9 +129,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 		const restoredFilterState = hashUrlToFilterObject<TInput>(this.currentHash);
 
 		if (restoredFilterState && Array.isArray(restoredFilterState.children)) {
-			const child = restoredFilterState.children.find(
-				(c: any) => c.field === itemKey
-			);
+			const child = restoredFilterState.children.find((c: any) => c.field === itemKey);
 			if (child && 'value' in child) {
 				return child.value as TInput[keyof TInput];
 			}

@@ -1,14 +1,9 @@
 <script lang="ts">
 	import { AppSidebar, AppHeader } from '../';
 	import type { AppLayoutPropsType } from '../types';
-	import { getGlobalContext } from '$lib/client/app/global.svelte';
+	import { getGlobalContext } from '$lib/app/global.svelte';
 
-	let {
-		sidebarData,
-		children,
-		class: classes,
-		...attributes
-	}: AppLayoutPropsType = $props();
+	let { sidebarData, children, class: classes, ...attributes }: AppLayoutPropsType = $props();
 
 	let global = getGlobalContext();
 </script>

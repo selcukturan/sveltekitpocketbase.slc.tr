@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { focustrap } from '$lib/client/attachments';
+	import { focustrap } from '$lib/attachments';
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
-	let { message = 'Onaylıyor musunuz?', yes = 'Evet', no = 'Hayır' }: { message?: string; yes?: string; no?: string } = $props();
+	let {
+		message = 'Onaylıyor musunuz?',
+		yes = 'Evet',
+		no = 'Hayır'
+	}: { message?: string; yes?: string; no?: string } = $props();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let resolvePromise: ((value: boolean) => void) | null = null;

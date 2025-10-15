@@ -1,5 +1,5 @@
 import type { Attachment } from 'svelte/attachments';
-import { isFocusable } from '$lib/client/utils';
+import { isFocusable } from '$lib/utils/common';
 
 // tooltip element type [extended div]
 type TooltipElementType = HTMLDivElement & {

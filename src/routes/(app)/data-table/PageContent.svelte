@@ -1,14 +1,10 @@
 <script lang="ts">
-	import type { TestDatatableResponse } from '$lib/client/types/pocketbase-types';
+	import type { TestDatatableResponse } from '$lib/types/pocketbase-types';
 	import { getFullList } from '$lib/remotes/testDataTable.remote';
-	import {
-		DataTable,
-		createTable,
-		type Sources
-	} from '$lib/components/base/data-table';
+	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
 
 	import { page } from '$app/state';
-	import { Navigator } from '$lib/client/app/navigator.svelte';
+	import { Navigator } from '$lib/app/navigator.svelte';
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -183,19 +179,10 @@
 
 <div class="flex h-full flex-col">
 	<div>
-		<input
-			type="text"
-			bind:value={navigator.filterInput.producer}
-			class="border"
-		/>
-		<button onclick={() => navigator.triggerFilter()} class="bg-warning-300 p-3"
-			>getFilter</button
-		>
+		<input type="text" bind:value={navigator.filterInput.producer} class="border" />
+		<button onclick={() => navigator.triggerFilter()} class="bg-warning-300 p-3">getFilter</button>
 		<span> | </span>
-		<button
-			onclick={() => getFullList(navigator.getRemoteFilterParams).refresh()}
-			class="bg-warning-300 p-3"
-		>
+		<button onclick={() => getFullList(navigator.getRemoteFilterParams).refresh()} class="bg-warning-300 p-3">
 			RRRR
 		</button>
 	</div>

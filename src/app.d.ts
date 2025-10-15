@@ -1,4 +1,4 @@
-import type { TypedPocketBase } from '$lib/client/types/pocketbase-types';
+import type { TypedPocketBase } from '$lib/types/pocketbase-types';
 import type { AuthRecord } from 'pocketbase';
 import { CustomAuthStore } from '$lib/server/pb';
 
