@@ -3,10 +3,13 @@ import { Collections, type TestDatatableResponse, type TestSubtotalViewResponse 
 import { buildPocketbaseFilterString } from '$lib/utils/filter-string-helper';
 
 import { getRequestEvent, query } from '$app/server';
+import { checkAuthenticated } from './guarded.remote';
 
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getFullList = query(v.string(), async (hash: string) => {
+	await checkAuthenticated();
+
 	const { locals } = getRequestEvent();
 
 	const filterString = buildPocketbaseFilterString(hash);
@@ -20,6 +23,8 @@ export const getFullList = query(v.string(), async (hash: string) => {
 });
 
 export const getFullListSubTotal = query(v.string(), async (hash: string) => {
+	await checkAuthenticated();
+
 	const { locals } = getRequestEvent();
 
 	const resultList = await locals.pb.collection('test_subtotal_view').getList<TestSubtotalViewResponse>(1, 100, {

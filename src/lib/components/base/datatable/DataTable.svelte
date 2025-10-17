@@ -5,16 +5,10 @@
 	 */
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { untrack, type Snippet } from 'svelte';
-	import type {
-		Row,
-		Column,
-		Footer,
-		FooterRowType,
-		DataRowType,
-		HeaderRowType
-	} from './types';
-	import { ScrollState, AnimationFrames, ElementSize, watch } from 'runed';
+	import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType } from './types';
+	import { ScrollState, AnimationFrames, watch, useResizeObserver } from 'runed';
 	import { setContext } from './context.svelte';
+	import { tick } from 'svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -33,7 +27,7 @@
 		loading?: boolean;
 	};
 
-	const {
+	let {
 		items = [],
 		columns,
 		footers,
@@ -49,17 +43,36 @@
 		...attributes
 	}: Props = $props();
 
+	let el = $state<HTMLElement>();
+	const scroll = new ScrollState({ element: () => el });
 	const context = setContext();
 
-	let el = $state<HTMLElement>();
+	let proxy = {
+		get items() {
+			return items;
+		},
+		set items(newValue) {
+			items = newValue;
+			tick().then(() => {
+				// scroll.scrollToTop();
+				updateVisibleIndexes(true);
+			});
+		}
+	};
 
-	const size = new ElementSize(() => el);
-	const scroll = new ScrollState({ element: () => el });
+	watch(
+		() => items,
+		(items) => {
+			proxy.items = items;
+		}
+	);
 
+	let clientHeight = $state(0);
 	let throttledY = $state(0);
 	let fpsLimit = $state(60);
 	let frames = $state(0);
 	let delta = $state(0);
+
 	const animation = new AnimationFrames(
 		(args) => {
 			frames++;
@@ -68,6 +81,14 @@
 		},
 		{ fpsLimit: () => fpsLimit }
 	);
+	useResizeObserver(
+		() => el,
+		(entries) => {
+			const entry = entries[0];
+			if (!entry) return;
+			clientHeight = entry.contentRect.height;
+		}
+	);
 
 	// virtualData trigger
 	let rowIndices = $state.raw({
@@ -75,32 +96,29 @@
 		end: 0
 	});
 
-	watch(
-		[() => throttledY, () => items, () => size.height],
-		([y, items, clientHeight]) => {
-			const overscan = 10;
-			const rowHeight = 35;
+	const updateVisibleIndexes = (force: boolean = false) => {
+		const overscan = 10;
+		const rowHeight = 35;
 
-			const start = Math.max(0, Math.floor(y / rowHeight) - overscan);
-			const end = Math.min(
-				items.length - 1,
-				Math.floor((y + clientHeight) / rowHeight) + overscan
-			);
+		let start = Math.max(0, Math.floor(throttledY / rowHeight) - overscan);
+		let end = Math.min(proxy.items.length - 1, Math.floor((throttledY + clientHeight) / rowHeight) + overscan);
 
-			const indicesChanged =
-				start !== rowIndices.start || end !== rowIndices.end;
+		const indicesChanged = start !== rowIndices.start || end !== rowIndices.end;
 
-			if (indicesChanged) {
-				rowIndices = {
-					start: start,
-					end: end
-				};
-			}
+		if (force || indicesChanged) {
+			rowIndices = {
+				start: start >= end ? 0 : start,
+				end: end
+			};
 		}
-	);
+	};
+
+	watch([() => throttledY, () => clientHeight], () => {
+		updateVisibleIndexes();
+	});
 
 	const virtualData = $derived.by(() => {
-		const rawData = untrack(() => items);
+		const rawData = untrack(() => proxy.items);
 
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
@@ -114,11 +132,8 @@
 		return processedData;
 	});
 
-	$inspect('virtualData', virtualData);
-
 	const visibleColumns = $derived.by(() => {
-		const processedColumns: { data: Column<TData>; originalIndex: number }[] =
-			[];
+		const processedColumns: { data: Column<TData>; originalIndex: number }[] = [];
 
 		for (let i = 0; i <= columns.length; i++) {
 			const col = columns[i];
@@ -130,20 +145,21 @@
 		return processedColumns;
 	});
 
+	// $inspect('throttledY', throttledY);
+	// $inspect('rowIndices', rowIndices);
+	// $inspect('virtualData', virtualData);
+
 	const gridTemplateRows = $derived.by(() => {
 		const headerCount = 1;
 		const headerRowHeight = 35;
 		const dataRowHeight = 35;
 		const footerRowHeight = 35;
 		const footerLength = footers?.length || 0;
-		const itemLength = items.length || 0;
+		const itemLength = proxy.items.length || 0;
 
-		const headerRowRepeat: string =
-			headerCount >= 1 ? `repeat(${headerCount}, ${headerRowHeight}px)` : ``;
-		const dataRowRepeat: string =
-			itemLength > 0 ? `repeat(${itemLength}, ${dataRowHeight}px)` : ``;
-		const footerRowRepeat: string =
-			footerLength > 0 ? `repeat(${footerLength}, ${footerRowHeight}px)` : ``;
+		const headerRowRepeat: string = headerCount >= 1 ? `repeat(${headerCount}, ${headerRowHeight}px)` : ``;
+		const dataRowRepeat: string = itemLength > 0 ? `repeat(${itemLength}, ${dataRowHeight}px)` : ``;
+		const footerRowRepeat: string = footerLength > 0 ? `repeat(${footerLength}, ${footerRowHeight}px)` : ``;
 
 		return [headerRowRepeat, dataRowRepeat, footerRowRepeat].join(' ');
 	});
@@ -152,18 +168,15 @@
 		const columnsWidth = visibleColumns.map((col) => col.data.width ?? `150px`);
 		return columnsWidth.join(' ');
 	});
+
+	export const test = () => {
+		console.log('test object');
+	};
 </script>
 
-<div
-	class:slc-table-main={true}
-	class={mainClass}
-	style:width={`100%`}
-	style:height={`100%`}
->
+<div class:slc-table-main={true} class={mainClass} style:width={`100%`} style:height={`100%`}>
 	{@render toolbar?.()}
-	<div
-		style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);"
-	>
+	<div style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);">
 		<div>
 			fps: {fpsLimit} / {animation.fps.toFixed(0)}
 		</div>
@@ -174,7 +187,7 @@
 	</div>
 
 	<div class:slc-table-container={true} class={containerClass}>
-		{#if items.length === 0}
+		{#if proxy.items.length === 0}
 			<div class="slc-table-nodata">No data to display</div>
 		{/if}
 		{#if loading}
@@ -191,7 +204,7 @@
 		>
 			{@render headerRow?.({
 				columns: visibleColumns,
-				dataLength: items.length,
+				dataLength: proxy.items.length,
 				headerHeight: 35,
 				headerCount: 1
 			})}
@@ -202,19 +215,19 @@
 					rowVirtualIndex: virtualIndex,
 					rowOriginalIndex: row.originalIndex,
 					columns: visibleColumns,
-					dataLength: items.length,
+					dataLength: proxy.items.length,
 					dataHeight: 35,
 					headerCount: 1
 				})}
 			{/each}
 
-			{#if items.length > 0 && footers && footers.length > 0}
+			{#if proxy.items.length > 0 && footers && footers.length > 0}
 				{#each footers as row, footerIndex (footerIndex)}
 					{@render footerRow?.({
 						footerRow: row,
 						columns: visibleColumns,
 						footerIndex,
-						dataLength: items.length,
+						dataLength: proxy.items.length,
 						footerLength: footers.length,
 						footerHeight: 35,
 						headerCount: 1

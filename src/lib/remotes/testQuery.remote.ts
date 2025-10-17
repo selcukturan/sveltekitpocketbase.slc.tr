@@ -5,7 +5,11 @@ import { error } from '@sveltejs/kit';
 import { Collections, type SysLogsResponse } from '$lib/types/pocketbase-types';
 import type { MenuNode } from '$lib/types/my-pocketbase-types';
 
+import { checkAuthenticated } from './guarded.remote';
+
 export const getTreeMenu = query(async () => {
+	await checkAuthenticated();
+
 	const { locals } = getRequestEvent();
 
 	let treeMenu: MenuNode[] = [];
@@ -38,6 +42,8 @@ export const getTreeMenu = query(async () => {
 });
 
 export const getLogs = query(async () => {
+	await checkAuthenticated();
+
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const { locals } = getRequestEvent();
@@ -54,6 +60,8 @@ export const getLogs = query(async () => {
 });
 
 export const getLog = query(v.string(), async (slug) => {
+	await checkAuthenticated();
+
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const { locals } = getRequestEvent();
@@ -75,7 +83,7 @@ export const createLog = form(
 		content: v.pipe(v.string(), v.nonEmpty())
 	}),
 	async ({ title, content }) => {
-		// Check the user is logged in
+		await checkAuthenticated();
 
 		// Check the data is valid
 		if (typeof title !== 'string' || typeof content !== 'string') {

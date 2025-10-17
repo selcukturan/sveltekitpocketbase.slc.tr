@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ url, depends, locals }) => {
-	console.log(`${url.pathname} | +layout.server.ts - (app) `);
+	console.log(`${new Date().toISOString()} ----> /(app)/+layout.server.ts | url.pathname:${url.pathname}`);
 
 	/**
 	 * (app) klasörü içindeki rotalarda `+page.server.ts` olmasa bile her navigation'da `hooks.server.ts`in çalıştırılmasını sağlar.

@@ -5,7 +5,7 @@ import { Collections } from '$lib/types/pocketbase-types';
 import { createInstance } from '$lib/server/pb';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	console.log('hooks.server.ts');
+	console.log(`${new Date().toISOString()} ----> hooks.server.ts | START | event.url.pathname:${event.url.pathname}`);
 	const isProduction = env.NODE_ENV === 'production';
 
 	// 🚀 PB ve AuthStore örneği oluştur ##############################################################################################
@@ -22,30 +22,35 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = structuredClone(event.locals.auth.record);
 
 	// ⌛🔒 Rota koruma ###############################################################################################################
-	if (event.url.pathname.startsWith('/login')) {
-		if (event.locals.user) redirect(303, '/');
+	if (event.request.url.includes('/_app/remote/')) {
+		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Remote Function`);
 	} else {
-		if (!event.locals.user) redirect(303, '/login');
+		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Other`);
+		if (event.url.pathname.startsWith('/login')) {
+			if (event.locals.user) redirect(303, '/');
+		} else {
+			if (!event.locals.user) redirect(303, '/login');
+		}
 	}
 
+	console.log(`${new Date().toISOString()} ----> hooks.server.ts | before resolving the request`);
 	// 📡 before resolving the request ################################################################################################
 	// 🔼 - istek sunucu tarafından işlenmeden önceki kodlar yukarıdadır.
 	const response = await resolve(event);
 	// 🔽 - istek sunucu tarafından işlendikten sonraki kodlar aşağıdadır.
 	// 📡 after resolving the request #################################################################################################
-
+	console.log(`${new Date().toISOString()} ----> hooks.server.ts | after resolving the request`);
 	// ⌛🍪 Set Cookie ################################################################################################################
 	response.headers.append(
 		'set-cookie',
 		event.locals.auth.exportToCookie({
-			/* expires: event.locals.auth.getCookieExpDate(event.locals.auth.token), */
 			httpOnly: true,
 			secure: isProduction,
 			sameSite: 'lax',
 			priority: 'High'
 		})
 	);
-
+	console.log(`${new Date().toISOString()} ----> hooks.server.ts | END | event.url.pathname:${event.url.pathname}`);
 	// 🏆 ############################################################################################################################
 	return response;
 };
