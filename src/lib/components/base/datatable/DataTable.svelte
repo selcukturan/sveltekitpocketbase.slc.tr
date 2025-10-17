@@ -51,8 +51,8 @@
 		get items() {
 			return items;
 		},
-		set items(newValue) {
-			items = newValue;
+		set items(newItems) {
+			items = newItems;
 			tick().then(() => {
 				// scroll.scrollToTop();
 				updateVisibleIndexes(true);
@@ -96,6 +96,10 @@
 		end: 0
 	});
 
+	watch([() => throttledY, () => clientHeight], () => {
+		updateVisibleIndexes();
+	});
+
 	const updateVisibleIndexes = (force: boolean = false) => {
 		const overscan = 10;
 		const rowHeight = 35;
@@ -112,10 +116,6 @@
 			};
 		}
 	};
-
-	watch([() => throttledY, () => clientHeight], () => {
-		updateVisibleIndexes();
-	});
 
 	const virtualData = $derived.by(() => {
 		const rawData = untrack(() => proxy.items);

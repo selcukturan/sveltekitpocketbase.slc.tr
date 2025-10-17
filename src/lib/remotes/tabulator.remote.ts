@@ -15,7 +15,7 @@ export const getFullList = query(v.string(), async (filter: string) => {
 	const filterString = buildPocketbaseFilterString(filter);
 	// console.log('filterString', filterString);
 	const records = await locals.pb.collection(Collections.TestDatatable).getList<TestDatatableResponse>(1, 1000, {
-		filter: `producer ~ "${filter}"`,
+		filter: `caption ~ "${filter}"`,
 		sort: 'order'
 	});
 

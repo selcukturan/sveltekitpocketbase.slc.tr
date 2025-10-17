@@ -54,7 +54,7 @@
 			},
 			autoColumns: true,
 			autoColumnsDefinitions: [
-				{ field: 'producer', editor: 'input' },
+				{ field: 'producer_caption', editor: 'input' },
 				{ field: 'price', editor: 'input' },
 				{ field: 'quantity', editor: 'input' },
 				{ field: 'amount', editor: 'input' }
@@ -70,9 +70,7 @@
 		});
 
 		const handleKeyDown = (e: KeyboardEvent) => {
-			const input1 = table?.element?.querySelector(
-				'.tabulator-cell.tabulator-editing input'
-			);
+			const input1 = table?.element?.querySelector('.tabulator-cell.tabulator-editing input');
 			if (input1) return;
 
 			const typableNumber = '1234567890';
@@ -91,13 +89,9 @@
 			) {
 				e.preventDefault();
 				const range = table.getRanges()[0];
-				const topLeft = table.getRows()[range.getTopEdge()].getCells()[
-					range.getLeftEdge()
-				];
+				const topLeft = table.getRows()[range.getTopEdge()].getCells()[range.getLeftEdge()];
 				topLeft.edit();
-				const input2 = table?.element?.querySelector(
-					'.tabulator-cell.tabulator-editing input'
-				) as HTMLInputElement;
+				const input2 = table?.element?.querySelector('.tabulator-cell.tabulator-editing input') as HTMLInputElement;
 
 				input2.classList.add('form-input');
 				input2.name = topLeft.getField();

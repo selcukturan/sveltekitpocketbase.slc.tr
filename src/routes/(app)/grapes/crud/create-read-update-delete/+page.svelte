@@ -29,7 +29,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<!-- <PageDrawer /> add ve edit için -->
+			<!-- <Boundary><PageDrawer /></Boundary> add ve edit için -->
 			<Boundary>
 				<PageDataTable {filter} {onselect} />
 			</Boundary>

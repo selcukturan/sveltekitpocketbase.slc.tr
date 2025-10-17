@@ -14,11 +14,13 @@
  * 
  * 
  * 1 - snapshot al
- * 2 - snapshot'ı 1757071360_initial_snapshot.js dosyasıntaşı
+ * 2 - snapshot'ı 1757071360_initial_snapshot.js dosyasına taşı
  * 3 - diğer migration dosyalarını sil
  * 4 - docker container'ını ve imajı sil
  * 5 - pb_data klasörünü boşalt
  * 6 - npm run pb komutunu çalıştır
+ * 
+ * Not: Temiz kurulum için serverda "Persistent storage"ten `pb_data` klasörünü sil.
  * 
  */
 migrate((/* app */) => {

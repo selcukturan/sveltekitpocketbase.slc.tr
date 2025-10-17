@@ -56,7 +56,7 @@ export class Navigator<TInput extends Record<string, unknown>> {
 			children: [
 				{
 					type: 'condition',
-					field: 'producer',
+					field: 'caption',
 					operator: '~',
 					value: this.filterInput['producer'] as TInput[keyof TInput]
 				},

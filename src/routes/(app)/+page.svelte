@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { generateProducedData2 } from '$lib/demo/produced-grapes-generate-data.js';
 	const { data } = $props();
-
-	console.log(crypto.randomUUID());
-	console.log(generateProducedData2(5));
 </script>
 
 <Head>

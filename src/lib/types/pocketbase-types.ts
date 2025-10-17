@@ -144,6 +144,7 @@ export enum AclRolesTypeOptions {
 	"admin" = "admin",
 	"superadmin" = "superadmin",
 	"system" = "system",
+	"developer" = "developer",
 }
 
 export enum AclRolesStatusOptions {
@@ -291,6 +292,7 @@ export type SysCompanysRecord<Tavailable_permissions = unknown> = {
 }
 
 export type SysLogsRecord = {
+	caption?: string
 	content?: string
 	created?: IsoDateString
 	id: string
@@ -360,6 +362,7 @@ export type SysUsersRecord = {
 export type TestDatatableRecord = {
 	active?: boolean
 	amount?: number
+	caption?: string
 	created?: IsoDateString
 	district?: string
 	grape?: string
@@ -369,11 +372,11 @@ export type TestDatatableRecord = {
 	kt?: IsoDateString
 	order?: number
 	price?: number
-	producer?: string
 	province?: string
 	purchase_date?: IsoDateString
 	quantity?: number
 	region?: string
+	title?: string
 	updated?: IsoDateString
 	village?: string
 }

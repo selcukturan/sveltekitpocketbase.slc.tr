@@ -43,7 +43,7 @@
 				resizeable: true
 			},
 			{
-				field: 'producer',
+				field: 'caption',
 				label: 'Producer (editable)',
 				width: 'minmax(75px,1fr)',
 				editable: true,
