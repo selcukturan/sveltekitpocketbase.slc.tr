@@ -50,6 +50,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			priority: 'High'
 		})
 	);
+	response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 	console.log(`${new Date().toISOString()} ----> hooks.server.ts | END | event.url.pathname:${event.url.pathname}`);
 	// 🏆 ############################################################################################################################
 	return response;

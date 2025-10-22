@@ -33,12 +33,12 @@ export class CustomAuthStore extends LocalAuthStore {
 	}
 
 	// ##### SLC Auth Methods
-	logout(goto = true) {
+	/* logout(goto = true) {
 		this.clear();
 		if (goto) {
 			return redirect(303, '/login');
 		}
-	}
+	} */
 	error(err: ClientResponseError, notify = true, defaultMsg = '') {
 		if (!err || !(err instanceof ClientResponseError) || err.isAbort) return;
 

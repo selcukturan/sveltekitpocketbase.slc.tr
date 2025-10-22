@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
 	import { getGlobalContext } from '$lib/app/global.svelte';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';
 	import { config } from '$lib/app/config';
 	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { goto } from '$app/navigation';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();
@@ -37,7 +38,15 @@
 		</div>
 		<div class="flex items-center gap-4">
 			<!-- class="btn slc-will-close w-full justify-start text-nowrap" -->
-			<form action="/logout" method="POST">
+			<form
+				action="/logout"
+				method="POST"
+				use:enhance={() => {
+					return async ({ result }) => {
+						await applyAction(result);
+					};
+				}}
+			>
 				<button
 					type="submit"
 					class="bg-primary-300 hover:bg-primary-300/80 text-primary-900 flex cursor-pointer rounded-sm px-2.5 *:disabled:opacity-50"
