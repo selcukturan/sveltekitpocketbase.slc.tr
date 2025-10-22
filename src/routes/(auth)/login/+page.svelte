@@ -41,7 +41,7 @@
 	Toast
 </button> -->
 
-<main class="flex min-h-[100dvh] flex-row">
+<main class="flex min-h-dvh flex-row">
 	<a href="/" class="contents">
 		<div class="absolute top-0 left-0 z-10 m-4 inline-flex h-10 w-10 items-center md:m-10">
 			<img class="h-full w-full select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
@@ -61,7 +61,7 @@
 		sm:items-center
 		sm:justify-center
 		sm:gap-10
-		sm:bg-[center_center]"
+		sm:bg-position-[center_center]"
 	>
 		<h3
 			class="m-0
@@ -113,6 +113,13 @@
 	>
 		<form
 			method="POST"
+			use:enhance={() => {
+				isLoading = true;
+				return async ({ result }) => {
+					isLoading = false;
+					await applyAction(result);
+				};
+			}}
 			class="flex w-full flex-col
 				px-2
 				pb-4

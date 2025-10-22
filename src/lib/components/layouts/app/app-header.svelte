@@ -43,7 +43,11 @@
 				method="POST"
 				use:enhance={() => {
 					return async ({ result }) => {
-						await applyAction(result);
+						if (result.type === 'redirect') {
+							goto(result.location);
+						} else {
+							await applyAction(result);
+						}
 					};
 				}}
 			>
