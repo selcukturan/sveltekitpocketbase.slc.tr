@@ -5,11 +5,11 @@ import { buildPocketbaseFilterString } from '$lib/utils/filter-string-helper';
 import { getRequestEvent, query } from '$app/server';
 import { checkAuthenticated } from './guarded.remote';
 
-// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getFullList = query(v.string(), async (hash: string) => {
 	await checkAuthenticated();
-
+	await sleep(1000); // Simulate network delay
 	const { locals } = getRequestEvent();
 
 	const filterString = buildPocketbaseFilterString(hash);

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	const { data } = $props();
+	import { getUser } from '$lib/remotes/guarded.remote';
+
+	let user = await getUser();
 </script>
 
 <Head>
@@ -9,9 +11,9 @@
 </Head>
 
 <Page>
-	<!-- <Page.Header>
-		<p>Form Page Header</p>
-	</Page.Header> -->
+	<Page.Header>
+		<button onclick={() => getUser().refresh()}> Check getUser() {user?.email}</button>
+	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<div class="flex h-full w-full flex-col overflow-hidden">
@@ -23,7 +25,7 @@
 				>
 					Go to project github page
 				</a>
-				<pre>{JSON.stringify(data, null, 2)}</pre>
+				<pre>{JSON.stringify(user, null, 2)}</pre>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>

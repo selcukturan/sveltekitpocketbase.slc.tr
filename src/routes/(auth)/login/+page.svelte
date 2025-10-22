@@ -113,13 +113,6 @@
 	>
 		<form
 			method="POST"
-			use:enhance={() => {
-				isLoading = true;
-				return async ({ result }) => {
-					isLoading = false;
-					await applyAction(result);
-				};
-			}}
 			class="flex w-full flex-col
 				px-2
 				pb-4

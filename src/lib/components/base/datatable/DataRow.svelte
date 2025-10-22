@@ -2,6 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, DataRowType, DataCellType } from './types';
+	import { getContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -12,15 +13,11 @@
 	};
 
 	const { dataCell, class: classes, dr, ...attributes }: Props = $props();
+
+	const context = getContext<TData>();
 </script>
 
-<div
-	data-slc-table-datarow
-	role="row"
-	style:display="contents"
-	class={classes}
-	{...attributes}
->
+<div data-slc-table-datarow role="row" style:display="contents" class={classes} {...attributes}>
 	{#each dr.columns as col, colVisibleIndex (col.data.field)}
 		{@const value = dr.row[col.data.field]}
 		{@render dataCell?.({ value, col, colVisibleIndex })}

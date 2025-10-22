@@ -32,8 +32,7 @@ export interface ConditionGroup<TInput extends Record<string, any>> {
 
 // 3. JENERİK ANA FİLTRE TİPİ (FILTERSTATE)
 // Bu da artık TInput tipini alır ve ConditionGroup'a paslar.
-export type FilterDerived<TInput extends Record<string, any>> =
-	ConditionGroup<TInput>;
+export type FilterDerived<TInput extends Record<string, any>> = ConditionGroup<TInput>;
 
 // #########################################################################################################################################################
 // pb.filter(...) kullanabilmek için PocketBase örneği oluşturalım
@@ -55,9 +54,7 @@ const longToShortKeyMap: { [key: string]: string } = {
 };
 
 // Tam tersi işlemi yapmak için kısa anahtarları uzunlara eşleştiriyoruz.
-const shortToLongKeyMap = Object.fromEntries(
-	Object.entries(longToShortKeyMap).map(([long, short]) => [short, long])
-);
+const shortToLongKeyMap = Object.fromEntries(Object.entries(longToShortKeyMap).map(([long, short]) => [short, long]));
 
 /**
  * Filtre objesini, anahtar isimlerini kısaltarak "paketler".
@@ -142,9 +139,7 @@ function base64UrlToUint8Array(base64: string): Uint8Array {
  * kısa, sıkıştırılmış bir metne dönüştürür.
  * @param state Orijinal filtre ağacı.
  */
-export function packFilter<TInput extends Record<string, any>>(
-	state: FilterDerived<TInput>
-): string {
+export function packFilter<TInput extends Record<string, any>>(state: FilterDerived<TInput>): string {
 	try {
 		// 1. Anahtarları kısalt
 		const packedObject = packKeys(state);
@@ -188,9 +183,7 @@ export function unpackFilter<TInput extends Record<string, any>>(
  * Filtre ağacını (state) PocketBase'in anlayacağı bir metne çeviren recursive fonksiyon.
  * @param node Mevcut ağaç düğümü (grup veya koşul).
  */
-function buildFilterString(
-	node: FilterDerived<any> | AnyCondition<any>
-): string {
+function buildFilterString(node: FilterDerived<any> | AnyCondition<any>): string {
 	// Düğüm tek bir koşul ise (yaprak)
 	if (node.type === 'condition') {
 		if (!node.field || !node.value) return '';
@@ -224,29 +217,26 @@ export function buildPocketbaseFilterString(hashUrl: string) {
 	const filterParam = currentSearchParams.get('filter');
 
 	const restoredFilterState = unpackFilter(filterParam) as FilterDerived<any>;
-	const pocketbaseFilterString = filterParam
-		? buildFilterString(restoredFilterState)
-		: undefined;
+	const pocketbaseFilterString = filterParam ? buildFilterString(restoredFilterState) : undefined;
 	return pocketbaseFilterString;
 }
 
-export function hashUrlToFilterObject<TInput extends Record<string, any>>(
-	hashUrl: string
-) {
+export function hashUrlToFilterObject<TInput extends Record<string, any>>(hashUrl: string) {
 	const currentSearchParams = new URLSearchParams(hashUrl.replace('#', ''));
 	const filterParam = currentSearchParams.get('filter');
 
-	return filterParam
-		? (unpackFilter(filterParam) as FilterDerived<TInput>)
-		: null;
+	return filterParam ? (unpackFilter(filterParam) as FilterDerived<TInput>) : null;
 }
 
-export function filterObjectToHashUrl(
-	hashUrl: string,
-	filterState: FilterDerived<any>
-) {
+export function filterObjectToHashUrl(hashUrl: string, filterState: FilterDerived<any>) {
+	if (!filterState.children || filterState.children.length === 0) return '';
 	const currentSearchParams = new URLSearchParams(hashUrl.replace('#', ''));
 	const filterValue = packFilter(filterState);
 	currentSearchParams.set('filter', filterValue);
 	return `#${currentSearchParams.toString()}`;
+}
+
+export function filterPackString(filterState: FilterDerived<any>) {
+	if (!filterState.children || filterState.children.length === 0) return '';
+	return packFilter(filterState);
 }

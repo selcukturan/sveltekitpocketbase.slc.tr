@@ -11,7 +11,7 @@ declare global {
 		interface Locals {
 			pb: TypedPocketBase;
 			auth: CustomAuthStore;
-			user: AuthRecord | null;
+			user: AuthRecord;
 		}
 		// interface PageData {}
 		// interface PageState {}

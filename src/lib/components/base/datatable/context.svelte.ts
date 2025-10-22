@@ -1,7 +1,8 @@
 import { getContext as getContextAs, setContext as setContextAs } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
+import type { Row } from './types';
 
-class TableContext {
+class TableContext<TData extends Row> {
 	#selectedRows = new SvelteSet<number>();
 	get selectedRows() {
 		return this.#selectedRows;
@@ -17,10 +18,10 @@ class TableContext {
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
 // ################################## BEGIN Export Table Context ##############################################################################################################################
-export function setContext() {
-	return setContextAs(key, new TableContext());
+export function setContext<TData extends Row>() {
+	return setContextAs(key, new TableContext<TData>());
 }
-export function getContext() {
-	return getContextAs<ReturnType<typeof setContext>>(key);
+export function getContext<TData extends Row>() {
+	return getContextAs<ReturnType<typeof setContext<TData>>>(key);
 }
 // ################################## END Export Table Context ################################################################################################################################

@@ -1,7 +1,7 @@
 <script lang="ts">
 	/* import DataTableWrapper from '$lib/components/base/datatable/DataTableWrapper.svelte'; */
 	import * as s from '$lib/components/base/datatable';
-	import { getFullList } from '$lib/remotes/tabulator.remote';
+	import { getFullList } from './page.remote';
 	import { watch } from 'runed';
 
 	let { onselect, filter = '' }: { onselect: (id: string) => void; filter: string } = $props();
@@ -12,17 +12,19 @@
 
 	let columns = $state<s.Column<ItemsType>[]>([
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
-		{ field: 'amount', label: 'amount', width: 'minmax(50px,1fr)' },
+		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
+		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
 		{ field: 'price', label: 'price', width: 'minmax(50px,1fr)' },
 		{ field: 'kn', label: 'kn', width: 'minmax(50px,1fr)' }
 	]);
-	let footers = $state<s.Footer<ItemsType>[]>([{ amount: 'x1' }, { price: 'x2' }]);
+	let footers = $state<s.Footer<ItemsType>[]>([{ caption: 'x1' }, { price: 'x2' }]);
 
 	let dataTable: s.DataTable<ItemsType> | undefined;
 
 	watch(
 		() => filter,
 		() => {
+			console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 			getFullList(filter).then((res) => {
 				items = res.items;
 			});

@@ -5,6 +5,9 @@
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
+	import { getUser } from '$lib/remotes/guarded.remote';
+	import { goto } from '$app/navigation';
+
 	// import { appToaster } from '$lib/components/base/toast';
 
 	let { children, data } = $props();
@@ -49,24 +52,37 @@
 		}
 	]);
 
-	const role: string = data?.user?.role || '';
+	createToaster({ name: 'app-toaster' });
+
+	let user = $derived(await getUser());
+
+	/* console.log('role', role); */
 
 	let filteredSidebarData = $derived.by(() => {
-		if (role.startsWith(':demo:')) {
+		console.log(user?.role);
+		if (user?.role.startsWith(':demo:')) {
 			return sidebarData.filter((item) => item.title !== 'ERP');
 		}
 		return sidebarData;
 	});
 
-	createToaster({ name: 'app-toaster' });
+	$effect(() => {
+		if (user === null) {
+			goto('/login');
+		}
+	});
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<Toasts toasterName="app-toaster" />
+{#if user}
+	<Toasts toasterName="app-toaster" />
 
-<ProgressBar navigate={navigating}>
-	<AppLayout sidebarData={filteredSidebarData}>
-		{@render children?.()}
-	</AppLayout>
-</ProgressBar>
+	<ProgressBar navigate={navigating}>
+		<AppLayout sidebarData={filteredSidebarData}>
+			{@render children?.()}
+		</AppLayout>
+	</ProgressBar>
+{:else}
+	<div>Not Authenticated</div>
+{/if}

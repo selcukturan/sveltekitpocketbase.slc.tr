@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { Boundary } from '$lib/components/base/boundary';
 	import '$lib/css/app.css';
 	let { children } = $props();
 </script>
 
-{@render children?.()}
+<Boundary>
+	{@render children?.()}
+</Boundary>

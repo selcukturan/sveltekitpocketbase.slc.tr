@@ -2,9 +2,10 @@
 	import type { TestDatatableResponse } from '$lib/types/pocketbase-types';
 	import { getFullList } from '$lib/remotes/testDataTable.remote';
 	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
-
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/app/navigator.svelte';
+	import { type PageQuerySchemaType, pageQuerySchema } from './types';
+	import { watch } from 'runed';
 
 	// initial sources setup
 	const sources: Sources<TestDatatableResponse> = {
@@ -40,6 +41,14 @@
 				label: 'Order',
 				width: 'minmax(75px,1fr)',
 				hidden: true,
+				resizeable: true
+			},
+			{
+				field: 'title',
+				label: 'Title (editable)',
+				width: 'minmax(75px,1fr)',
+				editable: true,
+				hidden: false,
 				resizeable: true
 			},
 			{
@@ -159,32 +168,71 @@
 		}
 	});
 
-	type FilterInput = {
-		producer?: string;
-		quantity?: number;
-	};
-	const navigator = new Navigator<FilterInput>(page.url.hash, {
-		producer: 'taş',
-		quantity: 22
-	});
+	const navigator = new Navigator(page.url.hash, pageQuerySchema);
 
-	let promise = $derived(getFullList(navigator.getRemoteFilterParams));
+	let promise = $derived(getFullList(navigator.getFilter));
+	let results = $derived(await promise);
 
-	let filter = $derived(await promise);
+	watch(
+		() => results.items,
+		(items) => {
+			table.setSource('data', items);
+		}
+	);
 
-	$effect(() => {
-		table.setSource('data', filter.items);
-	});
+	watch(
+		() => navigator.params.recordId,
+		(recordId) => {
+			console.log('recordId:', recordId);
+		}
+	);
+
+	// $inspect('navigator.params', navigator.params);
+	// $inspect('navigator.filterDerived', navigator.filterDerived);
+	// $inspect('navigator.currentHash', navigator.currentHash);
+	// $inspect('navigator.getFilter', navigator.getFilter);
 </script>
 
 <div class="flex h-full flex-col">
 	<div>
-		<input type="text" bind:value={navigator.filterInput.producer} class="border" />
-		<button onclick={() => navigator.triggerFilter()} class="bg-warning-300 p-3">getFilter</button>
+		<input
+			type="text"
+			bind:value={navigator.params.filter.title}
+			placeholder="Search - Title contains..."
+			class="border"
+			onkeydown={(e) => e.key === 'Enter' && navigator.setFilter()}
+		/>
+		<button
+			onclick={() => navigator.setFilter()}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Search</button
+		>
 		<span> | </span>
-		<button onclick={() => getFullList(navigator.getRemoteFilterParams).refresh()} class="bg-warning-300 p-3">
-			RRRR
+		<button
+			onclick={() => getFullList(navigator.getFilter).refresh()}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50"
+		>
+			Refresh
 		</button>
+		<button
+			onclick={() => navigator.setRecordId(`${Math.floor(Math.random() * 100 + 1)}`)}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Set RecordID</button
+		>
+		<button
+			onclick={() => navigator.removeRecordId()}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Remove RecordID</button
+		>
+		<p>
+			pending promises:
+			{#if $effect.pending()}
+				{$effect.pending()}
+			{:else}
+				0
+			{/if}
+		</p>
 	</div>
 	<div class="h-full flex-1 overflow-hidden">
 		<DataTable {sources} />

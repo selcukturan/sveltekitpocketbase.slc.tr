@@ -14,17 +14,11 @@
 	};
 	const { children, class: classes, dr, dc, ...attributes }: Props = $props();
 
-	const context = getContext();
+	const context = getContext<TData>();
 
 	const gridRowStart = $derived(dr.rowOriginalIndex + dr.headerCount + 1);
-	const gridColumn = $derived(
-		`${dc.colVisibleIndex + 1} / ${dc.colVisibleIndex + 2}`
-	);
-	const background = $derived(
-		dr.rowOriginalIndex % 2 === 0
-			? 'var(--color-surface-50)'
-			: 'var(--color-surface-50)'
-	);
+	const gridColumn = $derived(`${dc.colVisibleIndex + 1} / ${dc.colVisibleIndex + 2}`);
+	const background = $derived(dr.rowOriginalIndex % 2 === 0 ? 'var(--color-surface-50)' : 'var(--color-surface-50)');
 </script>
 
 <div

@@ -2,6 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, HeaderRowType, HeaderCellType } from './types';
+	import { getContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -13,10 +14,10 @@
 	};
 	const { children, class: classes, hr, hc, ...attributes }: Props = $props();
 
+	const context = getContext<TData>();
+
 	const gridRowStart = 1;
-	const gridColumn = $derived(
-		`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`
-	);
+	const gridColumn = $derived(`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`);
 </script>
 
 <div

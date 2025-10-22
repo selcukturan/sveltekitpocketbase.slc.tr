@@ -25,12 +25,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (event.request.url.includes('/_app/remote/')) {
 		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Remote Function`);
 	} else {
-		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Other`);
 		if (event.url.pathname.startsWith('/login')) {
 			if (event.locals.user) redirect(303, '/');
 		} else {
 			if (!event.locals.user) redirect(303, '/login');
 		}
+		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Other [${event.url.pathname}]`);
 	}
 
 	console.log(`${new Date().toISOString()} ----> hooks.server.ts | before resolving the request`);

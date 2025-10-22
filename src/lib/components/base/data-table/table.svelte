@@ -6,18 +6,17 @@
 	let { sources }: { sources: Sources<TData> } = $props();
 	const t = getTable<TData>(sources.id);
 	// $inspect('$inspect-editingCellPath', t.editingCellPath);
+	// $inspect(t.srcData, 'srcData');
 </script>
 
 <!-- ############################################################ DATA TABLE ############################################################ -->
 <div {...t.mainProps}>
 	<div {...t.containerProps}>
+		{#if t.srcData.length === 0}
+			<div class="slc-table-nodata">No data to display</div>
+		{/if}
 		<!-- TABLE -->
-		<div
-			{...t.tableProps}
-			bind:this={t.element}
-			use:t.mount
-			{@attach t.mountAttach}
-		>
+		<div {...t.tableProps} bind:this={t.element} use:t.mount {@attach t.mountAttach}>
 			<!-- ########## HEADER ########## -->
 			<!-- ********** TRH ************* -->
 			<div {...t.trhProps}>
@@ -28,15 +27,13 @@
 					</div>
 				{/if}
 				{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
-					{@const col = colWrapper.data}
-					{@const coi = colWrapper.coi}
 					<!-- TH-->
 					<div
 						{...t.thProps}
-						data-coi={coi}
+						data-coi={colWrapper.coi}
 						style:grid-area={`1 / ${ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / 2 / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 					>
-						{@render baseContent({ type: 'header', col, coi })}
+						{@render baseContent({ type: 'header', col: colWrapper.data, coi: colWrapper.coi })}
 					</div>
 				{/each}
 				{#if t.srcRowAction}
@@ -51,132 +48,110 @@
 			</div>
 			<!-- ########## DATA ########## -->
 			{#each t.virtualData as rowWrapper, ri (rowWrapper.roi)}
-				{@const row = rowWrapper.data}
-				{@const roi = rowWrapper.roi}
-				{@const rowStart = roi + t.headerRowsCountState + 1}
-				{@const checked = t.selectedRows.has(roi)}
-				{@const cancelEditable = String(row.id).startsWith('subtotal')}
 				<!-- ********** TRD ********** -->
 				<div
 					{...t.trdProps}
-					class:slc-table-trd-even={t.srcZebra && roi % 2}
-					class:slc-table-trd-selected={checked}
+					class:slc-table-trd-even={t.srcZebra && rowWrapper.roi % 2}
+					class:slc-table-trd-selected={t.selectedRows.has(rowWrapper.roi)}
 					class:slc-table-trd-hoverable={t.srcHoverableRows}
-					class:slc-table-trd-subtotal1={String(row.id).startsWith('subtotal1')}
-					class:slc-table-trd-subtotal2={String(row.id).startsWith('subtotal2')}
-					class:slc-table-trd-subtotal3={String(row.id).startsWith('subtotal3')}
-					class:slc-table-trd-subtotal4={String(row.id).startsWith('subtotal4')}
-					class:slc-table-trd-subtotal5={String(row.id).startsWith('subtotal5')}
-					style:--slc-grid-row-start={rowStart}
+					class:slc-table-trd-subtotal1={String(rowWrapper.data.id).startsWith('subtotal1')}
+					class:slc-table-trd-subtotal2={String(rowWrapper.data.id).startsWith('subtotal2')}
+					class:slc-table-trd-subtotal3={String(rowWrapper.data.id).startsWith('subtotal3')}
+					class:slc-table-trd-subtotal4={String(rowWrapper.data.id).startsWith('subtotal4')}
+					class:slc-table-trd-subtotal5={String(rowWrapper.data.id).startsWith('subtotal5')}
+					style:--slc-grid-row-start={rowWrapper.roi + t.headerRowsCountState + 1}
 				>
 					<!-- TD selection -->
 					{#if t.srcRowSelection !== 'none'}
-						{@const originalCell = {
-							rowIndex: roi,
-							colIndex: -1,
-							cancelEditable
-						}}
-						{@const isCellFocused =
-							t.focusedCellState?.originalCell ===
-							`${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex =
-							isCellFocused && t.focusedCellState?.tabIndex != null
-								? t.focusedCellState?.tabIndex
-								: -1}
 						<div
 							{...t.tdSelectionProps}
 							role="gridcell"
-							use:t.tdMount={originalCell}
-							class:slc-table-td-focused={isCellFocused}
+							use:t.tdMount={{
+								rowIndex: rowWrapper.roi,
+								colIndex: -1,
+								cancelEditable: String(rowWrapper.data.id).startsWith('subtotal')
+							}}
+							class:slc-table-td-focused={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${-1}`}
 							style:grid-column={`1 / 2`}
-							{tabindex}
+							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${-1}` &&
+							t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						>
-							{#if cancelEditable}
+							{#if String(rowWrapper.data.id).startsWith('subtotal')}
 								{@html ``}
 							{:else}
-								{@render selectionContent({ type: 'data', checked, roi })}
+								{@render selectionContent({
+									type: 'data',
+									checked: t.selectedRows.has(rowWrapper.roi),
+									roi: rowWrapper.roi
+								})}
 							{/if}
 						</div>
 					{/if}
 					<!-- TD data -->
 					{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
-						{@const col = colWrapper.data}
-						{@const coi = colWrapper.coi}
-						{@const isEditable =
-							t.editingCellPath === `r${roi}c${ci}` && col.editable}
-						{@const originalCell = {
-							rowIndex: roi,
-							colIndex: ci,
-							field: col.field,
-							cancelEditable
-						}}
-						{@const isCellFocused =
-							t.focusedCellState?.originalCell ===
-							`${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex =
-							isCellFocused && t.focusedCellState?.tabIndex != null
-								? t.focusedCellState?.tabIndex
-								: -1}
 						<div
 							{...t.tdProps}
 							role="gridcell"
-							use:t.tdMount={originalCell}
-							class:slc-table-td-focused={isCellFocused}
+							use:t.tdMount={{
+								rowIndex: rowWrapper.roi,
+								colIndex: ci,
+								field: colWrapper.data.field,
+								cancelEditable: String(rowWrapper.data.id).startsWith('subtotal')
+							}}
+							class:slc-table-td-focused={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${ci}`}
 							style:grid-column={`${
 								ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
 							} / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
-							{tabindex}
+							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${ci}` &&
+							t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						>
-							{#if isEditable}
-								{@render editableInput({ roi, coi, col })}
+							{#if t.editingCellPath === `r${rowWrapper.roi}c${ci}` && colWrapper.data.editable}
+								{@render editableInput({ roi: rowWrapper.roi, coi: colWrapper.coi, col: colWrapper.data })}
 							{:else}
-								{@render baseContent({ type: 'data', row, col, coi })}
+								{@render baseContent({ type: 'data', row: rowWrapper.data, col: colWrapper.data, coi: colWrapper.coi })}
 							{/if}
 						</div>
 					{/each}
 					<!-- TD action -->
 					{#if t.srcRowAction}
-						{@const originalCell = {
-							rowIndex: roi,
-							colIndex: t.visibleColumns.length,
-							cancelEditable
-						}}
-						{@const isCellFocused =
-							t.focusedCellState?.originalCell ===
-							`${originalCell.rowIndex}_${originalCell.colIndex}`}
-						{@const tabindex =
-							isCellFocused && t.focusedCellState?.tabIndex != null
-								? t.focusedCellState?.tabIndex
-								: -1}
 						<div
 							{...t.tdActionProps}
 							role="gridcell"
-							use:t.tdMount={originalCell}
-							class:slc-table-td-focused={isCellFocused}
+							use:t.tdMount={{
+								rowIndex: rowWrapper.roi,
+								colIndex: t.visibleColumns.length,
+								cancelEditable: String(rowWrapper.data.id).startsWith('subtotal')
+							}}
+							class:slc-table-td-focused={t.focusedCellState?.originalCell ===
+								`${rowWrapper.roi}_${t.visibleColumns.length}`}
 							style:grid-column={`${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
-							{tabindex}
+							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${t.visibleColumns.length}` &&
+							t.focusedCellState?.tabIndex != null
+								? t.focusedCellState?.tabIndex
+								: -1}
 						>
-							{#if cancelEditable}
+							{#if String(rowWrapper.data.id).startsWith('subtotal')}
 								{@html ``}
 							{:else}
-								{@render actionContent({ type: 'data', roi })}
+								{@render actionContent({ type: 'data', roi: rowWrapper.roi })}
 							{/if}
 						</div>
 					{/if}
 				</div>
 			{/each}
-			<!-- ########## FOOTER ########## -->
 
+			<!-- ########## FOOTER ########## -->
 			{#if t.srcData.length > 0 && t.srcFooters.length > 0}
 				{#each t.srcFooters as foot, footerindex (footerindex)}
-					{@const rowStart =
-						t.srcData.length + t.headerRowsCountState + footerindex + 1}
-					{@const bottom = `${(t.srcFooters.length - footerindex - 1) * t.srcTfootRowHeight}px`}
 					<!-- ********** TRF ********** -->
 					<div
 						{...t.trfProps}
-						style:--slc-grid-row-start={rowStart}
-						style:--slc-summary-row-bottom={bottom}
+						style:--slc-grid-row-start={t.srcData.length + t.headerRowsCountState + footerindex + 1}
+						style:--slc-summary-row-bottom={`${(t.srcFooters.length - footerindex - 1) * t.srcTfootRowHeight}px`}
 					>
 						<!-- TF selection -->
 						{#if t.srcRowSelection !== 'none'}
@@ -186,15 +161,13 @@
 						{/if}
 						<!-- TF data -->
 						{#each t.visibleColumns as colWrapper, ci (colWrapper.coi)}
-							{@const col = colWrapper.data}
-							{@const coi = colWrapper.coi}
 							<div
 								{...t.tfProps}
 								style:grid-column={`${
 									ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
 								} / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							>
-								{@render baseContent({ type: 'footer', foot, col, coi })}
+								{@render baseContent({ type: 'footer', foot, col: colWrapper.data, coi: colWrapper.coi })}
 							</div>
 						{/each}
 						<!-- TF action -->
@@ -211,48 +184,13 @@
 			{/if}
 		</div>
 	</div>
-	<div
-		class="bg-tertiary-50 border-tertiary-200 flex h-14 items-center border-t"
-	>
-		<p>
-			pending promises:
-			{#if $effect.pending()}
-				{$effect.pending()}
-			{:else}
-				0
-			{/if}
-		</p>
-		<!-- <span class="flex-1">Count: {t.srcData.length}</span>
-		<span class="flex flex-1 items-center justify-center">
-			<button>Load More</button>
-		</span>
-		<span class="flex-1 text-right">{t.version}</span> -->
-
-		<!-- <span>{t.rowIndices.overscanStart}-</span>
-		<span>{t.rowIndices.overscanEnd}-</span>
-		<span>{t.rowIndices.scrollTop}</span>
-		<span> | </span>
-		<span>{t.srcData.length}</span> -->
-	</div>
 </div>
 
 <!-- ############################################################ SNIPPETS ############################################################ -->
-{#snippet editableInput({
-	roi,
-	col,
-	coi
-}: {
-	roi: number;
-	col: Column<TData>;
-	coi: number;
-})}
-	<div
-		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
-	>
+{#snippet editableInput({ roi, col, coi }: { roi: number; col: Column<TData>; coi: number })}
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
-		<div
-			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
-		>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;">
 			<span style="overflow: hidden; width:100%;">
 				<input
 					type="text"
@@ -285,9 +223,7 @@
 	coi: number;
 	foot?: Footer<TData>;
 })}
-	<div
-		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
-	>
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
 		<div
 			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center;"
@@ -311,9 +247,7 @@
 								: 'flex-start'
 						: 'flex-start'}
 		>
-			<span
-				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-			>
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 				{#if type === 'header' && col.label}
 					{col.label}
 				{:else if type === 'data' && row}
@@ -328,12 +262,7 @@
 		<div style="display: none; align-items: center;">x</div>
 	</div>
 	{#if type === 'header' && col.resizeable}
-		<div
-			{...t.thResizeProps}
-			{@attach t.colResizePointerAttach((e) =>
-				t.colResizeUpdate(e, coi, col.field)
-			)}
-		></div>
+		<div {...t.thResizeProps} {@attach t.colResizePointerAttach((e) => t.colResizeUpdate(e, coi, col.field))}></div>
 	{/if}
 {/snippet}
 
@@ -346,16 +275,10 @@
 	checked?: boolean;
 	roi?: number;
 })}
-	<div
-		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
-	>
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
-		<div
-			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;"
-		>
-			<span
-				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-			>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 				{#if type === 'header' && t.srcRowSelection === 'multiple-all'}
 					<input
 						aria-label="Select All"
@@ -366,9 +289,7 @@
 						class="slc-table-selection-checkbox"
 						{@attach t.selectAttach({ type })}
 						checked={t.headerIsIndeterminate ? undefined : t.headerIsChecked}
-						data-checked={t.headerIsIndeterminate
-							? 'indeterminate'
-							: t.headerIsChecked}
+						data-checked={t.headerIsIndeterminate ? 'indeterminate' : t.headerIsChecked}
 					/>
 				{:else if type === 'data' && roi != null}
 					<input
@@ -391,23 +312,11 @@
 	</div>
 {/snippet}
 
-{#snippet actionContent({
-	type,
-	roi
-}: {
-	type: 'header' | 'footer' | 'data';
-	roi?: number;
-})}
-	<div
-		style="display: flex; height: 100%; width: 100%; justify-content: space-between;"
-	>
+{#snippet actionContent({ type, roi }: { type: 'header' | 'footer' | 'data'; roi?: number })}
+	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
-		<div
-			style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;"
-		>
-			<span
-				style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-			>
+		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
+			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
 					<div class="slc-table-th-action-container">
 						<button
@@ -422,11 +331,7 @@
 						</button>
 						<!-- transition:fly={{ y: 3, duration: 300 }} -->
 						{#if t.actionActiveRowIndex === roi}
-							<div
-								class="slc-table-th-action-popup"
-								tabindex="-1"
-								{@attach t.actionPopupAttach({ type, roi })}
-							>
+							<div class="slc-table-th-action-popup" tabindex="-1" {@attach t.actionPopupAttach({ type, roi })}>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.tableActions as item, i (i)}
 										<button
@@ -463,11 +368,7 @@
 						</button>
 						<!-- transition:fly={{ y: 5, duration: 300 }} -->
 						{#if t.actionActiveRowIndex === roi}
-							<div
-								class="slc-table-td-action-popup"
-								tabindex="-1"
-								{@attach t.actionPopupAttach({ type, roi })}
-							>
+							<div class="slc-table-td-action-popup" tabindex="-1" {@attach t.actionPopupAttach({ type, roi })}>
 								<div style:display="grid" role="menu">
 									{#each t.srcActions.rowActions as item, i (i)}
 										<button
@@ -746,5 +647,19 @@
 	.slc-table-th-action-popup-item:active,
 	.slc-table-td-action-popup-item:active {
 		background-color: var(--color-surface-300);
+	}
+	/******************************************************/
+	.slc-table-nodata {
+		display: flex;
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		align-items: center;
+		justify-content: center;
+		background-color: transparent;
+		pointer-events: none;
+		z-index: 5;
 	}
 </style>
