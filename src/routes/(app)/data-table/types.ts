@@ -14,7 +14,7 @@ export const pageQuerySchema = v.object({
 	), */
 	filter: v.optional(
 		v.object({
-			title: v.optional(v.string(), 'sel'),
+			title: v.optional(v.string()),
 			quantity: v.optional(v.number())
 		})
 	),

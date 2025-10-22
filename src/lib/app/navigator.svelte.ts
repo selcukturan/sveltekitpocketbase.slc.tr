@@ -62,9 +62,6 @@ export class Navigator<TSchema extends v.ObjectSchema<any, any>> {
 			}
 		]
 	}; */
-	// DİKKAT: Bu kısım hala `pageQuerySchema`'nın yapısına özel (hard-coded).
-	// Sınıfı tamamen generic yapmak için buranın da dinamik olması gerekir.
-	// Ancak mevcut sorunuz için bu yapı çalışmaya devam edecektir.
 
 	filterDerived: FilterDerived<v.InferOutput<TSchema>> = $derived.by(() => {
 		const filterParams = (this.params as any).filter;
@@ -106,30 +103,24 @@ export class Navigator<TSchema extends v.ObjectSchema<any, any>> {
 
 		const schemaKeys = Object.keys(this.#schema.entries);
 
-		// Bu anahtarlardan, tüm değerleri 'undefined' olan bir temel nesne oluşturuyoruz.
+		// 1. Tüm değerlerden temel bir nesne oluşturuyoruz.
 		// Örn: { page: undefined, filter: {}, sort: undefined, recordId: undefined }
 		const baseObjectWithAllKeys = Object.fromEntries(
 			schemaKeys.map((key) => {
-				// Eğer mevcut anahtar 'filter' ise, değer olarak {} ata; değilse undefined ata.
 				const value = key === 'filter' ? {} : undefined;
 				return [key, value];
 			})
 		);
 
-		// Kaynakları Doğru Sırada Birleştir
-		const filterFromHash = this.getFilterHashFlatObject(initialHashUrl);
+		// 2. Unpack yapılmış filtre ile diğer parametreleri `initialHashUrl`den alıyoruz.
+		const filterParamObject = this.getFilterHashFlatObject(initialHashUrl); // Örn: { filter: { title: 'test', quantity: 10 } }
+		const otherParamsObject = this.getOtherParamsAsObject(initialHashUrl); // Örn: { sort: 'order', page: '2', recordId: 'abc123' }
 
-		const recordId = new URLSearchParams(initialHashUrl.replace('#', '')).get('recordId');
-		const recordIdFromHash = recordId ? { recordId } : undefined;
-
-		// Birleştirme sırası önemlidir:
-		// 1. Temel nesne (tüm anahtarlar `undefined` olarak mevcut)
-		// 2. URL'den gelen değerler (`undefined`'ların üzerine yazar)
-		// 3. initialParams (`URL`'dekilerin de üzerine yazar, en yüksek öncelik)
+		// 3. Birleştirme sırası önemlidir:
 		const combinedInput = {
 			...baseObjectWithAllKeys,
-			...filterFromHash,
-			...recordIdFromHash,
+			...filterParamObject,
+			...otherParamsObject,
 			...initialParams
 		};
 
@@ -145,10 +136,7 @@ export class Navigator<TSchema extends v.ObjectSchema<any, any>> {
 			this.params = defaultData as Required<v.InferOutput<TSchema>>;
 		}
 
-		const hashObject = this.createCurrentHash(this.filterDerived, this.params);
-		this.goto(hashObject.hash);
-		this.currentHash = hashObject.hash;
-		this.#trackHashFilterString = hashObject.filter;
+		this.setFilter();
 	}
 
 	getFilter = $derived.by(() => {
@@ -163,15 +151,8 @@ export class Navigator<TSchema extends v.ObjectSchema<any, any>> {
 		this.#trackHashFilterString = hashObject.filter;
 	}
 
-	setRecordId(recordId: string) {
-		this.params = { ...this.params, recordId };
-		const hashObject = this.createCurrentHash(this.filterDerived, this.params);
-		this.goto(hashObject.hash);
-		this.currentHash = hashObject.hash;
-	}
-
-	removeRecordId() {
-		this.params = { ...this.params, recordId: undefined };
+	setParams(newParams: Partial<v.InferInput<TSchema>>) {
+		this.params = { ...this.params, ...newParams } as Required<v.InferOutput<TSchema>>;
 		const hashObject = this.createCurrentHash(this.filterDerived, this.params);
 		this.goto(hashObject.hash);
 		this.currentHash = hashObject.hash;
@@ -187,6 +168,11 @@ export class Navigator<TSchema extends v.ObjectSchema<any, any>> {
 	}
 
 	// HELPER METHODS
+	getOtherParamsAsObject(hashUrl: string) {
+		const currentAllParams = new URLSearchParams(hashUrl.replace('#', ''));
+		currentAllParams.delete('filter');
+		return Object.fromEntries(currentAllParams.entries());
+	}
 	createCurrentHash(filterDerived: FilterDerived<any>, params: v.InferOutput<TSchema>) {
 		const filterString = filterPackString(filterDerived);
 		const filter = filterString ? `filter=${filterString}` : '';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { TestDatatableResponse } from '$lib/types/pocketbase-types';
-	import { getFullList } from '$lib/remotes/testDataTable.remote';
+	import { getFullList } from './page.remote';
 	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
 	import { page } from '$app/state';
 	import { Navigator } from '$lib/app/navigator.svelte';
@@ -183,7 +183,9 @@
 	watch(
 		() => navigator.params.recordId,
 		(recordId) => {
-			console.log('recordId:', recordId);
+			if (!recordId) return;
+
+			console.log('Selected Record ID:', recordId);
 		}
 	);
 
@@ -216,12 +218,12 @@
 			Refresh
 		</button>
 		<button
-			onclick={() => navigator.setRecordId(`${Math.floor(Math.random() * 100 + 1)}`)}
+			onclick={() => navigator.setParams({ recordId: `${Math.floor(Math.random() * 100 + 1)}` })}
 			disabled={$effect.pending() > 0}
 			class="bg-warning-300 p-3 disabled:opacity-50">Set RecordID</button
 		>
 		<button
-			onclick={() => navigator.removeRecordId()}
+			onclick={() => navigator.setParams({ recordId: undefined })}
 			disabled={$effect.pending() > 0}
 			class="bg-warning-300 p-3 disabled:opacity-50">Remove RecordID</button
 		>

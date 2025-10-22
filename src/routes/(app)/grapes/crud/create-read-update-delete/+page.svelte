@@ -4,9 +4,17 @@
 	import { getFullList } from './page.remote';
 	import { Page, Head } from '$lib/components/templates';
 	import { Boundary } from '$lib/components/base/boundary';
+	import { page } from '$app/state';
+	import { Navigator } from '$lib/app/navigator.svelte';
+	import { type PageQuerySchemaType, pageQuerySchema } from './types';
+	import { watch } from 'runed';
 
-	let filter = $state('');
-	let items = $derived((await getFullList(filter)).items);
+	const navigator = new Navigator(page.url.hash, pageQuerySchema);
+
+	let promise = $derived(getFullList(navigator.getFilter));
+	let results = $derived(await promise);
+
+	let items = $derived(results.items);
 	let dataTable: s.DataTable<ItemsType> | undefined = $state(undefined);
 
 	type ItemsType = (typeof items)[number];
@@ -20,10 +28,14 @@
 	]);
 	let footers = $state<s.Footer<ItemsType>[]>([{ caption: 'x1' }, { price: 'x2' }]);
 
-	/* $effect(() => {
-		goto(`?${params.toURLSearchParams().toString()}`, { keepFocus: true });
-		getFullList(filter).refresh();
-	}); */
+	watch(
+		() => navigator.params.recordId,
+		(recordId) => {
+			if (!recordId) return;
+
+			console.log('Selected Record ID:', recordId);
+		}
+	);
 </script>
 
 <Head>
@@ -33,19 +45,44 @@
 
 <Page>
 	<Page.Header>
-		<p>Header</p>
 		<input
 			type="text"
-			placeholder="Filter..."
-			value={filter}
-			onkeydown={/* async */ (e) => {
-				if (e.key === 'Enter') {
-					/* items = (await getFullList(params.filter)).items; */
-					filter = (e.target as HTMLInputElement).value;
-					/* getFullList(filter).refresh(); */
-				}
-			}}
+			bind:value={navigator.params.filter.title}
+			placeholder="Search - Title contains..."
+			class="border"
+			onkeydown={(e) => e.key === 'Enter' && navigator.setFilter()}
 		/>
+		<button
+			onclick={() => navigator.setFilter()}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Search</button
+		>
+		<span> | </span>
+		<button
+			onclick={() => getFullList(navigator.getFilter).refresh()}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50"
+		>
+			Refresh
+		</button>
+		<button
+			onclick={() => navigator.setParams({ recordId: `${Math.floor(Math.random() * 100 + 1)}` })}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Set RecordID</button
+		>
+		<button
+			onclick={() => navigator.setParams({ recordId: undefined })}
+			disabled={$effect.pending() > 0}
+			class="bg-warning-300 p-3 disabled:opacity-50">Remove RecordID</button
+		>
+		<p>
+			pending promises:
+			{#if $effect.pending()}
+				{$effect.pending()}
+			{:else}
+				0
+			{/if}
+		</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
@@ -55,9 +92,6 @@
 
 				<div class="s" style:display="contents">
 					<s.DataTable bind:this={dataTable} {items} {columns} {footers}>
-						{#snippet toolbar()}
-							<button onclick={() => dataTable?.test()}>Test 4</button>
-						{/snippet}
 						{#snippet headerRow(hr)}
 							<s.HeaderRow {hr}>
 								{#snippet headerCell(hc)}

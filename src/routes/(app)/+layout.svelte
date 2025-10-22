@@ -65,12 +65,6 @@
 		}
 		return sidebarData;
 	});
-
-	$effect(() => {
-		if (user === null) {
-			goto('/login');
-		}
-	});
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />

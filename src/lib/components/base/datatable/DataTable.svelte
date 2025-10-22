@@ -1,15 +1,14 @@
 <script lang="ts" module>
 	/**
-	 * Bu blok içindeki kod, tarayıcı veya sunucu dosyayı ilk kez yüklediğinde sadece bir kez çalışır.
+	 * Bu blok içindeki kod, tarayıcı veya sunucu Debug.svelte dosyasını ilk kez yüklediğinde sadece bir kez çalışır.
 	 * Bu blokta tanımlanan şeyler, o bileşenin tüm örnekleri arasında paylaşılır.
 	 */
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { untrack, type Snippet } from 'svelte';
+	import { onDestroy, untrack, type Snippet } from 'svelte';
 	import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType } from './types';
 	import { ScrollState, AnimationFrames, watch, useResizeObserver } from 'runed';
 	import { setContext } from './context.svelte';
-	import { tick, onMount } from 'svelte';
-	import type { Action } from 'svelte/action';
+	import { tick } from 'svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -44,10 +43,9 @@
 		...attributes
 	}: Props = $props();
 
-	const context = setContext<TData>();
-
 	let el = $state<HTMLElement>();
-	/* const scroll = new ScrollState({ element: () => el }); */
+	const scroll = new ScrollState({ element: () => el });
+	const context = setContext<TData>();
 
 	let proxy = {
 		get items() {
@@ -55,7 +53,10 @@
 		},
 		set items(newItems) {
 			items = newItems;
-			updateVisibleIndexes(true);
+			tick().then(() => {
+				// scroll.scrollToTop();
+				updateVisibleIndexes(true);
+			});
 		}
 	};
 
@@ -63,136 +64,41 @@
 		() => items,
 		(items) => {
 			proxy.items = items;
-		},
-		{
-			lazy: true
 		}
 	);
-	let scrollY = 0;
+
 	let clientHeight = $state(0);
-	let throttledY = 0;
-
-	let resizeObserver: ResizeObserver | null = null;
-	const mount: Action = (tableNode: HTMLElement) => {
-		// Tablo DOM'a monte edildi
-		let ticking = false;
-
-		// Tablo virtual scroll kurulumu
-		/* this.cachedClientHeight = Math.round(el.clientHeight);
-		this.cachedScrollTop = Math.round(el.scrollTop);
-		this.updateVisibleIndexes(); */
-
-		if (resizeObserver == null) {
-			// Debounced Resize Handler
-			resizeObserver = new ResizeObserver((entries) => {
-				const entry = entries[0];
-				if (!entry) return;
-				clientHeight = entry.contentRect.height;
-			});
-			resizeObserver.observe(tableNode);
-		}
-
-		const scroll = () => {
-			if (!ticking) {
-				/* const defaultOverscan = 10;
-				const rowHeight = 35;
-				const newScrollTop = Math.round(tableNode.scrollTop);
-				const cachedScrollTop = throttledY ?? 0;
-				const scrollDelta = Math.abs(newScrollTop - cachedScrollTop);
-				const overscan = Math.max(0, defaultOverscan - 1);
-				const scrollThreshold = rowHeight * overscan; */
-
-				/* if (scrollDelta > scrollThreshold) {
-					ticking = true;
-					throttledY = newScrollTop;
-					updateVisibleIndexes(); */
-				throttledY = Math.round(tableNode.scrollTop);
-				tick().then(() => {
-					ticking = false;
-				});
-				/* } */
-			}
-		};
-
-		// mouse ile sürükleyerek scroll yapıldığında veya scrollbara bir şekilde tıklandığında, hücre focus'unun kaybolmaması için. Bu tablonun focus olmasını engeller.
-		const mousedown = (e: Event) => {
-			e.preventDefault();
-		};
-
-		tableNode.addEventListener('scroll', scroll, { passive: true });
-		tableNode.addEventListener('mousedown', mousedown);
-
-		$effect(() => {
-			return () => {
-				console.log("Tablo DOM'dan kaldırıldı");
-				tableNode.removeEventListener('scroll', scroll);
-				tableNode.removeEventListener('mousedown', mousedown);
-				resizeObserver?.disconnect();
-				resizeObserver = null;
-			};
-		});
-	};
-
-	let frames = 0;
+	let throttledY = $state(0);
 	let fpsLimit = $state(60);
+	let frames = $state(0);
 	let delta = $state(0);
-	let fps = 0;
-	$effect(() => {
-		let animationFrameId: number;
 
-		// Döngü içinde durumu korumak için gerekli değişkenler
-		let lastFrameTime = performance.now();
-		let frameCountForFps = 0;
-		let lastFpsUpdateTime = performance.now();
-
-		function loop(currentTime: number) {
-			// Bir sonraki kare için tekrar istekte bulunuyoruz.
-			animationFrameId = requestAnimationFrame(loop);
-
-			// FPS limitlemesi için gereken süre (milisaniye cinsinden)
-			const msPerFrame = 1000 / fpsLimit;
-			const elapsed = currentTime - lastFrameTime;
-
-			// Eğer bir sonraki kare için gereken süre geçmediyse, bu kareyi atla.
-			if (elapsed < msPerFrame) {
-				return;
-			}
-
-			// Zamanlama hatalarını önlemek için "kalan" süreyi hesaptan düşüyoruz.
-			// Bu, animasyonun zamanla kaymasını engeller.
-			lastFrameTime = currentTime - (elapsed % msPerFrame);
-
-			// --- BU KARE İŞLENECEK ---
-
-			// İstatistikleri güncelle
+	const animation = new AnimationFrames(
+		(args) => {
 			frames++;
-			delta = elapsed;
-			frameCountForFps++;
+			delta = args.delta;
+			throttledY = scroll.y;
+		},
+		{ fpsLimit: () => fpsLimit }
+	);
 
-			updateVisibleIndexes();
-
-			// Anlık FPS'i her saniye güncelle
-			if (currentTime >= lastFpsUpdateTime + 1000) {
-				fps = frameCountForFps;
-				frameCountForFps = 0;
-				lastFpsUpdateTime = currentTime;
-			}
+	useResizeObserver(
+		() => el,
+		(entries) => {
+			const entry = entries[0];
+			if (!entry) return;
+			clientHeight = entry.contentRect.height;
 		}
-
-		// Animasyon döngüsünü başlat
-		animationFrameId = requestAnimationFrame(loop);
-
-		// Temizleme fonksiyonu: Bileşen DOM'dan kaldırıldığında çalışır.
-		// Bu, bellek sızıntılarını ve gereksiz çalışmayı önler.
-		return () => {
-			cancelAnimationFrame(animationFrameId);
-		};
-	});
+	);
 
 	// virtualData trigger
 	let rowIndices = $state.raw({
 		start: 0,
 		end: 0
+	});
+
+	watch([() => throttledY, () => clientHeight], () => {
+		updateVisibleIndexes();
 	});
 
 	const updateVisibleIndexes = (force: boolean = false) => {
@@ -242,7 +148,7 @@
 
 	// $inspect('throttledY', throttledY);
 	// $inspect('rowIndices', rowIndices);
-	$inspect('virtualData', virtualData);
+	// $inspect('virtualData', virtualData);
 
 	const gridTemplateRows = $derived.by(() => {
 		const headerCount = 1;
@@ -273,12 +179,12 @@
 	{@render toolbar?.()}
 	<div style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);">
 		<div>
-			fps: {fpsLimit}
+			fps: {fpsLimit} / {animation.fps.toFixed(0)}
 		</div>
 		<div>
 			delta: 16.67 / {delta.toFixed(2)}
 		</div>
-		<div>frames:</div>
+		<div>frames: {frames}</div>
 	</div>
 
 	<div class:slc-table-container={true} class={containerClass}>
@@ -290,7 +196,6 @@
 		{/if}
 		<div
 			class:slc-table={true}
-			use:mount
 			class={tableClass}
 			role="grid"
 			bind:this={el}
