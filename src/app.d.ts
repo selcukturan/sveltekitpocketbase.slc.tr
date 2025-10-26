@@ -13,6 +13,9 @@ declare global {
 			auth: CustomAuthStore;
 			user: AuthRecord;
 		}
+		interface PageState {
+			message?: string;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}

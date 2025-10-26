@@ -40,3 +40,49 @@ export class Counter {
     count: {counter.count} | double: {counter.double}
 </button>
 */
+
+/*
+const params = useSearchParams(productSearchSchema);
+// Access parameters directly
+const page = $derived(params.page); // number (defaults to 1)
+const sort = $derived(params.sort); // 'newest' | 'oldest' | 'price'
+ 
+// Update parameters directly
+params.page = 2; // Updates URL to include ?page=2
+// Updates URL to include ?page=3&sort=oldest
+params.update({ page: 3, sort: 'oldest' });
+// Resets all parameters to their default values
+params.reset();
+// Returns URLSearchParams object with all current parameter values
+params.toURLSearchParams();
+*/
+export function createCounter(schema: any) {
+	let params = $state({
+		page: 1,
+		sort: 'newest',
+		filter: {
+			title: 'test',
+			quantity: 10
+		}
+	});
+
+	/* let count = $state(0);
+	const double = $derived(count * 2);
+
+	function increment() {
+		count++;
+	} */
+
+	return {
+		...params,
+		update(newParams: any) {
+			console.log('update', newParams);
+		},
+		reset() {
+			console.log('reset');
+		}
+		/* count,
+		double,
+		increment */
+	};
+}

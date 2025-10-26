@@ -2,7 +2,25 @@
 	import { Page, Head } from '$lib/components/templates';
 	import { getUser } from '$lib/remotes/guarded.remote';
 
+	import { Counter } from '$lib/app/counter.svelte';
+	const counter = new Counter();
+
+	import { createCounter } from '$lib/app/counter.svelte';
+	import { goto } from '$app/navigation';
+
+	let navigator = createCounter('');
+
+	$inspect(navigator);
+
 	let user = await getUser();
+
+	const go = () => {
+		goto('/grapes/crud/create-read-update-delete', {
+			state: {
+				message: 'Hello'
+			}
+		});
+	};
 </script>
 
 <Head>
@@ -26,12 +44,19 @@
 					Go to project github page
 				</a>
 				<pre>{JSON.stringify(user, null, 2)}</pre>
-				<a
-					href="/data-table#filter=eJyrVipRslJKV9JRygfSampARrKSVXQ1WDgPyEsD0iWZJTmpUCV1QLoMSBen5ijVxtYCAPqwEJk&recordId=test"
+				<button
+					onclick={go}
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
 				>
 					Go DataTable with filter and recordId in hash
-				</a>
+				</button>
+
+				<button
+					onclick={counter.increment}
+					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
+				>
+					Count:{counter.count}
+				</button>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>

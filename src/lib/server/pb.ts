@@ -1,5 +1,5 @@
 import type { TypedPocketBase } from '$lib/types/pocketbase-types';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { type RequestEvent } from '@sveltejs/kit';
 
 import env from '$lib/server/env';
 import PocketBase, { LocalAuthStore, type AuthRecord, type SerializeOptions, ClientResponseError } from 'pocketbase';

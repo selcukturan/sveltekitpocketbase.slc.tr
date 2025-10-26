@@ -1,49 +1,152 @@
-import { deflate, inflate } from 'pako';
-import PocketBase from 'pocketbase';
+import type { TypedPocketBase } from '$lib/types/pocketbase-types';
+import * as v from 'valibot';
+import type { AllCurrentValue } from '$lib/app/schemas/base';
+import { goto } from '$app/navigation';
+import { page } from '$app/state';
 
-// #########################################################################################################################################################
-// Bu temel tipler aynı kalır
-type ComparisonOperator = '=' | '!=' | '>' | '>=' | '<' | '<=' | '~' | '!~';
-type LogicalOperator = '&&' | '||';
-
-// TInput, { producer: string, price: number } gibi bir obje tipini temsil eder.
-// `extends Record<string, any>` TInput'un bir obje olması gerektiğini zorunlu kılar.
-
-// 1. JENERİK KOŞUL TİPİ (ANYCONDITION)
-// Bu, sihrin gerçekleştiği yerdir.
-// TInput objesinin her bir anahtarını (K in keyof TInput) gezer ve
-// her anahtar için spesifik bir condition objesi tipi oluşturur.
-export type AnyCondition<TInput extends Record<string, any>> = {
-	[K in keyof TInput]: {
-		type: 'condition';
-		field: K; // field, sadece TInput'un anahtarlarından biri olabilir.
-		operator: ComparisonOperator;
-		value: TInput[K]; // value, o anahtarın TInput'taki tipine sahip olmalıdır.
-	};
-}[keyof TInput]; // Bu [keyof TInput] ifadesi, yukarıdaki objeyi bir union tipine dönüştürür.
-
-// 2. JENERİK GRUP TİPİ (CONDITIONGROUP)
-// Bu tip artık jenerik AnyCondition tipini kullanır ve kendini tekrar eder (recursive).
-export interface ConditionGroup<TInput extends Record<string, any>> {
-	type: 'group';
-	operator: LogicalOperator;
-	children: Array<AnyCondition<TInput> | ConditionGroup<TInput>>;
+export function hashParam(key: string, hash: string) {
+	const hashData = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+	return hashData.get(key);
 }
 
-// 3. JENERİK ANA FİLTRE TİPİ (FILTERSTATE)
-// Bu da artık TInput tipini alır ve ConditionGroup'a paslar.
-export type FilterDerived<TInput extends Record<string, any>> = ConditionGroup<TInput>;
+export function setParams(params: Record<string, string>) {
+	const pageUrlHash = new URLSearchParams(page.url.hash.startsWith('#') ? page.url.hash.slice(1) : page.url.hash);
+	for (const [key, value] of Object.entries(params)) {
+		if (value === null || value === undefined || value === '') {
+			pageUrlHash.delete(key);
+		} else {
+			pageUrlHash.set(key, value);
+		}
+	}
+	const pageUrlHashString = pageUrlHash.toString();
 
-// #########################################################################################################################################################
-// pb.filter(...) kullanabilmek için PocketBase örneği oluşturalım
-const pb = new PocketBase();
-// #########################################################################################################################################################
-// ========================================================================
-// 1. ADIM: ŞEMA KÜÇÜLTME (KEY MINIFICATION)
-// ========================================================================
+	goto(pageUrlHashString ? `#${pageUrlHashString}` : '', { replaceState: true, noScroll: true, keepFocus: true });
+}
+
+export function injectFilterData<S extends v.GenericSchema>(
+	schema: S,
+	filterData: Record<string, AllCurrentValue>
+): v.InferOutput<S> {
+	const schemaData = v.getDefaults(schema);
+	// 1. Orijinal veriyi değiştirmemek için derin bir kopya oluştur.
+	// Bu, $state gibi reaktif sistemlerde yan etkileri önler.
+	const updatedData = structuredClone(schemaData);
+
+	// 2. Özyinelemeli (recursive) olarak çalışacak yardımcı fonksiyonu tanımla.
+	const traverseAndUpdate = (nodes: any[]) => {
+		// 'nodes' bir dizidir (children dizisi)
+		for (const node of nodes) {
+			if (node.type === 'group' && node.children) {
+				// Eğer düğüm bir 'group' ise, onun çocukları için fonksiyonu tekrar çağır.
+				traverseAndUpdate(node.children);
+			} else if (node.type === 'condition') {
+				// Eğer düğüm bir 'condition' ise, güncelleme mantığını uygula.
+				// Koşulun 'field'ı, input nesnesinde bir anahtar olarak var mı?
+				if (node.field in filterData) {
+					// Varsa, 'value' alanını input'taki değerle değiştir.
+					node.value = filterData[node.field];
+				}
+			}
+		}
+	};
+
+	// 3. Özyinelemeyi en üst seviyedeki 'children' dizisinden başlat.
+	// Güvenlik: updatedData ve updatedData.filter üzerindeki erişimleri runtime kontrolleri ile yap.
+	if (
+		updatedData &&
+		typeof updatedData === 'object' &&
+		'filter' in updatedData &&
+		updatedData.filter &&
+		typeof updatedData.filter === 'object' &&
+		'children' in updatedData.filter &&
+		Array.isArray(updatedData.filter.children)
+	) {
+		traverseAndUpdate(updatedData.filter.children);
+	}
+
+	// 4. Güncellenmiş kopyayı döndür.
+	return updatedData as v.InferOutput<S>;
+}
+
+export function jsonToPocketBaseFilter(node: unknown, pb: TypedPocketBase): string | undefined {
+	if (node === null || typeof node !== 'object' || Array.isArray(node)) {
+		return undefined;
+	}
+	// Placeholder'ları benzersiz kılmak için bir sayaç
+	let placeholderIndex = 0;
+
+	function buildFilterParts(currentNode: any) {
+		// --- Temel Durum: Düğüm bir koşul ise ---
+		if (currentNode.type === 'condition') {
+			// Geçersiz veya boş değer içeren koşulları atla
+			if (
+				!currentNode.field ||
+				currentNode.value === undefined ||
+				currentNode.value === null ||
+				currentNode.value === ''
+			) {
+				return null;
+			}
+
+			// Her koşul için benzersiz bir placeholder adı oluştur
+			const placeholderKey = `p${placeholderIndex++}`;
+
+			return {
+				template: `${currentNode.field} ${currentNode.operator} {:${placeholderKey}}`,
+				values: { [placeholderKey]: currentNode.value }
+			};
+		}
+
+		// --- Özyinelemeli Adım: Düğüm bir grup ise ---
+		if (currentNode.type === 'group') {
+			if (!currentNode.children || currentNode.children.length === 0) {
+				return null;
+			}
+
+			const childrenParts = currentNode.children
+				.map((child: any) => buildFilterParts(child)) // Her çocuk için özyineleme
+				.filter(Boolean); // null dönen sonuçları (geçersiz koşullar) filtrele
+
+			if (childrenParts.length === 0) {
+				return null;
+			}
+
+			// Çocuklardan gelen şablonları ve değerleri birleştir
+			const mergedValues = Object.assign({}, ...childrenParts.map((p: any) => p.values));
+			const templateStrings = childrenParts.map((p: any) => p.template);
+
+			// Eğer grupta tek bir geçerli eleman varsa, parantez gereksizdir.
+			if (templateStrings.length === 1) {
+				return {
+					template: templateStrings[0],
+					values: mergedValues
+				};
+			}
+
+			const logicalJoin = ` ${currentNode.operator} `;
+			return {
+				template: `(${templateStrings.join(logicalJoin)})`,
+				values: mergedValues
+			};
+		}
+
+		return null;
+	}
+
+	// Özyinelemeyi başlat ve nihai şablon/değerleri al
+	const finalParts = buildFilterParts(node);
+
+	// Eğer hiçbir geçerli koşul bulunamazsa undefined döndür
+	if (!finalParts || !finalParts.template) {
+		return undefined;
+	}
+
+	// En sonda, oluşturulan şablon ve değerlerle pb.filter'ı SADECE BİR KEZ çağır
+	return pb.filter(finalParts.template, finalParts.values);
+}
 
 // Uzun anahtar isimlerini tek harfli kısaltmalara eşleştiriyoruz.
-const longToShortKeyMap: { [key: string]: string } = {
+/* const longToShortKeyMap: { [key: string]: string } = {
 	type: 't',
 	operator: 'o',
 	children: 'c',
@@ -51,16 +154,15 @@ const longToShortKeyMap: { [key: string]: string } = {
 	value: 'v',
 	group: 'g',
 	condition: 'n' // 'c' dolu olduğu için 'n' (node) kullanalım
-};
+}; */
 
 // Tam tersi işlemi yapmak için kısa anahtarları uzunlara eşleştiriyoruz.
-const shortToLongKeyMap = Object.fromEntries(Object.entries(longToShortKeyMap).map(([long, short]) => [short, long]));
+/* const shortToLongKeyMap = Object.fromEntries(Object.entries(longToShortKeyMap).map(([long, short]) => [short, long])); */
 
 /**
  * Filtre objesini, anahtar isimlerini kısaltarak "paketler".
- * @param node Orijinal filtre ağacı.
  */
-function packKeys(node: AnyCondition<any> | ConditionGroup<any>): any {
+/* function packKeys(node: any): any {
 	// Kısaltılmış yeni bir obje oluştur
 	const shortNode: Record<string, any> = {};
 	for (const [key, value] of Object.entries(node)) {
@@ -71,20 +173,19 @@ function packKeys(node: AnyCondition<any> | ConditionGroup<any>): any {
 				shortNode[shortKey] = value.map(packKeys);
 			} else if (key === 'type') {
 				// 'group' ve 'condition' gibi değerleri de kısaltalım
-				shortNode[shortKey] = longToShortKeyMap[value];
+				shortNode[shortKey] = longToShortKeyMap[String(value)];
 			} else {
 				shortNode[shortKey] = value;
 			}
 		}
 	}
 	return shortNode;
-}
+} */
 
 /**
  * Kısa anahtarlı objeyi, orijinal anahtar isimlerine geri "açar".
- * @param shortNode Paketlenmiş obje.
  */
-function unpackKeys(shortNode: any): AnyCondition<any> | ConditionGroup<any> {
+/* function unpackKeys(shortNode: any): any {
 	const longNode: Record<string, any> = {};
 	for (const [key, value] of Object.entries(shortNode)) {
 		const longKey = shortToLongKeyMap[key];
@@ -98,27 +199,23 @@ function unpackKeys(shortNode: any): AnyCondition<any> | ConditionGroup<any> {
 			}
 		}
 	}
-	return longNode as AnyCondition<any> | ConditionGroup<any>;
-}
-// #########################################################################################################################################################
-// ========================================================================
-// 2. ADIM: URL-SAFE BASE64 YARDIMCI FONKSİYONLARI
-// ========================================================================
+	return longNode as any;
+} */
 
 /**
  * Binary veriyi (Uint8Array) URL-Safe Base64 metnine çevirir.
  */
-function uint8ArrayToBase64Url(bytes: Uint8Array): string {
+/* function uint8ArrayToBase64Url(bytes: Uint8Array): string {
 	return btoa(String.fromCharCode.apply(null, Array.from(bytes)))
 		.replace(/\+/g, '-') // '+' karakterini '-' ile değiştir
 		.replace(/\//g, '_') // '/' karakterini '_' ile değiştir
 		.replace(/=+$/, ''); // Sondaki '=' padding'ini kaldır
-}
+} */
 
 /**
  * URL-Safe Base64 metnini geri Binary veriye (Uint8Array) çevirir.
  */
-function base64UrlToUint8Array(base64: string): Uint8Array {
+/* function base64UrlToUint8Array(base64: string): Uint8Array {
 	base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
 	const binaryString = atob(base64);
 	const len = binaryString.length;
@@ -127,116 +224,66 @@ function base64UrlToUint8Array(base64: string): Uint8Array {
 		bytes[i] = binaryString.charCodeAt(i);
 	}
 	return bytes;
-}
-
-// #########################################################################################################################################################
-// ========================================================================
-// 3. ADIM: ANA PAKETLEME VE AÇMA FONKSİYONLARI
-// ========================================================================
+} */
 
 /**
- * Bir FilterDerived objesini alır ve onu URL'de saklanabilecek
- * kısa, sıkıştırılmış bir metne dönüştürür.
- * @param state Orijinal filtre ağacı.
+ * JSON string'ini Uint8Array'e çevirir.
  */
-export function packFilter<TInput extends Record<string, any>>(state: FilterDerived<TInput>): string {
+/* function jsonStringToUint8Array(jsonString: string): Uint8Array {
+	// 1. Bir TextEncoder örneği oluşturun. Bu API, string'leri baytlara kodlamak için kullanılır.
+	const encoder = new TextEncoder();
+
+	// 2. .encode() metodu ile string'i Uint8Array'e dönüştürün.
+	//    Bu metot varsayılan olarak UTF-8 kodlamasını kullanır.
+	const uint8Array = encoder.encode(jsonString);
+
+	return uint8Array;
+} */
+
+/**
+ * Uint8Array'ı geri string'e çevirir.
+ */
+/* function uint8ArrayToString(uint8Array: Uint8Array): string {
+	const decoder = new TextDecoder();
+	const decodedString = decoder.decode(uint8Array);
+	return decodedString;
+} */
+
+/**
+ * Filtre objesini paketleyip string'e çevirir.
+ */
+/* export function packFilter(state: any): string {
 	try {
 		// 1. Anahtarları kısalt
 		const packedObject = packKeys(state);
 		// 2. JSON'a çevir
 		const jsonString = JSON.stringify(packedObject);
 		// 3. Sıkıştır (pako.deflate)
-		const compressed = deflate(jsonString);
+		const compressed = jsonStringToUint8Array(jsonString);
 		// 4. URL-Safe Base64'e kodla
 		return uint8ArrayToBase64Url(compressed);
 	} catch (e) {
 		console.error('Filtre paketlenirken hata oluştu:', e);
 		return '';
 	}
-}
+} */
 
 /**
- * URL'den alınan paketlenmiş metni geri orijinal FilterDerived objesine çevirir.
- * @param packedString URL'den gelen sıkıştırılmış metin.
+ * Paketlenmiş filtre string'ini orijinal objeye açar.
  */
-export function unpackFilter<TInput extends Record<string, any>>(
-	packedString: string | null
-): FilterDerived<TInput> | null {
+/* export function unpackFilter(packedString: string | null) {
 	if (!packedString) return null;
 	try {
 		// 1. URL-Safe Base64'ten çöz
 		const compressed = base64UrlToUint8Array(packedString);
 		// 2. Sıkıştırılmış veriyi aç (pako.inflate)
-		const jsonString = inflate(compressed, { to: 'string' });
+		const jsonString = uint8ArrayToString(compressed);
 		// 3. JSON'ı objeye çevir
 		const packedObject = JSON.parse(jsonString);
 		// 4. Kısa anahtarları orijinal haline geri getir
-		return unpackKeys(packedObject) as FilterDerived<TInput>;
+		return unpackKeys(packedObject);
 	} catch (e) {
 		console.error('Filtre açılırken hata oluştu:', e);
 		return null;
 	}
-}
-
-// #########################################################################################################################################################
-/**
- * Filtre ağacını (state) PocketBase'in anlayacağı bir metne çeviren recursive fonksiyon.
- * @param node Mevcut ağaç düğümü (grup veya koşul).
- */
-function buildFilterString(node: FilterDerived<any> | AnyCondition<any>): string {
-	// Düğüm tek bir koşul ise (yaprak)
-	if (node.type === 'condition') {
-		if (!node.field || !node.value) return '';
-		// Tek koşul için pb.filter kullanarak güvenli metin oluştur
-		return pb.filter(`${node.field} ${node.operator} {:value}`, {
-			value: node.value
-		});
-	}
-
-	// Düğüm bir grup ise (dal)
-	if (node.type === 'group') {
-		if (node.children.length === 0) return '';
-
-		const childrenStrings = node.children
-			.map(buildFilterString) // Her bir çocuk için kendini tekrar çağır (recursion)
-			.filter(Boolean); // Boş olanları filtrele
-
-		if (childrenStrings.length === 0) return '';
-
-		// Çocukları grubun operatörü ile birleştir ve parantez içine al.
-		// Örn: (child1) AND (child2)
-		const logicalJoin = ` ${node.operator} `;
-		return `(${childrenStrings.join(logicalJoin)})`;
-	}
-
-	return '';
-}
-// ######################################## HELPER #################################################################################################################
-export function buildPocketbaseFilterString(hashUrl: string) {
-	const currentSearchParams = new URLSearchParams(hashUrl.replace('#', ''));
-	const filterParam = currentSearchParams.get('filter');
-
-	const restoredFilterState = unpackFilter(filterParam) as FilterDerived<any>;
-	const pocketbaseFilterString = filterParam ? buildFilterString(restoredFilterState) : undefined;
-	return pocketbaseFilterString;
-}
-
-export function hashUrlToFilterObject<TInput extends Record<string, any>>(hashUrl: string) {
-	const currentSearchParams = new URLSearchParams(hashUrl.replace('#', ''));
-	const filterParam = currentSearchParams.get('filter');
-
-	return filterParam ? (unpackFilter(filterParam) as FilterDerived<TInput>) : null;
-}
-
-export function filterObjectToHashUrl(hashUrl: string, filterState: FilterDerived<any>) {
-	if (!filterState.children || filterState.children.length === 0) return '';
-	const currentSearchParams = new URLSearchParams(hashUrl.replace('#', ''));
-	const filterValue = packFilter(filterState);
-	currentSearchParams.set('filter', filterValue);
-	return `#${currentSearchParams.toString()}`;
-}
-
-export function filterPackString(filterState: FilterDerived<any>) {
-	if (!filterState.children || filterState.children.length === 0) return '';
-	return packFilter(filterState);
-}
+} */

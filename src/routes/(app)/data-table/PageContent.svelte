@@ -3,7 +3,7 @@
 	import { getFullList } from './page.remote';
 	import { DataTable, createTable, type Sources } from '$lib/components/base/data-table';
 	import { page } from '$app/state';
-	import { Navigator } from '$lib/app/navigator.svelte';
+
 	import { type PageQuerySchemaType, pageQuerySchema } from './types';
 	import { watch } from 'runed';
 

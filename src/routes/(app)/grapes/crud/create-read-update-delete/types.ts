@@ -1,25 +1,33 @@
 import * as v from 'valibot';
+import { filterSchema, pocketbaseListSchema } from '$lib/app/schemas/filter-conditions';
+import * as base from '$lib/app/schemas/base';
 
-export const pageQuerySchema = v.object({
-	page: v.optional(v.number()),
-	/* filter: v.optional(
-		v.fallback(
-			v.object({
-				title: v.optional(v.string()),
-				quantity: v.optional(v.number())
-			}),
-			{}
-		),
-		{}
-	), */
-	filter: v.optional(
-		v.object({
-			title: v.optional(v.string()),
-			quantity: v.optional(v.number())
-		})
-	),
-	sort: v.optional(v.string()),
-	recordId: v.optional(v.string())
+const defaultConditions = {
+	type: 'group',
+	operator: '&&',
+	children: [
+		{
+			type: 'condition',
+			field: 'title',
+			operator: '~',
+			value: ''
+		},
+		{
+			type: 'condition',
+			field: 'quantity',
+			operator: '>',
+			value: 0
+		}
+	]
+};
+
+export const listParamsSchema = v.object({
+	filterData: v.object({
+		title: v.optional(v.fallback(base.string, ''), ''),
+		quantity: v.optional(v.fallback(base.number, 0), 0)
+	}),
+	filter: v.optional(v.fallback(filterSchema, defaultConditions), defaultConditions),
+	...pocketbaseListSchema.entries
 });
 
-export type PageQuerySchemaType = v.InferOutput<typeof pageQuerySchema>;
+export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;

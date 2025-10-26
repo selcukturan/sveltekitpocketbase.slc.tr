@@ -1,6 +1,5 @@
 import * as v from 'valibot';
 import { Collections, type TestDatatableResponse, type TestSubtotalViewResponse } from '$lib/types/pocketbase-types';
-import { buildPocketbaseFilterString } from '$lib/utils/filter-string-helper';
 
 import { getRequestEvent, query } from '$app/server';
 import { checkAuthenticated } from './guarded.remote';
@@ -12,10 +11,9 @@ export const getFullList = query(v.string(), async (hash: string) => {
 	await sleep(1000); // Simulate network delay
 	const { locals } = getRequestEvent();
 
-	const filterString = buildPocketbaseFilterString(hash);
 	// console.log('filterString', filterString);
 	const records = await locals.pb.collection(Collections.TestDatatable).getList<TestDatatableResponse>(1, 1000, {
-		filter: filterString,
+		filter: `title ~ "sel"`,
 		sort: 'order'
 	});
 

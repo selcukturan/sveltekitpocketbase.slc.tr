@@ -1,39 +1,51 @@
 <script lang="ts">
-	/* import PageDataTable from './PageDataTable.svelte'; */
-	import * as s from '$lib/components/base/datatable';
-	import { getFullList } from './page.remote';
+	import * as v from 'valibot';
 	import { Page, Head } from '$lib/components/templates';
-	import { Boundary } from '$lib/components/base/boundary';
-	import { page } from '$app/state';
-	import { Navigator } from '$lib/app/navigator.svelte';
-	import { type PageQuerySchemaType, pageQuerySchema } from './types';
+	import { type ListParamsSchemaType, listParamsSchema } from './types';
+	import { getFullList } from './page.remote';
+	import { setParams, injectFilterData, hashParam } from '$lib/utils/filter-string-helper';
 	import { watch } from 'runed';
+	import PageDataTable from './PageDataTable.svelte';
+	import { page } from '$app/state';
 
-	const navigator = new Navigator(page.url.hash, pageQuerySchema);
+	const pageUrlHash = $derived(page.url.hash);
 
-	let promise = $derived(getFullList(navigator.getFilter));
-	let results = $derived(await promise);
+	let params = $state<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
 
-	let items = $derived(results.items);
-	let dataTable: s.DataTable<ItemsType> | undefined = $state(undefined);
-
-	type ItemsType = (typeof items)[number];
-
-	let columns = $state<s.Column<ItemsType>[]>([
-		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
-		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
-		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
-		{ field: 'price', label: 'price', width: 'minmax(50px,1fr)' },
-		{ field: 'kn', label: 'kn', width: 'minmax(50px,1fr)' }
-	]);
-	let footers = $state<s.Footer<ItemsType>[]>([{ caption: 'x1' }, { price: 'x2' }]);
+	let filterData = $state<ListParamsSchemaType['filterData']>({ title: '', quantity: 0 });
 
 	watch(
-		() => navigator.params.recordId,
-		(recordId) => {
-			if (!recordId) return;
-
-			console.log('Selected Record ID:', recordId);
+		() => pageUrlHash,
+		(pageUrlHash) => {
+			const cmd = hashParam('cmd', pageUrlHash);
+			switch (cmd) {
+				case 'list':
+					const listId = hashParam('id', pageUrlHash);
+					if (listId) {
+						console.log(`List Triggered: ${listId}`);
+						params = injectFilterData(listParamsSchema, filterData);
+						getFullList(params).refresh();
+					}
+					break;
+				case 'view':
+					const viewId = hashParam('id', pageUrlHash);
+					if (viewId) {
+						console.log(`View - Open Drawer: ${viewId}`);
+					}
+					break;
+				case 'create':
+					console.log('Create');
+					break;
+				case 'update':
+					const updateId = hashParam('id', pageUrlHash);
+					if (updateId) {
+						console.log(`Update - Open Drawer: ${updateId}`);
+					}
+					break;
+				case 'delete':
+					console.log('Delete');
+					break;
+			}
 		}
 	);
 </script>
@@ -45,85 +57,69 @@
 
 <Page>
 	<Page.Header>
-		<input
-			type="text"
-			bind:value={navigator.params.filter.title}
-			placeholder="Search - Title contains..."
-			class="border"
-			onkeydown={(e) => e.key === 'Enter' && navigator.setFilter()}
-		/>
-		<button
-			onclick={() => navigator.setFilter()}
-			disabled={$effect.pending() > 0}
-			class="bg-warning-300 p-3 disabled:opacity-50">Search</button
-		>
-		<span> | </span>
-		<button
-			onclick={() => getFullList(navigator.getFilter).refresh()}
-			disabled={$effect.pending() > 0}
-			class="bg-warning-300 p-3 disabled:opacity-50"
-		>
-			Refresh
-		</button>
-		<button
-			onclick={() => navigator.setParams({ recordId: `${Math.floor(Math.random() * 100 + 1)}` })}
-			disabled={$effect.pending() > 0}
-			class="bg-warning-300 p-3 disabled:opacity-50">Set RecordID</button
-		>
-		<button
-			onclick={() => navigator.setParams({ recordId: undefined })}
-			disabled={$effect.pending() > 0}
-			class="bg-warning-300 p-3 disabled:opacity-50">Remove RecordID</button
-		>
-		<p>
-			pending promises:
-			{#if $effect.pending()}
-				{$effect.pending()}
-			{:else}
-				0
-			{/if}
-		</p>
+		<!-- <p>effect.pending: {$effect.pending()}</p> -->
+		<p>c</p>
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table>
-			<!-- <Boundary><PageDrawer /></Boundary> add ve edit için -->
-			<Boundary>
-				<!-- <PageDataTable filter={params.filter} {onselect} /> -->
+		<Page.Main.Table boundary>
+			<p>pending promises: {$effect.pending()}</p>
+			<input
+				type="text"
+				bind:value={filterData.title}
+				placeholder="Search - Title contains..."
+				class="border"
+				onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+			/>
+			<input
+				type="number"
+				bind:value={filterData.quantity}
+				placeholder="Search - Quantity equals..."
+				class="border"
+				onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+			/>
+			<button
+				onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+				disabled={$effect.pending() > 0}
+				class="bg-warning-300 p-3 disabled:opacity-50"
+			>
+				Search
+			</button>
+			<button
+				onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+				class="bg-warning-300 p-3 disabled:opacity-50">List</button
+			>
+			<button
+				onclick={() => setParams({ cmd: 'view', id: `${Math.round(Math.random() * 1000)}` })}
+				class="bg-warning-300 p-3 disabled:opacity-50"
+			>
+				View
+			</button>
+			<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50">
+				No View
+			</button>
+			<button
+				onclick={() => setParams({ cmd: 'create', id: `${Math.round(Math.random() * 1000)}` })}
+				class="bg-warning-300 p-3 disabled:opacity-50"
+			>
+				Create
+			</button>
+			<button
+				onclick={() => setParams({ cmd: 'update', id: `${Math.round(Math.random() * 1000)}` })}
+				class="bg-warning-300 p-3 disabled:opacity-50"
+			>
+				Update
+			</button>
+			<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50">
+				No Update
+			</button>
+			<button
+				onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })}
+				class="bg-warning-300 p-3 disabled:opacity-50"
+			>
+				Delete
+			</button>
 
-				<div class="s" style:display="contents">
-					<s.DataTable bind:this={dataTable} {items} {columns} {footers}>
-						{#snippet headerRow(hr)}
-							<s.HeaderRow {hr}>
-								{#snippet headerCell(hc)}
-									<s.HeaderCell {hr} {hc}>
-										{hc.label}
-									</s.HeaderCell>
-								{/snippet}
-							</s.HeaderRow>
-						{/snippet}
-
-						{#snippet dataRow(dr)}
-							<s.DataRow {dr}>
-								{#snippet dataCell(dc)}
-									<s.DataCell {dr} {dc}>
-										{dc.value}
-									</s.DataCell>
-								{/snippet}
-							</s.DataRow>
-						{/snippet}
-
-						{#snippet footerRow(fr)}
-							<s.FooterRow {fr}>
-								{#snippet footerCell(fc)}
-									<s.FooterCell {fr} {fc}>
-										{fc.value}
-									</s.FooterCell>
-								{/snippet}
-							</s.FooterRow>
-						{/snippet}
-					</s.DataTable>
-				</div>
-			</Boundary>
+			<PageDataTable records={await getFullList(params)} />
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
