@@ -1,14 +1,18 @@
 <script lang="ts">
 	import * as v from 'valibot';
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { watch } from 'runed';
 	import { injectFilterData } from '$lib/utils/filter-string-helper';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
 
 	import { type ListParamsSchemaType, listParamsSchema } from './types';
 	import { getFullList } from './page.remote';
+	import Drawer from '$lib/components/base/drawer/drawer.svelte';
+	import { confirm } from '$lib/components/base/confirm';
 
 	const pageUrlHash = $derived(page.url.hash);
+	let currentCMD = $state(null as string | null);
+	let currentID = $state(null as string | null);
 
 	let params = $state<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
 
@@ -18,47 +22,16 @@
 		params = injectFilterData(listParamsSchema, filterData);
 	};
 
-	const promise = $derived(getFullList(params));
-	const records = $derived(await promise);
+	let drawer: Drawer | null = $state(null);
 
-	let isOpen = $state('close' as 'open' | 'close' | 'waiting');
-	watch(
-		() => pageUrlHash,
-		(currHash, prevHash) => {
-			isOpen = 'close';
+	onMount(() => {
+		currentCMD = hashParam('cmd', pageUrlHash) || null;
+		currentID = hashParam('id', pageUrlHash) || null;
 
-			const prevCmd = prevHash ? hashParam('cmd', prevHash) : undefined;
-			const prevId = prevHash ? hashParam('id', prevHash) : undefined;
-
-			const currCmd = hashParam('cmd', currHash);
-			const currId = hashParam('id', currHash);
-			switch (currCmd) {
-				case 'list':
-					if (currId) {
-						console.log(`List Triggered: ${currId}`);
-						// params = injectFilterData(listParamsSchema, filterData);
-					}
-					break;
-				case 'view':
-					if (currId) {
-						console.log(`View - Open Drawer: ${currId}`);
-					}
-					break;
-				case 'create':
-					console.log('Create');
-					isOpen = 'open';
-					break;
-				case 'update':
-					if (currId) {
-						console.log(`Update - Open Drawer: ${currId}`);
-					}
-					break;
-				case 'delete':
-					console.log('Delete');
-					break;
-			}
+		if (currentCMD === 'create' && currentID && drawer) {
+			drawer.open();
 		}
-	);
+	});
 
 	/* let {
 		records,
@@ -118,10 +91,29 @@
 			console.log('Selected Record ID:', recordId);
 		}
 	); */
+
+	const promise = $derived(getFullList(params));
+	const records = $derived(await promise);
 </script>
 
 <div>
 	<p>pending promises: {$effect.pending()}</p>
+	<Drawer
+		bind:this={drawer}
+		onOpen={() => setParams({ cmd: 'create', id: currentID || '' })}
+		onClose={() => setParams({ cmd: '', id: '' })}
+		onBeforeClose={async () => {
+			// any custom logic before closing
+			return await confirm({
+				message: 'Bu paneli kapatmak istediğinize emin misiniz?',
+				yes: 'Evet',
+				no: 'Hayır'
+			});
+		}}
+	>
+		<p>This is a drawer for creating a new record.</p>
+		<button onclick={() => drawer?.close()} class="bg-error-300 p-3">Close Drawer</button>
+	</Drawer>
 	<input
 		type="text"
 		bind:value={filterData.title}
@@ -137,7 +129,9 @@
 		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
 	/>
 	<!-- onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })} -->
-	<button onclick={getData} class="bg-warning-300 p-3 disabled:opacity-50">Search</button>
+	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50"
+		>Search</button
+	>
 	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">Refresh</button>
 	<button
 		onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
@@ -151,7 +145,11 @@
 	</button>
 	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50"> No View </button>
 	<button
-		onclick={() => setParams({ cmd: 'create', id: `${Math.round(Math.random() * 1000)}` })}
+		onclick={() => {
+			currentCMD = 'create';
+			currentID = `${Math.round(Math.random() * 1000)}`;
+			drawer?.open();
+		}}
 		class="bg-warning-300 p-3 disabled:opacity-50"
 	>
 		Create

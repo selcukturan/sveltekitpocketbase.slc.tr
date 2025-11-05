@@ -2,13 +2,17 @@ import { getRequestEvent, query } from '$app/server';
 import { Collections } from '$lib/types/pocketbase-types';
 import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
-import { listParamsSchema } from './types';
-
 import { ResultAsync } from 'neverthrow';
 import { handleError, mapUnknownToError } from '$lib/server/error.service';
 
+import { listParamsSchema } from './types';
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const getFullList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
+
+	// await sleep(1000);
 
 	const { locals } = getRequestEvent();
 

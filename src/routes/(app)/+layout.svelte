@@ -6,7 +6,6 @@
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
 	import { getUser } from '$lib/remotes/guarded.remote';
-	import { goto } from '$app/navigation';
 
 	// import { appToaster } from '$lib/components/base/toast';
 
@@ -69,7 +68,7 @@
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-{#if user}
+{#if user && filteredSidebarData}
 	<Toasts toasterName="app-toaster" />
 
 	<ProgressBar navigate={navigating}>

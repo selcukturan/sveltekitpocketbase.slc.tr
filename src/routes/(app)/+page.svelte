@@ -14,13 +14,9 @@
 
 	let user = await getUser();
 
-	const go = () => {
-		goto('/grapes/crud/create-read-update-delete', {
-			state: {
-				message: 'Hello'
-			}
-		});
-	};
+	function onclick() {
+		goto('/grapes/crud/create-read-update-delete#cmd=create&id=123');
+	}
 </script>
 
 <Head>
@@ -45,7 +41,7 @@
 				</a>
 				<pre>{JSON.stringify(user, null, 2)}</pre>
 				<button
-					onclick={go}
+					{onclick}
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
 				>
 					Go DataTable with filter and recordId in hash

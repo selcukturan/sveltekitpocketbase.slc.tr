@@ -24,7 +24,7 @@
 	} = $props();
 
 	let dialog: HTMLDialogElement | null = $state(null);
-	let isOpen = $state(true);
+	let isOpen = $state(false);
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
 	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
 	/**
