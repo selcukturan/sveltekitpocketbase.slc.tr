@@ -1,4 +1,7 @@
-<script module>
+<script lang="ts">
+	import { tick } from 'svelte';
+	import { fly } from 'svelte/transition';
+
 	type PropsType = {
 		multiple?: boolean;
 		value?: string | string[];
@@ -17,11 +20,6 @@
 		escClose?: boolean;
 		deSelectText?: string;
 	};
-</script>
-
-<script lang="ts">
-	import { tick } from 'svelte';
-	import { fly } from 'svelte/transition';
 
 	let {
 		multiple = false,
@@ -90,15 +88,11 @@
 	});
 
 	let selectedLabels = $derived.by(() => {
-		const labels = selectedIndexes
-			.map((i) => displayOptions[i]?.label)
-			.filter(Boolean);
+		const labels = selectedIndexes.map((i) => displayOptions[i]?.label).filter(Boolean);
 
 		const selectedCount = multiple ? `(${labels.length}) ` : '';
 
-		return labels.length > 0
-			? `${selectedCount}${labels.join(', ')}`
-			: deSelectText;
+		return labels.length > 0 ? `${selectedCount}${labels.join(', ')}` : deSelectText;
 	});
 
 	let activeOptionId = $derived.by(() => {
@@ -173,11 +167,7 @@
 	}
 	function handleWindowFocusChange(e: FocusEvent) {
 		const target = e.target as HTMLElement;
-		if (
-			isOpenPopup &&
-			!trigger?.contains(target) &&
-			!container?.contains(target)
-		) {
+		if (isOpenPopup && !trigger?.contains(target) && !container?.contains(target)) {
 			toggle();
 		}
 	}
@@ -198,13 +188,7 @@
 	const handleListboxKeydown = (e: KeyboardEvent) => {
 		// 1. Arama (Typeahead) Mantığı
 		// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
-		if (
-			e.key !== ' ' &&
-			e.key.length === 1 &&
-			!e.ctrlKey &&
-			!e.altKey &&
-			!e.metaKey
-		) {
+		if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
 			e.preventDefault();
 
 			// Önceki zamanlayıcıyı temizle
@@ -245,8 +229,7 @@
 				let nextIndex = activeIndex;
 
 				if (e.code === 'ArrowUp') {
-					nextIndex =
-						(activeIndex - 1 + displayOptions.length) % displayOptions.length;
+					nextIndex = (activeIndex - 1 + displayOptions.length) % displayOptions.length;
 				} else if (e.code === 'ArrowDown') {
 					nextIndex = (activeIndex + 1) % displayOptions.length;
 				} else if (e.code === 'Home') {
@@ -313,14 +296,12 @@
 	}
 
 	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
-	const internalContainerClasses =
-		'relative inline-block max-w-full min-w-52 select-none';
+	const internalContainerClasses = 'relative inline-block max-w-full min-w-52 select-none';
 	const internalTriggerClasses =
 		'bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none';
 	const internalListboxClasses =
 		'bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
-	const internalOptionClasses =
-		'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
+	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 </script>
 
@@ -345,9 +326,7 @@
 		aria-labelledby={triggerId}
 		aria-activedescendant={activeOptionId}
 		aria-invalid={!isValid}
-		class="{internalTriggerClasses} {triggerClass} {!isValid
-			? internalInvalidTriggerClasses
-			: ''}"
+		class="{internalTriggerClasses} {triggerClass} {!isValid ? internalInvalidTriggerClasses : ''}"
 		onclick={() => toggle()}
 		onkeydown={handleTriggerKeyDown}
 		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
@@ -410,8 +389,7 @@
 							xmlns="http://www.w3.org/2000/svg"
 						>
 							<path fill="none" d="M0 0h24v24H0z"></path>
-							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-							></path>
+							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
 						</svg>
 					</span>
 				</li>

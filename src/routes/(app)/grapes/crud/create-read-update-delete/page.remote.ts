@@ -4,6 +4,9 @@ import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { listParamsSchema } from './types';
 
+import { ResultAsync } from 'neverthrow';
+import { handleError, mapUnknownToError } from '$lib/server/error.service';
+
 export const getFullList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
 
@@ -12,10 +15,16 @@ export const getFullList = query(listParamsSchema, async (params) => {
 	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
 	console.log('filterString', filterString);
 
-	const records = await locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
-		filter: filterString,
-		...params.listOptions
-	});
+	const listResult = await ResultAsync.fromPromise(
+		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
+			filter: filterString,
+			...params.listOptions
+		}),
+		mapUnknownToError
+	);
 
-	return records;
+	return listResult.match(
+		(records) => records,
+		(error) => handleError(error, { test: 'value' })
+	);
 });

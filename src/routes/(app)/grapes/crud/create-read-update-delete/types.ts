@@ -10,7 +10,7 @@ const defaultConditions = {
 			type: 'condition',
 			field: 'title',
 			operator: '~',
-			value: ''
+			value: 'sel'
 		},
 		{
 			type: 'condition',

@@ -1,8 +1,10 @@
-<script module>
+<script lang="ts">
+	import { Page, Head } from '$lib/components/templates';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+
 	const deleteHash = (currentHash: string, keys: string[]) => {
-		const currentSearchParams = new URLSearchParams(
-			currentHash.replace('#', '')
-		);
+		const currentSearchParams = new URLSearchParams(currentHash.replace('#', ''));
 		keys.forEach((key) => currentSearchParams.delete(key));
 
 		if (currentSearchParams.size === 0) {
@@ -12,25 +14,15 @@
 	};
 
 	const addHash = (currentHash: string, values: Record<string, string>) => {
-		const currentSearchParams = new URLSearchParams(
-			currentHash.replace('#', '')
-		);
+		const currentSearchParams = new URLSearchParams(currentHash.replace('#', ''));
 		Object.entries(values).forEach(([key, value]) => {
 			currentSearchParams.set(key, value);
 		});
 
 		return `#${currentSearchParams.toString()}`;
 	};
-</script>
 
-<script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-
-	let hashSearchParamsDerived = $derived(
-		new URLSearchParams(page.url.hash.replace('#', ''))
-	);
+	let hashSearchParamsDerived = $derived(new URLSearchParams(page.url.hash.replace('#', '')));
 
 	$effect(() => {
 		console.log('hashSearchParamsDerived', hashSearchParamsDerived.get('sort'));
@@ -57,8 +49,7 @@
 	<Page.Main>
 		<Page.Main.Panel>
 			<p>
-				hashSearchParamsDerived - sort: {hashSearchParamsDerived.get('sort') ||
-					'null'}
+				hashSearchParamsDerived - sort: {hashSearchParamsDerived.get('sort') || 'null'}
 			</p>
 			<div class="inline-flex flex-col">
 				<a

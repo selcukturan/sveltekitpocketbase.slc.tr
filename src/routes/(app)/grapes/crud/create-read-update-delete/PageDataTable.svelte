@@ -1,13 +1,66 @@
-<script lang="ts" generics="TData">
-	import type { ListResult } from 'pocketbase';
-	/* import DataTableWrapper from '$lib/components/base/datatable/DataTableWrapper.svelte'; */
-	/* import * as s from '$lib/components/base/datatable';
+<script lang="ts">
+	import * as v from 'valibot';
+	import { page } from '$app/state';
+	import { watch } from 'runed';
+	import { injectFilterData } from '$lib/utils/filter-string-helper';
+	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
+
+	import { type ListParamsSchemaType, listParamsSchema } from './types';
 	import { getFullList } from './page.remote';
-	import { useSearchParams } from 'runed/kit';
 
-	import { queryParamsSchema } from './types'; */
+	const pageUrlHash = $derived(page.url.hash);
 
-	let {
+	let params = $state<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
+
+	let filterData = $state<ListParamsSchemaType['filterData']>({ title: '', quantity: 0 });
+
+	const getData = () => {
+		params = injectFilterData(listParamsSchema, filterData);
+	};
+
+	const promise = $derived(getFullList(params));
+	const records = $derived(await promise);
+
+	let isOpen = $state('close' as 'open' | 'close' | 'waiting');
+	watch(
+		() => pageUrlHash,
+		(currHash, prevHash) => {
+			isOpen = 'close';
+
+			const prevCmd = prevHash ? hashParam('cmd', prevHash) : undefined;
+			const prevId = prevHash ? hashParam('id', prevHash) : undefined;
+
+			const currCmd = hashParam('cmd', currHash);
+			const currId = hashParam('id', currHash);
+			switch (currCmd) {
+				case 'list':
+					if (currId) {
+						console.log(`List Triggered: ${currId}`);
+						// params = injectFilterData(listParamsSchema, filterData);
+					}
+					break;
+				case 'view':
+					if (currId) {
+						console.log(`View - Open Drawer: ${currId}`);
+					}
+					break;
+				case 'create':
+					console.log('Create');
+					isOpen = 'open';
+					break;
+				case 'update':
+					if (currId) {
+						console.log(`Update - Open Drawer: ${currId}`);
+					}
+					break;
+				case 'delete':
+					console.log('Delete');
+					break;
+			}
+		}
+	);
+
+	/* let {
 		records,
 		onselect,
 		filter = ''
@@ -15,7 +68,7 @@
 		records: ListResult<TData> | TData[];
 		onselect?: (id: string) => void;
 		filter?: string;
-	} = $props();
+	} = $props(); */
 
 	// const navigator = new Navigator();
 	/* const params = useSearchParams(queryParamsSchema); */
@@ -67,13 +120,66 @@
 	); */
 </script>
 
+<div>
+	<p>pending promises: {$effect.pending()}</p>
+	<input
+		type="text"
+		bind:value={filterData.title}
+		placeholder="Search - Title contains..."
+		class="border"
+		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+	/>
+	<input
+		type="number"
+		bind:value={filterData.quantity}
+		placeholder="Search - Quantity equals..."
+		class="border"
+		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+	/>
+	<!-- onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })} -->
+	<button onclick={getData} class="bg-warning-300 p-3 disabled:opacity-50">Search</button>
+	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">Refresh</button>
+	<button
+		onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
+		class="bg-warning-300 p-3 disabled:opacity-50">Refresh(List)</button
+	>
+	<button
+		onclick={() => setParams({ cmd: 'view', id: `${Math.round(Math.random() * 1000)}` })}
+		class="bg-warning-300 p-3 disabled:opacity-50"
+	>
+		View
+	</button>
+	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50"> No View </button>
+	<button
+		onclick={() => setParams({ cmd: 'create', id: `${Math.round(Math.random() * 1000)}` })}
+		class="bg-warning-300 p-3 disabled:opacity-50"
+	>
+		Create
+	</button>
+	<button
+		onclick={() => setParams({ cmd: 'update', id: `${Math.round(Math.random() * 1000)}` })}
+		class="bg-warning-300 p-3 disabled:opacity-50"
+	>
+		Update
+	</button>
+	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50">
+		No Update
+	</button>
+	<button
+		onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })}
+		class="bg-warning-300 p-3 disabled:opacity-50"
+	>
+		Delete
+	</button>
+</div>
+
 <pre>
 	{#if typeof records === 'object' && 'items' in records}
 		{JSON.stringify(records.items, null, 2)}
 	{:else}
 		{JSON.stringify(records, null, 2)}
 	{/if}
-	
+	<!-- {JSON.stringify(records, null, 2)} -->
 </pre>
 
 <!-- <DataTableWrapper results={items} /> -->
