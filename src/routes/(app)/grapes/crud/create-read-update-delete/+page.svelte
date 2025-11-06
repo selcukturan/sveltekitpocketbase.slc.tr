@@ -34,7 +34,7 @@
 		// drawerOpen(cmd, id);
 		setTimeout(() => {
 			drawerOpen(cmd, id);
-		}, 0);
+		}, 10);
 	});
 </script>
 

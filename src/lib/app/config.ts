@@ -3,7 +3,7 @@
 // kritik güvenlik ayarları burada tutulmaz.
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.1.0-alpha.285',
+	version: 'v0.1.0-alpha.286',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`,
 	defaultLanguage: 'tr',
 	supportedLanguages: ['tr', 'en']
