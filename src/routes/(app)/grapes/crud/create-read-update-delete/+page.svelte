@@ -12,6 +12,7 @@
 
 	import PageDataTable from './PageDataTable.svelte';
 	import { Boundary } from '$lib/components/base/boundary';
+	import { watch, watchOnce } from 'runed';
 
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
@@ -28,17 +29,27 @@
 		if (!drawer) return;
 		drawer.close();
 	};
-	onMount(() => {
+	/* onMount(() => {
 		const cmd = hashParam('cmd', pageUrlHash) || '';
 		const id = hashParam('id', pageUrlHash) || '';
 		// drawerOpen(cmd, id);
 		tick().then(() => {
-			/* setTimeout(() => {
+			setTimeout(() => {
 				drawerOpen(cmd, id);
-			}, 10); */
+			}, 10);
 			drawerOpen(cmd, id);
 		});
-	});
+	}); */
+
+	watch(
+		() => pageUrlHash,
+		(newHash) => {
+			console.log(newHash);
+			const cmd = hashParam('cmd', newHash) || '';
+			const id = hashParam('id', newHash) || '';
+			drawerOpen(cmd, id);
+		}
+	);
 </script>
 
 <Head>
