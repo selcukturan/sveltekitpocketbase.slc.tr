@@ -12,12 +12,11 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const getFullList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
 
-	// await sleep(1000);
+	await sleep(500); // Simulate network delay
 
 	const { locals } = getRequestEvent();
 
 	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
-	console.log('filterString', filterString);
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {

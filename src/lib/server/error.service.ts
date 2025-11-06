@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { ClientResponseError } from 'pocketbase';
+import type { AppActionFailure } from '$lib/types';
 
 /**
  * Hata yönetimi için merkezi bir servis.
@@ -9,7 +10,7 @@ import { ClientResponseError } from 'pocketbase';
  * @param context Ek bağlam verisi (örn. form alanları) - opsiyonel.
  * @returns SvelteKit'in `fail` fonksiyonunu kullanarak uygun hata yanıtı.
  */
-export function handleError(error: unknown, context: Record<string, any> = {}) {
+export function handleError(error: unknown, context: Record<string, any> = {}): AppActionFailure {
 	if (error instanceof ClientResponseError) {
 		const statusCode = error?.status << 0 || 400;
 		const responseData = error?.data || {};

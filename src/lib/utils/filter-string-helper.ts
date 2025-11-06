@@ -2,6 +2,10 @@ import type { TypedPocketBase } from '$lib/types/pocketbase-types';
 import * as v from 'valibot';
 import type { AllCurrentValue } from '$lib/app/schemas/base';
 
+export function getDefaultsFromSchema<S extends v.GenericSchema>(schema: S): v.InferDefaults<S> {
+	return v.getDefaults(schema);
+}
+
 export function injectFilterData<S extends v.GenericSchema>(
 	schema: S,
 	filterData: Record<string, AllCurrentValue>

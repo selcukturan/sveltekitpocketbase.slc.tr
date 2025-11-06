@@ -1,196 +1,78 @@
-<script lang="ts">
-	import * as v from 'valibot';
-	import { page } from '$app/state';
-	import { injectFilterData } from '$lib/utils/filter-string-helper';
-	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
+<script lang="ts" generics="TData">
+	import type { AppActionFailure, AppErrorData } from '$lib/types';
+	import type { ListResult } from 'pocketbase';
+	import { isActionFailure } from '@sveltejs/kit';
 
-	import { type ListParamsSchemaType, listParamsSchema } from './types';
-	import { getFullList } from './page.remote';
-	import Drawer from '$lib/components/base/drawer/drawer.svelte';
-	import { confirm } from '$lib/components/base/confirm';
-	import { onMount } from 'svelte';
+	import type { TestDatatableResponse } from '$lib/types/pocketbase-types';
 
-	const pageUrlHash = $derived(page.url.hash);
-
-	let drawer = null as Drawer | null;
-	let drawerCommand = $state({ cmd: '', id: '' });
-
-	let params = $state.raw<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
-
-	let filterData = $state<ListParamsSchemaType['filterData']>({ title: '', quantity: 0 });
-
-	const getData = () => {
-		params = injectFilterData(listParamsSchema, filterData);
-	};
-	const drawerOpen = (cmd: string, id: string) => {
-		if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-		drawerCommand = { cmd, id };
-		drawer.open();
-	};
-	const drawerClose = () => {
-		if (!drawer) return;
-		drawer.close();
-	};
-
-	onMount(() => {
-		const cmd = hashParam('cmd', pageUrlHash) || '';
-		const id = hashParam('id', pageUrlHash) || '';
-		drawerOpen(cmd, id);
-	});
-
-	/* let {
+	const {
 		records,
 		onselect,
 		filter = ''
 	}: {
-		records: ListResult<TData> | TData[];
+		records: TestDatatableResponse[] | ListResult<TestDatatableResponse> | AppActionFailure;
 		onselect?: (id: string) => void;
 		filter?: string;
-	} = $props(); */
+	} = $props();
 
-	// const navigator = new Navigator();
-	/* const params = useSearchParams(queryParamsSchema); */
+	// 1. ActionFailure olup olmadığını kontrol eden reaktif değişken
+	const isFailure = $derived(isActionFailure(records));
 
-	// type Item = Awaited<ReturnType<typeof getFullList>>['items'][number];
-
-	// let items = $state<Item[]>([]);
-
-	/* let promise = $derived(getFullList(filter));
-	let records = $derived(await promise); */
-
-	// let items = $derived(records.items);
-	/* let items = $derived(
-		records.items.map((item) => ({
-			id: item.id,
-			title: item.title,
-			caption: item.caption,
-			price: item.price,
-			kn: item.kn
-		}))
+	// 2. ListResult olup olmadığını kontrol eden reaktif değişken
+	//    Hata olmadığını ve ListResult'a özgü alanların olduğunu kontrol ederiz.
+	const isListResult = $derived(
+		!isFailure && records && typeof records === 'object' && 'items' in records && 'totalItems' in records
 	);
-	type ItemsType = (typeof items)[number]; */
 
-	/* let dataTable: s.DataTable<ItemsType> | undefined = $state(undefined);
-
-	let columns = $state<s.Column<ItemsType>[]>([
-		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
-		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
-		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
-		{ field: 'price', label: 'price', width: 'minmax(50px,1fr)' },
-		{ field: 'kn', label: 'kn', width: 'minmax(50px,1fr)' }
-	]);
-	let footers = $state<s.Footer<ItemsType>[]>([{ caption: 'x1' }, { price: 'x2' }]); */
-
-	/* watch(
-		() => params.toURLSearchParams(),
-		() => {
-			console.log('object');
-		}
-	); */
-
-	/* watch(
-		() => navigator.params.recordId,
-		(recordId) => {
-			if (!recordId) return;
-
-			console.log('Selected Record ID:', recordId);
-		}
-	); */
-
-	const promise = $derived(getFullList(params));
-	const records = $derived(await promise);
+	// 3. Basit bir dizi (TData[]) olup olmadığını kontrol eden reaktif değişken
+	const isSimpleArray = $derived(!isFailure && Array.isArray(records));
 </script>
 
 <div>
 	<p>pending promises: {$effect.pending()}</p>
-	<Drawer
-		bind:this={drawer}
-		onOpen={() => setParams({ ...drawerCommand })}
-		onBeforeClose={async () => {
-			const shouldClose = await confirm({
-				message: 'Bu paneli kapatmak istediğinize emin misiniz?',
-				yes: 'Evet',
-				no: 'Hayır'
-			});
-
-			if (shouldClose) {
-				drawerCommand = { cmd: '', id: '' };
-			}
-			return shouldClose;
-		}}
-		onClose={() => setParams({ ...drawerCommand })}
-	>
-		<p>This is a drawer for creating a new record.</p>
-		<p>Current CMD: {drawerCommand.cmd}</p>
-		<p>Current ID: {drawerCommand.id}</p>
-		<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
-	</Drawer>
-	<input
-		type="text"
-		bind:value={filterData.title}
-		placeholder="Search - Title contains..."
-		class="border"
-		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
-	/>
-	<input
-		type="number"
-		bind:value={filterData.quantity}
-		placeholder="Search - Quantity equals..."
-		class="border"
-		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
-	/>
-	<!-- onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })} -->
-	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
-		Search
-	</button>
-	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">Refresh</button>
-	<button
-		onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
-		class="bg-warning-300 p-3 disabled:opacity-50">Refresh(List)</button
-	>
-	<button
-		onclick={() => {
-			drawerOpen('view', `${Math.round(Math.random() * 1000)}`);
-		}}
-		class="bg-warning-300 p-3 disabled:opacity-50"
-	>
-		View
-	</button>
-	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50"> No View </button>
-	<button
-		onclick={() => {
-			drawerOpen('create', `${Math.round(Math.random() * 1000)}`);
-		}}
-		class="bg-warning-300 p-3 disabled:opacity-50"
-	>
-		Create
-	</button>
-	<button
-		onclick={() => {
-			drawerOpen('update', `${Math.round(Math.random() * 1000)}`);
-		}}
-		class="bg-warning-300 p-3 disabled:opacity-50"
-	>
-		Update
-	</button>
-	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50">
-		No Update
-	</button>
-	<button
-		onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })}
-		class="bg-warning-300 p-3 disabled:opacity-50"
-	>
-		Delete
-	</button>
 </div>
 
 <pre>
-	{#if typeof records === 'object' && 'items' in records}
-		{JSON.stringify(records.items, null, 2)}
+	<!-- {#if isActionFailure(records)}
+		<p>Bir hata oluştu: records.message</p>
 	{:else}
 		{JSON.stringify(records, null, 2)}
+	{/if} -->
+
+	{#if isFailure}
+		<!-- DURUM 1: Veri bir AppActionFailure -->
+	<div class="error-message">
+		<p><strong>Bir hata oluştu:</strong></p>
+		<!-- TypeScript'e bunun bir hata olduğunu bildirmek için 'as' kullanabiliriz -->
+		<p>{((records as AppActionFailure).data as AppErrorData)?.message}</p>
+	</div>
+	{:else if isListResult}
+		<!-- DURUM 2: Veri bir ListResult<TData> -->
+	<!-- PocketBase'den gelen sayfalama bilgisi olan nesne -->
+	<div>
+		<p>Toplam {(records as ListResult<TestDatatableResponse>).totalItems} kayıt bulundu. Sayfa {(
+					records as ListResult<TestDatatableResponse>
+				).page}/{(records as ListResult<TestDatatableResponse>).totalPages}.</p>
+		<ul>
+			{#each (records as ListResult<TestDatatableResponse>).items as item}
+					<li>{item.caption}</li>
+				{/each}
+		</ul>
+	</div>
+	{:else if isSimpleArray}
+		<!-- DURUM 3: Veri basit bir TData[] dizisi -->
+	<div>
+		<p>Toplam {(records as TestDatatableResponse[]).length} kayıt listeleniyor.</p>
+		<ul>
+			{#each records as TestDatatableResponse[] as item}
+					<li>{item.caption}</li>
+				{/each}
+		</ul>
+	</div>
+	{:else}
+		<!-- Hiçbir koşul karşılanmazsa (örneğin records null veya undefined ise) -->
+	<p>Veri yükleniyor veya mevcut değil...</p>
 	{/if}
-	<!-- {JSON.stringify(records, null, 2)} -->
 </pre>
 
 <!-- <DataTableWrapper results={items} /> -->
