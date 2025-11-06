@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { filterSchema, pocketbaseListSchema } from '$lib/app/schemas/filter-conditions';
+import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
 import * as base from '$lib/app/schemas/base';
 // --------------------------------------------------------------------------------------------------------------------------------------------
 const templateConditions = {
@@ -31,12 +31,6 @@ export const listParamsSchema = v.object({
 });
 export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
-export const oneParamsSchema = v.object({
-	id: v.optional(v.fallback(base.string, 'ydmi70g2ghqx2nb'), 'ydmi70g2ghqx2nb'),
-	listOptions: v.object({
-		expand: v.optional(base.string),
-		fields: v.optional(base.string)
-	})
-});
+export const oneParamsSchema = pocketbaseOneSchema;
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------

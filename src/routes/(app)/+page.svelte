@@ -15,7 +15,7 @@
 	let user = await getUser();
 
 	function onclick() {
-		goto('/grapes/crud/create-read-update-delete#cmd=create&id=123');
+		goto('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9');
 	}
 </script>
 

@@ -11,7 +11,7 @@
 	import { confirm } from '$lib/components/base/confirm';
 
 	import PageDataTable from './PageDataTable.svelte';
-	import Boundary from '$lib/components/base/boundary/boundary.svelte';
+	import { Boundary } from '$lib/components/base/boundary';
 
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
@@ -45,15 +45,17 @@
 		<p>Header</p>
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table boundary>
-			<PageDataTable />
+		<Page.Main.Table>
+			<Boundary>
+				<PageDataTable />
+			</Boundary>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
 		<div>
 			<button
 				onclick={() => {
-					drawerOpen('view', `${Math.round(Math.random() * 1000)}`);
+					drawerOpen('view', `rjqbi24vn3f3k59`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -61,7 +63,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpen('create', `${Math.round(Math.random() * 1000)}`);
+					drawerOpen('create', `sp7wfdu7zg85vue`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -69,7 +71,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpen('update', `${Math.round(Math.random() * 1000)}`);
+					drawerOpen('update', `ydmi70g2ghqx2nb`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -107,7 +109,7 @@
 			<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
 			<Boundary>
 				<pre>					
-					{JSON.stringify(await getOne(oneParamsDefaults), null, 2)}
+					{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 				</pre>
 			</Boundary>
 		</Drawer>

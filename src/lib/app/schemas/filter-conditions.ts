@@ -47,6 +47,13 @@ export const pocketbaseListSchema = v.object({
 export type Condition = v.InferOutput<typeof conditionSchema>;
 export type Filter = v.InferOutput<typeof filterSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
+export const pocketbaseOneSchema = v.object({
+	id: v.optional(v.fallback(base.string, ''), ''),
+	listOptions: v.object({
+		expand: v.optional(base.string),
+		fields: v.optional(base.string)
+	})
+});
 
 /* 
 const defaultConditions = {
