@@ -109,11 +109,11 @@
 			<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
 			<p>Drawer Content</p>
 			<Boundary>
-				{#if drawerCommand.cmd !== ''}
+				<!-- {#if drawerCommand.cmd !== ''}
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				{/if}
+				{/if} -->
 			</Boundary>
 		</Drawer>
 	</Page.Drawer>
