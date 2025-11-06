@@ -20,34 +20,29 @@
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
 
-	const drawerOpen = (cmd: string, id: string) => {
-		if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-		drawerCommand = { cmd, id };
-		drawer.open();
+	const drawerOpenTrigger = (cmd: string, id: string) => {
+		setParams({ cmd, id });
 	};
 	const drawerClose = () => {
 		if (!drawer) return;
 		drawer.close();
 	};
-	/* onMount(() => {
-		const cmd = hashParam('cmd', pageUrlHash) || '';
-		const id = hashParam('id', pageUrlHash) || '';
-		// drawerOpen(cmd, id);
-		tick().then(() => {
-			setTimeout(() => {
-				drawerOpen(cmd, id);
-			}, 10);
-			drawerOpen(cmd, id);
-		});
-	}); */
 
+	// drawerOpen
 	watch(
 		() => pageUrlHash,
 		(newHash) => {
-			console.log(newHash);
+			console.log(1);
 			const cmd = hashParam('cmd', newHash) || '';
 			const id = hashParam('id', newHash) || '';
-			drawerOpen(cmd, id);
+			drawerCommand = { cmd, id };
+			if (!drawer) return;
+			if (cmd !== 'create' && cmd !== 'update' && cmd !== 'view') return;
+			drawer.open();
+			/* drawerCommand = { cmd, id };
+			setParams({ ...drawerCommand }); */
+			/* drawer.open(); */
+			// drawerOpen(cmd, id);
 		}
 	);
 </script>
@@ -72,7 +67,12 @@
 		<div>
 			<button
 				onclick={() => {
-					drawerOpen('view', `rjqbi24vn3f3k59`);
+					/* drawerOpen('view', `rjqbi24vn3f3k59`);
+					const cmd = hashParam('cmd', pageUrlHash) || '';
+					const id = hashParam('id', pageUrlHash) || ''; */
+					/* drawerCommand = { cmd: 'view', id: 'rjqbi24vn3f3k59' };
+					setParams({ ...drawerCommand }); */
+					drawerOpenTrigger('view', `rjqbi24vn3f3k59`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -80,7 +80,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpen('create', `sp7wfdu7zg85vue`);
+					drawerOpenTrigger('create', `sp7wfdu7zg85vue`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -88,7 +88,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpen('update', `ydmi70g2ghqx2nb`);
+					drawerOpenTrigger('update', `ydmi70g2ghqx2nb`);
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -105,7 +105,6 @@
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
-			onOpen={() => setParams({ ...drawerCommand })}
 			onBeforeClose={async () => {
 				const shouldClose = await confirm({
 					message: 'Bu paneli kapatmak istediğinize emin misiniz?',
@@ -114,16 +113,16 @@
 				});
 
 				if (shouldClose) {
-					drawerCommand = { cmd: '', id: '' };
+					/* drawerCommand = { cmd: '', id: '' }; */
+					drawerOpenTrigger('', '');
 				}
 				return shouldClose;
 			}}
-			onClose={() => setParams({ ...drawerCommand })}
 		>
 			<p>This is a drawer for creating a new record.</p>
 			<p>Current CMD: {drawerCommand.cmd}</p>
 			<p>Current ID: {drawerCommand.id}</p>
-			<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
+			<button onclick={() => drawerClose()} class="bg-error-300 p-3">Close Drawer</button>
 			<p>Drawer Content</p>
 			<Boundary>
 				{#if drawerCommand.cmd !== ''}
