@@ -11,7 +11,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getFullList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
-	// await sleep(300);
+	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -33,7 +33,7 @@ export const getFullList = query(listParamsSchema, async (params) => {
 
 export const getOne = query(oneParamsSchema, async (params) => {
 	await checkAuthenticated();
-	// await sleep(500);
+	await sleep(500);
 
 	const { locals } = getRequestEvent();
 

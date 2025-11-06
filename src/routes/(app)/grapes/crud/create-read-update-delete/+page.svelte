@@ -2,8 +2,8 @@
 	import { getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
 	import { Page, Head } from '$lib/components/templates';
 	import { page } from '$app/state';
-	import { onMount, tick } from 'svelte';
-	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
+
+	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { getOne } from './page.remote';
 	import { oneParamsSchema } from './types';
 
@@ -12,7 +12,7 @@
 
 	import PageDataTable from './PageDataTable.svelte';
 	import { Boundary } from '$lib/components/base/boundary';
-	import { watch, watchOnce } from 'runed';
+	import { watch } from 'runed';
 
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
@@ -20,29 +20,14 @@
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
 
-	const drawerOpenTrigger = (cmd: string, id: string) => {
-		setParams({ cmd, id });
-	};
-	const drawerClose = () => {
-		if (!drawer) return;
-		drawer.close();
-	};
-
-	// drawerOpen
 	watch(
 		() => pageUrlHash,
 		(newHash) => {
-			console.log(1);
-			const cmd = hashParam('cmd', newHash) || '';
-			const id = hashParam('id', newHash) || '';
+			const cmd = getParam('cmd', newHash) || '';
+			const id = getParam('id', newHash) || '';
 			drawerCommand = { cmd, id };
-			if (!drawer) return;
-			if (cmd !== 'create' && cmd !== 'update' && cmd !== 'view') return;
+			if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
 			drawer.open();
-			/* drawerCommand = { cmd, id };
-			setParams({ ...drawerCommand }); */
-			/* drawer.open(); */
-			// drawerOpen(cmd, id);
 		}
 	);
 </script>
@@ -67,12 +52,7 @@
 		<div>
 			<button
 				onclick={() => {
-					/* drawerOpen('view', `rjqbi24vn3f3k59`);
-					const cmd = hashParam('cmd', pageUrlHash) || '';
-					const id = hashParam('id', pageUrlHash) || ''; */
-					/* drawerCommand = { cmd: 'view', id: 'rjqbi24vn3f3k59' };
-					setParams({ ...drawerCommand }); */
-					drawerOpenTrigger('view', `rjqbi24vn3f3k59`);
+					setParams({ cmd: 'view', id: 'rjqbi24vn3f3k59' });
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -80,7 +60,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpenTrigger('create', `sp7wfdu7zg85vue`);
+					setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' });
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -88,7 +68,7 @@
 			</button>
 			<button
 				onclick={() => {
-					drawerOpenTrigger('update', `ydmi70g2ghqx2nb`);
+					setParams({ cmd: 'update', id: 'ydmi70g2ghqx2nb' });
 				}}
 				class="bg-warning-300 p-3 disabled:opacity-50"
 			>
@@ -113,8 +93,7 @@
 				});
 
 				if (shouldClose) {
-					/* drawerCommand = { cmd: '', id: '' }; */
-					drawerOpenTrigger('', '');
+					setParams({ cmd: '', id: '' });
 				}
 				return shouldClose;
 			}}
@@ -122,7 +101,7 @@
 			<p>This is a drawer for creating a new record.</p>
 			<p>Current CMD: {drawerCommand.cmd}</p>
 			<p>Current ID: {drawerCommand.id}</p>
-			<button onclick={() => drawerClose()} class="bg-error-300 p-3">Close Drawer</button>
+			<button onclick={() => drawer?.close()} class="bg-error-300 p-3">Close Drawer</button>
 			<p>Drawer Content</p>
 			<Boundary>
 				{#if drawerCommand.cmd !== ''}
