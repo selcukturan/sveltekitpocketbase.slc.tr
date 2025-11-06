@@ -107,10 +107,13 @@
 			<p>Current CMD: {drawerCommand.cmd}</p>
 			<p>Current ID: {drawerCommand.id}</p>
 			<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
+			<p>Drawer Content</p>
 			<Boundary>
-				<pre>					
-					{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
-				</pre>
+				{#if drawerCommand.cmd !== ''}
+					<pre>
+						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
+					</pre>
+				{/if}
 			</Boundary>
 		</Drawer>
 	</Page.Drawer>
