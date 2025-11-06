@@ -2,7 +2,7 @@
 	import { getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
 	import { Page, Head } from '$lib/components/templates';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
 	import { getOne } from './page.remote';
 	import { oneParamsSchema } from './types';
@@ -32,9 +32,12 @@
 		const cmd = hashParam('cmd', pageUrlHash) || '';
 		const id = hashParam('id', pageUrlHash) || '';
 		// drawerOpen(cmd, id);
-		setTimeout(() => {
+		tick().then(() => {
+			/* setTimeout(() => {
+				drawerOpen(cmd, id);
+			}, 10); */
 			drawerOpen(cmd, id);
-		}, 10);
+		});
 	});
 </script>
 
