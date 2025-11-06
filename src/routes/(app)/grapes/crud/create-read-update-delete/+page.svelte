@@ -13,8 +13,6 @@
 	import PageDataTable from './PageDataTable.svelte';
 	import { Boundary } from '$lib/components/base/boundary';
 
-	import { getFullList } from './page.remote';
-
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
 	const pageUrlHash = $derived(page.url.hash);
@@ -33,7 +31,7 @@
 	onMount(() => {
 		const cmd = hashParam('cmd', pageUrlHash) || '';
 		const id = hashParam('id', pageUrlHash) || '';
-		drawerOpen(cmd, id);
+		// drawerOpen(cmd, id);
 	});
 </script>
 
