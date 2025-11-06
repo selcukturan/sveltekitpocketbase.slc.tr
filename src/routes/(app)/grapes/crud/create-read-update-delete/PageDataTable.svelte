@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as v from 'valibot';
-	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { injectFilterData } from '$lib/utils/filter-string-helper';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
@@ -9,28 +8,34 @@
 	import { getFullList } from './page.remote';
 	import Drawer from '$lib/components/base/drawer/drawer.svelte';
 	import { confirm } from '$lib/components/base/confirm';
+	import { onMount } from 'svelte';
 
 	const pageUrlHash = $derived(page.url.hash);
-	let currentCMD = $state(null as string | null);
-	let currentID = $state(null as string | null);
 
-	let params = $state<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
+	let drawer = null as Drawer | null;
+	let drawerCommand = $state({ cmd: '', id: '' });
+
+	let params = $state.raw<ListParamsSchemaType>(v.getDefaults(listParamsSchema));
 
 	let filterData = $state<ListParamsSchemaType['filterData']>({ title: '', quantity: 0 });
 
 	const getData = () => {
 		params = injectFilterData(listParamsSchema, filterData);
 	};
-
-	let drawer: Drawer | null = $state(null);
+	const drawerOpen = (cmd: string, id: string) => {
+		if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
+		drawerCommand = { cmd, id };
+		drawer.open();
+	};
+	const drawerClose = () => {
+		if (!drawer) return;
+		drawer.close();
+	};
 
 	onMount(() => {
-		currentCMD = hashParam('cmd', pageUrlHash) || null;
-		currentID = hashParam('id', pageUrlHash) || null;
-
-		if (currentCMD === 'create' && currentID && drawer) {
-			drawer.open();
-		}
+		const cmd = hashParam('cmd', pageUrlHash) || '';
+		const id = hashParam('id', pageUrlHash) || '';
+		drawerOpen(cmd, id);
 	});
 
 	/* let {
@@ -100,19 +105,25 @@
 	<p>pending promises: {$effect.pending()}</p>
 	<Drawer
 		bind:this={drawer}
-		onOpen={() => setParams({ cmd: 'create', id: currentID || '' })}
-		onClose={() => setParams({ cmd: '', id: '' })}
+		onOpen={() => setParams({ ...drawerCommand })}
 		onBeforeClose={async () => {
-			// any custom logic before closing
-			return await confirm({
+			const shouldClose = await confirm({
 				message: 'Bu paneli kapatmak istediğinize emin misiniz?',
 				yes: 'Evet',
 				no: 'Hayır'
 			});
+
+			if (shouldClose) {
+				drawerCommand = { cmd: '', id: '' };
+			}
+			return shouldClose;
 		}}
+		onClose={() => setParams({ ...drawerCommand })}
 	>
 		<p>This is a drawer for creating a new record.</p>
-		<button onclick={() => drawer?.close()} class="bg-error-300 p-3">Close Drawer</button>
+		<p>Current CMD: {drawerCommand.cmd}</p>
+		<p>Current ID: {drawerCommand.id}</p>
+		<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
 	</Drawer>
 	<input
 		type="text"
@@ -129,16 +140,18 @@
 		onkeydown={(e) => e.key === 'Enter' && setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
 	/>
 	<!-- onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })} -->
-	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50"
-		>Search</button
-	>
+	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
+		Search
+	</button>
 	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">Refresh</button>
 	<button
 		onclick={() => setParams({ cmd: 'list', id: `${Math.round(Math.random() * 1000)}` })}
 		class="bg-warning-300 p-3 disabled:opacity-50">Refresh(List)</button
 	>
 	<button
-		onclick={() => setParams({ cmd: 'view', id: `${Math.round(Math.random() * 1000)}` })}
+		onclick={() => {
+			drawerOpen('view', `${Math.round(Math.random() * 1000)}`);
+		}}
 		class="bg-warning-300 p-3 disabled:opacity-50"
 	>
 		View
@@ -146,16 +159,16 @@
 	<button onclick={() => setParams({ cmd: '', id: '' })} class="bg-error-300 p-3 disabled:opacity-50"> No View </button>
 	<button
 		onclick={() => {
-			currentCMD = 'create';
-			currentID = `${Math.round(Math.random() * 1000)}`;
-			drawer?.open();
+			drawerOpen('create', `${Math.round(Math.random() * 1000)}`);
 		}}
 		class="bg-warning-300 p-3 disabled:opacity-50"
 	>
 		Create
 	</button>
 	<button
-		onclick={() => setParams({ cmd: 'update', id: `${Math.round(Math.random() * 1000)}` })}
+		onclick={() => {
+			drawerOpen('update', `${Math.round(Math.random() * 1000)}`);
+		}}
 		class="bg-warning-300 p-3 disabled:opacity-50"
 	>
 		Update

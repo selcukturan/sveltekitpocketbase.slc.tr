@@ -13,13 +13,15 @@
 		children,
 		onOpen,
 		onClose,
+		onBeforeOpen,
 		onBeforeClose,
 		escClose = true
 	}: {
 		children?: Snippet;
 		onOpen?: () => void;
 		onClose?: () => void;
-		onBeforeClose?: () => Promise<boolean>;
+		onBeforeOpen?: () => boolean | Promise<boolean>;
+		onBeforeClose?: () => boolean | Promise<boolean>;
 		escClose?: boolean;
 	} = $props();
 
@@ -28,7 +30,7 @@
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
 	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
 	/**
-	 * KISIT TARAYICI UYUMLULUĞU:
+	 * KISITLI TARAYICI UYUMLULUĞU:
 	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/closedBy#browser_compatibility
 	 * https://caniuse.com/mdn-html_elements_dialog_closedby
 	 *
@@ -42,11 +44,18 @@
 		show();
 	};
 
-	export const close = async () => {
+	export const close = () => {
 		hide();
 	};
 
 	const show = async () => {
+		let canOpen = true;
+		const result = onBeforeOpen?.();
+		if (result !== undefined) {
+			canOpen = result instanceof Promise ? await result : result;
+		}
+		if (!canOpen) return; // Açma izni yoksa fonksiyondan erken çık
+
 		if (isOpen) return; // Eğer zaten açıksa tekrar açma
 		isOpen = true; // Artık açık durumda. Kapatma işlemi CSS `.
 
@@ -61,11 +70,10 @@
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 
 		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
-
-		if (onBeforeClose) {
-			canClose = await onBeforeClose(); // "await" ile onBeforeClose fonksiyonunun tamamlanmasını beklenir.
+		const result = onBeforeClose?.();
+		if (result !== undefined) {
+			canClose = result instanceof Promise ? await result : result;
 		}
-
 		if (!canClose) return; // Kapatma izni yoksa fonksiyondan erken çık
 
 		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
