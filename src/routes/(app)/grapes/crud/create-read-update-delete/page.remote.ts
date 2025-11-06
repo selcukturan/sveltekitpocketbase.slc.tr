@@ -5,14 +5,13 @@ import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
 import { handleError, mapUnknownToError } from '$lib/server/error.service';
 
-import { listParamsSchema } from './types';
+import { listParamsSchema, oneParamsSchema } from './types';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getFullList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
-
-	await sleep(500); // Simulate network delay
+	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -28,6 +27,25 @@ export const getFullList = query(listParamsSchema, async (params) => {
 
 	return listResult.match(
 		(records) => records,
+		(error) => handleError(error, { test: 'value' })
+	);
+});
+
+export const getOne = query(oneParamsSchema, async (params) => {
+	await checkAuthenticated();
+	await sleep(500);
+
+	const { locals } = getRequestEvent();
+
+	const oneResult = await ResultAsync.fromPromise(
+		locals.pb.collection(Collections.TestDatatable).getOne(params.id, {
+			...params.listOptions
+		}),
+		mapUnknownToError
+	);
+
+	return oneResult.match(
+		(record) => record,
 		(error) => handleError(error, { test: 'value' })
 	);
 });

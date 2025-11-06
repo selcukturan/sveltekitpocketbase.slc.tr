@@ -1,21 +1,33 @@
 <script lang="ts" generics="TData">
-	import type { AppActionFailure, AppErrorData } from '$lib/types';
-	import type { ListResult } from 'pocketbase';
-	import { isActionFailure } from '@sveltejs/kit';
+	import { injectFilterData, getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
+	import { type ListParamsSchemaType, listParamsSchema } from './types';
+	import { getFullList } from './page.remote';
 
-	import type { TestDatatableResponse } from '$lib/types/pocketbase-types';
-
+	/* import type { ListResult } from 'pocketbase';
+	import type { AppActionFailure } from '$lib/types';
 	const {
 		records,
 		onselect,
 		filter = ''
 	}: {
-		records: TestDatatableResponse[] | ListResult<TestDatatableResponse> | AppActionFailure;
+		records: TData[] | ListResult<TData> | AppActionFailure;
 		onselect?: (id: string) => void;
 		filter?: string;
-	} = $props();
+	} = $props(); */
 
-	// 1. ActionFailure olup olmadığını kontrol eden reaktif değişken
+	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
+
+	let filterData = $state<ListParamsSchemaType['filterData']>({
+		title: listParamsDefaults.filterData.title ?? '',
+		quantity: listParamsDefaults.filterData.quantity ?? 0
+	});
+	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
+
+	const getData = () => {
+		params = injectFilterData(listParamsSchema, filterData);
+	};
+
+	/* // 1. ActionFailure olup olmadığını kontrol eden reaktif değişken
 	const isFailure = $derived(isActionFailure(records));
 
 	// 2. ListResult olup olmadığını kontrol eden reaktif değişken
@@ -25,54 +37,94 @@
 	);
 
 	// 3. Basit bir dizi (TData[]) olup olmadığını kontrol eden reaktif değişken
-	const isSimpleArray = $derived(!isFailure && Array.isArray(records));
+	const isSimpleArray = $derived(!isFailure && Array.isArray(records)); */
+
+	/* let {
+		records,
+		onselect,
+		filter = ''
+	}: {
+		records: ListResult<TData> | TData[];
+		onselect?: (id: string) => void;
+		filter?: string;
+	} = $props(); */
+
+	// const navigator = new Navigator();
+	/* const params = useSearchParams(queryParamsSchema); */
+
+	// type Item = Awaited<ReturnType<typeof getFullList>>['items'][number];
+
+	// let items = $state<Item[]>([]);
+
+	/* let promise = $derived(getFullList(filter));
+	let records = $derived(await promise); */
+
+	// let items = $derived(records.items);
+	/* let items = $derived(
+		records.items.map((item) => ({
+			id: item.id,
+			title: item.title,
+			caption: item.caption,
+			price: item.price,
+			kn: item.kn
+		}))
+	);
+	type ItemsType = (typeof items)[number]; */
+
+	/* let dataTable: s.DataTable<ItemsType> | undefined = $state(undefined);
+
+	let columns = $state<s.Column<ItemsType>[]>([
+		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
+		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
+		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
+		{ field: 'price', label: 'price', width: 'minmax(50px,1fr)' },
+		{ field: 'kn', label: 'kn', width: 'minmax(50px,1fr)' }
+	]);
+	let footers = $state<s.Footer<ItemsType>[]>([{ caption: 'x1' }, { price: 'x2' }]); */
+
+	/* watch(
+		() => params.toURLSearchParams(),
+		() => {
+			console.log('object');
+		}
+	); */
+
+	/* watch(
+		() => navigator.params.recordId,
+		(recordId) => {
+			if (!recordId) return;
+
+			console.log('Selected Record ID:', recordId);
+		}
+	); */
 </script>
 
 <div>
 	<p>pending promises: {$effect.pending()}</p>
+	<input
+		type="text"
+		bind:value={filterData.title}
+		placeholder="Search - Title contains..."
+		class="border"
+		onkeydown={(e) => e.key === 'Enter' && getData()}
+	/>
+	<input
+		type="number"
+		bind:value={filterData.quantity}
+		placeholder="Search - Quantity equals..."
+		class="border"
+		onkeydown={(e) => e.key === 'Enter' && getData()}
+	/>
+	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
+		Search
+	</button>
+	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">
+		Refresh
+	</button>
 </div>
 
 <pre>
-	<!-- {#if isActionFailure(records)}
-		<p>Bir hata oluştu: records.message</p>
-	{:else}
-		{JSON.stringify(records, null, 2)}
-	{/if} -->
-
-	{#if isFailure}
-		<!-- DURUM 1: Veri bir AppActionFailure -->
-	<div class="error-message">
-		<p><strong>Bir hata oluştu:</strong></p>
-		<!-- TypeScript'e bunun bir hata olduğunu bildirmek için 'as' kullanabiliriz -->
-		<p>{((records as AppActionFailure).data as AppErrorData)?.message}</p>
-	</div>
-	{:else if isListResult}
-		<!-- DURUM 2: Veri bir ListResult<TData> -->
-	<!-- PocketBase'den gelen sayfalama bilgisi olan nesne -->
-	<div>
-		<p>Toplam {(records as ListResult<TestDatatableResponse>).totalItems} kayıt bulundu. Sayfa {(
-					records as ListResult<TestDatatableResponse>
-				).page}/{(records as ListResult<TestDatatableResponse>).totalPages}.</p>
-		<ul>
-			{#each (records as ListResult<TestDatatableResponse>).items as item}
-					<li>{item.caption}</li>
-				{/each}
-		</ul>
-	</div>
-	{:else if isSimpleArray}
-		<!-- DURUM 3: Veri basit bir TData[] dizisi -->
-	<div>
-		<p>Toplam {(records as TestDatatableResponse[]).length} kayıt listeleniyor.</p>
-		<ul>
-			{#each records as TestDatatableResponse[] as item}
-					<li>{item.caption}</li>
-				{/each}
-		</ul>
-	</div>
-	{:else}
-		<!-- Hiçbir koşul karşılanmazsa (örneğin records null veya undefined ise) -->
-	<p>Veri yükleniyor veya mevcut değil...</p>
-	{/if}
+	{JSON.stringify(await getFullList(params), null, 2)}
 </pre>
 
 <!-- <DataTableWrapper results={items} /> -->

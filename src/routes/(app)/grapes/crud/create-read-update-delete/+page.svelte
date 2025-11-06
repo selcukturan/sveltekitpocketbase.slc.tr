@@ -1,30 +1,19 @@
 <script lang="ts">
+	import { getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
 	import { Page, Head } from '$lib/components/templates';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
-	import { isActionFailure } from '@sveltejs/kit';
+	import { getOne } from './page.remote';
+	import { oneParamsSchema } from './types';
 
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 
-	import { injectFilterData, getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
-	import { type ListParamsSchemaType, listParamsSchema } from './types';
-	import { getFullList } from './page.remote';
-
-	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
-
-	let filterData = $state<ListParamsSchemaType['filterData']>({
-		title: listParamsDefaults.filterData.title ?? '',
-		quantity: listParamsDefaults.filterData.quantity ?? 0
-	});
-	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
-
-	const getData = () => {
-		params = injectFilterData(listParamsSchema, filterData);
-	};
-
 	import PageDataTable from './PageDataTable.svelte';
+	import Boundary from '$lib/components/base/boundary/boundary.svelte';
+
+	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
 	const pageUrlHash = $derived(page.url.hash);
 	let drawer = null as Drawer | null;
@@ -53,30 +42,11 @@
 
 <Page>
 	<Page.Header>
-		<input
-			type="text"
-			bind:value={filterData.title}
-			placeholder="Search - Title contains..."
-			class="border"
-			onkeydown={(e) => e.key === 'Enter' && getData()}
-		/>
-		<input
-			type="number"
-			bind:value={filterData.quantity}
-			placeholder="Search - Quantity equals..."
-			class="border"
-			onkeydown={(e) => e.key === 'Enter' && getData()}
-		/>
-		<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
-			Search
-		</button>
-		<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">
-			Refresh
-		</button>
+		<p>Header</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<PageDataTable records={await getFullList(params)} />
+			<PageDataTable />
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
@@ -135,6 +105,11 @@
 			<p>Current CMD: {drawerCommand.cmd}</p>
 			<p>Current ID: {drawerCommand.id}</p>
 			<button onclick={drawerClose} class="bg-error-300 p-3">Close Drawer</button>
+			<Boundary>
+				<pre>					
+					{JSON.stringify(await getOne(oneParamsDefaults), null, 2)}
+				</pre>
+			</Boundary>
 		</Drawer>
 	</Page.Drawer>
 </Page>
