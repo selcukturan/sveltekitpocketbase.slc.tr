@@ -5,13 +5,15 @@
 	import { onMount } from 'svelte';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
 	import { getOne } from './page.remote';
-	import { oneParamsSchema } from './types';
+	import { oneParamsSchema, listParamsSchema } from './types';
 
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 
 	import PageDataTable from './PageDataTable.svelte';
 	import { Boundary } from '$lib/components/base/boundary';
+
+	import { getFullList } from './page.remote';
 
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
 
@@ -46,9 +48,12 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<!-- <Boundary>
-				<PageDataTable />
-			</Boundary> -->
+			<Boundary>
+				<!-- <PageDataTable /> -->
+				<pre>
+						{JSON.stringify(await getFullList(getDefaultsFromSchema(listParamsSchema)), null, 2)}
+					</pre>
+			</Boundary>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
