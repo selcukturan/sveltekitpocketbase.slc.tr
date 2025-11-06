@@ -32,6 +32,9 @@
 		const cmd = hashParam('cmd', pageUrlHash) || '';
 		const id = hashParam('id', pageUrlHash) || '';
 		// drawerOpen(cmd, id);
+		setTimeout(() => {
+			drawerOpen(cmd, id);
+		}, 150);
 	});
 </script>
 
