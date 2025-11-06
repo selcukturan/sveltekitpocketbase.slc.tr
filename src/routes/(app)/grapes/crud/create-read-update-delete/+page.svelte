@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import { setParams, hashParam } from '$lib/utils/hash-url-helper';
 	import { getOne } from './page.remote';
-	import { oneParamsSchema, listParamsSchema } from './types';
+	import { oneParamsSchema } from './types';
 
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
@@ -49,10 +49,7 @@
 	<Page.Main>
 		<Page.Main.Table>
 			<Boundary>
-				<!-- <PageDataTable /> -->
-				<pre>
-						{JSON.stringify(await getFullList(getDefaultsFromSchema(listParamsSchema)), null, 2)}
-					</pre>
+				<PageDataTable />
 			</Boundary>
 		</Page.Main.Table>
 	</Page.Main>
