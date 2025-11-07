@@ -36,7 +36,6 @@
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
-	let isFullPageLoad = true;
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
@@ -47,15 +46,7 @@
 			const id = getParam('id', newHash) || '';
 			drawerCommand = { cmd, id };
 			if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-			if (isFullPageLoad) {
-				isFullPageLoad = false;
-				drawer?.open();
-			} else {
-				tick().then(() => {
-					drawer?.open();
-				});
-			}
-			/* drawer.open(); */
+			drawer.open();
 		}
 	);
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
