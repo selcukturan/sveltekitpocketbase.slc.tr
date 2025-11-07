@@ -7,11 +7,8 @@ import { handleError, mapUnknownToError } from '$lib/server/error.service';
 
 import { listParamsSchema, oneParamsSchema } from './types';
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export const getFullList = query(listParamsSchema, async (params) => {
+export const getList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
-	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -20,7 +17,7 @@ export const getFullList = query(listParamsSchema, async (params) => {
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
 			filter: filterString,
-			...params.listOptions
+			...params.options
 		}),
 		mapUnknownToError
 	);
@@ -33,13 +30,12 @@ export const getFullList = query(listParamsSchema, async (params) => {
 
 export const getOne = query(oneParamsSchema, async (params) => {
 	await checkAuthenticated();
-	await sleep(500);
 
 	const { locals } = getRequestEvent();
 
 	const oneResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getOne(params.id, {
-			...params.listOptions
+			...params.options
 		}),
 		mapUnknownToError
 	);

@@ -1,25 +1,43 @@
 <script lang="ts">
-	import { getDefaultsFromSchema } from '$lib/utils/filter-string-helper';
-	import { Page, Head } from '$lib/components/templates';
+	// SvelteKit
 	import { page } from '$app/state';
-
+	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { getOne } from './page.remote';
-	import { oneParamsSchema } from './types';
-
+	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
+	// Utilities
+	import { watch } from 'runed';
+	// Templates
+	import { Page, Head } from '$lib/components/templates';
+	// Components
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
-
-	import PageDataTable from './PageDataTable.svelte';
 	import { Boundary } from '$lib/components/base/boundary';
-	import { watch } from 'runed';
+	// Types and Schemas
+	import { oneParamsSchema, listParamsSchema, type ListParamsSchemaType } from './types';
+	// Remote functions
+	import { getOne } from './page.remote';
+	import { getList } from './page.remote';
 
-	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema);
-
+	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
 	const pageUrlHash = $derived(page.url.hash);
+	// ----------- End Page Variables ----------------------------------------------------------------------------------------------------------------
+
+	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
+	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
+	let filterData = $state<ListParamsSchemaType['filterData']>({
+		title: listParamsDefaults.filterData.title ?? '',
+		quantity: listParamsDefaults.filterData.quantity ?? 0
+	});
+	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
+
+	const searchData = () => (params = injectFilterData(listParamsSchema, filterData));
+	const refreshData = () => getList(params).refresh();
+	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
+
+	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
+	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
-
 	watch(
 		() => pageUrlHash,
 		(newHash) => {
@@ -30,6 +48,7 @@
 			drawer.open();
 		}
 	);
+	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 </script>
 
 <Head>
@@ -39,12 +58,33 @@
 
 <Page>
 	<Page.Header>
-		<p>Header</p>
+		<h1 class="text-2xl font-bold">Create - Read - Update - Delete Example</h1>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
 			<Boundary>
-				<PageDataTable />
+				<input
+					type="text"
+					bind:value={filterData.title}
+					placeholder="Search - Title contains..."
+					class="border"
+					onkeydown={(e) => e.key === 'Enter' && searchData()}
+				/>
+				<input
+					type="number"
+					bind:value={filterData.quantity}
+					placeholder="Search - Quantity equals..."
+					class="border"
+					onkeydown={(e) => e.key === 'Enter' && searchData()}
+				/>
+				<button onclick={searchData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
+					Search
+				</button>
+				<button onclick={refreshData} class="bg-warning-300 p-3 disabled:opacity-50"> Refresh </button>
+				<p>$effect.pending() {$effect.pending()}</p>
+				<pre>
+					{JSON.stringify(await getList(params), null, 2)}
+				</pre>
 			</Boundary>
 		</Page.Main.Table>
 	</Page.Main>
@@ -94,6 +134,7 @@
 
 				if (shouldClose) {
 					setParams({ cmd: '', id: '' });
+					refreshData();
 				}
 				return shouldClose;
 			}}

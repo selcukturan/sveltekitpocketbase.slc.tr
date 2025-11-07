@@ -28,8 +28,8 @@ export const filterSchema = v.lazy(
 		])
 );
 
-export const pocketbaseFullListSchema = v.object({
-	listOptions: v.object({
+export const pocketbaseListOptionsSchema = v.object({
+	options: v.object({
 		sort: v.optional(base.string),
 		expand: v.optional(base.string),
 		fields: v.optional(base.string),
@@ -40,7 +40,7 @@ export const pocketbaseFullListSchema = v.object({
 export const pocketbaseListSchema = v.object({
 	page: v.optional(v.fallback(base.number, 1), 1),
 	perPage: v.optional(v.fallback(base.number, 30), 30),
-	...pocketbaseFullListSchema.entries
+	...pocketbaseListOptionsSchema.entries
 });
 
 // Export Types
@@ -49,7 +49,7 @@ export type Filter = v.InferOutput<typeof filterSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const pocketbaseOneSchema = v.object({
 	id: v.optional(v.fallback(base.string, ''), ''),
-	listOptions: v.object({
+	options: v.object({
 		expand: v.optional(base.string),
 		fields: v.optional(base.string)
 	})
@@ -76,13 +76,13 @@ const filterCondition = {
 					type: 'condition',
 					field: 'order',
 					operator: '>',
-					value: 9000
+					value: ''
 				},
 				{
 					type: 'condition',
 					field: 'grape',
 					operator: '~',
-					value: 'Fiano'
+					value: ''
 				}
 			]
 		},
@@ -90,7 +90,7 @@ const filterCondition = {
 			type: 'condition',
 			field: 'title',
 			operator: '~',
-			value: 'ba'
+			value: ''
 		}
 	]
 };

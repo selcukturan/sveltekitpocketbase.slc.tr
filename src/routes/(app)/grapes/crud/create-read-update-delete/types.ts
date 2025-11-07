@@ -16,7 +16,7 @@ const templateConditions = {
 			type: 'condition',
 			field: 'quantity',
 			operator: '>',
-			value: 0
+			value: ''
 		}
 	]
 };
