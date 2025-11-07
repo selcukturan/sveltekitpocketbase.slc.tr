@@ -17,6 +17,7 @@
 	// Remote functions
 	import { getOne } from './page.remote';
 	import { getList } from './page.remote';
+	import { tick } from 'svelte';
 
 	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
 	const pageUrlHash = $derived(page.url.hash);
@@ -35,6 +36,7 @@
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
+	let isFullPageLoad = true;
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
@@ -45,7 +47,15 @@
 			const id = getParam('id', newHash) || '';
 			drawerCommand = { cmd, id };
 			if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-			drawer.open();
+			if (isFullPageLoad) {
+				isFullPageLoad = false;
+				drawer?.open();
+			} else {
+				tick().then(() => {
+					drawer?.open();
+				});
+			}
+			/* drawer.open(); */
 		}
 	);
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
