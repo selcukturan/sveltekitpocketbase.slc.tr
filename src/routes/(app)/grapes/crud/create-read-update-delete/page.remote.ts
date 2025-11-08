@@ -1,11 +1,11 @@
-import { getRequestEvent, query } from '$app/server';
+import { getRequestEvent, query, form } from '$app/server';
 import { Collections } from '$lib/types/pocketbase-types';
 import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
 import { handleError, mapUnknownToError } from '$lib/server/error.service';
 
-import { listParamsSchema, oneParamsSchema } from './types';
+import { listParamsSchema, oneParamsSchema, updateParamsSchema } from './types';
 
 export const getList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
@@ -41,6 +41,31 @@ export const getOne = query(oneParamsSchema, async (params) => {
 	);
 
 	return oneResult.match(
+		(record) => record,
+		(error) => handleError(error, { test: 'value' })
+	);
+});
+
+export const update = form(updateParamsSchema, async (params) => {
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	// example update data
+	/* const data = {
+		id: 123,
+		title: 'test',
+		quantity: 123
+	}; */
+
+	console.log(params);
+
+	const updatedResult = await ResultAsync.fromPromise(
+		locals.pb.collection(Collections.TestDatatable).update(params.id, { ...params, id: undefined }),
+		mapUnknownToError
+	);
+
+	return updatedResult.match(
 		(record) => record,
 		(error) => handleError(error, { test: 'value' })
 	);

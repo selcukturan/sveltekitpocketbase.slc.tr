@@ -1,5 +1,6 @@
 import * as v from 'valibot';
 
+export const id = v.string();
 export const string = v.string();
 export const number = v.number();
 export const boolean = v.boolean();

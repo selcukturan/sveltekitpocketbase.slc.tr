@@ -13,11 +13,9 @@
 	import { confirm } from '$lib/components/base/confirm';
 	import { Boundary } from '$lib/components/base/boundary';
 	// Types and Schemas
-	import { oneParamsSchema, listParamsSchema, type ListParamsSchemaType } from './types';
+	import { oneParamsSchema, listParamsSchema, updateParamsSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
-	import { getOne } from './page.remote';
-	import { getList } from './page.remote';
-	import { tick } from 'svelte';
+	import { getOne, getList, update } from './page.remote';
 
 	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
 	const pageUrlHash = $derived(page.url.hash);
@@ -127,29 +125,75 @@
 		<Drawer
 			bind:this={drawer}
 			onBeforeClose={async () => {
-				const shouldClose = await confirm({
+				let shouldClose = true;
+				/* shouldClose = await confirm({
 					message: 'Bu paneli kapatmak istediğinize emin misiniz?',
 					yes: 'Evet',
 					no: 'Hayır'
-				});
-
+				}); */
 				if (shouldClose) {
 					setParams({ cmd: '', id: '' });
-					refreshData();
+					/* refreshData(); */
 				}
 				return shouldClose;
 			}}
 		>
-			<p>This is a drawer for creating a new record.</p>
-			<p>Current CMD: {drawerCommand.cmd}</p>
-			<p>Current ID: {drawerCommand.id}</p>
 			<button onclick={() => drawer?.close()} class="bg-error-300 p-3">Close Drawer</button>
 			<p>Drawer Content</p>
 			<Boundary>
-				{#if drawerCommand.cmd !== ''}
+				{#if drawerCommand.cmd === 'create'}
+					<p>This is a drawer for creating a new record.</p>
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
+				{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
+					<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
+					{@const modify = update.for(drawerCommand.id).preflight(updateParamsSchema)}
+					<form
+						{...modify.enhance(async ({ form, submit }) => {
+							try {
+								await submit().updates(getList(params));
+								form.reset();
+								drawer?.close();
+								console.log('Successfully saved!');
+							} catch (error) {
+								console.error('Oh no! Something went wrong');
+							}
+						})}
+					>
+						<input {...modify.fields.id.as('hidden', drawerCommand.id)} />
+						<label>
+							<h2>Title</h2>
+							<input
+								{...modify.fields.title.as('text')}
+								value={((await getOne({ ...oneParamsDefaults, id: drawerCommand.id })) as any)?.title || ''}
+							/>
+							{#each modify.fields.title.issues() ?? [] as issue}
+								<p class="issue">{issue.message}</p>
+							{/each}
+						</label>
+						<label>
+							<h2>Quantity</h2>
+							<input
+								{...modify.fields.quantity.as('number')}
+								value={((await getOne({ ...oneParamsDefaults, id: drawerCommand.id })) as any)?.quantity ?? 0}
+							/>
+							{#each modify.fields.quantity.issues() ?? [] as issue}
+								<p class="issue">{issue.message}</p>
+							{/each}
+						</label>
+						<button type="submit" disabled={!!modify.pending}>Update</button>
+					</form>
+					<pre>
+						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
+					</pre>
+				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
+					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
+					<pre>
+						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
+					</pre>
+				{:else}
+					<p>No valid command provided.</p>
 				{/if}
 			</Boundary>
 		</Drawer>

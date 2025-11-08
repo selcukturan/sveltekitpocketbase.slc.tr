@@ -27,15 +27,11 @@
 				<ul>
 					{#each await getLogs() as { id, title, content }}
 						<li>
-							<a href="{page.url.pathname}/{id}"
-								>{`title: ${title} - content: ${content}`}</a
-							>
+							<a href="{page.url.pathname}/{id}">{`title: ${title} - content: ${content}`}</a>
 						</li>
 					{/each}
 				</ul>
-				<button onclick={() => getLogs().refresh()}>
-					Check for new posts
-				</button>
+				<button onclick={() => getLogs().refresh()}> Check for new posts </button>
 				<!--  bir `pending` snippet içeren `svelte:boundary`, `await` ifadeleri içerebilir. 
 				Bu snippet, `svelte:boundary` ilk oluşturulduğunda gösterilir ve `svelte:boundary` içindeki 
 				tüm `await` ifadeleri çözülene kadar görünür kalır. 

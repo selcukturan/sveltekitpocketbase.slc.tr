@@ -156,20 +156,22 @@
 		'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 
-{#if isOpen}
-	<dialog
-		{closedby}
-		class:closing={isClosing}
-		class="{dialogClasses} {dialogFocusOverrideClasses}"
-		bind:this={dialog}
-		{@attach focustrap}
-		{@attach dialogAttach}
-	>
-		<div class="h-full w-full">
-			{@render children?.()}
-		</div>
-	</dialog>
-{/if}
+<!-- {#if isOpen} -->
+
+<dialog
+	{closedby}
+	class:closing={isClosing}
+	class="{dialogClasses} {dialogFocusOverrideClasses}"
+	bind:this={dialog}
+	{@attach focustrap}
+	{@attach dialogAttach}
+>
+	<div class="h-full w-full">
+		{@render children?.()}
+	</div>
+</dialog>
+
+<!-- {/if} -->
 
 <style>
 	dialog {
