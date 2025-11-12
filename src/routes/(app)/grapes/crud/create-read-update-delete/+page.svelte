@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
+	import { getDefaultsFromSchema, injectFilterData, resolvePromiseDerived } from '$lib/utils/filter-string-helper';
 	// Utilities
 	import { watch } from 'runed';
 	// Templates
@@ -48,6 +48,18 @@
 		}
 	);
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
+
+	/*
+	const getOnePromise = $derived(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }));
+	const oneResult = $derived(resolvePromiseDerived(getOnePromise, 'id'));
+	type OneSuccessResultType = NonNullable<(typeof oneResult)['data']>;
+	type OneFailureResultType = NonNullable<(typeof oneResult)['error']>;
+
+	const getListPromise = $derived(await getList(params));
+	const listResult = $derived(resolvePromiseDerived(getListPromise, 'items'));
+	type ListSuccessResultType = NonNullable<(typeof listResult)['data']>['items'][number];
+	type ListFailureResultType = NonNullable<(typeof listResult)['error']>;
+	*/
 </script>
 
 <Head>
@@ -147,46 +159,47 @@
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
 				{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
-					<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
-					{@const modify = update.for(drawerCommand.id).preflight(updateParamsSchema)}
-					<form
-						{...modify.enhance(async ({ form, submit }) => {
-							try {
-								await submit().updates(getList(params));
-								form.reset();
-								drawer?.close();
-								console.log('Successfully saved!');
-							} catch (error) {
-								console.error('Oh no! Something went wrong');
-							}
-						})}
-					>
-						<input {...modify.fields.id.as('hidden', drawerCommand.id)} />
-						<label>
-							<h2>Title</h2>
-							<input
-								{...modify.fields.title.as('text')}
-								value={((await getOne({ ...oneParamsDefaults, id: drawerCommand.id })) as any)?.title || ''}
-							/>
-							{#each modify.fields.title.issues() ?? [] as issue}
-								<p class="issue">{issue.message}</p>
-							{/each}
-						</label>
-						<label>
-							<h2>Quantity</h2>
-							<input
-								{...modify.fields.quantity.as('number')}
-								value={((await getOne({ ...oneParamsDefaults, id: drawerCommand.id })) as any)?.quantity ?? 0}
-							/>
-							{#each modify.fields.quantity.issues() ?? [] as issue}
-								<p class="issue">{issue.message}</p>
-							{/each}
-						</label>
-						<button type="submit" disabled={!!modify.pending}>Update</button>
-					</form>
-					<pre>
-						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
+					{@const oneResult = resolvePromiseDerived(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), 'id')}
+					{#if oneResult.data}
+						<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
+						{@const modify = update.for(drawerCommand.id).preflight(updateParamsSchema)}
+						<form
+							{...modify.enhance(async ({ form, submit }) => {
+								try {
+									await submit().updates(getList(params));
+									form.reset();
+									drawer?.close();
+									console.log('Successfully saved!');
+								} catch (error) {
+									console.error('Oh no! Something went wrong');
+								}
+							})}
+						>
+							<input {...modify.fields.id.as('hidden', drawerCommand.id)} />
+							<label>
+								<h2>Title</h2>
+								<input {...modify.fields.title.as('text')} value={oneResult.data.title || ''} />
+								{#each modify.fields.title.issues() ?? [] as issue}
+									<p class="issue">{issue.message}</p>
+								{/each}
+							</label>
+							<label>
+								<h2>Quantity</h2>
+								<input {...modify.fields.quantity.as('number')} value={oneResult.data.quantity ?? 0} />
+								{#each modify.fields.quantity.issues() ?? [] as issue}
+									<p class="issue">{issue.message}</p>
+								{/each}
+							</label>
+							<button type="submit" disabled={!!modify.pending}>Update</button>
+						</form>
+						<pre>
+						{JSON.stringify(oneResult.data, null, 2)}
 					</pre>
+					{:else if oneResult.error}
+						{JSON.stringify(oneResult.error, null, 2)}
+					{:else}
+						<p>Loading...</p>
+					{/if}
 				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
 					<pre>

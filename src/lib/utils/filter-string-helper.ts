@@ -128,6 +128,39 @@ export function jsonToPocketBaseFilter(node: unknown, pb: TypedPocketBase): stri
 	return pb.filter(finalParts.template, finalParts.values);
 }
 
+/**
+ * Bir promise'den gelen birleşik tipli bir sonucu, belirtilen anahtarın
+ * varlığına göre { data, error } durum nesnesine dönüştürür.
+ *
+ * @param promiseValue Promise'den dönen ham değer (bir birleşim tipi).
+ * @param key Başarı nesnesinde bulunması gereken ayırt edici anahtar.
+ * @returns Başarı veya hata durumunu içeren bir nesne.
+ */
+export function resolvePromiseDerived<
+	// T: Gelen birleşim tipi (örn: Success | Failure)
+	T,
+	// K: Ayırt edici anahtar (örn: 'id' veya 'items')
+	K extends string
+>(
+	promiseValue: T,
+	key: K
+): {
+	// data'nın tipi: T'nin içinden, K anahtarına sahip olan tip.
+	data: Extract<T, Record<K, unknown>> | null;
+	// error'un tipi: T'nin içinden, K anahtarına sahip olmayan tip.
+	error: Exclude<T, Record<K, unknown>> | null;
+} {
+	// 'promiseValue' bir nesne mi ve belirtilen 'key'i içeriyor mu?
+	if (typeof promiseValue === 'object' && promiseValue !== null && key in promiseValue) {
+		// Evet ise, bu başarı durumudur.
+		// TypeScript'e bu koşulun tipi doğruladığını söylemek için 'as' kullanırız.
+		return { data: promiseValue as Extract<T, Record<K, unknown>>, error: null };
+	} else {
+		// Hayır ise, bu hata durumudur.
+		return { data: null, error: promiseValue as Exclude<T, Record<K, unknown>> };
+	}
+}
+
 // Uzun anahtar isimlerini tek harfli kısaltmalara eşleştiriyoruz.
 /* const longToShortKeyMap: { [key: string]: string } = {
 	type: 't',

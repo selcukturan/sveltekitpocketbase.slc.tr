@@ -46,7 +46,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.auth.exportToCookie({
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'lax',
+			sameSite: 'strict', // 'lax' | 'strict' | 'none'
 			priority: 'High'
 		})
 	);
