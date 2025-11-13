@@ -1,21 +1,26 @@
 <script lang="ts">
 	// SvelteKit
 	import { page } from '$app/state';
+	import { isHttpError } from '@sveltejs/kit';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { getDefaultsFromSchema, injectFilterData, resolvePromiseDerived } from '$lib/utils/filter-string-helper';
+	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
 	// Utilities
 	import { watch } from 'runed';
+	import { ResultAsync } from 'neverthrow';
 	// Templates
 	import { Page, Head } from '$lib/components/templates';
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 	import { Boundary } from '$lib/components/base/boundary';
+	// Inputs
+	import { Text } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateParamsSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
-	import { getOne, getList, update } from './page.remote';
+	import { getOne, getList, updateForm } from './page.remote';
+	import Form from '$lib/components/base/form/form.svelte';
 
 	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
 	const pageUrlHash = $derived(page.url.hash);
@@ -159,47 +164,43 @@
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
 				{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
-					{@const oneResult = resolvePromiseDerived(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), 'id')}
-					{#if oneResult.data}
-						<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
-						{@const modify = update.for(drawerCommand.id).preflight(updateParamsSchema)}
-						<form
-							{...modify.enhance(async ({ form, submit }) => {
-								try {
-									await submit().updates(getList(params));
+					{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
+
+					<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
+					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateParamsSchema)}
+					<form
+						{...updateRemoteForm.enhance(async ({ form, submit }) => {
+							const submissionResult = ResultAsync.fromPromise(submit().updates(getList(params)), (error: unknown) =>
+								isHttpError(error) ? error : null
+							);
+							await submissionResult.match(
+								() => {
 									form.reset();
 									drawer?.close();
-									console.log('Successfully saved!');
-								} catch (error) {
-									console.error('Oh no! Something went wrong');
+									console.log('Başarıyla kaydedildi!');
+								},
+								(error) => {
+									alert('Client: ' + error?.body.message);
 								}
-							})}
-						>
-							<input {...modify.fields.id.as('hidden', drawerCommand.id)} />
-							<label>
-								<h2>Title</h2>
-								<input {...modify.fields.title.as('text')} value={oneResult.data.title || ''} />
-								{#each modify.fields.title.issues() ?? [] as issue}
-									<p class="issue">{issue.message}</p>
-								{/each}
-							</label>
-							<label>
-								<h2>Quantity</h2>
-								<input {...modify.fields.quantity.as('number')} value={oneResult.data.quantity ?? 0} />
-								{#each modify.fields.quantity.issues() ?? [] as issue}
-									<p class="issue">{issue.message}</p>
-								{/each}
-							</label>
-							<button type="submit" disabled={!!modify.pending}>Update</button>
-						</form>
-						<pre>
-						{JSON.stringify(oneResult.data, null, 2)}
+							);
+						})}
+					>
+						<input {...updateRemoteForm.fields.id.as('hidden', drawerCommand.id)} />
+
+						<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
+
+						<label>
+							<h2>Quantity</h2>
+							<input {...updateRemoteForm.fields.quantity.as('number')} value={oneResult.quantity} />
+							{#each updateRemoteForm.fields.quantity.issues() ?? [] as issue}
+								<p class="issue">{issue.message}</p>
+							{/each}
+						</label>
+						<button type="submit" disabled={!!updateRemoteForm.pending}>Update</button>
+					</form>
+					<pre>
+						{JSON.stringify(oneResult, null, 2)}
 					</pre>
-					{:else if oneResult.error}
-						{JSON.stringify(oneResult.error, null, 2)}
-					{:else}
-						<p>Loading...</p>
-					{/if}
 				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
 					<pre>

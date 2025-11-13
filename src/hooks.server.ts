@@ -1,5 +1,5 @@
-import type { Handle } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
+import type { Handle, HandleServerError, HandleValidationError } from '@sveltejs/kit';
+import { isHttpError, redirect } from '@sveltejs/kit';
 import env from '$lib/server/env';
 import { Collections } from '$lib/types/pocketbase-types';
 import { createInstance } from '$lib/server/pb';
@@ -46,7 +46,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.auth.exportToCookie({
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'strict', // 'lax' | 'strict' | 'none'
+			sameSite: 'strict', // strict olduğunda bazı tarayıcılarda sorun çıkabilir. 'lax' | 'strict'
 			priority: 'High'
 		})
 	);
@@ -58,4 +58,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 	console.log(`${new Date().toISOString()} ----> hooks.server.ts | END | event.url.pathname:${event.url.pathname}`);
 	// 🏆 ############################################################################################################################
 	return response;
+};
+
+export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+	const myError = isHttpError(error) ? error : null;
+	return {
+		type: myError?.body.type || 'general',
+		errorId: myError?.body.errorId || '#SLC:HandleServerError',
+		message: myError?.body.message || message
+	};
+};
+
+export const handleValidationError: HandleValidationError = ({ event, issues }) => {
+	return {
+		type: 'general',
+		errorId: '#SLC:HandleValidationError',
+		message: 'Validation failed'
+	};
 };

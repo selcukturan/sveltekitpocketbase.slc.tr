@@ -5,8 +5,9 @@ import { CustomAuthStore } from '$lib/server/pb';
 declare global {
 	namespace App {
 		interface Error {
-			message: string;
+			type: 'pb' | 'general';
 			errorId: string;
+			message: string;
 		}
 		interface Locals {
 			pb: TypedPocketBase;

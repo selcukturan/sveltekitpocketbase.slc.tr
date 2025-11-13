@@ -3,10 +3,10 @@ import { Collections } from '$lib/types/pocketbase-types';
 import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
-import { handleError, mapUnknownToError } from '$lib/server/error.service';
+import { throwError, mapUnknownToError } from '$lib/server/error';
 
 import { listParamsSchema, oneParamsSchema, updateParamsSchema } from './types';
-
+import { error } from '@sveltejs/kit';
 export const getList = query(listParamsSchema, async (params) => {
 	await checkAuthenticated();
 
@@ -22,10 +22,11 @@ export const getList = query(listParamsSchema, async (params) => {
 		mapUnknownToError
 	);
 
-	return listResult.match(
-		(records) => records,
-		(error) => handleError(error, { test: 'value' })
-	);
+	if (listResult.isErr()) {
+		throwError(listResult.error);
+	}
+
+	return listResult.value;
 });
 
 export const getOne = query(oneParamsSchema, async (params) => {
@@ -40,33 +41,26 @@ export const getOne = query(oneParamsSchema, async (params) => {
 		mapUnknownToError
 	);
 
-	return oneResult.match(
-		(record) => record,
-		(error) => handleError(error, { test: 'value' })
-	);
+	if (oneResult.isErr()) {
+		throwError(oneResult.error);
+	}
+
+	return oneResult.value;
 });
 
-export const update = form(updateParamsSchema, async (params) => {
+export const updateForm = form(updateParamsSchema, async (params) => {
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
-
-	// example update data
-	/* const data = {
-		id: 123,
-		title: 'test',
-		quantity: 123
-	}; */
-
-	console.log(params);
 
 	const updatedResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).update(params.id, { ...params, id: undefined }),
 		mapUnknownToError
 	);
 
-	return updatedResult.match(
-		(record) => record,
-		(error) => handleError(error, { test: 'value' })
-	);
+	if (updatedResult.isErr()) {
+		throwError(updatedResult.error);
+	}
+
+	return updatedResult.value;
 });
