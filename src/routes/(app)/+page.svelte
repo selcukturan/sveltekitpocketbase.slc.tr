@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/app/localization.svelte';
 	import { Page, Head } from '$lib/components/templates';
 	import { getUser } from '$lib/remotes/guarded.remote';
 
@@ -8,6 +9,7 @@
 	import { createCounter } from '$lib/app/counter.svelte';
 	import { goto } from '$app/navigation';
 
+	/* const locales = getLocalizationContext(); */
 	let navigator = createCounter('');
 
 	$inspect(navigator);
@@ -27,6 +29,8 @@
 <Page>
 	<Page.Header>
 		<button onclick={() => getUser().refresh()}> Check getUser() {user?.email}</button>
+
+		<p>{t('hello_world')}</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>

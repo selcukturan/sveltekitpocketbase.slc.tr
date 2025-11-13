@@ -2,7 +2,7 @@ import type { Actions } from './$types';
 import { Collections } from '$lib/types/pocketbase-types';
 import { fail, redirect } from '@sveltejs/kit';
 import { ResultAsync } from 'neverthrow';
-import { handleError, mapUnknownToError } from '$lib/server/error.service';
+import { throwError, mapUnknownToError } from '$lib/server/error';
 
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -22,9 +22,10 @@ export const actions: Actions = {
 			mapUnknownToError
 		);
 
-		return loginResult.match(
-			/*Ok*/ () => redirect(303, '/'),
-			/*Err*/ (error) => handleError(error, { email })
-		);
+		if (loginResult.isErr()) {
+			throwError(loginResult.error);
+		}
+
+		return redirect(303, '/');
 	}
 };

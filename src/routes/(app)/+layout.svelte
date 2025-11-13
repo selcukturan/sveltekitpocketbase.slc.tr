@@ -9,7 +9,7 @@
 
 	// import { appToaster } from '$lib/components/base/toast';
 
-	let { children, data } = $props();
+	let { children } = $props();
 
 	const global = initGlobalContext();
 
