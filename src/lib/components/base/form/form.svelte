@@ -8,6 +8,8 @@
 
 	import { createForm } from './forms.svelte';
 
+	import type { RemoteForm, RemoteFormInput, RemoteFormIssue } from '@sveltejs/kit';
+
 	let {
 		children,
 		class: classes,

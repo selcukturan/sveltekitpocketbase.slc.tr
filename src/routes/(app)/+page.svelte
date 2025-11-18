@@ -53,6 +53,8 @@
 				<a
 					href="/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9"
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
+					target="_blank"
+					rel="noopener noreferrer"
 				>
 					LINK: Go DataTable with filter and recordId in hash
 				</a>

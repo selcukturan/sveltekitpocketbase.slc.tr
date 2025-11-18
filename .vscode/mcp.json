@@ -1,8 +1,10 @@
 {
+	"inputs": [],
 	"servers": {
-		"svelte-llm": {
+		"svelte": {
+			"type": "stdio",
 			"command": "npx",
-			"args": ["mcp-remote", "https://svelte-llm.khromov.se/mcp/mcp"]
+			"args": ["-y", "@sveltejs/mcp"]
 		}
 	}
 }

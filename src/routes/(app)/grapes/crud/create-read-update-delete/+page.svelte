@@ -170,6 +170,12 @@
 					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateParamsSchema)}
 					<form
 						{...updateRemoteForm.enhance(async ({ form, submit }) => {
+							try {
+								await submit().updates(getList(params));
+								form.reset();
+								drawer?.close();
+								console.log('Başarıyla kaydedildi!');
+							} catch (error) {}
 							const submissionResult = ResultAsync.fromPromise(submit().updates(getList(params)), (error: unknown) =>
 								isHttpError(error) ? error : null
 							);
@@ -187,7 +193,15 @@
 					>
 						<input {...updateRemoteForm.fields.id.as('hidden', drawerCommand.id)} />
 
-						<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
+						<Text
+							label="Title"
+							oninput={(v) => console.log(v)}
+							onchange={(v) => console.log(v)}
+							field={updateRemoteForm.fields.title}
+							value={oneResult.title}
+						/>
+
+						<h2>{updateRemoteForm.fields.title.value()}</h2>
 
 						<label>
 							<h2>Quantity</h2>

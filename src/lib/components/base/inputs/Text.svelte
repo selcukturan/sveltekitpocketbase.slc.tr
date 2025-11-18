@@ -1,6 +1,5 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
-	import { watch } from 'runed';
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	// ######################## PROPS TYPE ##############################################################################################
@@ -13,34 +12,36 @@
 	};
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
-	// ######################## VARIABLES ###############################################################################################
-	let inputValue = $state(parseInputValue(value)); // initial input value
-	// ######################## PROXY ###################################################################################################
 
-	function parseInputValue(raw: string) {
-		// if (attributes.type !== 'number') return raw;
-		// return raw != '' ? Number(raw) : null;
-		return raw ? raw : '';
+	function format(raw: string) {
+		return raw ?? '';
 	}
-	function parseBindValue(raw: string) {
-		return raw ? raw : '';
+	function parse(raw: string) {
+		return raw ?? '';
 	}
 
-	watch(
-		() => inputValue,
-		(currValue, prevValue) => {
-			console.log('watch', currValue, prevValue);
-			value = parseBindValue(currValue);
+	const input = {
+		currentValue: undefined as string | undefined,
+		get value() {
+			if (this.currentValue === undefined) {
+				this.currentValue = format(value); // initial input value
+				oninput?.(value);
+			}
+			return this.currentValue;
+		},
+		set value(val) {
+			this.currentValue = val;
+			value = parse(this.currentValue);
 			oninput?.(value);
 		}
-	);
+	};
 </script>
 
 <label>
 	<h2>{label}</h2>
 	<input
 		{...field.as('text')}
-		bind:value={inputValue}
+		bind:value={input.value}
 		onchange={() => onchange?.(value)}
 		class={classes}
 		{...attributes}
