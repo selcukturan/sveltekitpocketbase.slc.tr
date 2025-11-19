@@ -39,13 +39,7 @@
 
 <label>
 	<h2>{label}</h2>
-	<input
-		{...field.as('text')}
-		bind:value={input.value}
-		onchange={() => onchange?.(value)}
-		class={classes}
-		{...attributes}
-	/>
+	<input {...field.as('text')} value={input.value} onchange={() => onchange?.(value)} class={classes} {...attributes} />
 
 	{#each field.issues() ?? [] as issue}
 		<p class="issue">{issue.message}</p>

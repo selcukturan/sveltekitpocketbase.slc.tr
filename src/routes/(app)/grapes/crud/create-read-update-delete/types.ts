@@ -35,9 +35,10 @@ export const oneParamsSchema = pocketbaseOneSchema;
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const updateParamsSchema = v.object({
-	id: v.pipe(base.id, v.nonEmpty()), // required - boş olmayan string
-	title: v.pipe(base.string, v.nonEmpty()), // required - boş olmayan string
-	quantity: v.pipe(base.number, v.integer(), v.minValue(1)) // required - 0'dan büyük pozitif tam sayı
+	id: v.pipe(base.id, v.nonEmpty('required')), // required - boş olmayan string
+	title: v.pipe(base.string, v.nonEmpty('required')), // required - boş olmayan string
+	quantity: v.pipe(base.number, v.integer(), v.minValue(1)), // required - 0'dan büyük pozitif tam sayı
+	purchase_date: v.pipe(base.date, v.nonEmpty('required')) // required - boş olmayan string
 	/* ...pocketbaseUpdateSchema.entries */
 });
 export type UpdateParamsSchemaType = v.InferOutput<typeof updateParamsSchema>;

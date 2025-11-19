@@ -7,7 +7,6 @@
 	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
 	// Utilities
 	import { watch } from 'runed';
-	import { ResultAsync } from 'neverthrow';
 	// Templates
 	import { Page, Head } from '$lib/components/templates';
 	// Components
@@ -15,7 +14,7 @@
 	import { confirm } from '$lib/components/base/confirm';
 	import { Boundary } from '$lib/components/base/boundary';
 	// Inputs
-	import { Text } from '$lib/components/base/inputs';
+	import { Text, Number, Date, Datetime } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateParamsSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
@@ -65,6 +64,7 @@
 	type ListSuccessResultType = NonNullable<(typeof listResult)['data']>['items'][number];
 	type ListFailureResultType = NonNullable<(typeof listResult)['error']>;
 	*/
+	let test = $state('2025-09-18 00:00:00.000Z');
 </script>
 
 <Head>
@@ -169,51 +169,39 @@
 					<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
 					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateParamsSchema)}
 					<form
-						{...updateRemoteForm.enhance(async ({ form, submit }) => {
+						{...updateRemoteForm.enhance(async ({ submit }) => {
 							try {
 								await submit().updates(getList(params));
-								form.reset();
 								drawer?.close();
 								console.log('Başarıyla kaydedildi!');
-							} catch (error) {}
-							const submissionResult = ResultAsync.fromPromise(submit().updates(getList(params)), (error: unknown) =>
-								isHttpError(error) ? error : null
-							);
-							await submissionResult.match(
-								() => {
-									form.reset();
-									drawer?.close();
-									console.log('Başarıyla kaydedildi!');
-								},
-								(error) => {
-									alert('Client: ' + error?.body.message);
-								}
-							);
+							} catch (error) {
+								const myError = isHttpError(error) ? error : null;
+								alert('Client: ' + myError?.body.message);
+							}
 						})}
 					>
 						<input {...updateRemoteForm.fields.id.as('hidden', drawerCommand.id)} />
 
-						<Text
-							label="Title"
-							oninput={(v) => console.log(v)}
-							onchange={(v) => console.log(v)}
-							field={updateRemoteForm.fields.title}
-							value={oneResult.title}
+						<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
+						<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
+						<Date
+							label="Purchase Date"
+							oninput={(v) => console.log('clg - ', v)}
+							field={updateRemoteForm.fields.purchase_date}
+							value={oneResult.purchase_date}
 						/>
 
-						<h2>{updateRemoteForm.fields.title.value()}</h2>
+						<!-- <Datetime
+							label="Purchase Date"
+							oninput={(v) => console.log('clg - ', v)}
+							field={updateRemoteForm.fields.purchase_date}
+							value={oneResult.purchase_date}
+						/> -->
 
-						<label>
-							<h2>Quantity</h2>
-							<input {...updateRemoteForm.fields.quantity.as('number')} value={oneResult.quantity} />
-							{#each updateRemoteForm.fields.quantity.issues() ?? [] as issue}
-								<p class="issue">{issue.message}</p>
-							{/each}
-						</label>
 						<button type="submit" disabled={!!updateRemoteForm.pending}>Update</button>
 					</form>
 					<pre>
-						{JSON.stringify(oneResult, null, 2)}
+						<!-- {JSON.stringify({ title, quantity }, null, 2)} -->
 					</pre>
 				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
