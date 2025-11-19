@@ -1,42 +1,39 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import { watch } from 'runed';
-	import { formatDateIsoToInput, parseDateInputToIso } from '$lib/utils/input-helper';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { formatDateIsoToInput, parseDateInputToIso } from '$lib/utils/input-helper';
+	import { watch } from 'runed';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
 		value?: string;
 		label?: string;
-		oninput?: (value: string) => void;
-		onchange?: (value: string) => void;
+		oninput?: (e: Event, value: string) => void;
+		onchange?: (e: Event, value: string) => void;
 		field?: RemoteFormField<string>;
 	};
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
 	let inputValue = $state('');
-	let isValid = $state(true);
-	let isBadInput = $state(false);
+	let isOnInput = false;
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (e: Event) => {
 		const target = e.target as HTMLInputElement;
-
-		isValid = target.validity.valid; // 31.11.2025 -> valid = false
-		isBadInput = target.validity.badInput; // 31.11.2025 -> badInput = true
-
-		value = parseDateInputToIso(target.value); // trigger watch value
-		oninput?.(value);
+		isOnInput = true;
+		value = parseDateInputToIso(target.value);
+		oninput?.(e, value);
 	};
 	watch(
 		() => value,
-		(newBindValue) => {
-			if (isBadInput) {
-				isBadInput = false;
+		(currValue) => {
+			if (isOnInput) {
+				isOnInput = false;
 				return;
+			} else {
+				inputValue = formatDateIsoToInput(currValue);
 			}
-			inputValue = formatDateIsoToInput(newBindValue);
 		}
 	);
 	// ## END value logic ###############################################################################
@@ -44,7 +41,7 @@
 	// ## BEGIN input change ############################################################################
 	const onChange = (e: Event) => {
 		const value = parseDateInputToIso((e.target as HTMLInputElement).value);
-		onchange?.(value);
+		onchange?.(e, value);
 	};
 	// ## END input change ##############################################################################
 </script>

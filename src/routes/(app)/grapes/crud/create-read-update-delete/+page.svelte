@@ -184,7 +184,14 @@
 
 						<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
 						<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
-						<Date
+						<!-- <Date
+							label="Purchase Date"
+							oninput={(v) => console.log('clg - ', v)}
+							field={updateRemoteForm.fields.purchase_date}
+							value={oneResult.purchase_date}
+						/> -->
+
+						<Datetime
 							label="Purchase Date"
 							oninput={(v) => console.log('clg - ', v)}
 							field={updateRemoteForm.fields.purchase_date}
@@ -192,11 +199,19 @@
 						/>
 
 						<!-- <Datetime
-							label="Purchase Date"
+							label="xxxxxxxxxxxxxx"
 							oninput={(v) => console.log('clg - ', v)}
-							field={updateRemoteForm.fields.purchase_date}
-							value={oneResult.purchase_date}
-						/> -->
+							name="purchase_date2"
+							bind:value={test}
+						/>
+						<p>{test}</p>
+						<Datetime
+							label="yyyyyyyyyyyyyyy"
+							oninput={(v) => console.log('clg - ', v)}
+							name="purchase_date3"
+							bind:value={test}
+						/>
+						<p>{test}</p> -->
 
 						<button type="submit" disabled={!!updateRemoteForm.pending}>Update</button>
 					</form>

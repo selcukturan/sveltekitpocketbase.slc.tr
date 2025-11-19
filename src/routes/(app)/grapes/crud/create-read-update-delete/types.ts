@@ -38,7 +38,7 @@ export const updateParamsSchema = v.object({
 	id: v.pipe(base.id, v.nonEmpty('required')), // required - boş olmayan string
 	title: v.pipe(base.string, v.nonEmpty('required')), // required - boş olmayan string
 	quantity: v.pipe(base.number, v.integer(), v.minValue(1)), // required - 0'dan büyük pozitif tam sayı
-	purchase_date: v.pipe(base.date, v.nonEmpty('required')) // required - boş olmayan string
+	purchase_date: v.pipe(base.datetime, v.nonEmpty('required')) // required - boş olmayan string
 	/* ...pocketbaseUpdateSchema.entries */
 });
 export type UpdateParamsSchemaType = v.InferOutput<typeof updateParamsSchema>;
