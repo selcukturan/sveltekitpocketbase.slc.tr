@@ -62,6 +62,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleError: HandleServerError = async ({ error, event, status, message }) => {
 	const myError = isHttpError(error) ? error : null;
+	console.log('HandleServerError');
 	return {
 		type: myError?.body.type || 'general',
 		errorId: myError?.body.errorId || '#SLC:HandleServerError',
@@ -70,6 +71,7 @@ export const handleError: HandleServerError = async ({ error, event, status, mes
 };
 
 export const handleValidationError: HandleValidationError = ({ event, issues }) => {
+	console.log('HandleValidationError');
 	return {
 		type: 'general',
 		errorId: '#SLC:HandleValidationError',

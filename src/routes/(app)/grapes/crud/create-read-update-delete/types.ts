@@ -1,6 +1,7 @@
 import * as v from 'valibot';
-import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
 import * as base from '$lib/app/schemas/base';
+import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
+
 // --------------------------------------------------------------------------------------------------------------------------------------------
 const templateConditions = {
 	type: 'group',
@@ -34,11 +35,11 @@ export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
 export const oneParamsSchema = pocketbaseOneSchema;
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
-export const updateParamsSchema = v.object({
+export const updateFormSchema = v.object({
 	id: v.pipe(base.id, v.nonEmpty('required')), // required - boş olmayan string
 	title: v.pipe(base.string, v.nonEmpty('required')), // required - boş olmayan string
 	quantity: v.pipe(base.number, v.integer(), v.minValue(1)), // required - 0'dan büyük pozitif tam sayı
 	purchase_date: v.pipe(base.datetime, v.nonEmpty('required')) // required - boş olmayan string
 	/* ...pocketbaseUpdateSchema.entries */
 });
-export type UpdateParamsSchemaType = v.InferOutput<typeof updateParamsSchema>;
+export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;

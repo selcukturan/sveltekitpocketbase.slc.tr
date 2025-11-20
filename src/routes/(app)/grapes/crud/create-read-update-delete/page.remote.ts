@@ -5,9 +5,10 @@ import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '$lib/server/error';
 
-import { listParamsSchema, oneParamsSchema, updateParamsSchema } from './types';
-import { error } from '@sveltejs/kit';
+import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
+
 export const getList = query(listParamsSchema, async (params) => {
+	// 🔒
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
@@ -30,6 +31,7 @@ export const getList = query(listParamsSchema, async (params) => {
 });
 
 export const getOne = query(oneParamsSchema, async (params) => {
+	// 🔒
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
@@ -48,7 +50,8 @@ export const getOne = query(oneParamsSchema, async (params) => {
 	return oneResult.value;
 });
 
-export const updateForm = form(updateParamsSchema, async (params) => {
+export const updateForm = form(updateFormSchema, async (params) => {
+	// 🔒
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();

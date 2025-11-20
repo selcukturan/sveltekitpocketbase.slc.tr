@@ -7,21 +7,13 @@
 		boundary?: boolean;
 	};
 
-	let {
-		children,
-		class: classes,
-		boundary = false,
-		...attributes
-	}: Props = $props();
+	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
 </script>
 
-<div
-	class="{classes} {`wrapper relative mx-auto w-4xl max-w-full p-6`}"
-	{...attributes}
->
-	<div
-		class="panel bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40"
-	>
+<!-- wrapper -->
+<div class="{classes} {`relative mx-auto w-4xl max-w-full p-6`}" {...attributes}>
+	<!-- panel -->
+	<div class="bg-surface-50 shadow-surface-400 rounded-xl p-6 shadow-sm/40">
 		{#if boundary}
 			<svelte:boundary>
 				{#if children}

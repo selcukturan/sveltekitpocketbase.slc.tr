@@ -12,14 +12,19 @@
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
+	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 	import { Boundary } from '$lib/components/base/boundary';
 	// Inputs
-	import { Text, Number, Date, Datetime } from '$lib/components/base/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button } from '$lib/components/base/inputs';
 	// Types and Schemas
-	import { oneParamsSchema, listParamsSchema, updateParamsSchema, type ListParamsSchemaType } from './types';
+	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
-	import Form from '$lib/components/base/form/form.svelte';
+
+	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
+	const appToaster = getToaster('app-toaster');
+	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
+	// ----------- End Page Context ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
 	const pageUrlHash = $derived(page.url.hash);
@@ -64,13 +69,14 @@
 	type ListSuccessResultType = NonNullable<(typeof listResult)['data']>['items'][number];
 	type ListFailureResultType = NonNullable<(typeof listResult)['error']>;
 	*/
-	let test = $state('2025-09-18 00:00:00.000Z');
 </script>
 
 <Head>
 	<title>create-read-update-delete - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
+
+<Toasts toasterName="page-toaster" />
 
 <Page>
 	<Page.Header>
@@ -155,8 +161,6 @@
 				return shouldClose;
 			}}
 		>
-			<button onclick={() => drawer?.close()} class="bg-error-300 p-3">Close Drawer</button>
-			<p>Drawer Content</p>
 			<Boundary>
 				{#if drawerCommand.cmd === 'create'}
 					<p>This is a drawer for creating a new record.</p>
@@ -165,66 +169,64 @@
 					</pre>
 				{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
 					{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
-
-					<p>This is a drawer for updating the record with ID: {drawerCommand.id}</p>
-					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateParamsSchema)}
+					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
 					<form
 						{...updateRemoteForm.enhance(async ({ submit }) => {
 							try {
 								await submit().updates(getList(params));
 								drawer?.close();
-								console.log('Başarıyla kaydedildi!');
+								pageToaster.add({
+									type: 'success',
+									title: 'Başarıyla kaydedildi!',
+									description: 'Başarıyla kaydedildi!',
+									action: {
+										label: 'Close',
+										onClick: (id) => {
+											pageToaster.remove(id);
+										}
+									}
+								});
 							} catch (error) {
 								const myError = isHttpError(error) ? error : null;
-								alert('Client: ' + myError?.body.message);
+								pageToaster.add({
+									type: 'error',
+									title: 'Hata!',
+									description: 'Client: ' + myError?.body.message,
+									action: {
+										label: 'Close',
+										onClick: (id) => {
+											pageToaster.remove(id);
+										}
+									}
+								});
 							}
 						})}
+						style="display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;"
 					>
-						<input {...updateRemoteForm.fields.id.as('hidden', drawerCommand.id)} />
-
-						<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
-						<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
-						<!-- <Date
-							label="Purchase Date"
-							oninput={(v) => console.log('clg - ', v)}
-							field={updateRemoteForm.fields.purchase_date}
-							value={oneResult.purchase_date}
-						/> -->
-
-						<Datetime
-							label="Purchase Date"
-							oninput={(v) => console.log('clg - ', v)}
-							field={updateRemoteForm.fields.purchase_date}
-							value={oneResult.purchase_date}
-						/>
-
-						<!-- <Datetime
-							label="xxxxxxxxxxxxxx"
-							oninput={(v) => console.log('clg - ', v)}
-							name="purchase_date2"
-							bind:value={test}
-						/>
-						<p>{test}</p>
-						<Datetime
-							label="yyyyyyyyyyyyyyy"
-							oninput={(v) => console.log('clg - ', v)}
-							name="purchase_date3"
-							bind:value={test}
-						/>
-						<p>{test}</p> -->
-
-						<button type="submit" disabled={!!updateRemoteForm.pending}>Update</button>
+						<header class="bg-surface-100/80 flex items-center justify-between border-b p-4">
+							<div class="flex w-full items-center justify-between">
+								<h2 class="text-lg font-semibold">Update ID: {drawerCommand.id}</h2>
+								<Button label=" X " onclick={() => drawer?.close()} />
+							</div>
+						</header>
+						<main class="flex-1 overflow-y-auto p-4">
+							<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
+							<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
+							<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
+							<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
+						</main>
+						<footer class="bg-surface-100/80 border-t p-4">
+							<div class="flex justify-end">
+								<Button label="Close" onclick={() => drawer?.close()} />
+								<Submit label="Update" disabled={!!updateRemoteForm.pending} />
+							</div>
+						</footer>
 					</form>
-					<pre>
-						<!-- {JSON.stringify({ title, quantity }, null, 2)} -->
-					</pre>
 				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				{:else}
-					<p>No valid command provided.</p>
 				{/if}
 			</Boundary>
 		</Drawer>

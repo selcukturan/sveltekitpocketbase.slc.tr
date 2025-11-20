@@ -56,7 +56,6 @@ export const pocketbaseOneSchema = v.object({
 });
 // --------------------------------------------------------------------------------------------------------------------------------------------
 /* export const pocketbaseUpdateSchema = v.object({
-	id: v.optional(v.fallback(base.string, ''), ''),
 	options: v.object({
 		expand: v.optional(base.string),
 		fields: v.optional(base.string)
