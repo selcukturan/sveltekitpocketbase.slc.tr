@@ -7,6 +7,8 @@ import { throwError, mapUnknownToError } from '$lib/server/error';
 
 import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const getList = query(listParamsSchema, async (params) => {
 	// 🔒
 	await checkAuthenticated();
@@ -35,6 +37,8 @@ export const getOne = query(oneParamsSchema, async (params) => {
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
+
+	await sleep(2000);
 
 	const oneResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getOne(params.id, {

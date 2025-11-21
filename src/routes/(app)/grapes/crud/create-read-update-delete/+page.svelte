@@ -161,16 +161,20 @@
 				return shouldClose;
 			}}
 		>
-			<Boundary>
-				{#if drawerCommand.cmd === 'create'}
+			{#if drawerCommand.cmd === 'create'}
+				<Boundary>
 					<p>This is a drawer for creating a new record.</p>
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
+				</Boundary>
+			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
+				<Boundary>
 					{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
 					<form
+						id="page-update-form"
+						style="display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;"
 						{...updateRemoteForm.enhance(async ({ submit }) => {
 							try {
 								await submit().updates(getList(params));
@@ -201,7 +205,6 @@
 								});
 							}
 						})}
-						style="display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;"
 					>
 						<header class="bg-surface-100/80 flex items-center justify-between border-b p-4">
 							<div class="flex w-full items-center justify-between">
@@ -222,13 +225,16 @@
 							</div>
 						</footer>
 					</form>
-				{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
+					<!-- <Submit label="Update2" form="page-update-form" /> -->
+				</Boundary>
+			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
+				<Boundary>
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				{/if}
-			</Boundary>
+				</Boundary>
+			{/if}
 		</Drawer>
 	</Page.Drawer>
 </Page>
