@@ -169,7 +169,67 @@
 					</pre>
 				</Boundary>
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
-				<Boundary>
+				<div class="flex h-full w-full flex-col overflow-hidden">
+					<!-- header -->
+					<div class="bg-surface-100/80 flex items-center justify-between border-b p-4">
+						<h2 class="text-lg font-semibold">Update ID: {drawerCommand.id}</h2>
+						<Button label=" X " onclick={() => drawer?.close()} />
+					</div>
+					<Boundary>
+						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
+						{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
+						<form
+							class="flex flex-1 flex-col overflow-hidden"
+							{...updateRemoteForm.enhance(async ({ submit }) => {
+								try {
+									await submit().updates(getList(params));
+									drawer?.close();
+									pageToaster.add({
+										type: 'success',
+										title: 'Başarıyla kaydedildi!',
+										description: 'Başarıyla kaydedildi!',
+										action: {
+											label: 'Close',
+											onClick: (id) => {
+												pageToaster.remove(id);
+											}
+										}
+									});
+								} catch (error) {
+									const myError = isHttpError(error) ? error : null;
+									pageToaster.add({
+										type: 'error',
+										title: 'Hata!',
+										description: 'Client: ' + myError?.body.message,
+										action: {
+											label: 'Close',
+											onClick: (id) => {
+												pageToaster.remove(id);
+											}
+										}
+									});
+								}
+							})}
+						>
+							<!-- form content -->
+							<div class="flex-1 overflow-y-auto" tabindex="-1">
+								<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
+								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
+								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
+								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
+							</div>
+
+							<!-- button content -->
+
+							<div class="bg-surface-100/80 flex justify-end border-t p-4">
+								<Button label="Close" onclick={() => drawer?.close()} />
+								<Submit label="Update" disabled={!!updateRemoteForm.pending} />
+							</div>
+						</form>
+					</Boundary>
+				</div>
+
+				<!-- <Boundary>
 					{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
 					<form
@@ -206,12 +266,6 @@
 							}
 						})}
 					>
-						<header class="bg-surface-100/80 flex items-center justify-between border-b p-4">
-							<div class="flex w-full items-center justify-between">
-								<h2 class="text-lg font-semibold">Update ID: {drawerCommand.id}</h2>
-								<Button label=" X " onclick={() => drawer?.close()} />
-							</div>
-						</header>
 						<main class="flex-1 overflow-y-auto p-4">
 							<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
 							<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
@@ -225,8 +279,8 @@
 							</div>
 						</footer>
 					</form>
-					<!-- <Submit label="Update2" form="page-update-form" /> -->
-				</Boundary>
+					<Submit label="Update2" form="page-update-form" />
+				</Boundary> -->
 			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 				<Boundary>
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
