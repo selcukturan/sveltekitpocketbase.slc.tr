@@ -1,1 +1,1 @@
-export { default as Drawer } from './drawer.svelte';
+export { default as Drawer } from './Drawer.svelte';

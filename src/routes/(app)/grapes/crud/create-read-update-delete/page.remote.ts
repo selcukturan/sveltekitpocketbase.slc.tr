@@ -38,7 +38,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	// await sleep(2000);
+	await sleep(500);
 
 	const oneResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getOne(params.id, {

@@ -8,14 +8,14 @@
 	// Utilities
 	import { watch } from 'runed';
 	// Templates
-	import { Page, Head } from '$lib/components/templates';
+	import { Page, Head, DrawerForm } from '$lib/components/templates';
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 	import { Boundary } from '$lib/components/base/boundary';
 	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button } from '$lib/components/base/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button, Form } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
@@ -85,24 +85,18 @@
 	<Page.Main>
 		<Page.Main.Table>
 			<Boundary>
-				<input
-					type="text"
+				<Text
 					bind:value={filterData.title}
 					placeholder="Search - Title contains..."
-					class="border"
 					onkeydown={(e) => e.key === 'Enter' && searchData()}
 				/>
-				<input
-					type="number"
+				<Number
 					bind:value={filterData.quantity}
 					placeholder="Search - Quantity equals..."
-					class="border"
 					onkeydown={(e) => e.key === 'Enter' && searchData()}
 				/>
-				<button onclick={searchData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
-					Search
-				</button>
-				<button onclick={refreshData} class="bg-warning-300 p-3 disabled:opacity-50"> Refresh </button>
+				<Button label="Search" onclick={searchData} disabled={$effect.pending() > 0} />
+				<Button label="Refresh" onclick={refreshData} />
 				<p>$effect.pending() {$effect.pending()}</p>
 				<pre>
 					{JSON.stringify(await getList(params), null, 2)}
@@ -112,36 +106,25 @@
 	</Page.Main>
 	<Page.Footer>
 		<div>
-			<button
+			<Button
+				label="View"
 				onclick={() => {
 					setParams({ cmd: 'view', id: 'rjqbi24vn3f3k59' });
 				}}
-				class="bg-warning-300 p-3 disabled:opacity-50"
-			>
-				View
-			</button>
-			<button
+			/>
+			<Button
+				label="Create"
 				onclick={() => {
 					setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' });
 				}}
-				class="bg-warning-300 p-3 disabled:opacity-50"
-			>
-				Create
-			</button>
-			<button
+			/>
+			<Button
+				label="Update"
 				onclick={() => {
 					setParams({ cmd: 'update', id: 'ydmi70g2ghqx2nb' });
 				}}
-				class="bg-warning-300 p-3 disabled:opacity-50"
-			>
-				Update
-			</button>
-			<button
-				onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })}
-				class="bg-warning-300 p-3 disabled:opacity-50"
-			>
-				Delete
-			</button>
+			/>
+			<Button label="Delete" onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })} />
 		</div>
 	</Page.Footer>
 	<Page.Drawer>
@@ -169,17 +152,14 @@
 					</pre>
 				</Boundary>
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
-				<div class="flex h-full w-full flex-col overflow-hidden">
-					<!-- header -->
-					<div class="bg-surface-100/80 flex items-center justify-between border-b p-4">
-						<h2 class="text-lg font-semibold">Update ID: {drawerCommand.id}</h2>
+				<DrawerForm>
+					<DrawerForm.Header label={`Update ID: ${drawerCommand.id}`}>
 						<Button label=" X " onclick={() => drawer?.close()} />
-					</div>
-					<Boundary>
+					</DrawerForm.Header>
+					<DrawerForm.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 						{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
-						<form
-							class="flex flex-1 flex-col overflow-hidden"
+						<DrawerForm.Content.Form
 							{...updateRemoteForm.enhance(async ({ submit }) => {
 								try {
 									await submit().updates(getList(params));
@@ -211,76 +191,20 @@
 								}
 							})}
 						>
-							<!-- form content -->
-							<div class="flex-1 overflow-y-auto" tabindex="-1">
+							{#snippet inputs()}
 								<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
 								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
 								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
 								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
-							</div>
+							{/snippet}
 
-							<!-- button content -->
-
-							<div class="bg-surface-100/80 flex justify-end border-t p-4">
+							{#snippet buttons()}
 								<Button label="Close" onclick={() => drawer?.close()} />
 								<Submit label="Update" disabled={!!updateRemoteForm.pending} />
-							</div>
-						</form>
-					</Boundary>
-				</div>
-
-				<!-- <Boundary>
-					{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
-					{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
-					<form
-						id="page-update-form"
-						style="display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;"
-						{...updateRemoteForm.enhance(async ({ submit }) => {
-							try {
-								await submit().updates(getList(params));
-								drawer?.close();
-								pageToaster.add({
-									type: 'success',
-									title: 'Başarıyla kaydedildi!',
-									description: 'Başarıyla kaydedildi!',
-									action: {
-										label: 'Close',
-										onClick: (id) => {
-											pageToaster.remove(id);
-										}
-									}
-								});
-							} catch (error) {
-								const myError = isHttpError(error) ? error : null;
-								pageToaster.add({
-									type: 'error',
-									title: 'Hata!',
-									description: 'Client: ' + myError?.body.message,
-									action: {
-										label: 'Close',
-										onClick: (id) => {
-											pageToaster.remove(id);
-										}
-									}
-								});
-							}
-						})}
-					>
-						<main class="flex-1 overflow-y-auto p-4">
-							<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
-							<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
-							<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
-							<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
-						</main>
-						<footer class="bg-surface-100/80 border-t p-4">
-							<div class="flex justify-end">
-								<Button label="Close" onclick={() => drawer?.close()} />
-								<Submit label="Update" disabled={!!updateRemoteForm.pending} />
-							</div>
-						</footer>
-					</form>
-					<Submit label="Update2" form="page-update-form" />
-				</Boundary> -->
+							{/snippet}
+						</DrawerForm.Content.Form>
+					</DrawerForm.Content>
+				</DrawerForm>
 			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 				<Boundary>
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>

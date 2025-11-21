@@ -3,19 +3,19 @@
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type Props = SvelteHTMLElements['footer'] & {
+		label?: string;
 		children?: Snippet;
 		boundary?: boolean;
 	};
 
-	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
+	let { label, children, class: classes, boundary = false, ...attributes }: Props = $props();
+
+	const internalClasses = 'flex items-center justify-between border-b p-4';
 </script>
 
-<header
-	class="{classes} {`bg-surface-100/80 flex items-center justify-between border-b p-4`}"
-	style:border-top="0px"
-	style:border-left="0px"
-	{...attributes}
->
+<header class="{classes} {internalClasses} {`bg-surface-100/80`}" {...attributes}>
+	<h2 class="text-lg font-semibold">{label || 'Drawer Form Header'}</h2>
+
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}

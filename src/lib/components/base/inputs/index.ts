@@ -1,6 +1,7 @@
 export { default as Button } from './Button.svelte';
 export { default as Date } from './Date.svelte';
 export { default as Datetime } from './Datetime.svelte';
+export { default as Form } from './Form.svelte';
 export { default as Hidden } from './Hidden.svelte';
 export { default as Number } from './Number.svelte';
 export { default as Submit } from './Submit.svelte';
