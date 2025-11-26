@@ -7,19 +7,22 @@
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
 		value?: number;
 		label?: string;
+		step?: string;
 		oninput?: (params: { event: Event; value: number }) => void;
 		onchange?: (params: { event: Event; value: number }) => void;
 		field?: RemoteFormField<number>;
 	};
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(0), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
+	let { value = $bindable(0), label, step = '1', oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
 	let inputValue = $state(0);
 	let isOnInput = false;
+	const separator = (1.1).toLocaleString().replace(/\d/g, '');
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
+
 		const newValue = Number(target.value);
 		if (newValue !== value) {
 			isOnInput = true;
@@ -53,7 +56,16 @@
 
 <label>
 	<h2>{label}</h2>
-	<input {...inputAttributes} value={inputValue} oninput={onInput} onchange={onChange} class={classes} {...attributes} />
+	<input
+		{...inputAttributes}
+		placeholder="123{step === '1' ? '' : separator}45"
+		{step}
+		value={inputValue}
+		oninput={onInput}
+		onchange={onChange}
+		class={classes}
+		{...attributes}
+	/>
 
 	{#each field?.issues() ?? [] as issue}
 		<p class="issue">{issue.message}</p>

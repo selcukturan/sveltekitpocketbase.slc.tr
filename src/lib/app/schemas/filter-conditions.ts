@@ -1,10 +1,30 @@
 import * as v from 'valibot';
 import * as base from './base';
 
-export const filterKeySchema = base.string;
+export const filterKeySchema = v.string();
 export const filterValueSchema = base.allCurrentValue;
+// ########################### BEGIN OPERATORS ###########################
+export const operators = v.picklist([
+	'=',
+	'!=',
+	'>',
+	'>=',
+	'<',
+	'<=',
+	'~',
+	'!~',
+	'?=',
+	'?!=',
+	'?>',
+	'?>=',
+	'?<',
+	'?<=',
+	'?~',
+	'?!~'
+]);
+// ########################### END OPERATORS ###########################
 
-export const OperatorSchema = v.optional(v.fallback(base.operators, '~'), '~');
+export const OperatorSchema = v.optional(v.fallback(operators, '~'), '~');
 
 // 'condition' tipindeki bir nesnenin şeması
 export const conditionSchema = v.object({
@@ -30,16 +50,16 @@ export const filterSchema = v.lazy(
 
 export const pocketbaseListOptionsSchema = v.object({
 	options: v.object({
-		sort: v.optional(base.string),
-		expand: v.optional(base.string),
-		fields: v.optional(base.string),
-		skipTotal: v.optional(v.fallback(base.boolean, false), false)
+		sort: v.optional(v.string()),
+		expand: v.optional(v.string()),
+		fields: v.optional(v.string()),
+		skipTotal: v.optional(v.fallback(v.boolean(), false), false)
 	})
 });
 
 export const pocketbaseListSchema = v.object({
-	page: v.optional(v.fallback(base.number, 1), 1),
-	perPage: v.optional(v.fallback(base.number, 30), 30),
+	page: v.optional(v.fallback(base.integer, 1), 1),
+	perPage: v.optional(v.fallback(base.integer, 30), 30),
 	...pocketbaseListOptionsSchema.entries
 });
 
@@ -48,10 +68,10 @@ export type Condition = v.InferOutput<typeof conditionSchema>;
 export type Filter = v.InferOutput<typeof filterSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const pocketbaseOneSchema = v.object({
-	id: v.optional(v.fallback(base.string, ''), ''),
+	id: v.optional(v.fallback(base.id, ''), ''),
 	options: v.object({
-		expand: v.optional(base.string),
-		fields: v.optional(base.string)
+		expand: v.optional(v.string()),
+		fields: v.optional(v.string())
 	})
 });
 // --------------------------------------------------------------------------------------------------------------------------------------------

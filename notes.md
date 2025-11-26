@@ -129,3 +129,7 @@ Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması
 **Kilit Fark:** `??` operatörü, `0`, `""` (boş string) ve `false` gibi değerleri geçerli kabul eder ve değiştirmez.
 
 **Tavsiye:** Modern JavaScript'te, varsayılan değer atamak için neredeyse her zaman daha güvenli olan `??` operatörünü kullanın.
+
+# "Install from VSIX..." ile yüklenen eklentiler
+
+- **Package Pilot** → An extension for managing your Node.js projects packages.

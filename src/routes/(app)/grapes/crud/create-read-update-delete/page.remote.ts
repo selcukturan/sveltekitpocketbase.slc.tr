@@ -10,7 +10,7 @@ import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getList = query(listParamsSchema, async (params) => {
-	// 🔒
+	// 🔒🔐
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
@@ -33,7 +33,7 @@ export const getList = query(listParamsSchema, async (params) => {
 });
 
 export const getOne = query(oneParamsSchema, async (params) => {
-	// 🔒
+	// 🔒🔐
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();
@@ -55,7 +55,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 });
 
 export const updateForm = form(updateFormSchema, async (params) => {
-	// 🔒
+	// 🔒🔐
 	await checkAuthenticated();
 
 	const { locals } = getRequestEvent();

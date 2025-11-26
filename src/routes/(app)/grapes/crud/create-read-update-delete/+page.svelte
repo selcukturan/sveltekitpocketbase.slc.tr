@@ -14,6 +14,7 @@
 	import { confirm } from '$lib/components/base/confirm';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 	import { Boundary } from '$lib/components/base/boundary';
+	import * as s from '$lib/components/base/datatable';
 	// Inputs
 	import { Hidden, Text, Number, Datetime, Submit, Button, Form } from '$lib/components/base/inputs';
 	// Types and Schemas
@@ -58,17 +59,18 @@
 	);
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
-	/*
-	const getOnePromise = $derived(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }));
-	const oneResult = $derived(resolvePromiseDerived(getOnePromise, 'id'));
-	type OneSuccessResultType = NonNullable<(typeof oneResult)['data']>;
-	type OneFailureResultType = NonNullable<(typeof oneResult)['error']>;
-
-	const getListPromise = $derived(await getList(params));
-	const listResult = $derived(resolvePromiseDerived(getListPromise, 'items'));
-	type ListSuccessResultType = NonNullable<(typeof listResult)['data']>['items'][number];
-	type ListFailureResultType = NonNullable<(typeof listResult)['error']>;
-	*/
+	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
+	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number];
+	let dataTable: s.DataTable<ItemType> | undefined = $state(undefined);
+	let columns: s.Column<ItemType>[] = [
+		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
+		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
+		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
+		{ field: 'quantity', label: 'quantity', width: 'minmax(50px,1fr)' },
+		{ field: 'purchase_date', label: 'purchase_date', width: 'minmax(50px,1fr)' }
+	];
+	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
+	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
 </script>
 
 <Head>
@@ -83,25 +85,55 @@
 		<h1 class="text-2xl font-bold">Create - Read - Update - Delete Example</h1>
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table>
-			<Boundary>
-				<Text
-					bind:value={filterData.title}
-					placeholder="Search - Title contains..."
-					onkeydown={(e) => e.key === 'Enter' && searchData()}
-				/>
-				<Number
-					bind:value={filterData.quantity}
-					placeholder="Search - Quantity equals..."
-					onkeydown={(e) => e.key === 'Enter' && searchData()}
-				/>
-				<Button label="Search" onclick={searchData} disabled={$effect.pending() > 0} />
-				<Button label="Refresh" onclick={refreshData} />
-				<p>$effect.pending() {$effect.pending()}</p>
-				<pre>
-					{JSON.stringify(await getList(params), null, 2)}
-				</pre>
-			</Boundary>
+		<Page.Main.Table boundary>
+			{@const items = (await getList(params)).items}
+			<s.DataTable bind:this={dataTable} {items} {columns} {footers}>
+				{#snippet toolbar()}
+					<Text
+						bind:value={filterData.title}
+						placeholder="Search - Title contains..."
+						onkeydown={(e) => e.key === 'Enter' && searchData()}
+					/>
+					<Number
+						bind:value={filterData.quantity}
+						placeholder="Search - Quantity equals..."
+						onkeydown={(e) => e.key === 'Enter' && searchData()}
+					/>
+					<Button label="Search" onclick={searchData} disabled={$effect.pending() > 0} />
+					<Button label="Refresh" onclick={refreshData} />
+					<p>$effect.pending() {$effect.pending()}</p>
+				{/snippet}
+				{#snippet headerRow(hr)}
+					<s.HeaderRow {hr}>
+						{#snippet headerCell(hc)}
+							<s.HeaderCell {hr} {hc}>
+								{hc.label}
+							</s.HeaderCell>
+						{/snippet}
+					</s.HeaderRow>
+				{/snippet}
+				{#snippet dataRow(dr)}
+					<s.DataRow {dr}>
+						{#snippet dataCell(dc)}
+							<s.DataCell {dr} {dc}>
+								{dc.value}
+							</s.DataCell>
+						{/snippet}
+					</s.DataRow>
+				{/snippet}
+				{#snippet footerRow(fr)}
+					<s.FooterRow {fr}>
+						{#snippet footerCell(fc)}
+							<s.FooterCell {fr} {fc}>
+								{fc.value}
+							</s.FooterCell>
+						{/snippet}
+					</s.FooterRow>
+				{/snippet}
+				{#snippet statusbar()}
+					<p>Table Statusbar</p>
+				{/snippet}
+			</s.DataTable>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>
@@ -192,7 +224,7 @@
 							})}
 						>
 							{#snippet inputs()}
-								<Hidden field={updateRemoteForm.fields.id} value={drawerCommand.id} />
+								<Hidden field={updateRemoteForm.fields.id} value={oneResult.id} />
 								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
 								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
 								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />

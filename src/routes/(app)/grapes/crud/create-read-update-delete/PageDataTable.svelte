@@ -97,6 +97,20 @@
 			console.log('Selected Record ID:', recordId);
 		}
 	); */
+
+	/*
+	const getOnePromise = $derived(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }));
+	const oneResult = $derived(resolvePromiseDerived(getOnePromise, 'id'));
+	type OneSuccessResultType = NonNullable<(typeof oneResult)['data']>;
+	type OneFailureResultType = NonNullable<(typeof oneResult)['error']>;
+
+	const getListPromise = $derived(await getList(params));
+	const listResult = $derived(resolvePromiseDerived(getListPromise, 'items'));
+	type ListSuccessResultType = NonNullable<(typeof listResult)['data']>['items'][number];
+	type ListFailureResultType = NonNullable<(typeof listResult)['error']>;
+	*/
+
+	/* let items = $state<ItemType[]>([]); */
 </script>
 
 <div>
@@ -115,12 +129,8 @@
 		class="border"
 		onkeydown={(e) => e.key === 'Enter' && getData()}
 	/>
-	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50">
-		Search
-	</button>
-	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50">
-		Refresh
-	</button>
+	<button onclick={getData} disabled={$effect.pending() > 0} class="bg-warning-300 p-3 disabled:opacity-50"> Search </button>
+	<button onclick={() => getFullList(params).refresh()} class="bg-warning-300 p-3 disabled:opacity-50"> Refresh </button>
 </div>
 
 <pre>

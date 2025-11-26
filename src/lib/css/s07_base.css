@@ -51,8 +51,9 @@
 }
 
 @layer components {
+
+	/* Varsayılanı temizliyoruz, çünkü kendi stilimizi :focus-visible ile ekleyeceğiz */
 	*:not(body):not(.focus-override):focus {
-		/* Varsayılanı temizliyoruz, çünkü kendi stilimizi :focus-visible ile ekleyeceğiz */
 		outline: none;
 	}
 
