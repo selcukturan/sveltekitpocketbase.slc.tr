@@ -15,13 +15,15 @@
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
-	let inputRef: HTMLInputElement | undefined = $state(undefined);
 	let inputValue = $state('');
 	let isOnInput = false;
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
+
+		target.setCustomValidity('');
+
 		const newValue = parseDateInputToIso(target.value);
 		if (newValue !== value) {
 			isOnInput = true;
@@ -50,13 +52,27 @@
 	};
 	// ## END input change ##############################################################################
 
+	// ## BEGIN issues view logic ############################################################################
+	let inputElement: HTMLInputElement | undefined = $state();
+	const issues = $derived(field?.issues() ?? []);
+	$effect(() => {
+		if (!inputElement) return;
+		if (issues.length > 0) {
+			inputElement.setCustomValidity(issues[0].message);
+			inputElement.reportValidity();
+		} else {
+			inputElement.setCustomValidity('');
+		}
+	});
+	// ## END issues view logic ###########################################################################
+
 	let inputAttributes = $derived(field ? field.as('date') : { type: 'date' });
 </script>
 
 <label>
 	<h2>{label}</h2>
 	<input
-		bind:this={inputRef}
+		bind:this={inputElement}
 		{...inputAttributes}
 		value={inputValue}
 		oninput={onInput}
@@ -64,8 +80,4 @@
 		class={classes}
 		{...attributes}
 	/>
-
-	{#each field?.issues() ?? [] as issue}
-		<p class="issue">{issue.message}</p>
-	{/each}
 </label>

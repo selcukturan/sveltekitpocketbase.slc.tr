@@ -5,6 +5,7 @@
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
+	import { t } from '$lib/app/localization.svelte';
 	// Utilities
 	import { watch } from 'runed';
 	// Templates
@@ -16,7 +17,7 @@
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
 	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button, Form } from '$lib/components/base/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	// Remote functions
@@ -71,6 +72,10 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
+
+	// await_waterfall TEST
+	// const testPromise = $derived(getList(params));
+	// let test = $derived(await testPromise);
 </script>
 
 <Head>
@@ -99,8 +104,8 @@
 						placeholder="Search - Quantity equals..."
 						onkeydown={(e) => e.key === 'Enter' && searchData()}
 					/>
-					<Button label="Search" onclick={searchData} disabled={$effect.pending() > 0} />
-					<Button label="Refresh" onclick={refreshData} />
+					<Button label={t('search')} onclick={searchData} disabled={$effect.pending() > 0} />
+					<Button label={t('refresh')} onclick={refreshData} />
 					<p>$effect.pending() {$effect.pending()}</p>
 				{/snippet}
 				{#snippet headerRow(hr)}
@@ -139,29 +144,30 @@
 	<Page.Footer>
 		<div>
 			<Button
-				label="View"
+				label={t('view')}
 				onclick={() => {
 					setParams({ cmd: 'view', id: 'rjqbi24vn3f3k59' });
 				}}
 			/>
 			<Button
-				label="Create"
+				label={t('create')}
 				onclick={() => {
 					setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' });
 				}}
 			/>
 			<Button
-				label="Update"
+				label={t('update')}
 				onclick={() => {
 					setParams({ cmd: 'update', id: 'ydmi70g2ghqx2nb' });
 				}}
 			/>
-			<Button label="Delete" onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })} />
+			<Button label={t('delete')} onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })} />
 		</div>
 	</Page.Footer>
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
+			contentLoading={false}
 			onBeforeClose={async () => {
 				let shouldClose = true;
 				/* shouldClose = await confirm({
@@ -186,7 +192,12 @@
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
 				<DrawerForm>
 					<DrawerForm.Header label={`Update ID: ${drawerCommand.id}`}>
-						<Button label=" X " onclick={() => drawer?.close()} />
+						<Button
+							label=" X "
+							onclick={() => {
+								drawer?.close();
+							}}
+						/>
 					</DrawerForm.Header>
 					<DrawerForm.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
@@ -201,7 +212,7 @@
 										title: 'Başarıyla kaydedildi!',
 										description: 'Başarıyla kaydedildi!',
 										action: {
-											label: 'Close',
+											label: t('close'),
 											onClick: (id) => {
 												pageToaster.remove(id);
 											}
@@ -214,7 +225,7 @@
 										title: 'Hata!',
 										description: 'Client: ' + myError?.body.message,
 										action: {
-											label: 'Close',
+											label: t('close'),
 											onClick: (id) => {
 												pageToaster.remove(id);
 											}
@@ -231,8 +242,8 @@
 							{/snippet}
 
 							{#snippet buttons()}
-								<Button label="Close" onclick={() => drawer?.close()} />
-								<Submit label="Update" disabled={!!updateRemoteForm.pending} />
+								<Button label={t('close')} onclick={() => drawer?.close()} />
+								<Submit label={t('update')} disabled={!!updateRemoteForm.pending} />
 							{/snippet}
 						</DrawerForm.Content.Form>
 					</DrawerForm.Content>

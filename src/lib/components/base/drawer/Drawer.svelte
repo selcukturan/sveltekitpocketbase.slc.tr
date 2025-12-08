@@ -15,7 +15,8 @@
 		onClose,
 		onBeforeOpen,
 		onBeforeClose,
-		escClose = true
+		escClose = true,
+		contentLoading = false
 	}: {
 		children?: Snippet;
 		onOpen?: () => void;
@@ -23,6 +24,7 @@
 		onBeforeOpen?: () => boolean | Promise<boolean>;
 		onBeforeClose?: () => boolean | Promise<boolean>;
 		escClose?: boolean;
+		contentLoading?: boolean;
 	} = $props();
 
 	let dialog: HTMLDialogElement | null = $state(null);
@@ -68,6 +70,7 @@
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const hide = async () => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
+		if (contentLoading) return; // İçerik yükleniyor ise tekrar çalıştırma
 
 		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
 		const result = onBeforeClose?.();
@@ -159,6 +162,7 @@
 <!-- {#if isOpen} -->
 
 <dialog
+	style="--drawer-animation-duration: {ANIMATION_DURATION / 1000}s"
 	{closedby}
 	class:closing={isClosing}
 	class="{dialogClasses} {dialogFocusOverrideClasses}"
@@ -197,10 +201,10 @@
 
 	/* Animate In */
 	dialog[open] {
-		animation: dialog-enter-from-right 0.15s ease-out forwards;
+		animation: dialog-enter-from-right var(--drawer-animation-duration) ease-out forwards;
 	}
 	dialog[open]::backdrop {
-		animation: backdrop-fade-in 0.15s ease-out forwards;
+		animation: backdrop-fade-in var(--drawer-animation-duration) ease-out forwards;
 	}
 
 	/* Starting style for entry animation */
@@ -217,11 +221,11 @@
 	}
 
 	dialog[open].closing {
-		animation: dialog-exit-to-right 0.15s ease-out forwards;
+		animation: dialog-exit-to-right var(--drawer-animation-duration) ease-out forwards;
 	}
 
 	dialog[open].closing::backdrop {
-		animation: backdrop-fade-out 0.15s ease-out forwards;
+		animation: backdrop-fade-out var(--drawer-animation-duration) ease-out forwards;
 	}
 
 	@keyframes dialog-enter-from-right {

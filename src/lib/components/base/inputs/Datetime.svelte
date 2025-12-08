@@ -16,21 +16,22 @@
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
-	let inputRef: HTMLInputElement | undefined = $state(undefined);
 	let inputValue = $state('');
-	let isOnInput = false;
+	let isOnInput = false; // `oninput` ile değiştirildi mi?
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
+		target.setCustomValidity('');
 		const newValue = parseDatetimeInputToIso(target.value);
-
 		if (newValue !== value) {
 			isOnInput = true;
 			value = newValue;
 			oninput?.({ event, value });
 		}
 	};
+	// `value`, bileşen dışından `prop` ile değiştiriliyorsa `input` değeri ayarlanır.
+	// `value`, bileşen içinden `oninput` ile değiştiriliyorsa `input` değeri ayarlanmaz.
 	watch(
 		() => value,
 		(currValue) => {
@@ -52,13 +53,27 @@
 	};
 	// ## END input change ##############################################################################
 
+	// ## BEGIN issues view logic ############################################################################
+	let inputElement: HTMLInputElement | undefined = $state();
+	const issues = $derived(field?.issues() ?? []);
+	$effect(() => {
+		if (!inputElement) return;
+		if (issues.length > 0) {
+			inputElement.setCustomValidity(issues[0].message);
+			inputElement.reportValidity();
+		} else {
+			inputElement.setCustomValidity('');
+		}
+	});
+	// ## END issues view logic ###########################################################################
+
 	let inputAttributes = $derived(field ? field.as('datetime-local') : { type: 'datetime-local' });
 </script>
 
 <label>
 	<h2>{label}</h2>
 	<input
-		bind:this={inputRef}
+		bind:this={inputElement}
 		{...inputAttributes}
 		value={inputValue}
 		oninput={onInput}
@@ -66,8 +81,4 @@
 		class={classes}
 		{...attributes}
 	/>
-
-	{#each field?.issues() ?? [] as issue}
-		<p class="issue">{issue.message}</p>
-	{/each}
 </label>

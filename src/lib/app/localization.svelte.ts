@@ -4,7 +4,15 @@ const trTranslations = {
 	hello_world: 'Merhaba Dünya',
 	login: 'Giriş Yap',
 	logout: 'Çıkış Yap',
-	change_theme: 'Temayı Değiştir'
+	change_theme: 'Temayı Değiştir',
+	close: 'Kapat',
+	create: 'Oluştur',
+	delete: 'Sil',
+	edit: 'Düzenle',
+	refresh: 'Yenile',
+	search: 'Ara',
+	view: 'Görüntüle',
+	update: 'Güncelle'
 } as const;
 
 // ---------------------------------------- EN Translations
@@ -14,7 +22,15 @@ const translations: Translations = {
 		hello_world: 'Hello World',
 		login: 'Login',
 		logout: 'Logout',
-		change_theme: 'Change Theme'
+		change_theme: 'Change Theme',
+		close: 'Close',
+		create: 'Create',
+		delete: 'Delete',
+		edit: 'Edit',
+		refresh: 'Refresh',
+		search: 'Search',
+		view: 'View',
+		update: 'Update'
 	}
 } as const;
 // ####################################### END TRANSLATIONS ######################################

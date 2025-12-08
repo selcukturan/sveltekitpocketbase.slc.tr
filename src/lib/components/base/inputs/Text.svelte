@@ -14,12 +14,16 @@
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
+
 	let inputValue = $state('');
 	let isOnInput = false;
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
+
+		target.setCustomValidity('');
+
 		const newValue = target.value;
 		if (newValue !== value) {
 			isOnInput = true;
@@ -48,14 +52,37 @@
 	};
 	// ## END input change ##############################################################################
 
+	// ## BEGIN issues view logic ############################################################################
+	let inputElement: HTMLInputElement | undefined = $state();
+	const issues = $derived(field?.issues() ?? []);
+	$effect(() => {
+		if (!inputElement) return;
+
+		if (issues.length > 0) {
+			inputElement.setCustomValidity(issues[0].message);
+			inputElement.reportValidity();
+		} else {
+			inputElement.setCustomValidity('');
+		}
+	});
+	// ## END issues view logic ###########################################################################
+
 	let inputAttributes = $derived(field ? field.as('text') : { type: 'text' });
 </script>
 
 <label>
 	<h2>{label}</h2>
-	<input {...inputAttributes} value={inputValue} oninput={onInput} onchange={onChange} class={classes} {...attributes} />
+	<input
+		bind:this={inputElement}
+		{...inputAttributes}
+		value={inputValue}
+		oninput={onInput}
+		onchange={onChange}
+		class={classes}
+		{...attributes}
+	/>
 
-	{#each field?.issues() ?? [] as issue}
+	<!-- {#each field?.issues() ?? [] as issue}
 		<p class="issue">{issue.message}</p>
-	{/each}
+	{/each} -->
 </label>

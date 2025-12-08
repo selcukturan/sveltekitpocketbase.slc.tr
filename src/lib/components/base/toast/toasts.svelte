@@ -5,8 +5,9 @@
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
-	let { toasterName }: ToastsProps = $props();
+	const { toasterName = 'app-toaster' }: ToastsProps = $props();
 
+	// svelte-ignore state_referenced_locally
 	const toaster = getToaster(toasterName);
 
 	const positionClasses: Record<Required<ToasterOptions>['position'], string> = {
@@ -63,19 +64,19 @@
 		>
 			<div class="pr-2">
 				{#if toastType === 'info'}
-					<i class={`ri-information-line !text-2xl`}></i>
+					<i class={`ri-information-line text-2xl!`}></i>
 				{:else if toastType === 'error'}
-					<i class={`ri-error-warning-line !text-2xl`}></i>
+					<i class={`ri-error-warning-line text-2xl!`}></i>
 				{:else if toastType === 'success'}
-					<i class={`ri-check-line !text-2xl`}></i>
+					<i class={`ri-check-line text-2xl!`}></i>
 				{:else if toastType === 'warning'}
-					<i class={`ri-alert-line !text-2xl`}></i>
+					<i class={`ri-alert-line text-2xl!`}></i>
 				{:else if toastType === 'loading'}
 					<div class="animate-spin">
-						<i class={`ri-loader-4-line !text-2xl`}></i>
+						<i class={`ri-loader-4-line text-2xl!`}></i>
 					</div>
 				{:else}
-					<i class={`ri-circle-line !text-2xl`}></i>
+					<i class={`ri-circle-line text-2xl!`}></i>
 				{/if}
 			</div>
 			<div class="flex-1">
@@ -84,7 +85,10 @@
 			</div>
 			{#if toastId && toast.action}
 				<div>
-					<button class={`${actionButtonClasses.base} ${actionButtonClasses[toastType]}`} onclick={() => toast.action?.onClick(toastId)}>
+					<button
+						class={`${actionButtonClasses.base} ${actionButtonClasses[toastType]}`}
+						onclick={() => toast.action?.onClick(toastId)}
+					>
 						{toast.action.label}
 					</button>
 				</div>
@@ -97,7 +101,7 @@
 						onclick={() => toaster.remove(toastId)}
 						aria-label="Close"
 					>
-						<i class={`ri-close-line !text-base !leading-0`}></i>
+						<i class={`ri-close-line text-base! leading-0!`}></i>
 					</button>
 				</div>
 			{/if}
