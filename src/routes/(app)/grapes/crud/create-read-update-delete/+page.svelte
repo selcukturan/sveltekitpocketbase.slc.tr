@@ -87,7 +87,7 @@
 
 <Page>
 	<Page.Header>
-		<h1 class="text-2xl font-bold">Create - Read - Update - Delete Example</h1>
+		<h1 class="text-2xl font-bold">Page Header</h1>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
@@ -106,7 +106,7 @@
 					/>
 					<Button label={t('search')} onclick={searchData} disabled={$effect.pending() > 0} />
 					<Button label={t('refresh')} onclick={refreshData} />
-					<p>$effect.pending() {$effect.pending()}</p>
+					<p>1 - $effect.pending() {$effect.pending()}</p>
 				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>

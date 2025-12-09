@@ -82,3 +82,11 @@
 		{...attributes}
 	/>
 </label>
+
+<style>
+	input::-webkit-calendar-picker-indicator {
+		cursor: pointer;
+		border-radius: 4px;
+		filter: invert(0.3);
+	}
+</style>

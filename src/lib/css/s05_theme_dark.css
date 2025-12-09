@@ -1,6 +1,6 @@
 /* SLC Colors Dark */
 .dark {
-	color-scheme: dark;
+	color-scheme: light dark;
 	/* primary */
 	--provider-primary-50: var(--token-primary-950);
 	--provider-primary-100: var(--token-primary-900);
