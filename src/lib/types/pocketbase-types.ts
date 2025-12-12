@@ -27,13 +27,16 @@ export enum Collections {
 	SysUsers = "sys_users",
 	TestDatatable = "test_datatable",
 	TestForm = "test_form",
+	TestSelectbox = "test_selectbox",
 	TestSubtotal = "test_subtotal",
 	TestSubtotalView = "test_subtotal_view",
 }
 
 // Alias types for improved usability
 export type IsoDateString = string
+export type IsoAutoDateString = string & { readonly autodate: unique symbol }
 export type RecordIdString = string
+export type FileNameString = string & { readonly filename: unique symbol }
 export type HTMLString = string
 
 type ExpandType<T> = unknown extends T
@@ -60,50 +63,50 @@ export type AuthSystemFields<T = unknown> = {
 
 export type AuthoriginsRecord = {
 	collectionRef: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	fingerprint: string
 	id: string
 	recordRef: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type ExternalauthsRecord = {
 	collectionRef: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	provider: string
 	providerId: string
 	recordRef: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type MfasRecord = {
 	collectionRef: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	method: string
 	recordRef: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type OtpsRecord = {
 	collectionRef: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	password: string
 	recordRef: string
 	sentTo?: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type SuperusersRecord = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	email: string
 	emailVisibility?: boolean
 	id: string
 	password: string
 	tokenKey: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	verified?: boolean
 }
 
@@ -153,12 +156,12 @@ export enum AclRolesStatusOptions {
 }
 export type AclRolesRecord = {
 	caption: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	status: AclRolesStatusOptions
 	title: string
 	type: AclRolesTypeOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export enum AclRolesAppRegionsStatusOptions {
@@ -166,12 +169,12 @@ export enum AclRolesAppRegionsStatusOptions {
 	"passive" = "passive",
 }
 export type AclRolesAppRegionsRecord<Tvalid_permissions = unknown> = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	perm: RecordIdString
 	role: RecordIdString
 	status: AclRolesAppRegionsStatusOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	valid_permissions?: null | Tvalid_permissions
 }
 
@@ -180,12 +183,12 @@ export enum AclRolesCompanysStatusOptions {
 	"passive" = "passive",
 }
 export type AclRolesCompanysRecord<Tvalid_permissions = unknown> = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	perm: RecordIdString
 	role: RecordIdString
 	status: AclRolesCompanysStatusOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	valid_permissions?: null | Tvalid_permissions
 }
 
@@ -194,12 +197,12 @@ export enum AclRolesMenusStatusOptions {
 	"passive" = "passive",
 }
 export type AclRolesMenusRecord<Tvalid_permissions = unknown> = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	menu: RecordIdString
 	role: RecordIdString
 	status: AclRolesMenusStatusOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	valid_permissions?: null | Tvalid_permissions
 }
 
@@ -255,14 +258,14 @@ export enum AppRegionsStatusOptions {
 export type AppRegionsRecord<Tavailable_permissions = unknown> = {
 	available_permissions: null | Tavailable_permissions
 	caption: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	parent_id?: RecordIdString
 	sorder: number
 	status: AppRegionsStatusOptions
 	title: string
 	type: AppRegionsTypeOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export enum SysCompanysTypeOptions {
@@ -278,7 +281,7 @@ export enum SysCompanysStatusOptions {
 export type SysCompanysRecord<Tavailable_permissions = unknown> = {
 	available_permissions: null | Tavailable_permissions
 	caption: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	note?: string
 	parent_id?: RecordIdString
@@ -287,18 +290,18 @@ export type SysCompanysRecord<Tavailable_permissions = unknown> = {
 	status: SysCompanysStatusOptions
 	title: string
 	type?: SysCompanysTypeOptions
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	value: number
 }
 
 export type SysLogsRecord = {
 	caption?: string
 	content?: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	slug?: string
 	title?: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export enum SysMenuItemsStatusOptions {
@@ -308,12 +311,12 @@ export enum SysMenuItemsStatusOptions {
 export type SysMenuItemsRecord<Tavailable_permissions = unknown> = {
 	available_permissions: null | Tavailable_permissions
 	caption: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	note?: string
 	status: SysMenuItemsStatusOptions
 	title: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	url: string
 }
 
@@ -323,28 +326,28 @@ export enum SysMenusStatusOptions {
 }
 export type SysMenusRecord = {
 	caption: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	parent_id?: RecordIdString
 	sorder: number
 	status: SysMenusStatusOptions
 	sys_menu_item: RecordIdString
 	title: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type SysSettingsRecord<Textra = unknown> = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	extra?: null | Textra
 	id: string
 	key: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	value?: boolean
 }
 
 export type SysUsersRecord = {
-	avatar?: string
-	created?: IsoDateString
+	avatar?: FileNameString
+	created: IsoAutoDateString
 	default_company: RecordIdString
 	default_company_storage: RecordIdString
 	default_company_year: RecordIdString
@@ -355,15 +358,26 @@ export type SysUsersRecord = {
 	password: string
 	role?: RecordIdString
 	tokenKey: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	verified?: boolean
 }
 
+export enum TestDatatableSelectSingleOptions {
+	"windows" = "windows",
+	"mac" = "mac",
+	"linux" = "linux",
+}
+
+export enum TestDatatableSelectMultipleOptions {
+	"html" = "html",
+	"css" = "css",
+	"js" = "js",
+}
 export type TestDatatableRecord = {
 	active?: boolean
 	amount?: number
 	caption?: string
-	created?: IsoDateString
+	created: IsoAutoDateString
 	district?: string
 	grape?: string
 	grape_color?: string
@@ -376,13 +390,16 @@ export type TestDatatableRecord = {
 	purchase_date?: IsoDateString
 	quantity?: number
 	region?: string
+	select_multiple?: TestDatatableSelectMultipleOptions[]
+	select_relation?: RecordIdString
+	select_single?: TestDatatableSelectSingleOptions
 	title?: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 	village?: string
 }
 
 export type TestFormRecord = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	date_optional?: IsoDateString
 	date_required: IsoDateString
 	datetime_optional?: IsoDateString
@@ -394,11 +411,24 @@ export type TestFormRecord = {
 	integer_number_required: number
 	text_optional?: string
 	text_required: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
+}
+
+export enum TestSelectboxStatusOptions {
+	"active" = "active",
+	"passive" = "passive",
+}
+export type TestSelectboxRecord = {
+	caption?: string
+	created: IsoAutoDateString
+	id: string
+	status?: TestSelectboxStatusOptions
+	title?: string
+	updated: IsoAutoDateString
 }
 
 export type TestSubtotalRecord = {
-	created?: IsoDateString
+	created: IsoAutoDateString
 	id: string
 	kg?: number
 	kn?: number
@@ -406,7 +436,7 @@ export type TestSubtotalRecord = {
 	note?: string
 	producer?: string
 	region?: string
-	updated?: IsoDateString
+	updated: IsoAutoDateString
 }
 
 export type TestSubtotalViewRecord<Tkg = unknown, Tkn = unknown, Tkt = unknown, Tnote = unknown, Tproducer = unknown, Tregion = unknown, Tsubtotal = unknown> = {
@@ -442,6 +472,7 @@ export type SysSettingsResponse<Textra = unknown, Texpand = unknown> = Required<
 export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
 export type TestDatatableResponse<Texpand = unknown> = Required<TestDatatableRecord> & BaseSystemFields<Texpand>
 export type TestFormResponse<Texpand = unknown> = Required<TestFormRecord> & BaseSystemFields<Texpand>
+export type TestSelectboxResponse<Texpand = unknown> = Required<TestSelectboxRecord> & BaseSystemFields<Texpand>
 export type TestSubtotalResponse<Texpand = unknown> = Required<TestSubtotalRecord> & BaseSystemFields<Texpand>
 export type TestSubtotalViewResponse<Tkg = unknown, Tkn = unknown, Tkt = unknown, Tnote = unknown, Tproducer = unknown, Tregion = unknown, Tsubtotal = unknown, Texpand = unknown> = Required<TestSubtotalViewRecord<Tkg, Tkn, Tkt, Tnote, Tproducer, Tregion, Tsubtotal>> & BaseSystemFields<Texpand>
 
@@ -469,6 +500,7 @@ export type CollectionRecords = {
 	sys_users: SysUsersRecord
 	test_datatable: TestDatatableRecord
 	test_form: TestFormRecord
+	test_selectbox: TestSelectboxRecord
 	test_subtotal: TestSubtotalRecord
 	test_subtotal_view: TestSubtotalViewRecord
 }
@@ -495,35 +527,73 @@ export type CollectionResponses = {
 	sys_users: SysUsersResponse
 	test_datatable: TestDatatableResponse
 	test_form: TestFormResponse
+	test_selectbox: TestSelectboxResponse
 	test_subtotal: TestSubtotalResponse
 	test_subtotal_view: TestSubtotalViewResponse
 }
 
+// Utility types for create/update operations
+
+type ProcessCreateAndUpdateFields<T> = Omit<{
+	// Omit AutoDate fields
+	[K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: 
+		// Convert FileNameString to File
+		T[K] extends infer U ? 
+			U extends (FileNameString | FileNameString[]) ? 
+				U extends any[] ? File[] : File 
+			: U
+		: never
+}, 'id'>
+
+// Create type for Auth collections
+export type CreateAuth<T> = {
+	id?: RecordIdString
+	email: string
+	emailVisibility?: boolean
+	password: string
+	passwordConfirm: string
+	verified?: boolean
+} & ProcessCreateAndUpdateFields<T>
+
+// Create type for Base collections
+export type CreateBase<T> = {
+	id?: RecordIdString
+} & ProcessCreateAndUpdateFields<T>
+
+// Update type for Auth collections
+export type UpdateAuth<T> = Partial<
+	Omit<ProcessCreateAndUpdateFields<T>, keyof AuthSystemFields>
+> & {
+	email?: string
+	emailVisibility?: boolean
+	oldPassword?: string
+	password?: string
+	passwordConfirm?: string
+	verified?: boolean
+}
+
+// Update type for Base collections
+export type UpdateBase<T> = Partial<
+	Omit<ProcessCreateAndUpdateFields<T>, keyof BaseSystemFields>
+>
+
+// Get the correct create type for any collection
+export type Create<T extends keyof CollectionResponses> =
+	CollectionResponses[T] extends AuthSystemFields
+		? CreateAuth<CollectionRecords[T]>
+		: CreateBase<CollectionRecords[T]>
+
+// Get the correct update type for any collection
+export type Update<T extends keyof CollectionResponses> =
+	CollectionResponses[T] extends AuthSystemFields
+		? UpdateAuth<CollectionRecords[T]>
+		: UpdateBase<CollectionRecords[T]>
+
 // Type for usage with type asserted PocketBase instance
 // https://github.com/pocketbase/js-sdk#specify-typescript-definitions
 
-export type TypedPocketBase = PocketBase & {
-	collection(idOrName: '_authOrigins'): RecordService<AuthoriginsResponse>
-	collection(idOrName: '_externalAuths'): RecordService<ExternalauthsResponse>
-	collection(idOrName: '_mfas'): RecordService<MfasResponse>
-	collection(idOrName: '_otps'): RecordService<OtpsResponse>
-	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
-	collection(idOrName: 'acl_app_regions_view'): RecordService<AclAppRegionsViewResponse>
-	collection(idOrName: 'acl_companys_view'): RecordService<AclCompanysViewResponse>
-	collection(idOrName: 'acl_roles'): RecordService<AclRolesResponse>
-	collection(idOrName: 'acl_roles_app_regions'): RecordService<AclRolesAppRegionsResponse>
-	collection(idOrName: 'acl_roles_companys'): RecordService<AclRolesCompanysResponse>
-	collection(idOrName: 'acl_roles_menus'): RecordService<AclRolesMenusResponse>
-	collection(idOrName: 'acl_roles_menus_view'): RecordService<AclRolesMenusViewResponse>
-	collection(idOrName: 'app_regions'): RecordService<AppRegionsResponse>
-	collection(idOrName: 'sys_companys'): RecordService<SysCompanysResponse>
-	collection(idOrName: 'sys_logs'): RecordService<SysLogsResponse>
-	collection(idOrName: 'sys_menu_items'): RecordService<SysMenuItemsResponse>
-	collection(idOrName: 'sys_menus'): RecordService<SysMenusResponse>
-	collection(idOrName: 'sys_settings'): RecordService<SysSettingsResponse>
-	collection(idOrName: 'sys_users'): RecordService<SysUsersResponse>
-	collection(idOrName: 'test_datatable'): RecordService<TestDatatableResponse>
-	collection(idOrName: 'test_form'): RecordService<TestFormResponse>
-	collection(idOrName: 'test_subtotal'): RecordService<TestSubtotalResponse>
-	collection(idOrName: 'test_subtotal_view'): RecordService<TestSubtotalViewResponse>
-}
+export type TypedPocketBase = {
+	collection<T extends keyof CollectionResponses>(
+		idOrName: T
+	): RecordService<CollectionResponses[T]>
+} & PocketBase

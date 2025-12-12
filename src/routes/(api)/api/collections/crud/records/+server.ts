@@ -8,18 +8,21 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const id = String(url.searchParams.get('id') ?? '0');
 
 	let records: RecordModel[] | RecordModel = [];
+	records = await locals.pb.collection('test_selectbox').getFullList({
+		sort: '-created'
+	});
 
-	if (id) {
+	/* if (id) {
 		// View (crud) - /api/collections/crud/records/:id
-		records = await locals.auth.pb.collection('crud').getOne(id, {
+		records = await locals.pb.collection('test_selectbox').getOne(id, {
 			expand: 'relField1,relField2.subRelField'
 		});
 	} else {
 		// List/Search (crud) - /api/collections/crud/records
-		records = await locals.auth.pb.collection('crud').getFullList({
+		records = await locals.pb.collection('test_selectbox').getFullList({
 			sort: '-created'
 		});
-	}
+	} */
 
 	return json(records);
 	// return new Response(String(random));
@@ -32,7 +35,7 @@ export const POST: RequestHandler = async ({ locals }) => {
 		field2: 'test'
 	};
 
-	const record = await locals.auth.pb.collection('crud').create(data);
+	const record = await locals.pb.collection('crud').create(data);
 	return json(record);
 };
 
@@ -45,7 +48,7 @@ export const PATCH: RequestHandler = async ({ url, locals }) => {
 		field2: 'test-2'
 	};
 
-	const record = await locals.auth.pb.collection('crud').update(id, data);
+	const record = await locals.pb.collection('crud').update(id, data);
 
 	return json(record);
 };
@@ -53,7 +56,7 @@ export const PATCH: RequestHandler = async ({ url, locals }) => {
 // Delete       (crud) - /api/collections/crud/records/:id
 export const DELETE: RequestHandler = async ({ url, locals }) => {
 	const id = String(url.searchParams.get('id') ?? '0');
-	const record = await locals.auth.pb.collection('crud').delete(id);
+	const record = await locals.pb.collection('crud').delete(id);
 	return json(record);
 };
 

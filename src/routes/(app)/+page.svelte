@@ -43,7 +43,10 @@
 				>
 					Go to project github page
 				</a>
-				<pre>{JSON.stringify(user, null, 2)}</pre>
+				<h1>1 - Lang değişimini server ile eşitlemek için cookie kullan.</h1>
+				<h1>2 - Update forma single ve multiselect ekle.</h1>
+				<h1>3 - Update form deriwer açılırken boundry pending yakalanmalı.</h1>
+				<!-- <pre>{JSON.stringify(user, null, 2)}</pre> -->
 				<button
 					{onclick}
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"

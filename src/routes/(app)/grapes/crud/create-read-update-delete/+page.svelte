@@ -17,9 +17,10 @@
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
 	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button } from '$lib/components/base/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button, Select } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
+	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
 
@@ -87,27 +88,24 @@
 
 <Page>
 	<Page.Header>
-		<h1 class="text-2xl font-bold">Page Header</h1>
+		<Text
+			bind:value={filterData.title}
+			placeholder="Search - Title contains..."
+			onkeydown={(e) => e.key === 'Enter' && searchData()}
+		/>
+		<Number
+			bind:value={filterData.quantity}
+			placeholder="Search - Quantity equals..."
+			onkeydown={(e) => e.key === 'Enter' && searchData()}
+		/>
+		<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
+		<Button label={t('refresh')} onclick={refreshData} />
+		<p>1 - $effect.pending() {$effect.pending()}</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
 			{@const items = (await getList(params)).items}
 			<s.DataTable bind:this={dataTable} {items} {columns} {footers}>
-				{#snippet toolbar()}
-					<Text
-						bind:value={filterData.title}
-						placeholder="Search - Title contains..."
-						onkeydown={(e) => e.key === 'Enter' && searchData()}
-					/>
-					<Number
-						bind:value={filterData.quantity}
-						placeholder="Search - Quantity equals..."
-						onkeydown={(e) => e.key === 'Enter' && searchData()}
-					/>
-					<Button label={t('search')} onclick={searchData} disabled={$effect.pending() > 0} />
-					<Button label={t('refresh')} onclick={refreshData} />
-					<p>1 - $effect.pending() {$effect.pending()}</p>
-				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
@@ -135,9 +133,6 @@
 						{/snippet}
 					</s.FooterRow>
 				{/snippet}
-				{#snippet statusbar()}
-					<p>Table Statusbar</p>
-				{/snippet}
 			</s.DataTable>
 		</Page.Main.Table>
 	</Page.Main>
@@ -164,6 +159,7 @@
 			<Button label={t('delete')} onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })} />
 		</div>
 	</Page.Footer>
+	<!-- Page Hidden Drawer Area -->
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
@@ -201,7 +197,7 @@
 					</DrawerForm.Header>
 					<DrawerForm.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
-						{@const updateRemoteForm = updateForm.for(drawerCommand.id).preflight(updateFormSchema)}
+						{@const updateRemoteForm = updateForm.for('update').preflight(updateFormSchema)}
 						<DrawerForm.Content.Form
 							{...updateRemoteForm.enhance(async ({ submit }) => {
 								try {
@@ -239,11 +235,29 @@
 								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
 								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
 								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
+								<Select
+									required
+									field={updateRemoteForm.fields.select_single}
+									value={oneResult.select_single}
+									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
+										value,
+										label: value.charAt(0).toUpperCase() + value.slice(1)
+									}))}
+								/>
+								<Select
+									multiple
+									field={updateRemoteForm.fields.select_multiple}
+									value={oneResult.select_multiple}
+									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({
+										value,
+										label: value.toUpperCase()
+									}))}
+								/>
 							{/snippet}
 
 							{#snippet buttons()}
 								<Button label={t('close')} onclick={() => drawer?.close()} />
-								<Submit label={t('update')} disabled={!!updateRemoteForm.pending} />
+								<Submit label={t('update')} disabled={Boolean(updateRemoteForm.pending)} />
 							{/snippet}
 						</DrawerForm.Content.Form>
 					</DrawerForm.Content>

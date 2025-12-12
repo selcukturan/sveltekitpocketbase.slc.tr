@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import * as base from '$lib/app/schemas/base';
 import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
+import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 const templateConditions = {
@@ -39,7 +40,10 @@ export const updateFormSchema = v.object({
 	id: v.pipe(base.id, v.nonEmpty('required')), // required - boş olmayan string
 	title: v.pipe(base.text, v.nonEmpty('required')), // required - boş olmayan string
 	quantity: v.pipe(base.integer, v.minValue(1)), // required - 0'dan büyük pozitif tam sayı
-	purchase_date: v.pipe(base.datetime, v.nonEmpty('required')) // required - boş olmayan string
+	purchase_date: v.pipe(base.datetime, v.nonEmpty('required')), // required - boş olmayan string
+	/* select_relation: v.picklist(Object.values(TestDatatableSelectSingleOptions)), */
+	select_single: v.picklist(Object.values(TestDatatableSelectSingleOptions)),
+	select_multiple: v.optional(v.array(v.picklist(Object.values(TestDatatableSelectMultipleOptions))), [])
 	/* ...pocketbaseUpdateSchema.entries */
 });
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
