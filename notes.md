@@ -1,3 +1,5 @@
+**Client-First Fullstack Development With SvelteKit & PocketBase**
+
 **SLC Geliştirme Ortamı Komutları**
 
 - Geliştirme ortamını ayağa kaldırma

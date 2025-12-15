@@ -2,14 +2,14 @@ import type { Handle, HandleServerError, HandleValidationError } from '@sveltejs
 import { isHttpError, redirect } from '@sveltejs/kit';
 import env from '$lib/server/env';
 import { Collections } from '$lib/types/pocketbase-types';
-import { createInstance } from '$lib/server/pb';
+import { createPocketBaseInstance } from '$lib/server/pb';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	console.log(`${new Date().toISOString()} ----> hooks.server.ts | START | event.url.pathname:${event.url.pathname}`);
 	const isProduction = env.NODE_ENV === 'production';
 
 	// 🚀 PB ve AuthStore örneği oluştur ##############################################################################################
-	const { pb, auth } = createInstance(event);
+	const { pb, auth } = createPocketBaseInstance(event);
 	event.locals.pb = pb;
 	event.locals.auth = auth;
 

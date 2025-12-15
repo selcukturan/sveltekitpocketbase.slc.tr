@@ -73,7 +73,7 @@ export class CustomAuthStore extends LocalAuthStore {
 }
 
 // Fabrika Fonksiyonu (Tüm kurulumu yöneten yer)
-export function createInstance(event: RequestEvent): { pb: TypedPocketBase; auth: CustomAuthStore } {
+export function createPocketBaseInstance(event: RequestEvent): { pb: TypedPocketBase; auth: CustomAuthStore } {
 	const auth = new CustomAuthStore();
 
 	auth.loadFromCookie(event.request.headers.get('cookie') || '');

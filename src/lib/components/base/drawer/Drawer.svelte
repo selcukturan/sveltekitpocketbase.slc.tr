@@ -69,6 +69,9 @@
 
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const hide = async () => {
+		const pendingElement = document.querySelector('.slc-boundary-drawer-form-content-pending'); // Manuel içerik yükleniyor kontrolü. Bu kısım değiştirilecek. boundary pending'in dışa aktarılabilmesi lazım.
+		if (pendingElement) return;
+
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 		if (contentLoading) return; // İçerik yükleniyor ise tekrar çalıştırma
 

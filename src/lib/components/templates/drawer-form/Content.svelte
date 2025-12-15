@@ -21,7 +21,7 @@
 				<span>No content available.</span>
 			{/if}
 			{#snippet pending()}
-				<p>Loading...</p>
+				<p class="slc-boundary-drawer-form-content-pending">Loading...</p>
 			{/snippet}
 		</svelte:boundary>
 	{:else if children}
