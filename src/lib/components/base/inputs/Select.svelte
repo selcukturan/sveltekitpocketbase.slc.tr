@@ -38,19 +38,17 @@
 		deSelectText = '-- Seçiniz --'
 	}: PropsType = $props();
 
-	// Helper to get input attributes for checkbox (multiple select)
-	const getCheckboxAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined, option: string) => {
-		if (!field) return { type: 'checkbox' as const };
-		return (field as RemoteFormField<string[]>).as('checkbox', option);
+	const getSelectAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
+		if (!field) return { type: 'select' as const };
+		return (field as RemoteFormField<string>).as('select');
 	};
-
-	// Helper to get input attributes for radio (single select)
-	const getRadioAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined, option: string) => {
-		if (!field) return { type: 'radio' as const };
-		return (field as RemoteFormField<string>).as('radio', option);
+	const getSelectMultipleAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
+		if (!field) return { type: 'select multiple' as const };
+		return (field as RemoteFormField<string[]>).as('select multiple');
 	};
 
 	const id = $props.id();
+
 	const baseId = `slc-select-${id}`;
 	const triggerId = `${baseId}-trigger`;
 	const listboxId = `${baseId}-listbox`;
@@ -60,6 +58,7 @@
 	let trigger: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
+	let selectInput: HTMLSelectElement | null = $state(null);
 	let isOpenPopup = $state(false);
 	let isOutsideMouseDown = false;
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
@@ -312,11 +311,24 @@
 	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
 	const internalContainerClasses = 'relative inline-block max-w-full min-w-52 select-none';
 	const internalTriggerClasses =
-		'bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none';
+		'slc-input bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none';
 	const internalListboxClasses =
-		'bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
+		'slc-input bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
+
+	$effect(() => {
+		selectedIndexes;
+		if (selectInput) {
+			if (multiple) {
+				Array.from(selectInput.options).forEach((option) => {
+					option.selected = value.includes(option.value);
+				});
+			} else {
+				selectInput.value = `${value}`;
+			}
+		}
+	});
 </script>
 
 <svelte:window
@@ -409,16 +421,33 @@
 			{/each}
 		</ul>
 	{/if}
+
+	{#if multiple}
+		{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
+		<select class="hidden-select" hidden bind:this={selectInput} {...selectMultipleAttributes}>
+			{#each displayOptions as option, i (i)}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</select>
+	{:else}
+		{@const selectAttributes = getSelectAttributes(field)}
+		<select class="hidden-select" hidden bind:this={selectInput} {...selectAttributes}>
+			{#each displayOptions as option, i (i)}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</select>
+	{/if}
 </div>
 
-{#if multiple}
-	{#each displayOptions as option, i (i)}
-		{@const inputAttributes = getCheckboxAttributes(field, option.value)}
-		<input hidden {...inputAttributes} checked={value?.includes(option.value) ?? false} />
-	{/each}
-{:else}
-	{#each displayOptions as option, i (i)}
-		{@const inputAttributes = getRadioAttributes(field, option.value)}
-		<input hidden {...inputAttributes} checked={value === option.value} />
-	{/each}
-{/if}
+<style>
+	.hidden-select {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+		margin: 0;
+		padding: 0;
+		pointer-events: none;
+	}
+</style>

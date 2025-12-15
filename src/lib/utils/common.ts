@@ -14,7 +14,13 @@ export function isFocusable(element: HTMLElement): boolean {
 export function isInput(element: HTMLElement): boolean {
 	const tagName = element && element.tagName ? element.tagName.toLowerCase() : '';
 
-	return tagName === 'input' || tagName === 'select' || tagName === 'textarea' || element?.isContentEditable;
+	return (
+		tagName === 'input' ||
+		tagName === 'select' ||
+		tagName === 'textarea' ||
+		element?.isContentEditable ||
+		element?.classList.contains('slc-input')
+	);
 }
 
 export function randomString(length?: number): string {

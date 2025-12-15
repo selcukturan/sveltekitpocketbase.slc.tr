@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, FooterRowType, FooterCellType } from './types';
-	import { getContext } from './context.svelte';
+	import { getTableContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -14,11 +14,11 @@
 	};
 	const { children, class: classes, fr, fc, ...attributes }: Props = $props();
 
-	const context = getContext<TData>();
+	const context = getTableContext<TData>();
 
-	const gridRowStart = $derived(fr.dataLength + fr.headerCount + fr.footerIndex + 1);
+	const gridRowStart = $derived(context.dataLength + context.headerLength + fr.footerIndex + 1);
 	const gridColumn = $derived(`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`);
-	const bottom = $derived(`${(fr.footerLength - fr.footerIndex - 1) * fr.footerHeight}px`);
+	const bottom = $derived(`${(context.footerLength - fr.footerIndex - 1) * context.footerRowHeight}px`);
 </script>
 
 <div

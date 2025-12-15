@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, DataRowType, DataCellType } from './types';
-	import { getContext } from './context.svelte';
+	import { getTableContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -14,9 +14,9 @@
 	};
 	const { children, class: classes, dr, dc, ...attributes }: Props = $props();
 
-	const context = getContext<TData>();
+	const context = getTableContext<TData>();
 
-	const gridRowStart = $derived(dr.rowOriginalIndex + dr.headerCount + 1);
+	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
 	const gridColumn = $derived(`${dc.colVisibleIndex + 1} / ${dc.colVisibleIndex + 2}`);
 	const background = $derived(dr.rowOriginalIndex % 2 === 0 ? 'var(--color-surface-50)' : 'var(--color-surface-50)');
 </script>

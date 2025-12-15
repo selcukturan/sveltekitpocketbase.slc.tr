@@ -15,6 +15,8 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
+	// await sleep(1000);
+
 	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
 
 	const listResult = await ResultAsync.fromPromise(

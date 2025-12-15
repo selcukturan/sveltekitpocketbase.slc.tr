@@ -88,24 +88,27 @@
 
 <Page>
 	<Page.Header>
-		<Text
-			bind:value={filterData.title}
-			placeholder="Search - Title contains..."
-			onkeydown={(e) => e.key === 'Enter' && searchData()}
-		/>
-		<Number
-			bind:value={filterData.quantity}
-			placeholder="Search - Quantity equals..."
-			onkeydown={(e) => e.key === 'Enter' && searchData()}
-		/>
-		<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
-		<Button label={t('refresh')} onclick={refreshData} />
-		<p>1 - $effect.pending() {$effect.pending()}</p>
+		<p>Page Header</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			{@const items = (await getList(params)).items}
-			<s.DataTable bind:this={dataTable} {items} {columns} {footers}>
+			{@const data = await getList(params)}
+			<s.DataTable bind:this={dataTable} {data} {columns} {footers}>
+				{#snippet toolbar()}
+					<Text
+						bind:value={filterData.title}
+						placeholder="Search - Title contains..."
+						onkeydown={(e) => e.key === 'Enter' && searchData()}
+					/>
+					<Number
+						bind:value={filterData.quantity}
+						placeholder="Search - Quantity equals..."
+						onkeydown={(e) => e.key === 'Enter' && searchData()}
+					/>
+					<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
+					<Button label={t('refresh')} onclick={refreshData} />
+					<p>1 - $effect.pending() {$effect.pending()}</p>
+				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
