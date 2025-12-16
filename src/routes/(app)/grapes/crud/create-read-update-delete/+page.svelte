@@ -249,6 +249,7 @@
 								/>
 								<Select
 									multiple
+									required
 									field={updateRemoteForm.fields.select_multiple}
 									value={oneResult.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({

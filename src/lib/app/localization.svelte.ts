@@ -1,4 +1,7 @@
 // ####################################### BEGIN TRANSLATIONS ####################################
+
+import { browser } from '$app/environment';
+
 // ---------------------------------------- TR Translations
 const trTranslations = {
 	hello_world: 'Merhaba Dünya',
@@ -63,17 +66,12 @@ function getInitialLang(): SupportedLangs {
 			return storedLang as SupportedLangs;
 		}
 	}
-	return 'tr'; // Default language
-	/* if (typeof window !== 'undefined') {
-		const match = document.cookie.match(new RegExp('(^| )slc:lang=([^;]+)'));
-		if (match) {
-			const storedLang = match[2];
-			if (supportedLanguages.some((lang) => lang.code === storedLang)) {
-				return storedLang as SupportedLangs;
-			}
-		}
+
+	if (browser) {
+		return 'tr'; // Default Client Language
+	} else {
+		return 'en'; // Default Server Language
 	}
-	return 'tr'; // Default language */
 }
 // ------------------------------ END Get Initial Language Method --------------------------------
 
@@ -87,10 +85,6 @@ export function setSelectedLang(lang: SupportedLangs) {
 		selected = lang;
 		localStorage.setItem('slc:lang', lang);
 	}
-	/* if (supportedLanguages.some((s) => s.code === lang)) {
-		selected = lang;
-		document.cookie = `slc:lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
-	} */
 }
 // ------------------------------ END Selected State and Language Management ---------------------
 

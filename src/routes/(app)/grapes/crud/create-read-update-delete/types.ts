@@ -36,13 +36,15 @@ export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
 export const oneParamsSchema = pocketbaseOneSchema;
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
+
 export const updateFormSchema = v.object({
 	id: v.pipe(base.id, v.nonEmpty('required')), // required - boş olmayan string
 	title: v.pipe(base.text, v.nonEmpty('required')), // required - boş olmayan string
-	quantity: v.pipe(base.integer, v.minValue(1)), // required - 0'dan büyük pozitif tam sayı
+	quantity: v.pipe(base.integer, v.minValue(1, 'required')), // required - 0'dan büyük pozitif tam sayı
 	purchase_date: v.pipe(base.datetime, v.nonEmpty('required')), // required - boş olmayan string
-	select_single: v.picklist(Object.values(TestDatatableSelectSingleOptions)),
-	select_multiple: v.optional(v.array(v.picklist(Object.values(TestDatatableSelectMultipleOptions))), [])
+	select_single: v.pipe(base.selectSingle(Object.values(TestDatatableSelectSingleOptions)), v.nonEmpty('required')),
+	select_multiple: v.pipe(base.selectMultiple(Object.values(TestDatatableSelectMultipleOptions)), v.minLength(1, 'required')) // required - en az bir eleman seçilmeli
 	/* ...pocketbaseUpdateSchema.entries */
 });
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
+// --------------------------------------------------------------------------------------------------------------------------------------------

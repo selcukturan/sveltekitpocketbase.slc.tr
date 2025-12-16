@@ -43,9 +43,8 @@
 				>
 					Go to project github page
 				</a>
-				<h1>1 - Lang değişimini server ile eşitlemek için cookie kullan.</h1>
-				<h1>2 - Update forma single ve multiselect ekle.</h1>
-				<h1>3 - Update form deriwer açılırken boundry pending yakalanmalı.</h1>
+
+				<h1>1 - FancyInput'ların içinde orjinal input değerlerini değiştirirken `field?.set('new value');` kullan.</h1>
 				<!-- <pre>{JSON.stringify(user, null, 2)}</pre> -->
 				<button
 					{onclick}

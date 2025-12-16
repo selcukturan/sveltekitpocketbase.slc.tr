@@ -63,6 +63,17 @@ export const datetime = v.pipe(
 );
 // ########################### END DATETIME ###########################
 
+// ########################### BEGIN SELECT MULTIPLE ###########################
+export const selectMultiple = (options: string[]) => {
+	return v.optional(v.array(v.picklist(options)), []);
+};
+// ########################### END SELECT MULTIPLE #############################
+// ########################### BEGIN SELECT SINGLE ###########################
+export const selectSingle = (options: string[]) => {
+	return v.optional(v.picklist([...options, '']), '');
+};
+// ########################### END SELECT SINGLE #############################
+
 // ########################### BEGIN ALL CURRENT VALUE ###########################
 export const allCurrentValue = v.union([
 	id,

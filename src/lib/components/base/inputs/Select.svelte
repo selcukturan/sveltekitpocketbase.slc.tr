@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import type { RemoteFormField } from '@sveltejs/kit';
+	import Popup from './Popup.svelte';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -58,7 +59,6 @@
 	let trigger: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
-	let selectInput: HTMLSelectElement | null = $state(null);
 	let isOpenPopup = $state(false);
 	let isOutsideMouseDown = false;
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
@@ -319,13 +319,13 @@
 
 	$effect(() => {
 		selectedIndexes;
-		if (selectInput) {
+		const currentValue = untrack(() => value);
+
+		if (field) {
 			if (multiple) {
-				Array.from(selectInput.options).forEach((option) => {
-					option.selected = value.includes(option.value);
-				});
+				(field as RemoteFormField<string[]>).set(currentValue as string[]);
 			} else {
-				selectInput.value = `${value}`;
+				(field as RemoteFormField<string>).set(currentValue as string);
 			}
 		}
 	});
@@ -403,7 +403,7 @@
 					<span class="flex-1 {textEllipsisClasses}">
 						{option.label}
 					</span>
-					<span aria-hidden={true} hidden={!isSelected}>
+					<span aria-hidden={!isSelected} hidden={!isSelected}>
 						<svg
 							stroke="currentColor"
 							fill="currentColor"
@@ -422,32 +422,46 @@
 		</ul>
 	{/if}
 
+	{#each field?.issues() ?? [] as issue}
+		<Popup>{issue.message}</Popup>
+	{/each}
+
 	{#if multiple}
 		{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
-		<select class="hidden-select" hidden bind:this={selectInput} {...selectMultipleAttributes}>
+		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes}>
 			{#each displayOptions as option, i (i)}
-				<option value={option.value}>{option.label}</option>
+				<option>{option.value}</option>
 			{/each}
 		</select>
 	{:else}
 		{@const selectAttributes = getSelectAttributes(field)}
-		<select class="hidden-select" hidden bind:this={selectInput} {...selectAttributes}>
+		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes}>
 			{#each displayOptions as option, i (i)}
-				<option value={option.value}>{option.label}</option>
+				<option>{option.value}</option>
 			{/each}
 		</select>
 	{/if}
 </div>
 
 <style>
-	.hidden-select {
+	.sr-only {
+		/* Görünmezliği sağla (Modern yöntem) */
 		position: absolute;
-		opacity: 0;
-		width: 0;
-		height: 0;
-		overflow: hidden;
-		margin: 0;
+		width: 1px;
+		height: 1px;
 		padding: 0;
-		pointer-events: none;
+		margin: -1px; /* Yer kaplamaması için (Tavsiye edilen eski yöntemden kalma) */
+		overflow: hidden;
+		clip-path: inset(50%); /* Yeni, standartlaştırılmış kırpma yöntemi */
+
+		/* Kesinlikle görünmezliği garanti et */
+		opacity: 0;
+
+		/* Etkileşimi tamamen kes */
+		pointer-events: none; /* Üzerine tıklanmasını kesinlikle engeller */
+
+		/* Ekstra temizlik */
+		white-space: nowrap;
+		border: 0;
 	}
 </style>
