@@ -1,6 +1,8 @@
 import * as v from 'valibot';
 import { parseDateInputToIso, parseDatetimeInputToIso, isValidIsoDate } from '$lib/utils/input-helper';
 
+// BU SAYFADA DEFAULT DEĞER BELİRLENMEZ.
+
 // ########################### BEGIN STRING ###########################
 const safeStringCharsRegex = /^[a-zA-Z0-9ÇçĞğİıÖöŞşÜü\s._()'!*:@,;+?=-]*$/;
 const safeStringIdCharsRegex = /^[a-z0-9:-]+$/;
@@ -14,15 +16,15 @@ export const text = v.pipe(
 // ########################### END STRING ###########################
 
 // ########################### BEGIN NUMBER ###########################
-const number = v.pipe(
+export const number = v.pipe(
 	v.number(),
 	v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
 	v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
 );
-const maxDecimalPlaces = (max: number) =>
+export const maxDecimalPlaces = (max: number) =>
 	v.check(
 		(input: number) => new RegExp(`^-?\\d+(\\.\\d{1,${max}})?$`).test(String(input)),
-		`Sayı en fazla ${max} ondalık basamağa sahip olabilir.`
+		`Sayı en fazla ${max} ondalık basamağa sahip olabilir. `
 	);
 
 export const integer = v.pipe(number, v.integer());
@@ -62,17 +64,6 @@ export const datetime = v.pipe(
 	)
 );
 // ########################### END DATETIME ###########################
-
-// ########################### BEGIN SELECT MULTIPLE ###########################
-export const selectMultiple = (options: string[]) => {
-	return v.optional(v.array(v.picklist(options)), []);
-};
-// ########################### END SELECT MULTIPLE #############################
-// ########################### BEGIN SELECT SINGLE ###########################
-export const selectSingle = (options: string[]) => {
-	return v.optional(v.picklist([...options, '']), '');
-};
-// ########################### END SELECT SINGLE #############################
 
 // ########################### BEGIN ALL CURRENT VALUE ###########################
 export const allCurrentValue = v.union([

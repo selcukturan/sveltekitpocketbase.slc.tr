@@ -3,6 +3,7 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { watch } from 'runed';
+	import Popup from './Popup.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
 		value?: string;
@@ -14,9 +15,11 @@
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 	// ######################## VARIABLES ###############################################################################################
-
-	let inputValue = $state('');
 	let isOnInput = false;
+	let inputValue = $state('');
+	let inputElement: HTMLInputElement | undefined = $state();
+	const issues = $derived(field?.issues() ?? []);
+	const inputAttributes = $derived(field ? field.as('text') : { type: 'text' });
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
@@ -51,38 +54,20 @@
 		onchange?.({ event, value });
 	};
 	// ## END input change ##############################################################################
-
-	// ## BEGIN issues view logic ############################################################################
-	let inputElement: HTMLInputElement | undefined = $state();
-	const issues = $derived(field?.issues() ?? []);
-	$effect(() => {
-		if (!inputElement) return;
-
-		if (issues.length > 0) {
-			inputElement.setCustomValidity(issues[0].message);
-			inputElement.reportValidity();
-		} else {
-			inputElement.setCustomValidity('');
-		}
-	});
-	// ## END issues view logic ###########################################################################
-
-	let inputAttributes = $derived(field ? field.as('text') : { type: 'text' });
 </script>
 
-<label>
-	<h2>{label}</h2>
-	<input
-		bind:this={inputElement}
-		{...inputAttributes}
-		value={inputValue}
-		oninput={onInput}
-		onchange={onChange}
-		class={classes}
-		{...attributes}
-	/>
-
-	<!-- {#each field?.issues() ?? [] as issue}
-		<p class="issue">{issue.message}</p>
-	{/each} -->
-</label>
+<div style:position="relative">
+	<label>
+		<h2>{label}</h2>
+		<input
+			bind:this={inputElement}
+			{...inputAttributes}
+			value={inputValue}
+			oninput={onInput}
+			onchange={onChange}
+			class={classes}
+			{...attributes}
+		/>
+	</label>
+	<Popup {issues} />
+</div>

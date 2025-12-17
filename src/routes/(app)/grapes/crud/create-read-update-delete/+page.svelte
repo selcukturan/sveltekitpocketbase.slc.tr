@@ -166,7 +166,6 @@
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
-			contentLoading={false}
 			onBeforeClose={async () => {
 				let shouldClose = true;
 				/* shouldClose = await confirm({
@@ -202,6 +201,8 @@
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 						{@const updateRemoteForm = updateForm.for('update').preflight(updateFormSchema)}
 						<DrawerForm.Content.Form
+							oninput={() => updateRemoteForm.validate({ includeUntouched: true })}
+							onchange={() => updateRemoteForm.validate({ includeUntouched: true })}
 							{...updateRemoteForm.enhance(async ({ submit }) => {
 								try {
 									await submit().updates(getList(params));
@@ -236,10 +237,9 @@
 							{#snippet inputs()}
 								<Hidden field={updateRemoteForm.fields.id} value={oneResult.id} />
 								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
-								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
+								<Number label="Quantity" field={updateRemoteForm.fields.quantity} step="0.01" value={oneResult.quantity} />
 								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
 								<Select
-									required
 									field={updateRemoteForm.fields.select_single}
 									value={oneResult.select_single}
 									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
@@ -249,7 +249,6 @@
 								/>
 								<Select
 									multiple
-									required
 									field={updateRemoteForm.fields.select_multiple}
 									value={oneResult.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({
@@ -260,7 +259,7 @@
 							{/snippet}
 
 							{#snippet buttons()}
-								<Button label={t('close')} onclick={() => drawer?.close()} />
+								<Button label={t('close')} onclick={() => drawer?.close(true)} />
 								<Submit label={t('update')} disabled={Boolean(updateRemoteForm.pending)} />
 							{/snippet}
 						</DrawerForm.Content.Form>

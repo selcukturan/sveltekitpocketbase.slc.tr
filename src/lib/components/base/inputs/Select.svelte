@@ -50,6 +50,8 @@
 
 	const id = $props.id();
 
+	const issues = $derived(field?.issues() ?? []);
+
 	const baseId = `slc-select-${id}`;
 	const triggerId = `${baseId}-trigger`;
 	const listboxId = `${baseId}-listbox`;
@@ -422,9 +424,7 @@
 		</ul>
 	{/if}
 
-	{#each field?.issues() ?? [] as issue}
-		<Popup>{issue.message}</Popup>
-	{/each}
+	<Popup {issues} />
 
 	{#if multiple}
 		{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}

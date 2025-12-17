@@ -4,6 +4,7 @@ import { watch, ScrollState, AnimationFrames, useResizeObserver } from 'runed';
 import { untrack } from 'svelte';
 
 class TableContext<TData extends Row> {
+	// required DataTable props
 	rawData = $state<ListResult<TData>>({
 		page: 1,
 		perPage: 30,
@@ -17,6 +18,7 @@ class TableContext<TData extends Row> {
 	dataRowHeight = $state(35);
 	footerRowHeight = $state(35);
 
+	// Context variables
 	allRows = $derived<readonly $state.Snapshot<TData>[]>($state.snapshot(this.rawData.items));
 	el = $state<HTMLElement>();
 	headerLength = $state(1);

@@ -22,7 +22,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = structuredClone(event.locals.auth.record);
 
 	// ⌛🔒 Rota koruma ###############################################################################################################
-	if (event.request.url.includes('/_app/remote/')) {
+	if (event.isRemoteRequest) {
 		console.log(`${new Date().toISOString()} ----> hooks.server.ts | request type: Remote Function`);
 	} else {
 		if (event.url.pathname.startsWith('/login')) {

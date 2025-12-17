@@ -46,8 +46,8 @@
 		show();
 	};
 
-	export const close = () => {
-		hide();
+	export const close = (force = false) => {
+		hide(force);
 	};
 
 	const show = async () => {
@@ -68,12 +68,17 @@
 	};
 
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-	const hide = async () => {
-		const pendingElement = document.querySelector('.slc-boundary-drawer-form-content-pending'); // Manuel içerik yükleniyor kontrolü. Bu kısım değiştirilecek. boundary pending'in dışa aktarılabilmesi lazım.
-		if (pendingElement) return;
+	const hide = async (force = false) => {
+		if (!force) {
+			// https://github.com/sveltejs/svelte/issues/17083
+			// https://github.com/sveltejs/kit/issues/14900
+			// Manuel, içerik yükleniyor kontrolü. Bu kısım değiştirilecek. <svelte:boundary> pending'inin dışa aktarılabilmesi lazım.
+			// if (contentLoading) return; // İçerik yükleniyor ise kapanamaz.
+			const pendingElement = document.querySelector('.slc-boundary-drawer-form-content-pending');
+			if (pendingElement) return;
+		}
 
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
-		if (contentLoading) return; // İçerik yükleniyor ise tekrar çalıştırma
 
 		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.
 		const result = onBeforeClose?.();

@@ -3,6 +3,7 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { watch } from 'runed';
+	import Popup from './Popup.svelte';
 
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
@@ -18,9 +19,12 @@
 	let { value = $bindable(0), label, step = '1', oninput, onchange, field, class: classes, ...attributes }: Props = $props();
 
 	// ######################## VARIABLES ###############################################################################################
-	let inputValue = $state(0);
 	let isOnInput = false;
+	let inputValue = $state(0);
+	let inputElement: HTMLInputElement | undefined = $state();
 	const separator = (1.1).toLocaleString().replace(/\d/g, '');
+	const issues = $derived(field?.issues() ?? []);
+	const inputAttributes = $derived(field ? field.as('number') : { type: 'number' });
 
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
@@ -41,6 +45,7 @@
 				return;
 			} else {
 				inputValue = currValue;
+				// field?.set(currValue);
 			}
 		}
 	);
@@ -53,35 +58,22 @@
 		onchange?.({ event, value });
 	};
 	// ## END input change ##############################################################################
-
-	// ## BEGIN issues view logic ############################################################################
-	let inputElement: HTMLInputElement | undefined = $state();
-	const issues = $derived(field?.issues() ?? []);
-	$effect(() => {
-		if (!inputElement) return;
-		if (issues.length > 0) {
-			inputElement.setCustomValidity(issues[0].message);
-			inputElement.reportValidity();
-		} else {
-			inputElement.setCustomValidity('');
-		}
-	});
-	// ## END issues view logic ##############################################################################
-
-	let inputAttributes = $derived(field ? field.as('number') : { type: 'number' });
 </script>
 
-<label>
-	<h2>{label}</h2>
-	<input
-		bind:this={inputElement}
-		{...inputAttributes}
-		placeholder="123{step === '1' ? '' : separator}45"
-		{step}
-		value={inputValue}
-		oninput={onInput}
-		onchange={onChange}
-		class={classes}
-		{...attributes}
-	/>
-</label>
+<div style:position="relative">
+	<label>
+		<h2>{label}</h2>
+		<input
+			bind:this={inputElement}
+			{...inputAttributes}
+			placeholder="123{step === '1' ? '' : separator}45"
+			{step}
+			value={inputValue}
+			oninput={onInput}
+			onchange={onChange}
+			class={classes}
+			{...attributes}
+		/>
+	</label>
+	<Popup {issues} />
+</div>
