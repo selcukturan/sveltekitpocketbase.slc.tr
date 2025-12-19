@@ -40,6 +40,7 @@ export function formatDatetimeIsoToInput(isoString: string) {
 // "2025-11-21T10:00" -> "2025-11-21 10:00:00.000Z"
 export function parseDatetimeInputToIso(localDateTime: string) {
 	if (!localDateTime) return ''; // Input boşsa boş döndür.
+
 	// Input'tan gelen değere 'Z' ekleyerek, bunun yerel saat değil,
 	// UTC olduğunu belirtiyoruz. Bu, zaman dilimi kaymalarını önler.
 	const dateCandidate = new Date(`${localDateTime}Z`);

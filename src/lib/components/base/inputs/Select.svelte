@@ -3,6 +3,8 @@
 	import { fly } from 'svelte/transition';
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Popup from './Popup.svelte';
+	import { watch } from 'runed';
+	import { getFormInputsContext } from './context.svelte';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -38,6 +40,8 @@
 		escClose = true,
 		deSelectText = '-- Seçiniz --'
 	}: PropsType = $props();
+
+	const context = getFormInputsContext();
 
 	const getSelectAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
 		if (!field) return { type: 'select' as const };
@@ -319,18 +323,21 @@
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
-	$effect(() => {
-		selectedIndexes;
-		const currentValue = untrack(() => value);
-
-		if (field) {
-			if (multiple) {
-				(field as RemoteFormField<string[]>).set(currentValue as string[]);
-			} else {
-				(field as RemoteFormField<string>).set(currentValue as string);
+	let selectInput: HTMLSelectElement | null = $state(null);
+	watch(
+		() => selectedIndexes,
+		() => {
+			const currentValue = value;
+			if (field) {
+				if (multiple) {
+					(field as RemoteFormField<string[]>).set(currentValue as string[]);
+				} else {
+					(field as RemoteFormField<string>).set(currentValue as string);
+				}
 			}
+			context.validate?.();
 		}
-	});
+	);
 </script>
 
 <svelte:window
@@ -428,14 +435,14 @@
 
 	{#if multiple}
 		{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
-		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes}>
+		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes} bind:this={selectInput}>
 			{#each displayOptions as option, i (i)}
 				<option>{option.value}</option>
 			{/each}
 		</select>
 	{:else}
 		{@const selectAttributes = getSelectAttributes(field)}
-		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes}>
+		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes} bind:this={selectInput}>
 			{#each displayOptions as option, i (i)}
 				<option>{option.value}</option>
 			{/each}

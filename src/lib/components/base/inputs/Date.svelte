@@ -5,6 +5,7 @@
 	import { formatDateIsoToInput, parseDateInputToIso } from '$lib/utils/input-helper';
 	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
+	import { getFormInputsContext } from './context.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
 		value?: string;
@@ -15,6 +16,7 @@
 	};
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
+	const context = getFormInputsContext();
 	// ######################## VARIABLES ###############################################################################################
 	let isOnInput = false;
 	let inputValue = $state('');
@@ -26,14 +28,13 @@
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
 
-		target.setCustomValidity('');
-
 		const newValue = parseDateInputToIso(target.value);
 		if (newValue !== value) {
 			isOnInput = true;
 			value = newValue;
 			oninput?.({ event, value });
 		}
+		context.validate?.();
 	};
 	watch(
 		() => value,

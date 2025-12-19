@@ -47,10 +47,10 @@ export const boolean = v.boolean();
 export const date = v.pipe(
 	v.string(),
 	v.transform((input) => parseDateInputToIso(input)),
-	v.custom(
-		(input) => isValidIsoDate(input),
-		'Tarih geçerli bir takvim tarihi değil (Örn: 31 Haziran) veya Tarih 01.01.1900-31.12.2100 aralığında değil.'
-	)
+	v.custom((input) => {
+		if (input === '') return true;
+		return isValidIsoDate(input);
+	}, 'Geçerli bir tarih giriniz.')
 );
 // ########################### END DATE ###########################
 
@@ -58,10 +58,10 @@ export const date = v.pipe(
 export const datetime = v.pipe(
 	v.string(),
 	v.transform((input) => parseDatetimeInputToIso(input)),
-	v.custom(
-		(input) => isValidIsoDate(input),
-		'Tarih geçerli bir takvim tarihi değil (Örn: 31 Haziran) veya Tarih 01.01.1900-31.12.2100 aralığında değil.'
-	)
+	v.custom((input) => {
+		if (input === '') return true;
+		return isValidIsoDate(input);
+	}, 'Geçerli bir tarih ve saat giriniz.')
 );
 // ########################### END DATETIME ###########################
 

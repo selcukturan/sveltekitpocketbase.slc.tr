@@ -4,6 +4,7 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
+	import { getFormInputsContext } from './context.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
 		value?: string;
@@ -14,6 +15,7 @@
 	};
 	// ######################## PROPS ###################################################################################################
 	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
+	const context = getFormInputsContext();
 	// ######################## VARIABLES ###############################################################################################
 	let isOnInput = false;
 	let inputValue = $state('');
@@ -24,15 +26,14 @@
 	// ## BEGIN value logic ###############################################################################
 	const onInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
-
-		target.setCustomValidity('');
-
+		// inputValue = target.value;
 		const newValue = target.value;
 		if (newValue !== value) {
 			isOnInput = true;
 			value = newValue;
 			oninput?.({ event, value });
 		}
+		context.validate?.();
 	};
 	watch(
 		() => value,

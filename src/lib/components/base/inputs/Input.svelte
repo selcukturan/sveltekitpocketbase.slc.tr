@@ -17,7 +17,9 @@
 					| { type: Exclude<RemoteFormFieldType<V>, 'radio' | 'hidden' | 'submit'>; value?: undefined }
 			: { type: RemoteFormFieldType<V>; value?: undefined }) &
 		Omit<HTMLInputAttributes, 'type' | 'id' | 'value' | 'name' | 'checked'>;
+
 	let { label, field, type, value, description, warning, hidden, ...rest }: Props = $props();
+
 	const attributes = $derived(
 		field.as(
 			// @ts-expect-error expected
@@ -30,7 +32,6 @@
 	const invalid = $derived(!!issues?.length || undefined);
 </script>
 
-// https://gist.github.com/sillvva/06d350db98fb4bbf7454e5fc484a8afe
 {#if type === 'checkbox'}
 	<label
 		class={[

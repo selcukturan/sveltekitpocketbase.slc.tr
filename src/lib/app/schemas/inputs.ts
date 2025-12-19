@@ -49,13 +49,13 @@ export const numberOptionalNegativeInteger = () => {
 	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
 };
 
-export const datetimeRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string } = {}) => {
+export const datetimeRequired = ({ message = 'Geçerli bir tarih ve saat giriniz.' }: { message?: string } = {}) => {
 	return v.pipe(base.datetime, v.nonEmpty(message));
 };
 export const datetimeOptional = () => {
 	return v.optional(base.datetime, '');
 };
-export const dateRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string } = {}) => {
+export const dateRequired = ({ message = 'Geçerli bir tarih giriniz.' }: { message?: string } = {}) => {
 	return v.pipe(base.date, v.nonEmpty(message));
 };
 export const dateOptional = () => {

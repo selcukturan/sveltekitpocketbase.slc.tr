@@ -42,10 +42,10 @@ export const updateFormSchema = v.object({
 	title: input.textOptional(),
 	quantity: input.numberRequiredNegativeInteger(),
 	purchase_date: input.datetimeRequired(),
-	select_single: input.selectOptionalSingle({
+	select_single: input.selectRequiredSingle({
 		options: Object.values(TestDatatableSelectSingleOptions)
 	}),
-	select_multiple: input.selectOptionalMultiple({
+	select_multiple: input.selectRequiredMultiple({
 		options: Object.values(TestDatatableSelectMultipleOptions)
 	})
 	/* ...pocketbaseUpdateSchema.entries */
