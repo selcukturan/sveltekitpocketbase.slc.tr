@@ -67,6 +67,13 @@
 				>
 					Count:{counter.count}
 				</button>
+				<a
+					href="/login"
+					class="bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
+					rel="noopener noreferrer"
+				>
+					Go to Login Page
+				</a>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>

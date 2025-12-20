@@ -9,7 +9,7 @@
 	// Utilities
 	import { watch } from 'runed';
 	// Templates
-	import { Page, Head, DrawerForm } from '$lib/components/templates';
+	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
@@ -18,7 +18,6 @@
 	import * as s from '$lib/components/base/datatable';
 	// Inputs
 	import { Hidden, Text, Number, Datetime, Submit, Button, Select } from '$lib/components/base/inputs';
-	import Input from '$lib/components/base/inputs/Input.svelte';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
@@ -189,19 +188,19 @@
 					</pre>
 				</Boundary>
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
-				<DrawerForm>
-					<DrawerForm.Header label={`Update ID: ${drawerCommand.id}`}>
+				<DrawerFormContent>
+					<DrawerFormContent.Header label={`Update ID: ${drawerCommand.id}`}>
 						<Button
 							label=" X "
 							onclick={() => {
 								drawer?.close();
 							}}
 						/>
-					</DrawerForm.Header>
-					<DrawerForm.Content boundary>
+					</DrawerFormContent.Header>
+					<DrawerFormContent.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 						{@const updateRemoteForm = updateForm.for('update').preflight(updateFormSchema)}
-						<DrawerForm.Content.Form
+						<DrawerFormContent.Content.Form
 							schema={updateFormSchema}
 							validate={updateRemoteForm.validate}
 							{...updateRemoteForm.enhance(async ({ submit }) => {
@@ -263,9 +262,9 @@
 								<Button label={t('close')} onclick={() => drawer?.close(true)} />
 								<Submit label={t('update')} disabled={Boolean(updateRemoteForm.pending)} />
 							{/snippet}
-						</DrawerForm.Content.Form>
-					</DrawerForm.Content>
-				</DrawerForm>
+						</DrawerFormContent.Content.Form>
+					</DrawerFormContent.Content>
+				</DrawerFormContent>
 			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
 				<Boundary>
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
