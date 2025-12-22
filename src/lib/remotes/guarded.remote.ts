@@ -8,7 +8,7 @@ import { resolve } from '$app/paths';
 export const getUser = query(() => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) {
-		redirect(302, resolve('/login'));
+		throw redirect(302, resolve('/login'));
 	}
 	return locals.user;
 });
@@ -17,6 +17,6 @@ export const getUser = query(() => {
 export const checkAuthenticated = query(() => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) {
-		redirect(302, resolve('/login'));
+		throw redirect(302, resolve('/login'));
 	}
 });

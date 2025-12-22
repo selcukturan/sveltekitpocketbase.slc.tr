@@ -40,6 +40,7 @@
 	};
 	// `value`, bileşen dışından `prop` ile değiştiriliyorsa `input` değeri ayarlanır.
 	// `value`, bileşen içinden `oninput` ile değiştiriliyorsa `input` değeri ayarlanmaz.
+
 	watch(
 		() => value,
 		(currValue) => {

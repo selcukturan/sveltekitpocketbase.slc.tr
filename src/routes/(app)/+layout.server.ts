@@ -5,7 +5,5 @@ export async function load({ locals }) {
 	if (!locals.user?.id) {
 		throw redirect(302, resolve('/login'));
 	}
-	return {
-		user: locals.user
-	};
+	return {};
 }

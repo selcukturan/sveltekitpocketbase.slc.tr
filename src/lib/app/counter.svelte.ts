@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 export class Counter {
 	#count = $state(0);
 	double = $derived(this.#count * 2);

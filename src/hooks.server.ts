@@ -31,15 +31,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.auth.exportToCookie({
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'strict', // strict olduğunda bazı tarayıcılarda sorun çıkabilir. 'lax' | 'strict'
+			sameSite: 'strict', // strict olduğunda bazı tarayıcılarda sorun çıkabilir. 'lax' | 'strict'. safaride düzeldi. kullanılabilir.
 			priority: 'High'
 		})
 	);
 
-	// Herkese açık, önbelleğe alınmasında sakınca olmayan yollar
-	/* if (!['/login'].includes(event.url.pathname)) {
-		response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-	} */
 	// 🏆 ############################################################################################################################
 	return response;
 };

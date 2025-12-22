@@ -3,13 +3,49 @@
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/app/config';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
+	import { getUser } from '$lib/remotes/guarded.remote';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const loginPageToaster = createToaster({
 		name: 'login-page-toaster',
 		position: 'bottom-center'
 	});
 
-	let isLoading = false;
+	let isLoading = $state(false);
+
+	let error = $state('');
+
+	async function login(e: Event) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const email = form.email.value;
+		const password = form.password.value;
+
+		console.log('object');
+
+		if (!email || !password) {
+			error = 'All fields are required';
+			return;
+		}
+
+		const response = await fetch('/api/login', {
+			method: 'POST',
+			body: JSON.stringify({ email, password })
+		});
+
+		const result = await response.json();
+		console.log(result);
+
+		if (result.type === 'success') {
+			getUser().refresh();
+			goto(resolve('/'));
+		} else {
+			// Hata durumunu opsiyonel olarak göster
+			error = result.message;
+		}
+	}
 </script>
 
 <!-- <span class="slc-screen-test bg-surface-900 text-surface-50 fixed top-28 left-1/2 z-50 block -translate-x-1/2 -translate-y-1/2 font-extrabold"></span> -->
@@ -89,11 +125,7 @@
 		<div class="flex flex-row gap-4">
 			<div class="flex flex-col items-center justify-center gap-1">
 				<p class="text-surface-500">{`${config.appName} | ${config.version}`}</p>
-				<img
-					class="object-fit inset-0 h-6 w-6 brightness-85 grayscale"
-					src="/images/logo/logo_512.png"
-					alt="SLC Web logo"
-				/>
+				<img class="object-fit inset-0 h-6 w-6 brightness-85 grayscale" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 			</div>
 		</div>
 	</div>
@@ -112,14 +144,7 @@
 		dark:bg-transparent"
 	>
 		<form
-			method="POST"
-			use:enhance={() => {
-				isLoading = true;
-				return async ({ result }) => {
-					isLoading = false;
-					await applyAction(result);
-				};
-			}}
+			onsubmit={login}
 			class="flex w-full flex-col
 				px-2
 				pb-4
@@ -135,6 +160,7 @@
 					<input
 						id="email"
 						name="email"
+						required
 						placeholder="E-Posta"
 						type="email"
 						autocapitalize="none"
@@ -151,6 +177,7 @@
 					<input
 						id="password"
 						name="password"
+						required
 						placeholder="Şifre"
 						type="password"
 						autocapitalize="none"

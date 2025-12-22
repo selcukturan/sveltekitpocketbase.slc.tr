@@ -5,11 +5,11 @@
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
-	// import { getUser } from '$lib/remotes/guarded.remote';
+	import { getUser } from '$lib/remotes/guarded.remote';
 
 	// import { appToaster } from '$lib/components/base/toast';
 
-	let { children, data } = $props();
+	let { children } = $props();
 
 	const global = initGlobalContext();
 
@@ -53,8 +53,8 @@
 
 	createToaster({ name: 'app-toaster' });
 
-	// let user = $derived(await getUser());
-	let user = $derived(data?.user);
+	let user = $derived(await getUser());
+	// let user = $derived(data?.user);
 
 	/* console.log('role', role); */
 
