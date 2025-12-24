@@ -69,7 +69,7 @@
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-{#if user && filteredSidebarData}
+{#if user !== null && filteredSidebarData}
 	<Toasts toasterName="app-toaster" />
 
 	<ProgressBar navigate={navigating}>

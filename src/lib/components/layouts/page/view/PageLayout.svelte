@@ -20,9 +20,7 @@
 		if (global.isMobileBreakpoint) {
 			return global.pageSidebarSize.vertical ? (`${global.pageSidebarSize.vertical}px` as Length) : ('150px' as Length);
 		} else {
-			return global.pageSidebarSize.horizontal
-				? (`${global.pageSidebarSize.horizontal}px` as Length)
-				: ('150px' as Length);
+			return global.pageSidebarSize.horizontal ? (`${global.pageSidebarSize.horizontal}px` as Length) : ('150px' as Length);
 		}
 	});
 
@@ -84,8 +82,7 @@
 				class:desktop-position={!global.isMobileBreakpoint}
 				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
 			>
-				<i
-					class={`${icon} !text-base !leading-px ${global.hidePageSidebar ? (global.isMobileBreakpoint ? 'mt-3' : 'ml-2') : ''}`}
+				<i class={`${icon} text-base! leading-px! ${global.hidePageSidebar ? (global.isMobileBreakpoint ? 'mt-3' : 'ml-2') : ''}`}
 				></i>
 			</button>
 			<PageSidebar {pageSidebardata} />
@@ -111,9 +108,9 @@
 
 <style lang="postcss">
 	.mobile-position {
-		@apply top-[var(--pos)] left-1/2 -translate-x-1/2 -translate-y-1/2;
+		@apply top-(--pos) left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
 	.desktop-position {
-		@apply top-1/2 left-[var(--pos)] -translate-x-1/2 -translate-y-1/2;
+		@apply top-1/2 left-(--pos) -translate-x-1/2 -translate-y-1/2;
 	}
 </style>

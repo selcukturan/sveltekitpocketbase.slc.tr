@@ -8,6 +8,7 @@
 	import type { SvelteHTMLElements } from 'svelte/elements';
 	import { goto } from '$app/navigation';
 	import { tooltip } from '$lib/attachments';
+	import { getUser } from '$lib/remotes/guarded.remote';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();
@@ -41,14 +42,21 @@
 		</div>
 		<div class="flex items-center gap-4">
 			<form
-				action="/logout"
+				action="/logout/?/logout"
 				method="POST"
 				use:enhance={() => {
 					return async ({ result }) => {
-						if (result.type === 'redirect') {
+						if (result.type === 'success') {
+							getUser().refresh();
+							goto('/login');
+						} else if (result.type === 'failure') {
+							alert('failure-data-validation');
+						} else if (result.type === 'error') {
+							alert('error-pb');
+						} else if (result.type === 'redirect') {
 							goto(result.location);
 						} else {
-							await applyAction(result);
+							alert('unknown');
 						}
 					};
 				}}

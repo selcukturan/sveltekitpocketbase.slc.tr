@@ -7,8 +7,8 @@ import { resolve } from '$app/paths';
 // Client side get user
 export const getUser = query(() => {
 	const { locals } = getRequestEvent();
-	if (!locals.user) {
-		throw redirect(302, resolve('/login'));
+	if (!locals.user?.id) {
+		return null;
 	}
 	return locals.user;
 });

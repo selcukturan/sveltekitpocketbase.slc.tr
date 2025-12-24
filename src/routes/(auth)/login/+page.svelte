@@ -3,49 +3,14 @@
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/app/config';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
-	import { getUser } from '$lib/remotes/guarded.remote';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 
 	const loginPageToaster = createToaster({
 		name: 'login-page-toaster',
 		position: 'bottom-center'
 	});
 
-	let isLoading = $state(false);
-
-	let error = $state('');
-
-	async function login(e: Event) {
-		e.preventDefault();
-
-		const form = e.target as HTMLFormElement;
-		const email = form.email.value;
-		const password = form.password.value;
-
-		console.log('object');
-
-		if (!email || !password) {
-			error = 'All fields are required';
-			return;
-		}
-
-		const response = await fetch('/api/login', {
-			method: 'POST',
-			body: JSON.stringify({ email, password })
-		});
-
-		const result = await response.json();
-		console.log(result);
-
-		if (result.type === 'success') {
-			getUser().refresh();
-			goto(resolve('/'));
-		} else {
-			// Hata durumunu opsiyonel olarak göster
-			error = result.message;
-		}
-	}
+	let isLoading = false;
 </script>
 
 <!-- <span class="slc-screen-test bg-surface-900 text-surface-50 fixed top-28 left-1/2 z-50 block -translate-x-1/2 -translate-y-1/2 font-extrabold"></span> -->
@@ -144,7 +109,26 @@
 		dark:bg-transparent"
 	>
 		<form
-			onsubmit={login}
+			action="/login/?/login"
+			method="POST"
+			use:enhance={() => {
+				isLoading = true;
+				return async ({ result }) => {
+					isLoading = false;
+					if (result.type === 'success') {
+						// getUser().refresh();
+						goto('/');
+					} else if (result.type === 'failure') {
+						alert('failure-data-validation');
+					} else if (result.type === 'error') {
+						alert('error-pb');
+					} else if (result.type === 'redirect') {
+						goto(result.location);
+					} else {
+						alert('unknown');
+					}
+				};
+			}}
 			class="flex w-full flex-col
 				px-2
 				pb-4
@@ -158,9 +142,9 @@
 				<label class="grid gap-1">
 					<span class="select-none">E-Posta</span>
 					<input
+						required
 						id="email"
 						name="email"
-						required
 						placeholder="E-Posta"
 						type="email"
 						autocapitalize="none"
@@ -175,9 +159,9 @@
 				<label class="grid gap-1">
 					<span class="select-none">Şifre</span>
 					<input
+						required
 						id="password"
 						name="password"
-						required
 						placeholder="Şifre"
 						type="password"
 						autocapitalize="none"
