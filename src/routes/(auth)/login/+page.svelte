@@ -109,7 +109,7 @@
 		dark:bg-transparent"
 	>
 		<form
-			action="/login/?/login"
+			action="/login?/login"
 			method="POST"
 			use:enhance={() => {
 				isLoading = true;

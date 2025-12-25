@@ -42,7 +42,7 @@
 		</div>
 		<div class="flex items-center gap-4">
 			<form
-				action="/logout/?/logout"
+				action="/logout?/logout"
 				method="POST"
 				use:enhance={() => {
 					return async ({ result }) => {
