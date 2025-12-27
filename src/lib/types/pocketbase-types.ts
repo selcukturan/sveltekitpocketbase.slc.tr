@@ -384,6 +384,7 @@ export type TestDatatableRecord = {
 	id: string
 	kn?: number
 	kt?: IsoDateString
+	multiple_files?: FileNameString[]
 	order?: number
 	price?: number
 	province?: string
@@ -393,6 +394,7 @@ export type TestDatatableRecord = {
 	select_multiple?: TestDatatableSelectMultipleOptions[]
 	select_relation?: RecordIdString
 	select_single?: TestDatatableSelectSingleOptions
+	single_file?: FileNameString
 	title?: string
 	updated: IsoAutoDateString
 	village?: string

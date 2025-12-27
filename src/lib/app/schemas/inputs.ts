@@ -1,93 +1,293 @@
 import * as v from 'valibot';
 import * as base from './base';
 
-export const selectRequiredSingle = ({
-	options = [],
-	message = 'Bu alan gereklidir.'
-}: {
-	options: string[];
-	message?: string;
-}) => {
-	return v.pipe(v.optional(v.picklist([...options, '']), ''), v.nonEmpty(message));
-};
-export const selectOptionalSingle = ({ options = [] }: { options: string[] }) => {
-	return v.optional(v.picklist([...options, '']), '');
-};
-export const selectRequiredMultiple = ({ options = [], minLength = 1 }: { options: string[]; minLength?: number }) => {
-	const minLengthValue = minLength <= 0 ? 1 : minLength;
-	return v.pipe(
-		v.optional(v.array(v.picklist(options)), []),
-		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.')
-	);
-};
-export const selectOptionalMultiple = ({ options = [] }: { options: string[] }) => {
-	return v.optional(v.array(v.picklist(options)), []);
-};
-export const numberRequiredInteger = ({ message = 'Bu alan gereklidir. Tamsayı olmalıdır.' }: { message?: string } = {}) => {
-	return v.pipe(
-		v.optional(base.integer, 0),
-		v.check((input) => input !== 0, message)
-	);
-};
-export const numberOptionalInteger = () => {
-	return v.optional(base.integer, 0);
-};
-export const numberRequiredPositiveInteger = ({
-	message = 'Bu alan gereklidir. Pozitif tamsayı olmalıdır.'
-}: { message?: string } = {}) => {
-	return v.pipe(v.optional(base.integer, 0), v.minValue(1, message));
-};
-export const numberOptionalPositiveInteger = () => {
-	return v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0);
-};
-export const numberRequiredNegativeInteger = ({
-	message = 'Bu alan gereklidir. Negatif tamsayı olmalıdır.'
-}: { message?: string } = {}) => {
-	return v.pipe(v.optional(base.integer, 0), v.maxValue(-1, message));
-};
-export const numberOptionalNegativeInteger = () => {
-	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
-};
+// ########################################## BEGIN FILE ######################################################
+// Optional
+const _SingleFileOptional = () => v.optional(v.file());
+const _SingleStrOptional = (defaultValue = '') => v.optional(v.string(), defaultValue);
+const _MultipleFileOptional = () => v.optional(v.array(v.file()), []);
+const _MultipleStrOptional = () => v.optional(v.array(v.string()), []);
+// Required
+const _SingleFileRequired = () => v.file();
+const _SingleStrRequired = () => v.string();
+const _MultipleFileRequired = () => v.array(v.file());
+const _MultipleStrRequired = () => v.array(v.string());
 
-export const datetimeRequired = ({ message = 'Geçerli bir tarih ve saat giriniz.' }: { message?: string } = {}) => {
-	return v.pipe(base.datetime, v.nonEmpty(message));
-};
-export const datetimeOptional = () => {
-	return v.optional(base.datetime, '');
-};
+// Optional
+type SingleFileTypeOptional = ReturnType<typeof _SingleFileOptional>;
+type SingleStrTypeOptional = ReturnType<typeof _SingleStrOptional>;
+type MultipleFileTypeOptional = ReturnType<typeof _MultipleFileOptional>;
+type MultipleStrTypeOptional = ReturnType<typeof _MultipleStrOptional>;
+// Required
+type SingleFileTypeRequired = ReturnType<typeof _SingleFileRequired>;
+type SingleStrTypeRequired = ReturnType<typeof _SingleStrRequired>;
+type MultipleFileTypeRequired = ReturnType<typeof _MultipleFileRequired>;
+type MultipleStrTypeRequired = ReturnType<typeof _MultipleStrRequired>;
+
+type FileTypeChoice<Multiple extends boolean, Required extends boolean> = Required extends true
+	? Multiple extends true
+		? MultipleFileTypeRequired
+		: SingleFileTypeRequired
+	: Multiple extends true
+		? MultipleFileTypeOptional
+		: SingleFileTypeOptional;
+type FileStrTypeChoice<Multiple extends boolean, Required extends boolean> = Required extends true
+	? Multiple extends true
+		? MultipleStrTypeRequired
+		: SingleStrTypeRequired
+	: Multiple extends true
+		? MultipleStrTypeOptional
+		: SingleStrTypeOptional;
+
+export function file<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
+	key: Key,
+	options: { multiple?: Multiple; required?: Required } = {}
+) {
+	const { multiple = false, required = true } = options;
+
+	const main = required
+		? multiple
+			? _MultipleFileRequired()
+			: _SingleFileRequired()
+		: multiple
+			? _MultipleFileOptional()
+			: _SingleFileOptional();
+	const plus = required
+		? multiple
+			? _MultipleStrRequired()
+			: _SingleStrRequired()
+		: multiple
+			? _MultipleStrOptional()
+			: _SingleStrOptional('');
+	const minus = required
+		? multiple
+			? _MultipleStrRequired()
+			: _SingleStrRequired()
+		: multiple
+			? _MultipleStrOptional()
+			: _SingleStrOptional('');
+
+	return {
+		[`${key}`]: main,
+		[`${key}+`]: plus,
+		[`${key}-`]: minus
+	} as { [P in Key]: FileTypeChoice<Multiple, Required> } & { [P in `${Key}+`]: FileStrTypeChoice<Multiple, Required> } & {
+		[P in `${Key}-`]: FileStrTypeChoice<Multiple, Required>;
+	};
+}
+// ########################################## END FILE ######################################################
+
+// ########################################## BEGIN TEXT ######################################################
+const _TextOptional = () => v.optional(base.text, '');
+const _TextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message));
+
+type TextOptional = ReturnType<typeof _TextOptional>;
+type TextRequired = ReturnType<typeof _TextRequired>;
+
+type TextTypeChoice<Required extends boolean> = Required extends true ? TextRequired : TextOptional;
+
+export function text<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _TextRequired(message) : _TextOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: TextTypeChoice<Required> };
+}
+// ########################################## END TEXT ######################################################
+
+// ########################################## BEGIN HIDDEN ######################################################
+const _HiddenIdOptional = () => v.optional(base.id, '');
+const _HiddenIdRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.id, v.nonEmpty(message));
+const _HiddenTextOptional = () => v.optional(base.text, '');
+const _HiddenTextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message));
+
+type HiddenIdOptional = ReturnType<typeof _HiddenIdOptional>;
+type HiddenIdRequired = ReturnType<typeof _HiddenIdRequired>;
+type HiddenTextOptional = ReturnType<typeof _HiddenTextOptional>;
+type HiddenTextRequired = ReturnType<typeof _HiddenTextRequired>;
+
+type HiddenTypeChoice<Required extends boolean, Type extends 'id' | 'text' = 'id'> = Required extends true
+	? Type extends 'id'
+		? HiddenIdRequired
+		: HiddenTextRequired
+	: Type extends 'id'
+		? HiddenIdOptional
+		: HiddenTextOptional;
+
+export function hidden<Key extends string, Type extends 'id' | 'text' = 'id', Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; type?: Type; message?: string } = {}
+) {
+	const { required = true, type = 'id', message } = options;
+
+	const main = required
+		? type === 'id'
+			? _HiddenIdRequired(message)
+			: _HiddenTextRequired(message)
+		: type === 'id'
+			? _HiddenIdOptional()
+			: _HiddenTextOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: HiddenTypeChoice<Required, Type> };
+}
+// ########################################## END HIDDEN ######################################################
+
+// ########################################## BEGIN DATE ######################################################
 export const dateRequired = ({ message = 'Geçerli bir tarih giriniz.' }: { message?: string } = {}) => {
 	return v.pipe(base.date, v.nonEmpty(message));
 };
 export const dateOptional = () => {
 	return v.optional(base.date, '');
 };
-export const textRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string } = {}) => {
-	return v.pipe(base.text, v.nonEmpty(message));
+
+const _DateOptional = () => v.optional(base.date, '');
+const _DateRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.date, v.nonEmpty(message));
+
+type DateOptional = ReturnType<typeof _DateOptional>;
+type DateRequired = ReturnType<typeof _DateRequired>;
+
+type DateTypeChoice<Required extends boolean> = Required extends true ? DateRequired : DateOptional;
+
+export function date<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _DateRequired(message) : _DateOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: DateTypeChoice<Required> };
+}
+// ########################################## END DATE ######################################################
+
+// ########################################## BEGIN DATETIME ######################################################
+const _DatetimeOptional = () => v.optional(base.datetime, '');
+const _DatetimeRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.datetime, v.nonEmpty(message));
+
+type DatetimeOptional = ReturnType<typeof _DatetimeOptional>;
+type DatetimeRequired = ReturnType<typeof _DatetimeRequired>;
+
+type DatetimeTypeChoice<Required extends boolean> = Required extends true ? DatetimeRequired : DatetimeOptional;
+
+export function datetime<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _DatetimeRequired(message) : _DatetimeOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: DatetimeTypeChoice<Required> };
+}
+// ########################################## END DATETIME ######################################################
+
+// ########################################## BEGIN SELECT ######################################################
+// Optional
+const _SingleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
+	v.optional(v.picklist([...selectOptions, '']), '');
+const _MultipleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
+	v.optional(v.array(v.picklist(selectOptions)), []);
+
+// Required
+const _SingleSelectRequired = ({
+	selectOptions = [],
+	message = 'Bu alan gereklidir.'
+}: {
+	selectOptions: string[];
+	message?: string;
+}) => v.pipe(v.optional(v.picklist([...selectOptions, '']), ''), v.nonEmpty(message));
+const _MultipleSelectRequired = ({ selectOptions = [], minLength = 1 }: { selectOptions: string[]; minLength?: number }) => {
+	const minLengthValue = minLength <= 0 ? 1 : minLength;
+	return v.pipe(
+		v.optional(v.array(v.picklist(selectOptions)), []),
+		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.')
+	);
 };
-export const textOptional = () => {
-	return v.optional(base.text, '');
+
+type SingleSelectTypeOptional = ReturnType<typeof _SingleSelectOptional>;
+type MultipleSelectTypeOptional = ReturnType<typeof _MultipleSelectOptional>;
+type SingleSelectTypeRequired = ReturnType<typeof _SingleSelectRequired>;
+type MultipleSelectTypeRequired = ReturnType<typeof _MultipleSelectRequired>;
+
+// 2. Multiple durumuna göre tip seçen yardımcı tipler
+type SelectChoice<Multiple extends boolean, Required extends boolean> = Required extends true
+	? Multiple extends true
+		? MultipleSelectTypeRequired
+		: SingleSelectTypeRequired
+	: Multiple extends true
+		? MultipleSelectTypeOptional
+		: SingleSelectTypeOptional;
+
+// 3. Tekil fonksiyon
+export function select<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
+	key: Key,
+	options: { multiple?: Multiple; required?: Required; selectOptions?: string[]; minLength?: number; message?: string } = {}
+) {
+	const { multiple = false, required = true, selectOptions = [], minLength = 1, message } = options;
+
+	const main = required
+		? multiple
+			? _MultipleSelectRequired({ selectOptions, minLength })
+			: _SingleSelectRequired({ selectOptions, message })
+		: multiple
+			? _MultipleSelectOptional({ selectOptions })
+			: _SingleSelectOptional({ selectOptions });
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: SelectChoice<Multiple, Required> };
+}
+// ########################################## END SELECT ######################################################
+
+// ########################################## BEGIN NUMBER ######################################################
+const _NumberRequiredInteger = ({ message = 'Bu alan gereklidir. Tamsayı olmalıdır.' }: { message?: string } = {}) => {
+	return v.pipe(
+		v.optional(base.integer, 0),
+		v.check((input) => input !== 0, message)
+	);
 };
-export const hiddenRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string } = {}) => {
-	return v.pipe(base.text, v.nonEmpty(message));
+const _NumberOptionalInteger = () => {
+	return v.optional(base.integer, 0);
 };
-export const hiddenIdRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string } = {}) => {
-	return v.pipe(base.id, v.nonEmpty(message));
+const _NumberRequiredPositiveInteger = ({
+	message = 'Bu alan gereklidir. Pozitif tamsayı olmalıdır.'
+}: { message?: string } = {}) => {
+	return v.pipe(v.optional(base.integer, 0), v.minValue(1, message));
 };
-export const numberRequiredDecimal = ({
-	message = 'Bu alan gereklidir.',
-	step = 2
-}: { message?: string; step?: number } = {}) => {
+const _NumberOptionalPositiveInteger = () => {
+	return v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0);
+};
+const _NumberRequiredNegativeInteger = ({
+	message = 'Bu alan gereklidir. Negatif tamsayı olmalıdır.'
+}: { message?: string } = {}) => {
+	return v.pipe(v.optional(base.integer, 0), v.maxValue(-1, message));
+};
+const _NumberOptionalNegativeInteger = () => {
+	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
+};
+const _NumberRequiredDecimal = ({ message = 'Bu alan gereklidir.', step = 2 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.pipe(
 		v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0),
 		v.check((input) => input !== 0, message)
 	);
 };
-export const numberOptionalDecimal = ({ step = 2 }: { step?: number } = {}) => {
+const _NumberOptionalDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0);
 };
-export const numberRequiredPositiveDecimal = ({
+const _NumberRequiredPositiveDecimal = ({
 	message = 'Bu alan gereklidir. 0 dan büyük olmalıdır.',
 	step = 2
 }: { message?: string; step?: number } = {}) => {
@@ -95,14 +295,14 @@ export const numberRequiredPositiveDecimal = ({
 	const minVal = Math.pow(10, -stepVal); // Örn: precision 2 için 10^-2 = 0.01
 	return v.pipe(v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0), v.minValue(minVal, message));
 };
-export const numberOptionalPositiveDecimal = ({ step = 2 }: { step?: number } = {}) => {
+const _NumberOptionalPositiveDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.optional(
 		v.pipe(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), v.minValue(0, 'Sayısal değer 0 veya daha büyük olmalıdır.')),
 		0
 	);
 };
-export const numberRequiredNegativeDecimal = ({
+const _NumberRequiredNegativeDecimal = ({
 	message = 'Bu alan gereklidir. 0 dan küçük olmalıdır.',
 	step = 2
 }: { message?: string; step?: number } = {}) => {
@@ -110,10 +310,98 @@ export const numberRequiredNegativeDecimal = ({
 	const maxVal = Math.pow(10, -stepVal) * -1; // Örn: precision 2 için 10^-2 = 0.01
 	return v.pipe(v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0), v.maxValue(maxVal, message));
 };
-export const numberOptionalNegativeDecimal = ({ step = 2 }: { step?: number } = {}) => {
+const _NumberOptionalNegativeDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.optional(
 		v.pipe(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), v.maxValue(0, 'Sayısal değer 0 veya daha küçük olmalıdır.')),
 		0
 	);
 };
+
+type NumberRequiredInteger = ReturnType<typeof _NumberRequiredInteger>;
+type NumberOptionalInteger = ReturnType<typeof _NumberOptionalInteger>;
+type NumberRequiredDecimal = ReturnType<typeof _NumberRequiredDecimal>;
+type NumberOptionalDecimal = ReturnType<typeof _NumberOptionalDecimal>;
+type NumberRequiredPositiveDecimal = ReturnType<typeof _NumberRequiredPositiveDecimal>;
+type NumberOptionalPositiveDecimal = ReturnType<typeof _NumberOptionalPositiveDecimal>;
+type NumberRequiredNegativeDecimal = ReturnType<typeof _NumberRequiredNegativeDecimal>;
+type NumberOptionalNegativeDecimal = ReturnType<typeof _NumberOptionalNegativeDecimal>;
+type NumberRequiredPositiveInteger = ReturnType<typeof _NumberRequiredPositiveInteger>;
+type NumberOptionalPositiveInteger = ReturnType<typeof _NumberOptionalPositiveInteger>;
+type NumberRequiredNegativeInteger = ReturnType<typeof _NumberRequiredNegativeInteger>;
+type NumberOptionalNegativeInteger = ReturnType<typeof _NumberOptionalNegativeInteger>;
+
+type NumberTypeChoice<
+	Type extends 'integer' | 'decimal',
+	Sign extends 'positive' | 'negative' | 'both',
+	Required extends boolean
+> = Type extends 'integer'
+	? // Integer types
+		Sign extends 'positive'
+		? Required extends true
+			? NumberRequiredPositiveInteger
+			: NumberOptionalPositiveInteger
+		: Sign extends 'negative'
+			? Required extends true
+				? NumberRequiredNegativeInteger
+				: NumberOptionalNegativeInteger
+			: // Both (integer)
+				Required extends true
+				? NumberRequiredInteger
+				: NumberOptionalInteger
+	: // Decimal types
+		Sign extends 'positive'
+		? Required extends true
+			? NumberRequiredPositiveDecimal
+			: NumberOptionalPositiveDecimal
+		: Sign extends 'negative'
+			? Required extends true
+				? NumberRequiredNegativeDecimal
+				: NumberOptionalNegativeDecimal
+			: // Both (decimal)
+				Required extends true
+				? NumberRequiredDecimal
+				: NumberOptionalDecimal;
+
+export function number<
+	Key extends string,
+	Type extends 'integer' | 'decimal' = 'integer',
+	Sign extends 'positive' | 'negative' | 'both' = 'positive',
+	Required extends boolean = true
+>(key: Key, options: { type?: Type; sign?: Sign; step?: number; required?: Required; message?: string } = {}) {
+	const { type = 'integer', sign = 'positive', step = 0, required = true, message } = options;
+
+	const main =
+		type === 'integer'
+			? // Integer types
+				sign === 'positive'
+				? required
+					? _NumberRequiredPositiveInteger({ message })
+					: _NumberOptionalPositiveInteger()
+				: sign === 'negative'
+					? required
+						? _NumberRequiredNegativeInteger({ message })
+						: _NumberOptionalNegativeInteger()
+					: // Both (integer)
+						required
+						? _NumberRequiredInteger({ message })
+						: _NumberOptionalInteger()
+			: // Decimal types
+				sign === 'positive'
+				? required
+					? _NumberRequiredPositiveDecimal({ step, message })
+					: _NumberOptionalPositiveDecimal({ step })
+				: sign === 'negative'
+					? required
+						? _NumberRequiredNegativeDecimal({ step, message })
+						: _NumberOptionalNegativeDecimal({ step })
+					: // Both (decimal)
+						required
+						? _NumberRequiredDecimal({ step, message })
+						: _NumberOptionalDecimal({ step });
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: NumberTypeChoice<Type, Sign, Required> };
+}
+// ########################################## END NUMBER ######################################################
