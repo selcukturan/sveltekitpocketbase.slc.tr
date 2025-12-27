@@ -36,7 +36,7 @@
 			value = newBindValue;
 		}
 		oninput?.({ event, newValue: newBindValue });
-		context.validate?.();
+		context.validate?.({ preflightOnly: true });
 	};
 	// `value`, bileşen dışından `prop` ile değiştiriliyorsa `input` değeri ayarlanır.
 	// `value`, bileşen içinden `oninput` ile değiştiriliyorsa `input` değeri ayarlanmaz.

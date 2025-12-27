@@ -129,7 +129,8 @@
 		 */
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
-			hide();
+			const activeElement = document.activeElement as HTMLElement;
+			if (!isInput(activeElement)) hide();
 		};
 
 		/**

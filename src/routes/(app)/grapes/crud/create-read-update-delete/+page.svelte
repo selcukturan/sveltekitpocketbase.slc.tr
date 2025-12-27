@@ -201,6 +201,7 @@
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 						{@const updateRemoteForm = updateForm.for('update').preflight(updateFormSchema)}
 						<DrawerFormContent.Content.Form
+							enctype="multipart/form-data"
 							schema={updateFormSchema}
 							validate={updateRemoteForm.validate}
 							{...updateRemoteForm.enhance(async ({ submit }) => {
@@ -256,6 +257,8 @@
 										label: value.toUpperCase()
 									}))}
 								/>
+								<input {...updateRemoteForm.fields.multiple_files.as('file multiple')} />
+								<input {...updateRemoteForm.fields.single_file.as('file')} />
 							{/snippet}
 
 							{#snippet buttons()}

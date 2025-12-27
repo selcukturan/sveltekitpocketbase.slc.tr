@@ -34,7 +34,7 @@
 			value = newValue;
 			oninput?.({ event, value });
 		}
-		context.validate?.();
+		context.validate?.({ preflightOnly: true });
 	};
 	watch(
 		() => value,

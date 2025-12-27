@@ -42,6 +42,8 @@ export const updateFormSchema = v.object({
 	title: input.textOptional(),
 	quantity: input.numberRequiredNegativeInteger(),
 	purchase_date: input.datetimeRequired(),
+	single_file: v.optional(v.file()),
+	multiple_files: v.optional(v.array(v.file())),
 	select_single: input.selectRequiredSingle({
 		options: Object.values(TestDatatableSelectSingleOptions)
 	}),
