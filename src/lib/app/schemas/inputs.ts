@@ -39,7 +39,7 @@ type FileStrTypeChoice<Multiple extends boolean, Required extends boolean> = Req
 		? MultipleStrTypeOptional
 		: SingleStrTypeOptional;
 
-export function file<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
+export function File<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
 	key: Key,
 	options: { multiple?: Multiple; required?: Required } = {}
 ) {
@@ -86,7 +86,7 @@ type TextRequired = ReturnType<typeof _TextRequired>;
 
 type TextTypeChoice<Required extends boolean> = Required extends true ? TextRequired : TextOptional;
 
-export function text<Key extends string, Required extends boolean = true>(
+export function Text<Key extends string, Required extends boolean = true>(
 	key: Key,
 	options: { required?: Required; message?: string } = {}
 ) {
@@ -119,7 +119,7 @@ type HiddenTypeChoice<Required extends boolean, Type extends 'id' | 'text' = 'id
 		? HiddenIdOptional
 		: HiddenTextOptional;
 
-export function hidden<Key extends string, Type extends 'id' | 'text' = 'id', Required extends boolean = true>(
+export function Hidden<Key extends string, Type extends 'id' | 'text' = 'id', Required extends boolean = true>(
 	key: Key,
 	options: { required?: Required; type?: Type; message?: string } = {}
 ) {
@@ -178,7 +178,7 @@ type DatetimeRequired = ReturnType<typeof _DatetimeRequired>;
 
 type DatetimeTypeChoice<Required extends boolean> = Required extends true ? DatetimeRequired : DatetimeOptional;
 
-export function datetime<Key extends string, Required extends boolean = true>(
+export function Datetime<Key extends string, Required extends boolean = true>(
 	key: Key,
 	options: { required?: Required; message?: string } = {}
 ) {
@@ -230,7 +230,7 @@ type SelectChoice<Multiple extends boolean, Required extends boolean> = Required
 		: SingleSelectTypeOptional;
 
 // 3. Tekil fonksiyon
-export function select<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
+export function Select<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
 	key: Key,
 	options: { multiple?: Multiple; required?: Required; selectOptions?: string[]; minLength?: number; message?: string } = {}
 ) {
@@ -363,7 +363,7 @@ type NumberTypeChoice<
 				? NumberRequiredDecimal
 				: NumberOptionalDecimal;
 
-export function number<
+export function Number<
 	Key extends string,
 	Type extends 'integer' | 'decimal' = 'integer',
 	Sign extends 'positive' | 'negative' | 'both' = 'positive',
