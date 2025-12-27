@@ -129,8 +129,9 @@
 		 */
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
-			const activeElement = document.activeElement as HTMLElement;
-			if (!isInput(activeElement)) hide();
+			if (e.target === dialog) {
+				hide();
+			}
 		};
 
 		/**
