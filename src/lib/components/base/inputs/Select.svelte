@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Popup from './Popup.svelte';

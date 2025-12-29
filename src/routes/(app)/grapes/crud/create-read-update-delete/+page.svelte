@@ -17,7 +17,7 @@
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
 	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button, Select } from '$lib/components/base/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button, Select, File } from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
@@ -257,8 +257,18 @@
 										label: value.toUpperCase()
 									}))}
 								/>
-								<input {...updateRemoteForm.fields.multiple_files.as('file multiple')} />
-								<input {...updateRemoteForm.fields.single_file.as('file')} />
+								<File field={updateRemoteForm.fields.multiple_files} value={oneResult.multiple_files} />
+
+								<!-- {oneResult.single_file}
+								{oneResult.multiple_files} -->
+								<!-- <input {...updateRemoteForm.fields.single_file.as('file')} /> -->
+								<!-- <input type="text" name="single_file" placeholder="single_file" />
+								<input type="file" name="single_file_Plus" placeholder="single_file_Plus" />
+								<input type="text" name="single_file_Minus" placeholder="single_file_Minus" /> -->
+
+								<!-- <input {...updateRemoteForm.fields.multiple_files.as('file multiple')} />
+								<input type="text" name="multiple_files_Plus" placeholder="multiple_files_Plus" />
+								<input type="text" name="multiple_files_Minus" placeholder="multiple_files_Minus" /> -->
 							{/snippet}
 
 							{#snippet buttons()}
