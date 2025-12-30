@@ -72,6 +72,14 @@ class Toaster {
 		this.toasts = this.toasts.filter((toast) => toast.id !== id);
 	};
 
+	readonly removeAll = () => {
+		// Önce zamanlayıcıyı temizle ve Map'ten sil
+		for (const id of this.#toastTimerData.keys()) {
+			this.remove(id);
+		}
+		this.toasts = [];
+	};
+
 	// --- Özel Zamanlayıcı Metotları ---
 
 	private startTimer(id: string, durationMs: number) {

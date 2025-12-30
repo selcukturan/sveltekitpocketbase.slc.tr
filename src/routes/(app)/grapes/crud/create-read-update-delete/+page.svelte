@@ -221,14 +221,14 @@
 									});
 								} catch (error) {
 									const myError = isHttpError(error) ? error : null;
-									pageToaster.add({
+									drawer?.toast({
 										type: 'error',
 										title: 'Hata!',
 										description: 'Client: ' + myError?.body.message,
 										action: {
 											label: t('close'),
 											onClick: (id) => {
-												pageToaster.remove(id);
+												drawer?.removeToast(id);
 											}
 										}
 									});

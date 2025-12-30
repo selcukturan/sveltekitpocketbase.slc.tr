@@ -6,13 +6,13 @@
 	let {
 		message = 'Onaylıyor musunuz?',
 		yes = 'Evet',
-		no = 'Hayır'
-	}: { message?: string; yes?: string; no?: string } = $props();
+		no = 'Hayır',
+		animationDuration = 150 // Animasyon süresini, JS ve CSS'te senkronize tut.
+	}: { message?: string; yes?: string; no?: string; animationDuration?: number } = $props();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let resolvePromise: ((value: boolean) => void) | null = null;
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
-	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
 	/**
 	 * KISITLI TARAYICI UYUMLULUĞU:
 	 * closedby="none" | Yalnızca "Kapat" düğmesine basmak gerekir.
@@ -52,7 +52,7 @@
 
 		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
 
-		await sleep(ANIMATION_DURATION); // CSS animasyonu için bekleniyor. Kod burada duraklar.
+		await sleep(animationDuration); // CSS animasyonu için bekleniyor. Kod burada duraklar.
 
 		// Bekleme bittikten sonra bu kodlar çalışır. Kapatma işlemi CSS `.closing` animasyonu biter.
 		isClosing = false;
@@ -89,7 +89,9 @@
 		 */
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
-			// hide('handleCancel - Backdrop click', false);
+			if (e.target === dialog) {
+				// hide('handleCancel - Backdrop click', false);
+			}
 		};
 
 		/**
@@ -124,6 +126,7 @@
 </script>
 
 <dialog
+	style="--confirm-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	{@attach dialogAttach}
 	class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
@@ -152,10 +155,10 @@
 
 	/* Animate In */
 	dialog[open] {
-		animation: dialog-enter-from-bottom 0.15s ease-out forwards;
+		animation: dialog-enter-from-bottom var(--confirm-animation-duration) ease-out forwards;
 	}
 	dialog[open]::backdrop {
-		animation: backdrop-fade-in 0.15s ease-out forwards;
+		animation: backdrop-fade-in var(--confirm-animation-duration) ease-out forwards;
 	}
 
 	/* Starting style for entry animation */
@@ -172,11 +175,11 @@
 	}
 
 	dialog[open].closing {
-		animation: dialog-exit-to-bottom 0.15s ease-out forwards;
+		animation: dialog-exit-to-bottom var(--confirm-animation-duration) ease-out forwards;
 	}
 
 	dialog[open].closing::backdrop {
-		animation: backdrop-fade-out 0.15s ease-out forwards;
+		animation: backdrop-fade-out var(--confirm-animation-duration) ease-out forwards;
 	}
 
 	@keyframes dialog-enter-from-bottom {

@@ -146,7 +146,7 @@
 		<button
 			type="button"
 			onclick={() => plusInputElement?.click()}
-			class="bg-secondary-400 cursor-pointer rounded border px-2 py-1"
+			class="slc-input bg-secondary-400 cursor-pointer rounded border px-2 py-1"
 		>
 			<span>Dosya Seç ({length})</span>
 		</button>

@@ -3,6 +3,8 @@
 	import { isInput } from '$lib/utils/common';
 	import { tick, type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { Toasts, createToaster } from '$lib/components/base/toast';
+	import type { Toast } from '$lib/components/base/toast/types';
 
 	/**
 	 * KISIT TARAYICI UYUMLULUĞU:
@@ -16,7 +18,8 @@
 		onBeforeOpen,
 		onBeforeClose,
 		escClose = true,
-		contentLoading = false
+		contentLoading = false,
+		animationDuration = 150 // Animasyon süresini, JS ve CSS'te senkronize tut.
 	}: {
 		children?: Snippet;
 		onOpen?: () => void;
@@ -25,12 +28,16 @@
 		onBeforeClose?: () => boolean | Promise<boolean>;
 		escClose?: boolean;
 		contentLoading?: boolean;
+		animationDuration?: number;
 	} = $props();
 
+	const compId = $props.id();
+	const toasterId = `drawer-toaster-${compId}`;
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
-	const ANIMATION_DURATION = 150; // Animasyon süresini, JS ve CSS'te senkronize tut.
+
+	const drawerToaster = createToaster({ name: toasterId, position: 'top-center' });
 	/**
 	 * KISITLI TARAYICI UYUMLULUĞU:
 	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/closedBy#browser_compatibility
@@ -48,6 +55,18 @@
 
 	export const close = (force = false) => {
 		hide(force);
+	};
+
+	export const toast = (toast: Toast) => {
+		drawerToaster.add(toast);
+	};
+
+	export const removeToast = (id: string) => {
+		drawerToaster.remove(id);
+	};
+
+	export const removeAllToast = () => {
+		drawerToaster.removeAll();
 	};
 
 	const show = async () => {
@@ -88,11 +107,13 @@
 		if (!canClose) return; // Kapatma izni yoksa fonksiyondan erken çık
 
 		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
-		await sleep(ANIMATION_DURATION); // CSS animasyonu için bekleniyor. Kod burada duraklar.
+		await sleep(animationDuration); // CSS animasyonu için bekleniyor. Kod burada duraklar.
 		isClosing = false; // Bekleme bittikten sonraki işlemler. Kapatma işlemi CSS `.closing` animasyonu bitti. Diyalog kapatılıyor.
 
 		isOpen = false; // Artık kapalı durumda. Kapatma işlemi CSS `.closing` animasyonu bitti.
 		await tick();
+
+		removeAllToast();
 
 		dialog?.close();
 		onClose?.();
@@ -172,7 +193,7 @@
 <!-- {#if isOpen} -->
 
 <dialog
-	style="--drawer-animation-duration: {ANIMATION_DURATION / 1000}s"
+	style="--drawer-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	class:closing={isClosing}
 	class="{dialogClasses} {dialogFocusOverrideClasses}"
@@ -180,6 +201,7 @@
 	{@attach focustrap}
 	{@attach dialogAttach}
 >
+	<Toasts toasterName={toasterId} />
 	<div class="h-full w-full">
 		{@render children?.()}
 	</div>

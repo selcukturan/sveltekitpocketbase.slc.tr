@@ -2,9 +2,6 @@
 	import { Drawer } from '$lib/components/base/drawer';
 	import { confirm } from '$lib/components/base/confirm';
 	import { Page, Head } from '$lib/components/templates';
-	import { Toasts, createToaster } from '$lib/components/base/toast';
-
-	const dialogToaster = createToaster({ name: 'dialog-toaster', position: 'top-center' });
 
 	let drawer1: Drawer;
 	let drawer2: Drawer;
@@ -42,7 +39,6 @@
 </Page>
 
 <Drawer bind:this={drawer1}>
-	<Toasts toasterName="dialog-toaster" />
 	<Page>
 		<Page.Header class="flex items-center justify-between border-b p-4">
 			<div class="flex w-full items-center justify-between">
@@ -66,7 +62,7 @@
 
 			<button
 				onclick={() => {
-					dialogToaster.add({
+					drawer1.toast({
 						type: 'info',
 						title: 'Silmek istediğinize emin misiniz?',
 						description: crypto.randomUUID(),

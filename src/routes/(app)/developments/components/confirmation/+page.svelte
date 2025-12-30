@@ -22,7 +22,7 @@
 					<button
 						onclick={async () => {
 							answer = 'waiting';
-							const isConfirmed = await confirm();
+							const isConfirmed = await confirm({ animationDuration: 150 });
 							if (isConfirmed) {
 								answer = 'true';
 							} else {
