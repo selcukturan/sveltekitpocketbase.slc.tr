@@ -46,7 +46,7 @@ export const handleError: HandleServerError = async ({ error, event, status, mes
 	const type = myError?.body.type || 'general';
 	const errorId = myError?.body.errorId || '#SLC:HandleServerError';
 	const msg = myError?.body.message || message;
-	console.log('HandleServerError', type, errorId, msg);
+	console.log('HandleServerError', type, errorId, msg, error);
 	return {
 		type,
 		errorId,
