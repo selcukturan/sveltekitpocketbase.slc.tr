@@ -42,16 +42,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleError: HandleServerError = async ({ error, event, status, message }) => {
 	const myError = isHttpError(error) ? error : null;
-	console.log('HandleServerError');
+
+	const type = myError?.body.type || 'general';
+	const errorId = myError?.body.errorId || '#SLC:HandleServerError';
+	const msg = myError?.body.message || message;
+	console.log('HandleServerError', type, errorId, msg);
 	return {
-		type: myError?.body.type || 'general',
-		errorId: myError?.body.errorId || '#SLC:HandleServerError',
-		message: myError?.body.message || message
+		type,
+		errorId,
+		message: msg
 	};
 };
 
 export const handleValidationError: HandleValidationError = ({ event, issues }) => {
-	console.log('HandleValidationError');
+	console.log('HandleValidationError', issues);
 	return {
 		type: 'general',
 		errorId: '#SLC:HandleValidationError',
