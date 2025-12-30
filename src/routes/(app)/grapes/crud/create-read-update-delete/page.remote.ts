@@ -4,7 +4,7 @@ import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '$lib/server/error';
-import { transformParams } from '$lib/utils/transform-params-helper';
+import { paramsFileKeyTransform } from '$lib/utils/transform-params-helper';
 
 import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
 
@@ -63,10 +63,13 @@ export const updateForm = form(updateFormSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	const transformedParams = transformParams(params);
+	const transformedParams = paramsFileKeyTransform(params);
+
+	const id = transformedParams.id;
+	const values = { ...transformedParams, id: undefined };
 
 	const updatedResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.TestDatatable).update(transformedParams.id, { ...transformedParams, id: undefined }),
+		locals.pb.collection(Collections.TestDatatable).update(id, values),
 		mapUnknownToError
 	);
 

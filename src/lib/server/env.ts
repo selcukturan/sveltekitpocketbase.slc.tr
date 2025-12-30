@@ -17,7 +17,7 @@ const bodySizeLimitSchema = v.pipe(
 	v.transform(Number), // 2. Dönüştürme işlemi
 	v.number('BODY_SIZE_LIMIT sayısal bir değere dönüştürülebilmelidir.'), // 3. Dönüştürülmüş değerin geçerli bir sayı olduğunu (NaN olmadığını) doğrula
 	v.integer('BODY_SIZE_LIMIT bir tam sayı olmalıdır.'),
-	v.minValue(1, 'BODY_SIZE_LIMIT en az 1 olmalıdır.'),
+	v.minValue(524288, 'BODY_SIZE_LIMIT en az 512KB olmalıdır.'),
 	v.maxValue(52428800, 'BODY_SIZE_LIMIT en fazla 50MB olmalıdır.')
 );
 
