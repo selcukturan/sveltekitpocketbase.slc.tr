@@ -12,13 +12,22 @@ const portNumberSchema = v.pipe(
 	v.minValue(1, 'PORT numarası en az 1 olmalıdır.'),
 	v.maxValue(65535, 'PORT numarası en fazla 65535 olmalıdır.')
 );
+const bodySizeLimitSchema = v.pipe(
+	v.unknown(), // 1. Herhangi bir girdi türünü kabul et
+	v.transform(Number), // 2. Dönüştürme işlemi
+	v.number('BODY_SIZE_LIMIT sayısal bir değere dönüştürülebilmelidir.'), // 3. Dönüştürülmüş değerin geçerli bir sayı olduğunu (NaN olmadığını) doğrula
+	v.integer('BODY_SIZE_LIMIT bir tam sayı olmalıdır.'),
+	v.minValue(1, 'BODY_SIZE_LIMIT en az 1 olmalıdır.'),
+	v.maxValue(52428800, 'BODY_SIZE_LIMIT en fazla 52428800 olmalıdır.')
+);
 
 const envSchema = v.object({
 	NODE_ENV: v.optional(v.string('NODE_ENV bir metin olmalıdır.'), 'development'),
 	TZ: v.string('TZ (Zaman Dilimi) gereklidir ve bir metin olmalıdır.'),
 	PB_BACKEND_URL: v.string('PB_BACKEND_URL gereklidir ve bir metin olmalıdır.'),
 	PORT: portNumberSchema,
-	ORIGIN: v.string('ORIGIN gereklidir ve bir metin olmalıdır.')
+	ORIGIN: v.string('ORIGIN gereklidir ve bir metin olmalıdır.'),
+	BODY_SIZE_LIMIT: bodySizeLimitSchema
 });
 
 export type EnvSchemaType = v.InferOutput<typeof envSchema>;
