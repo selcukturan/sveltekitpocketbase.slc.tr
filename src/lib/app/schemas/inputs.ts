@@ -23,9 +23,23 @@ const _SingleFileMinusRequired = () => v.optional(v.string(), undefined); // ops
 
 // #### MULTIPLE
 // Optional
-const _MultipleFileOptional = () => v.optional(v.array(v.string()));
-const _MultipleFilePlusOptional = () => v.optional(v.array(v.file()), []);
-const _MultipleFileMinusOptional = () => v.optional(v.array(v.string()));
+const _MultipleFileOptional = () =>
+	v.pipe(
+		v.optional(v.array(v.string()), []),
+		v.minLength(0),
+		v.transform(() => undefined)
+	);
+const _MultipleFilePlusOptional = () =>
+	v.pipe(
+		v.optional(v.array(v.file()), []),
+		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	);
+const _MultipleFileMinusOptional = () =>
+	v.pipe(
+		v.optional(v.array(v.string()), []),
+		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	);
+
 // Required
 const _MultipleFileRequired = () =>
 	v.pipe(
@@ -33,8 +47,16 @@ const _MultipleFileRequired = () =>
 		v.minLength(1, 'En az 1 dosya seçilmelidir.'),
 		v.transform(() => undefined)
 	);
-const _MultipleFilePlusRequired = () => v.pipe(v.optional(v.array(v.file()), undefined)); // v.array(v.file());
-const _MultipleFileMinusRequired = () => v.pipe(v.optional(v.array(v.string()), undefined)); // v.array(v.string());
+const _MultipleFilePlusRequired = () =>
+	v.pipe(
+		v.optional(v.array(v.file()), []),
+		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	);
+const _MultipleFileMinusRequired = () =>
+	v.pipe(
+		v.optional(v.array(v.string()), []),
+		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	);
 
 // #### SINGLE
 // Optional

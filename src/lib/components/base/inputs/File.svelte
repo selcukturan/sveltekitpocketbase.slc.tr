@@ -1,11 +1,11 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type DisplayFileType = {
 		name: string;
@@ -13,71 +13,64 @@
 		deleted: boolean;
 	};
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
+	type Props = Omit<SvelteHTMLElements['select'], 'value' | 'onchange'> & {
 		value?: string[];
 		label?: string;
-		oninput?: (params: { event: Event; value: string[] }) => void;
 		onchange?: (params: { event: Event; value: string[] }) => void;
 		field: RemoteFormField<string[]>;
 	};
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable([]), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
+	let { value = $bindable([]), label, onchange, field, class: classes, ...rest }: Props = $props();
 	const context = getFormInputsContext();
 	// ######################## VARIABLES ###############################################################################################
 	let isOnInput = false;
-	// let inputValue = $state([] as string[]);
-	let inputElement: HTMLSelectElement | undefined = $state();
-	let fileInputElement: HTMLInputElement | undefined = $state();
-	const issues = $derived(field?.issues() ?? []);
-	const inputAttributes = $derived(field.as('select multiple'));
+	let mainInputElement: HTMLSelectElement | undefined = $state();
+	let plusInputElement: HTMLInputElement | undefined = $state();
+	let minusInputElement: HTMLSelectElement | undefined = $state();
 
-	const name = $derived(inputAttributes.name);
-	const namePlus = $derived(name.replace('[]', '_Plus[]'));
-	const nameMinus = $derived(name.replace('[]', '_Minus[]'));
+	const mainInputAttributes = $derived(field.as('select multiple'));
 
-	let uploadedFiles: string[] = value;
+	const issues = $derived(field.issues() ?? []);
+	const mainName = $derived(mainInputAttributes.name);
+	const plusName = $derived(mainName.replace('[]', '_Plus[]'));
+	const minusName = $derived(mainName.replace('[]', '_Minus[]'));
+
 	let files = $state<FileList>();
+	let uploadedFiles = value;
 	let deletedFileNames = $state<string[]>([]);
 	let valueMap = $state<SvelteMap<string, DisplayFileType>>(new SvelteMap());
-	$inspect(valueMap);
 
-	const displayFiles = $derived.by(() => {
-		let returnedValue: DisplayFileType[] = [];
-		valueMap.forEach((value) => {
-			returnedValue.push(value);
-		});
-		return returnedValue;
-	});
+	const displayFiles = $derived([...valueMap.values()]);
+	const length = $derived([...valueMap.values()].filter((f) => !f.deleted).length);
+
+	const getMapNotDeletedFiles = () => [...valueMap.values()].filter((f) => !f.deleted).map((f) => f.name);
 
 	// ## BEGIN value logic ###############################################################################
-	const onInput = (event: Event) => {
-		const target = event.target;
-		if (!(target instanceof HTMLInputElement)) return;
+	let dt = new DataTransfer(); // Fiziksel dosyaları biriktirmek için
+	const plusInputOnChange = (event: Event) => {
+		const target = event.target as HTMLInputElement;
+		if (!target.files) return;
 
-		const inputFiles = target.files;
-		if (!inputFiles) return;
-
-		const currValue = Array.from(inputFiles).map((file) => file.name);
-		currValue.forEach((value) => {
-			valueMap.set(value, {
-				name: value,
-				uploaded: uploadedFiles.includes(value),
-				deleted: deletedFileNames.includes(value)
-			});
+		// Yeni seçilen her dosyayı DataTransfer'e ve Map'e ekle
+		Array.from(target.files).forEach((file) => {
+			// Eğer aynı isimde dosya zaten varsa ekleme (opsiyonel)
+			if (!valueMap.has(file.name)) {
+				dt.items.add(file);
+				valueMap.set(file.name, {
+					name: file.name,
+					uploaded: uploadedFiles.includes(file.name),
+					deleted: deletedFileNames.includes(file.name)
+				});
+			}
 		});
 
-		isOnInput = true;
-		value = [...valueMap.keys()];
-		field.set([...valueMap.keys()]);
-		oninput?.({ event, value });
+		files = dt.files;
 
-		/* const newValue = values;
-		if (newValue !== value) {
-			isOnInput = true;
-			value = [...value, ...newValue];
-			field.set([...value, ...newValue]);
-			oninput?.({ event, value });
-		} */
+		// sync Value and Field
+		isOnInput = true;
+		value = getMapNotDeletedFiles();
+
+		field.set(value);
 		context.validate?.({ preflightOnly: true });
 	};
 	watch(
@@ -86,57 +79,50 @@
 			if (isOnInput) {
 				isOnInput = false;
 				return;
-			} else {
-				currValue.forEach((value) => {
-					valueMap.set(value, {
-						name: value,
-						uploaded: uploadedFiles.includes(value),
-						deleted: deletedFileNames.includes(value)
-					});
-				});
-				field.set([...valueMap.keys()]);
 			}
+
+			// sync Map and Field
+			currValue.forEach((value) => {
+				valueMap.set(value, {
+					name: value,
+					uploaded: uploadedFiles.includes(value),
+					deleted: deletedFileNames.includes(value)
+				});
+			});
+			field.set(getMapNotDeletedFiles());
 		}
 	);
 	// ## END value logic ###############################################################################
 
-	// ## BEGIN input change ############################################################################
-	/* const onChange = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const value = field?.value() ?? [];
-		onchange?.({ event, value });
-	}; */
-	// ## END input change ##############################################################################
-
 	function removeFileInputElement(nameToDelete: string) {
-		if (!fileInputElement) return;
+		valueMap.delete(nameToDelete);
 
-		const inputFiles = fileInputElement.files;
+		const newDt = new DataTransfer();
+		Array.from(dt.files).forEach((file) => {
+			if (file.name !== nameToDelete) newDt.items.add(file);
+		});
 
-		if (!inputFiles) return;
+		files = newDt.files;
+		dt = newDt;
 
-		const dataTransfer = new DataTransfer();
+		// sync Value and Field
+		isOnInput = true;
+		value = getMapNotDeletedFiles();
 
-		for (let i = 0; i < inputFiles.length; i++) {
-			const file = inputFiles[i];
-			const fileName = file.name;
-			if (fileName !== nameToDelete) {
-				dataTransfer.items.add(file);
-			} else {
-				valueMap.delete(fileName);
-				value = [...valueMap.keys()];
-			}
-		}
-
-		files = dataTransfer.files;
+		field.set(value);
+		context.validate?.({ preflightOnly: true });
 	}
 
 	function removeUploadedElement(nameToDelete: string) {
 		if (valueMap.has(nameToDelete)) {
 			const deletedObject = valueMap.get(nameToDelete);
 			if (!deletedObject) return;
+
 			valueMap.set(nameToDelete, { ...deletedObject, deleted: true });
 			deletedFileNames.push(nameToDelete);
+
+			value = getMapNotDeletedFiles();
+			context.validate?.({ preflightOnly: true });
 		}
 	}
 
@@ -144,26 +130,55 @@
 		if (valueMap.has(nameToRestore)) {
 			const restoredObject = valueMap.get(nameToRestore);
 			if (!restoredObject) return;
+
 			valueMap.set(nameToRestore, { ...restoredObject, deleted: false });
 			deletedFileNames = deletedFileNames.filter((name) => name !== nameToRestore);
+
+			value = getMapNotDeletedFiles();
+			context.validate?.({ preflightOnly: true });
 		}
 	}
 </script>
 
-<!-- value={inputValue} -->
 <div style:position="relative">
 	<label>
 		<h2>{label}</h2>
+		<button
+			type="button"
+			onclick={() => plusInputElement?.click()}
+			class="bg-secondary-400 cursor-pointer rounded border px-2 py-1"
+		>
+			<span>Dosya Seç ({length})</span>
+		</button>
 		<!-- class="sr-only" tabindex={-1} aria-hidden={true}  -->
-		<select {...inputAttributes} bind:this={inputElement}>
+		<select class="sr-only" tabindex={-1} aria-hidden={true} {...mainInputAttributes} {...rest} bind:this={mainInputElement}>
 			{#each value as option, i (i)}
 				<option value={option}>{option}</option>
 			{/each}
 		</select>
 
-		<input type="file" name={namePlus} oninput={onInput} bind:this={fileInputElement} multiple bind:files />
+		<input
+			multiple
+			bind:files
+			bind:this={plusInputElement}
+			type="file"
+			name={plusName}
+			accept="image/*"
+			onchange={plusInputOnChange}
+			class="sr-only"
+			tabindex={-1}
+			aria-hidden={true}
+		/>
 
-		<select name={nameMinus} multiple>
+		<select
+			class="sr-only"
+			tabindex={-1}
+			aria-hidden={true}
+			name={minusName}
+			bind:this={minusInputElement}
+			bind:value={deletedFileNames}
+			multiple
+		>
 			{#each deletedFileNames as option, i (i)}
 				<option value={option} selected>{option}</option>
 			{/each}
