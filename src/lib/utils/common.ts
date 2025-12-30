@@ -163,3 +163,31 @@ export function normalizeStringForTurkishSearch(str: string): string {
 		.toLocaleLowerCase('tr-TR') // 3. Türkçe'ye uygun küçük harfe çevir
 		.replace(/ı/g, 'i'); // 4. Tüm 'ı' harflerini 'i' yap
 }
+
+/* export function sanitizeFilename(filename: string): string {
+	const map: Record<string, string> = {
+		ç: 'c',
+		ğ: 'g',
+		ı: 'i',
+		ö: 'o',
+		ş: 's',
+		ü: 'u',
+		Ç: 'C',
+		Ğ: 'G',
+		İ: 'I',
+		Ö: 'O',
+		Ş: 'S',
+		Ü: 'U'
+	};
+
+	// Türkçe karakterleri değiştir
+	let sanitized = filename.replace(/[çğıöşüÇĞİÖŞÜ]/g, (m) => map[m]);
+
+	// Geçersiz karakterleri kaldır ve boşlukları _ yap
+	sanitized = sanitized
+		.replace(/\s+/g, '_') // Boşlukları alt tire yap
+		.replace(/[^a-zA-Z0-9.\-_]/g, '') // Özel karakterleri sil
+		.replace(/_{2,}/g, '_'); // Yan yana alt tireleri temizle
+
+	return sanitized;
+} */

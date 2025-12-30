@@ -4,22 +4,38 @@ import * as base from './base';
 // ########################################## BEGIN FILE ######################################################
 // #### SINGLE
 // Optional
-export const sf_optional = v.pipe(
-	v.string(),
-	v.transform(() => undefined)
-);
-const _SingleFileOptional = () => sf_optional;
-const _SingleFilePlusOptional = () => v.optional(v.file());
-const _SingleFileMinusOptional = () => v.optional(v.string(), undefined); // opsiyonel olacak
+const _SingleFileOptional = () =>
+	v.pipe(
+		v.optional(v.string(), ''),
+		v.transform(() => undefined)
+	);
+const _SingleFilePlusOptional = () =>
+	v.pipe(
+		v.optional(v.file()),
+		v.transform((file) => (file ? file : undefined))
+	);
+const _SingleFileMinusOptional = () =>
+	v.pipe(
+		v.optional(v.string(), ''),
+		v.transform(() => undefined)
+	);
 // Required
-export const sf_required = v.pipe(
-	v.string(),
-	v.nonEmpty('Bu alan gereklidir.'),
-	v.transform(() => undefined)
-);
-const _SingleFileRequired = () => sf_required;
-const _SingleFilePlusRequired = () => v.optional(v.file());
-const _SingleFileMinusRequired = () => v.optional(v.string(), undefined); // opsiyonel olacak
+const _SingleFileRequired = () =>
+	v.pipe(
+		v.optional(v.string(), ''),
+		v.nonEmpty('Bu alan gereklidir.'),
+		v.transform(() => undefined)
+	);
+const _SingleFilePlusRequired = () =>
+	v.pipe(
+		v.optional(v.file()),
+		v.transform((file) => (file ? file : undefined))
+	);
+const _SingleFileMinusRequired = () =>
+	v.pipe(
+		v.optional(v.string(), ''),
+		v.transform(() => undefined)
+	);
 
 // #### MULTIPLE
 // Optional

@@ -47,7 +47,7 @@ export const updateFormSchema = v.object({
 	...input.Select('select_single', { selectOptions: Object.values(TestDatatableSelectSingleOptions) }),
 	...input.Select('select_multiple', { multiple: true, selectOptions: Object.values(TestDatatableSelectMultipleOptions) }),
 	/* ...input.File('single_file', { required: true }), */
-	...input.File('multiple_files', { multiple: true, required: true })
+	...input.File('multiple_files', { multiple: true, required: false })
 });
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
