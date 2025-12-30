@@ -5,9 +5,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter({
-			bodySizeLimit: '10mb'
-		}),
+		adapter: adapter(),
 		experimental: {
 			remoteFunctions: true
 		}
