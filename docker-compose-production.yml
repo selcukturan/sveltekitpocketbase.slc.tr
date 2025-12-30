@@ -10,6 +10,7 @@ services:
       NODE_ENV: production
       PORT: ${PORT}
       ORIGIN: ${ORIGIN}
+      BODY_SIZE_LIMIT: ${BODY_SIZE_LIMIT}
     ports:
       - ${PORT}:${PORT}
     networks:
