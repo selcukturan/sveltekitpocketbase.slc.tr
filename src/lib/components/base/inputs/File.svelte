@@ -163,7 +163,7 @@
 			bind:this={plusInputElement}
 			type="file"
 			name={plusName}
-			accept=".png, .jpg, .jpeg, .gif, .webp, .svg, image/png, image/jpeg, image/gif, image/webp, image/svg+xml"
+			accept="image/*"
 			onchange={plusInputOnChange}
 			class="sr-only"
 			tabindex={-1}
