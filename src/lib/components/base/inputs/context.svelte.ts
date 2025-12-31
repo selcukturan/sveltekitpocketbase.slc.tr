@@ -1,16 +1,16 @@
 import { getContext, setContext } from 'svelte';
-import type { RemoteForm } from '@sveltejs/kit';
-import type { ErrorMessage, ObjectEntries, ObjectIssue, ObjectSchema } from 'valibot';
+import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
+import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 
 class FormInputsContext<
-	T1 extends Record<string, any>,
-	T2 extends Record<string, any>,
-	Schema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
+	TInput extends RemoteFormInput | void,
+	TOutput,
+	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 > {
-	form: RemoteForm<T1, T2>;
-	schema: Schema;
+	form: RemoteForm<TInput, TOutput>;
+	schema: TSchema;
 
-	constructor(form: RemoteForm<T1, T2>, schema: Schema) {
+	constructor(form: RemoteForm<TInput, TOutput>, schema: TSchema) {
 		this.form = $state(form);
 		this.schema = $state(schema);
 	}
@@ -19,17 +19,17 @@ class FormInputsContext<
 const key = Symbol('SLC-FORM-INPUTS-CONTEXT');
 // ################################## BEGIN Export Table Context ##############################################################################################################################
 export function createFormInputsContext<
-	T1 extends Record<string, any>,
-	T2 extends Record<string, any>,
-	Schema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
->(form: RemoteForm<T1, T2>, schema: Schema) {
-	return setContext(key, new FormInputsContext<T1, T2, Schema>(form, schema));
+	TInput extends RemoteFormInput | void,
+	TOutput,
+	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
+>(form: RemoteForm<TInput, TOutput>, schema: TSchema) {
+	return setContext(key, new FormInputsContext<TInput, TOutput, TSchema>(form, schema));
 }
 export function getFormInputsContext<
-	T1 extends Record<string, any>,
-	T2 extends Record<string, any>,
-	Schema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
+	TInput extends RemoteFormInput | void,
+	TOutput,
+	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 >() {
-	return getContext<ReturnType<typeof createFormInputsContext<T1, T2, Schema>>>(key);
+	return getContext<ReturnType<typeof createFormInputsContext<TInput, TOutput, TSchema>>>(key);
 }
 // ################################## END Export Table Context ################################################################################################################################

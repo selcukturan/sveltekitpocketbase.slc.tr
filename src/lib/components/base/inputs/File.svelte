@@ -45,6 +45,14 @@
 
 	const getMapNotDeletedFiles = () => [...valueMap.values()].filter((f) => !f.deleted).map((f) => f.name);
 
+	function sensitize(fileName: string): string {
+		return fileName
+			.toLowerCase() // Tüm harfleri küçük harfe çevirir
+			.replace(/[^a-z0-9.]/g, '_') // Harf, sayı ve nokta dışındaki her şeyi _ yapar
+			.replace(/_+/g, '_') // Yan yana gelen birden fazla alt tireyi teke düşürür
+			.replace(/_(\.[a-z0-9]+)$/, '$1'); // Eğer uzantıdan hemen önce _ kaldıysa onu siler (isteğe bağlı)
+	}
+
 	// ## BEGIN value logic ###############################################################################
 	let dt = new DataTransfer(); // Fiziksel dosyaları biriktirmek için
 	const plusInputOnChange = (event: Event) => {
