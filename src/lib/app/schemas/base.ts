@@ -17,7 +17,7 @@ export const text = v.pipe(
 
 // ########################### BEGIN NUMBER ###########################
 export const number = v.pipe(
-	v.number(),
+	v.number('Lütfen bir sayı giriniz.'),
 	v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
 	v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
 );
@@ -27,7 +27,7 @@ export const maxDecimalPlaces = (max: number) =>
 		`Sayı en fazla ${max} ondalık basamağa sahip olabilir. `
 	);
 
-export const integer = v.pipe(number, v.integer());
+export const integer = v.pipe(number, v.integer('Sayı tam sayı olmalıdır.'));
 export const decimal_1 = v.pipe(number, maxDecimalPlaces(1));
 export const decimal_2 = v.pipe(number, maxDecimalPlaces(2));
 export const decimal_3 = v.pipe(number, maxDecimalPlaces(3));

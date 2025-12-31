@@ -33,7 +33,7 @@
 			value = newValue;
 			oninput?.({ event, value });
 		}
-		context.validate?.({ preflightOnly: true });
+		context.form.validate?.({ preflightOnly: true });
 	};
 	watch(
 		() => value,

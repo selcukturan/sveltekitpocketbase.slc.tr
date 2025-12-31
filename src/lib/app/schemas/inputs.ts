@@ -327,41 +327,30 @@ export function Select<Key extends string, Multiple extends boolean = false, Req
 // ########################################## END SELECT ######################################################
 
 // ########################################## BEGIN NUMBER ######################################################
+// Required
 const _NumberRequiredInteger = ({ message = 'Bu alan gereklidir. Tamsayı olmalıdır.' }: { message?: string } = {}) => {
 	return v.pipe(
-		v.optional(base.integer, 0),
+		base.integer,
 		v.check((input) => input !== 0, message)
 	);
-};
-const _NumberOptionalInteger = () => {
-	return v.optional(base.integer, 0);
 };
 const _NumberRequiredPositiveInteger = ({
 	message = 'Bu alan gereklidir. Pozitif tamsayı olmalıdır.'
 }: { message?: string } = {}) => {
-	return v.pipe(v.optional(base.integer, 0), v.minValue(1, message));
-};
-const _NumberOptionalPositiveInteger = () => {
-	return v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0);
+	return v.pipe(base.integer, v.minValue(1, message));
 };
 const _NumberRequiredNegativeInteger = ({
 	message = 'Bu alan gereklidir. Negatif tamsayı olmalıdır.'
 }: { message?: string } = {}) => {
-	return v.pipe(v.optional(base.integer, 0), v.maxValue(-1, message));
-};
-const _NumberOptionalNegativeInteger = () => {
-	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
+	return v.pipe(base.integer, v.maxValue(-1, message));
 };
 const _NumberRequiredDecimal = ({ message = 'Bu alan gereklidir.', step = 2 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.pipe(
-		v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0),
+		base.number,
+		base.maxDecimalPlaces(stepVal),
 		v.check((input) => input !== 0, message)
 	);
-};
-const _NumberOptionalDecimal = ({ step = 2 }: { step?: number } = {}) => {
-	const stepVal = step <= 0 ? 2 : step;
-	return v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0);
 };
 const _NumberRequiredPositiveDecimal = ({
 	message = 'Bu alan gereklidir. 0 dan büyük olmalıdır.',
@@ -369,14 +358,7 @@ const _NumberRequiredPositiveDecimal = ({
 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	const minVal = Math.pow(10, -stepVal); // Örn: precision 2 için 10^-2 = 0.01
-	return v.pipe(v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0), v.minValue(minVal, message));
-};
-const _NumberOptionalPositiveDecimal = ({ step = 2 }: { step?: number } = {}) => {
-	const stepVal = step <= 0 ? 2 : step;
-	return v.optional(
-		v.pipe(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), v.minValue(0, 'Sayısal değer 0 veya daha büyük olmalıdır.')),
-		0
-	);
+	return v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.minValue(minVal, message));
 };
 const _NumberRequiredNegativeDecimal = ({
 	message = 'Bu alan gereklidir. 0 dan küçük olmalıdır.',
@@ -384,12 +366,33 @@ const _NumberRequiredNegativeDecimal = ({
 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	const maxVal = Math.pow(10, -stepVal) * -1; // Örn: precision 2 için 10^-2 = 0.01
-	return v.pipe(v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0), v.maxValue(maxVal, message));
+	return v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.maxValue(maxVal, message));
+};
+// Optional
+const _NumberOptionalInteger = () => {
+	return v.optional(base.integer, 0);
+};
+const _NumberOptionalPositiveInteger = () => {
+	return v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0);
+};
+const _NumberOptionalNegativeInteger = () => {
+	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
+};
+const _NumberOptionalDecimal = ({ step = 2 }: { step?: number } = {}) => {
+	const stepVal = step <= 0 ? 2 : step;
+	return v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0);
+};
+const _NumberOptionalPositiveDecimal = ({ step = 2 }: { step?: number } = {}) => {
+	const stepVal = step <= 0 ? 2 : step;
+	return v.optional(
+		v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.minValue(0, 'Sayısal değer 0 veya daha büyük olmalıdır.')),
+		0
+	);
 };
 const _NumberOptionalNegativeDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.optional(
-		v.pipe(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), v.maxValue(0, 'Sayısal değer 0 veya daha küçük olmalıdır.')),
+		v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.maxValue(0, 'Sayısal değer 0 veya daha küçük olmalıdır.')),
 		0
 	);
 };
@@ -442,10 +445,10 @@ type NumberTypeChoice<
 export function Number<
 	Key extends string,
 	Type extends 'integer' | 'decimal' = 'integer',
-	Sign extends 'positive' | 'negative' | 'both' = 'positive',
+	Sign extends 'positive' | 'negative' | 'both' = 'both',
 	Required extends boolean = true
 >(key: Key, options: { type?: Type; sign?: Sign; step?: number; required?: Required; message?: string } = {}) {
-	const { type = 'integer', sign = 'positive', step = 0, required = true, message } = options;
+	const { type = 'integer', sign = 'both', step = 0, required = true, message } = options;
 
 	const main =
 		type === 'integer'

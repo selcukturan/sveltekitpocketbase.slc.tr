@@ -335,7 +335,7 @@
 					(field as RemoteFormField<string>).set(currentValue as string);
 				}
 			}
-			context.validate?.({ preflightOnly: true });
+			context.form.validate?.({ preflightOnly: true });
 		}
 	);
 </script>

@@ -42,7 +42,7 @@ export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 export const updateFormSchema = v.object({
 	...input.Hidden('id'),
 	...input.Text('title'),
-	...input.Number('quantity', { sign: 'negative' }),
+	...input.Number('quantity', { type: 'integer', required: true }),
 	...input.Datetime('purchase_date'),
 	...input.Select('select_single', { selectOptions: Object.values(TestDatatableSelectSingleOptions) }),
 	...input.Select('select_multiple', { multiple: true, selectOptions: Object.values(TestDatatableSelectMultipleOptions) }),

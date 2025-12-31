@@ -202,8 +202,8 @@
 						{@const updateRemoteForm = updateForm.for('update').preflight(updateFormSchema)}
 						<DrawerFormContent.Content.Form
 							enctype="multipart/form-data"
+							form={updateRemoteForm}
 							schema={updateFormSchema}
-							validate={updateRemoteForm.validate}
 							{...updateRemoteForm.enhance(async ({ submit }) => {
 								try {
 									await submit().updates(getList(params));
@@ -257,18 +257,8 @@
 										label: value.toUpperCase()
 									}))}
 								/>
+								<!-- <File field={updateRemoteForm.fields.single_file} value={oneResult.single_file} /> -->
 								<File field={updateRemoteForm.fields.multiple_files} value={oneResult.multiple_files} />
-
-								<!-- {oneResult.single_file}
-								{oneResult.multiple_files} -->
-								<!-- <input {...updateRemoteForm.fields.single_file.as('file')} /> -->
-								<!-- <input type="text" name="single_file" placeholder="single_file" />
-								<input type="file" name="single_file_Plus" placeholder="single_file_Plus" />
-								<input type="text" name="single_file_Minus" placeholder="single_file_Minus" /> -->
-
-								<!-- <input {...updateRemoteForm.fields.multiple_files.as('file multiple')} />
-								<input type="text" name="multiple_files_Plus" placeholder="multiple_files_Plus" />
-								<input type="text" name="multiple_files_Minus" placeholder="multiple_files_Minus" /> -->
 							{/snippet}
 
 							{#snippet buttons()}

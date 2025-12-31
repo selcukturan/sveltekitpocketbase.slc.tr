@@ -71,7 +71,7 @@
 		value = getMapNotDeletedFiles();
 
 		field.set(value);
-		context.validate?.({ preflightOnly: true });
+		context.form.validate?.({ preflightOnly: true });
 	};
 	watch(
 		() => value,
@@ -110,7 +110,7 @@
 		value = getMapNotDeletedFiles();
 
 		field.set(value);
-		context.validate?.({ preflightOnly: true });
+		context.form.validate?.({ preflightOnly: true });
 	}
 
 	function removeUploadedElement(nameToDelete: string) {
@@ -122,7 +122,7 @@
 			deletedFileNames.push(nameToDelete);
 
 			value = getMapNotDeletedFiles();
-			context.validate?.({ preflightOnly: true });
+			context.form.validate?.({ preflightOnly: true });
 		}
 	}
 
@@ -135,7 +135,7 @@
 			deletedFileNames = deletedFileNames.filter((name) => name !== nameToRestore);
 
 			value = getMapNotDeletedFiles();
-			context.validate?.({ preflightOnly: true });
+			context.form.validate?.({ preflightOnly: true });
 		}
 	}
 </script>
