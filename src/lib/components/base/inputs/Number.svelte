@@ -1,81 +1,59 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
+	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
 	import { getFormInputsContext } from './context.svelte';
-
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
+	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
+		id?: string;
 		value?: number;
-		label?: string;
-		step?: string;
-		oninput?: (params: { event: Event; value: number }) => void;
-		onchange?: (params: { event: Event; value: number }) => void;
+		name?: string;
+		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
 		field?: RemoteFormField<number>;
+		label?: string;
 	};
-
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(0), label, step = '1', oninput, onchange, field, class: classes, ...attributes }: Props = $props();
-
+	let { value = $bindable(0), label, field, class: classes, id, name, 'aria-invalid': ariaInvalid, ...rest }: Props = $props();
 	const context = getFormInputsContext();
 
-	// ######################## VARIABLES ###############################################################################################
-	let isOnInput = false;
-	let inputValue = $state(0);
-	let inputElement: HTMLInputElement | undefined = $state();
-	const separator = (1.1).toLocaleString().replace(/\d/g, '');
+	const attributes = $derived({ ...field?.as('number'), value: undefined });
 	const issues = $derived(field?.issues() ?? []);
-	const inputAttributes = $derived(field ? field.as('number') : { type: 'number' });
 
-	// ## BEGIN value logic ###############################################################################
-	const onInput = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const newValue = Number(target.value);
-		if (newValue !== value) {
-			isOnInput = true;
-			value = newValue;
-			oninput?.({ event, value });
-		}
-		context.form.validate?.({ preflightOnly: true });
+	const valueChange = (value: number) => {
+		field?.set(value);
+		context?.form.validate({ preflightOnly: true });
 	};
-	watch(
-		() => value,
-		(currValue) => {
-			if (isOnInput) {
-				isOnInput = false;
-				return;
-			} else {
-				inputValue = currValue;
-				field?.set(currValue);
+
+	let first = true;
+	const proxy = {
+		get value() {
+			const currentValue = value;
+			if (first) {
+				first = false;
+				valueChange(currentValue);
 			}
+			return currentValue;
+		},
+		set value(v) {
+			const currentValue = v;
+			value = currentValue;
+			valueChange(currentValue);
 		}
-	);
-	// ## END value logic ###############################################################################
-
-	// ## BEGIN input change ############################################################################
-	const onChange = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const value = Number(target.value);
-		onchange?.({ event, value });
 	};
-	// ## END input change ##############################################################################
 </script>
 
 <div style:position="relative">
 	<label>
 		<h2>{label}</h2>
 		<input
-			bind:this={inputElement}
-			{...inputAttributes}
-			placeholder="123{step === '1' ? '' : separator}45"
-			{step}
-			value={inputValue}
-			oninput={onInput}
-			onchange={onChange}
+			bind:value={proxy.value}
+			type={attributes.type || 'number'}
+			id={attributes.name || id}
+			name={attributes.name || name}
+			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
+			{...rest}
 			class={classes}
-			{...attributes}
 		/>
 	</label>
 	<Popup {issues} />

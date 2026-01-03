@@ -1,80 +1,59 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
-	import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import { formatDatetimeIsoToInput, parseDatetimeInputToIso } from '$lib/utils/input-helper';
-	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<HTMLInputAttributes, 'type' | 'id' | 'value' | 'name' | 'oninput' | 'onchange'> & {
+	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
+		id?: string;
 		value?: string;
+		name?: string;
+		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
+		field?: RemoteFormField<string>;
 		label?: string;
-		oninput?: ({ event, newValue }: { event: Event; newValue: string }) => void;
-		onchange?: ({ event, newValue }: { event: Event; newValue: string }) => void;
-		field: RemoteFormField<string>;
 	};
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...rest }: Props = $props();
+	let { value = $bindable(''), label, field, class: classes, id, name, 'aria-invalid': ariaInvalid, ...rest }: Props = $props();
 	const context = getFormInputsContext();
-	// ######################## VARIABLES ###############################################################################################
-	let isOnInput = false; // `oninput` ile değiştirildi mi?
-	let inputValue = $state('');
 
-	const attributes = $derived(field.as('datetime-local'));
-	const issues = $derived(field.issues() ?? []);
+	const attributes = $derived({ ...field?.as('datetime-local'), value: undefined });
+	const issues = $derived(field?.issues() ?? []);
 
-	// ## BEGIN value logic ###############################################################################
-	const onInput = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		// inputValue = input value burada değişti (target.value)
-		field.set(target.value); // field value burada değişti (target.value)
-
-		const newBindValue = parseDatetimeInputToIso(target.value);
-		if (newBindValue !== value) {
-			isOnInput = true;
-			value = newBindValue;
-		}
-		oninput?.({ event, newValue: newBindValue });
-		context.form.validate?.({ preflightOnly: true });
+	const valueChange = (value: string) => {
+		field?.set(value);
+		context?.form.validate({ preflightOnly: true });
 	};
-	// `value`, bileşen dışından `prop` ile değiştiriliyorsa `input` değeri ayarlanır.
-	// `value`, bileşen içinden `oninput` ile değiştiriliyorsa `input` değeri ayarlanmaz.
 
-	watch(
-		() => value,
-		(currValue) => {
-			if (isOnInput) {
-				isOnInput = false;
-				return;
-			} else {
-				const newInputValue = formatDatetimeIsoToInput(currValue);
-				inputValue = newInputValue; // input value burada değişti (newInputValue)
-				field.set(newInputValue); // field value burada değişti (newInputValue)
+	let first = true;
+	const proxy = {
+		get value() {
+			const currentValue = formatDatetimeIsoToInput(value);
+			if (first) {
+				first = false;
+				valueChange(currentValue);
 			}
+			return currentValue;
+		},
+		set value(v) {
+			const currentValue = parseDatetimeInputToIso(v);
+			value = currentValue;
+			valueChange(currentValue);
 		}
-	);
-	// ## END value logic ###############################################################################
-
-	// ## BEGIN input change ############################################################################
-	const onChange = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const newValue = parseDatetimeInputToIso(target.value);
-		onchange?.({ event, newValue });
 	};
-	// ## END input change ##############################################################################
 </script>
 
 <div style:position="relative">
 	<label>
 		<h2>{label}</h2>
 		<input
-			{...attributes}
+			bind:value={proxy.value}
+			type={attributes.type || 'datetime-local'}
+			id={attributes.name || id}
+			name={attributes.name || name}
+			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
 			{...rest}
-			id={attributes.name}
-			value={inputValue}
-			oninput={onInput}
-			onchange={onChange}
 			class={classes}
 		/>
 	</label>

@@ -3,8 +3,8 @@
 	import { fly } from 'svelte/transition';
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Popup from './Popup.svelte';
-	import { watch } from 'runed';
 	import { getFormInputsContext } from './context.svelte';
+	import { watchState } from '$lib/utils/watch-states.svelte';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -324,7 +324,7 @@
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
 	let selectInput: HTMLSelectElement | null = $state(null);
-	watch(
+	watchState(
 		() => selectedIndexes,
 		() => {
 			const currentValue = value;
@@ -334,8 +334,8 @@
 				} else {
 					(field as RemoteFormField<string>).set(currentValue as string);
 				}
+				context?.form.validate({ preflightOnly: true });
 			}
-			context.form.validate?.({ preflightOnly: true });
 		}
 	);
 </script>

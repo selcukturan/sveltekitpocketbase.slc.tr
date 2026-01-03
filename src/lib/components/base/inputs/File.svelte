@@ -1,7 +1,6 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -13,27 +12,26 @@
 		deleted: boolean;
 	};
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<SvelteHTMLElements['select'], 'value' | 'onchange'> & {
+	type Props = Omit<SvelteHTMLElements['select'], 'value'> & {
 		value?: string[];
 		label?: string;
-		onchange?: (params: { event: Event; value: string[] }) => void;
-		field: RemoteFormField<string[]>;
+		field?: RemoteFormField<string[]>;
 	};
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable([]), label, onchange, field, class: classes, ...rest }: Props = $props();
+	let { value = $bindable([]), label, field, class: classes, ...rest }: Props = $props();
 	const context = getFormInputsContext();
 	// ######################## VARIABLES ###############################################################################################
-	let isOnInput = false;
+
 	let mainInputElement: HTMLSelectElement | undefined = $state();
 	let plusInputElement: HTMLInputElement | undefined = $state();
 	let minusInputElement: HTMLSelectElement | undefined = $state();
 
-	const mainInputAttributes = $derived(field.as('select multiple'));
+	const mainInputAttributes = $derived(field?.as('select multiple'));
 
-	const issues = $derived(field.issues() ?? []);
-	const mainName = $derived(mainInputAttributes.name);
-	const plusName = $derived(mainName.replace('[]', '_Plus[]'));
-	const minusName = $derived(mainName.replace('[]', '_Minus[]'));
+	const issues = $derived(field?.issues() ?? []);
+	const mainName = $derived(mainInputAttributes?.name);
+	const plusName = $derived(mainName?.replace('[]', '_Plus[]'));
+	const minusName = $derived(mainName?.replace('[]', '_Minus[]'));
 
 	let files = $state<FileList>();
 	let uploadedFiles = value;
@@ -45,61 +43,54 @@
 
 	const getMapNotDeletedFiles = () => [...valueMap.values()].filter((f) => !f.deleted).map((f) => f.name);
 
-	function sensitize(fileName: string): string {
-		return fileName
-			.toLowerCase() // Tüm harfleri küçük harfe çevirir
-			.replace(/[^a-z0-9.]/g, '_') // Harf, sayı ve nokta dışındaki her şeyi _ yapar
-			.replace(/_+/g, '_') // Yan yana gelen birden fazla alt tireyi teke düşürür
-			.replace(/_(\.[a-z0-9]+)$/, '$1'); // Eğer uzantıdan hemen önce _ kaldıysa onu siler (isteğe bağlı)
-	}
-
 	// ## BEGIN value logic ###############################################################################
-	let dt = new DataTransfer(); // Fiziksel dosyaları biriktirmek için
-	const plusInputOnChange = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		if (!target.files) return;
-
-		// Yeni seçilen her dosyayı DataTransfer'e ve Map'e ekle
-		Array.from(target.files).forEach((file) => {
-			// Eğer aynı isimde dosya zaten varsa ekleme (opsiyonel)
-			if (!valueMap.has(file.name)) {
-				dt.items.add(file);
-				valueMap.set(file.name, {
-					name: file.name,
-					uploaded: uploadedFiles.includes(file.name),
-					deleted: deletedFileNames.includes(file.name)
-				});
-			}
-		});
-
-		files = dt.files;
-
-		// sync Value and Field
-		isOnInput = true;
-		value = getMapNotDeletedFiles();
-
-		field.set(value);
-		context.form.validate?.({ preflightOnly: true });
+	const valueChange = (value: string[]) => {
+		field?.set(value);
+		context?.form.validate({ preflightOnly: true });
 	};
-	watch(
-		() => value,
-		(currValue) => {
-			if (isOnInput) {
-				isOnInput = false;
-				return;
-			}
-
-			// sync Map and Field
-			currValue.forEach((value) => {
-				valueMap.set(value, {
-					name: value,
-					uploaded: uploadedFiles.includes(value),
-					deleted: deletedFileNames.includes(value)
+	let dt = new DataTransfer(); // Fiziksel dosyaları biriktirmek için
+	let first = true;
+	const proxy = {
+		get files() {
+			const currentValue = files;
+			if (first) {
+				first = false;
+				// sync Map and Field
+				value.forEach((value) => {
+					valueMap.set(value, {
+						name: value,
+						uploaded: uploadedFiles.includes(value),
+						deleted: deletedFileNames.includes(value)
+					});
 				});
-			});
-			field.set(getMapNotDeletedFiles());
+				valueChange(getMapNotDeletedFiles());
+			}
+			return currentValue;
+		},
+		set files(v) {
+			const currentValue = v;
+			// Yeni seçilen her dosyayı DataTransfer'e ve Map'e ekle
+			if (currentValue) {
+				Array.from(currentValue).forEach((file) => {
+					// Eğer aynı isimde dosya zaten varsa ekleme (opsiyonel)
+					if (!valueMap.has(file.name)) {
+						dt.items.add(file);
+						valueMap.set(file.name, {
+							name: file.name,
+							uploaded: uploadedFiles.includes(file.name),
+							deleted: deletedFileNames.includes(file.name)
+						});
+					}
+				});
+			}
+			files = dt.files;
+
+			// sync Value and Field
+			value = getMapNotDeletedFiles();
+			valueChange(value);
 		}
-	);
+	};
+
 	// ## END value logic ###############################################################################
 
 	function removeFileInputElement(nameToDelete: string) {
@@ -114,11 +105,8 @@
 		dt = newDt;
 
 		// sync Value and Field
-		isOnInput = true;
 		value = getMapNotDeletedFiles();
-
-		field.set(value);
-		context.form.validate?.({ preflightOnly: true });
+		valueChange(value);
 	}
 
 	function removeUploadedElement(nameToDelete: string) {
@@ -130,7 +118,7 @@
 			deletedFileNames.push(nameToDelete);
 
 			value = getMapNotDeletedFiles();
-			context.form.validate?.({ preflightOnly: true });
+			valueChange(value);
 		}
 	}
 
@@ -143,7 +131,7 @@
 			deletedFileNames = deletedFileNames.filter((name) => name !== nameToRestore);
 
 			value = getMapNotDeletedFiles();
-			context.form.validate?.({ preflightOnly: true });
+			valueChange(value);
 		}
 	}
 </script>
@@ -158,8 +146,9 @@
 		>
 			<span>Dosya Seç ({length})</span>
 		</button>
+		<!-- ################################ BEGIN HIDDEN AREA #################################################################################### -->
 		<!-- class="sr-only" tabindex={-1} aria-hidden={true}  -->
-		<select class="sr-only" tabindex={-1} aria-hidden={true} {...mainInputAttributes} {...rest} bind:this={mainInputElement}>
+		<select {...mainInputAttributes} {...rest} bind:this={mainInputElement} class="sr-only" tabindex={-1} aria-hidden={true}>
 			{#each value as option, i (i)}
 				<option value={option}>{option}</option>
 			{/each}
@@ -167,30 +156,30 @@
 
 		<input
 			multiple
-			bind:files
+			bind:files={proxy.files}
 			bind:this={plusInputElement}
 			type="file"
 			name={plusName}
 			accept=".png, .jpg, .jpeg, .gif, .webp, .svg, image/png, image/jpeg, image/gif, image/webp, image/svg+xml"
-			onchange={plusInputOnChange}
 			class="sr-only"
 			tabindex={-1}
 			aria-hidden={true}
 		/>
 
 		<select
-			class="sr-only"
-			tabindex={-1}
-			aria-hidden={true}
 			name={minusName}
 			bind:this={minusInputElement}
 			bind:value={deletedFileNames}
 			multiple
+			class="sr-only"
+			tabindex={-1}
+			aria-hidden={true}
 		>
 			{#each deletedFileNames as option, i (i)}
 				<option value={option} selected>{option}</option>
 			{/each}
 		</select>
+		<!-- ################################# END HIDDEN AREA ###################################################################################### -->
 	</label>
 	<Popup {issues} />
 </div>

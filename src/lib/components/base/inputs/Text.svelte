@@ -1,73 +1,59 @@
 <script lang="ts">
 	// ######################## IMPORTS #################################################################################################
+	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { watch } from 'runed';
 	import Popup from './Popup.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onchange'> & {
+	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
+		id?: string;
 		value?: string;
-		label?: string;
-		oninput?: (params: { event: Event; value: string }) => void;
-		onchange?: (params: { event: Event; value: string }) => void;
+		name?: string;
+		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
 		field?: RemoteFormField<string>;
+		label?: string;
 	};
 	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(''), label, oninput, onchange, field, class: classes, ...attributes }: Props = $props();
+	let { value = $bindable(''), label, field, class: classes, id, name, 'aria-invalid': ariaInvalid, ...rest }: Props = $props();
 	const context = getFormInputsContext();
-	// ######################## VARIABLES ###############################################################################################
-	let isOnInput = false;
-	let inputValue = $state('');
-	let inputElement: HTMLInputElement | undefined = $state();
+
+	const attributes = $derived({ ...field?.as('text'), value: undefined });
 	const issues = $derived(field?.issues() ?? []);
-	const inputAttributes = $derived(field ? field.as('text') : { type: 'text' });
 
-	// ## BEGIN value logic ###############################################################################
-	const onInput = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		// inputValue = target.value;
-		const newValue = target.value;
-		if (newValue !== value) {
-			isOnInput = true;
-			value = newValue;
-			oninput?.({ event, value });
-		}
-		context.form.validate?.({ preflightOnly: true });
+	const valueChange = (value: string) => {
+		field?.set(value);
+		context?.form.validate({ preflightOnly: true });
 	};
-	watch(
-		() => value,
-		(currValue) => {
-			if (isOnInput) {
-				isOnInput = false;
-				return;
-			} else {
-				inputValue = currValue;
+
+	let first = true;
+	const proxy = {
+		get value() {
+			const currentValue = value;
+			if (first) {
+				first = false;
+				valueChange(currentValue);
 			}
+			return currentValue;
+		},
+		set value(v) {
+			const currentValue = v;
+			value = currentValue;
+			valueChange(currentValue);
 		}
-	);
-	// ## END value logic ###############################################################################
-
-	// ## BEGIN input change ############################################################################
-	const onChange = (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const value = target.value;
-		onchange?.({ event, value });
 	};
-	// ## END input change ##############################################################################
 </script>
 
 <div style:position="relative">
 	<label>
 		<h2>{label}</h2>
 		<input
-			bind:this={inputElement}
-			{...inputAttributes}
-			value={inputValue}
-			oninput={onInput}
-			onchange={onChange}
+			bind:value={proxy.value}
+			type={'text'}
+			id={attributes.name || id}
+			name={attributes.name || name}
+			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
+			{...rest}
 			class={classes}
-			{...attributes}
 		/>
 	</label>
 	<Popup {issues} />

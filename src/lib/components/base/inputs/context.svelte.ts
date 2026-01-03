@@ -30,6 +30,10 @@ export function getFormInputsContext<
 	TOutput,
 	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 >() {
-	return getContext<ReturnType<typeof createFormInputsContext<TInput, TOutput, TSchema>>>(key);
+	const instance = getContext<ReturnType<typeof createFormInputsContext<TInput, TOutput, TSchema>>>(key);
+	if (!instance) {
+		return undefined;
+	}
+	return instance;
 }
 // ################################## END Export Table Context ################################################################################################################################
