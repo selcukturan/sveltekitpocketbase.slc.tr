@@ -4,25 +4,37 @@ import * as base from './base';
 // ########################################## BEGIN FILE ######################################################
 // #### SINGLE
 // Optional
+
 const _SingleFileOptional = () =>
-	v.pipe(
-		v.optional(v.string(), ''),
-		v.transform(() => undefined)
+	v.optional(
+		v.pipe(
+			v.string(),
+			v.transform(() => undefined)
+		),
+		undefined
 	);
 const _SingleFilePlusOptional = () =>
-	v.pipe(
-		v.optional(v.file()),
-		v.transform((file) => (file ? file : undefined))
+	v.optional(
+		v.pipe(
+			v.file(),
+			v.transform((file) => (file ? file : undefined))
+		),
+		undefined
 	);
+
 const _SingleFileMinusOptional = () =>
-	v.pipe(
-		v.optional(v.string(), ''),
-		v.transform(() => undefined)
+	v.optional(
+		v.pipe(
+			v.string(),
+			v.transform((str) => (str !== '' ? str : undefined))
+		),
+		undefined
 	);
+
 // Required
 const _SingleFileRequired = () =>
 	v.pipe(
-		v.optional(v.string(), ''),
+		v.string(),
 		v.nonEmpty('Bu alan gereklidir.'),
 		v.transform(() => undefined)
 	);
@@ -34,26 +46,35 @@ const _SingleFilePlusRequired = () =>
 const _SingleFileMinusRequired = () =>
 	v.pipe(
 		v.optional(v.string(), ''),
-		v.transform(() => undefined)
+		v.transform((str) => (str !== '' ? str : undefined))
 	);
 
 // #### MULTIPLE
 // Optional
 const _MultipleFileOptional = () =>
-	v.pipe(
-		v.optional(v.array(v.string()), []),
-		v.minLength(0),
-		v.transform(() => undefined)
+	v.optional(
+		v.pipe(
+			v.optional(v.array(v.string()), []),
+			v.minLength(0),
+			v.transform(() => undefined)
+		),
+		undefined
 	);
 const _MultipleFilePlusOptional = () =>
-	v.pipe(
-		v.optional(v.array(v.file()), []),
-		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	v.optional(
+		v.pipe(
+			v.optional(v.array(v.file()), []),
+			v.transform((arr) => (arr.length > 0 ? arr : undefined))
+		),
+		undefined
 	);
 const _MultipleFileMinusOptional = () =>
-	v.pipe(
-		v.optional(v.array(v.string()), []),
-		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+	v.optional(
+		v.pipe(
+			v.optional(v.array(v.string()), []),
+			v.transform((arr) => (arr.length > 0 ? arr : undefined))
+		),
+		undefined
 	);
 
 // Required
@@ -484,3 +505,72 @@ export function Number<
 	} as { [P in Key]: NumberTypeChoice<Type, Sign, Required> };
 }
 // ########################################## END NUMBER ######################################################
+
+// ########################################## BEGIN EMAIL ######################################################
+const _EmailOptional = () => v.optional(base.email, '');
+const _EmailRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.email, v.nonEmpty(message));
+
+type EmailOptional = ReturnType<typeof _EmailOptional>;
+type EmailRequired = ReturnType<typeof _EmailRequired>;
+
+type EmailTypeChoice<Required extends boolean> = Required extends true ? EmailRequired : EmailOptional;
+
+export function Email<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _EmailRequired(message) : _EmailOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: EmailTypeChoice<Required> };
+}
+// ########################################## END EMAIL ######################################################
+
+// ########################################## BEGIN URL ######################################################
+const _UrlOptional = () => v.optional(base.url, '');
+const _UrlRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.url, v.nonEmpty(message));
+
+type UrlOptional = ReturnType<typeof _UrlOptional>;
+type UrlRequired = ReturnType<typeof _UrlRequired>;
+
+type UrlTypeChoice<Required extends boolean> = Required extends true ? UrlRequired : UrlOptional;
+
+export function Url<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _UrlRequired(message) : _UrlOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: UrlTypeChoice<Required> };
+}
+// ########################################## END URL ######################################################
+
+// ########################################## BEGIN TEXTAREA ######################################################
+const _TextareaOptional = () => v.optional(base.textarea, '');
+const _TextareaRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.textarea, v.nonEmpty(message));
+
+type TextareaOptional = ReturnType<typeof _TextareaOptional>;
+type TextareaRequired = ReturnType<typeof _TextareaRequired>;
+
+type TextareaTypeChoice<Required extends boolean> = Required extends true ? TextareaRequired : TextareaOptional;
+
+export function Textarea<Key extends string, Required extends boolean = true>(
+	key: Key,
+	options: { required?: Required; message?: string } = {}
+) {
+	const { required = true, message } = options;
+
+	const main = required ? _TextareaRequired(message) : _TextareaOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: TextareaTypeChoice<Required> };
+}
+// ########################################## END TEXTAREA ######################################################

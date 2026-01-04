@@ -379,6 +379,7 @@ export type TestDatatableRecord = {
 	caption?: string
 	created: IsoAutoDateString
 	district?: string
+	email?: string
 	grape?: string
 	grape_color?: string
 	id: string
@@ -395,8 +396,10 @@ export type TestDatatableRecord = {
 	select_relation?: RecordIdString
 	select_single?: TestDatatableSelectSingleOptions
 	single_file?: FileNameString
+	textarea?: HTMLString
 	title?: string
 	updated: IsoAutoDateString
+	url?: string
 	village?: string
 }
 

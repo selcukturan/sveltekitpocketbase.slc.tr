@@ -64,6 +64,7 @@
 	let container: HTMLDivElement | null = null;
 	let trigger: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
+	let selectInput: HTMLSelectElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
 	let isOutsideMouseDown = false;
@@ -323,7 +324,6 @@
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
-	let selectInput: HTMLSelectElement | null = $state(null);
 	watchState(
 		() => selectedIndexes,
 		() => {

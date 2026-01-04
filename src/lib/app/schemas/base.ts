@@ -6,21 +6,54 @@ import { parseDateInputToIso, parseDatetimeInputToIso, isValidIsoDate } from '$l
 // ########################### BEGIN STRING ###########################
 const safeStringCharsRegex = /^[a-zA-Z0-9ÇçĞğİıÖöŞşÜü\s._()'!*:@,;+?=-]*$/;
 const safeStringIdCharsRegex = /^[a-z0-9:-]+$/;
-export const id = v.pipe(v.string(), v.regex(safeStringIdCharsRegex, 'ID için geçersiz karakterler içeriyor.'));
-export const text = v.pipe(
-	v.string(),
-	v.regex(safeStringCharsRegex, 'Girdi sadece harf, rakam ve belirli noktalama işaretleri içerebilir.'),
-	v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')
-);
+// Regex açıklaması:
+// \p{L}: Tüm dillerdeki harfler (Türkçe dahil)
+// \p{N}: Tüm rakamlar
+// \p{P}: Tüm noktalama işaretleri (. , ! ? < > [ ] { } " ' / \ _ vb.)
+// \p{S}: Semboller (+ = $ % ^ & vb.)
+// \s: Boşluk karakterleri (boşluk, tab, yeni satır)
+const safeStringTextareaCharsRegex = /^[\p{L}\p{N}\p{P}\p{S}\s]*$/u;
 
+export const id = v.pipe(v.string(), v.regex(safeStringIdCharsRegex, 'ID için geçersiz karakterler içeriyor.'));
+
+export const text = v.union([
+	v.literal(''), // Boş string ise kabul et
+	v.pipe(
+		v.string(),
+		v.regex(safeStringCharsRegex, 'Girdi sadece harf, rakam ve belirli noktalama işaretleri içerebilir.'),
+		v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')
+	) // Değilse text formatı ara
+]);
+
+export const textarea = v.union([
+	v.literal(''), // Boş string ise kabul et
+	v.pipe(
+		v.string(),
+		v.regex(safeStringTextareaCharsRegex, 'Textarea için geçersiz karakterler içeriyor.'),
+		v.maxLength(1024, 'Lütfen en fazla 1024 karakter girin.')
+	) // Değilse textarea formatı ara
+]);
+
+export const email = v.union([
+	v.literal(''), // Boş string ise kabul et
+	v.pipe(v.string(), v.email('Geçerli bir email adresi giriniz.'), v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')) // Değilse email formatı ara
+]);
+export const url = v.union([
+	v.literal(''), // Boş string ise kabul et
+	v.pipe(v.string(), v.url('Geçerli bir url giriniz.'), v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')) // Değilse url formatı ara
+]);
 // ########################### END STRING ###########################
 
 // ########################### BEGIN NUMBER ###########################
-export const number = v.pipe(
-	v.number('Lütfen bir sayı giriniz.'),
-	v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
-	v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
-);
+export const number = v.union([
+	v.literal(0), // 0 ise kabul et
+	v.pipe(
+		v.number('Lütfen bir sayı giriniz.'),
+		v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
+		v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
+	) // Değilse number formatı ara
+]);
+
 export const maxDecimalPlaces = (max: number) =>
 	v.check(
 		(input: number) => new RegExp(`^-?\\d+(\\.\\d{1,${max}})?$`).test(String(input)),

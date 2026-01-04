@@ -17,7 +17,19 @@
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
 	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button, Select, File } from '$lib/components/base/inputs';
+	import {
+		Hidden,
+		Text,
+		Number,
+		Datetime,
+		Submit,
+		Button,
+		Select,
+		File,
+		Email,
+		Url,
+		Textarea
+	} from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
@@ -240,6 +252,9 @@
 								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
 								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
 								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
+								<Email label="Email" field={updateRemoteForm.fields.email} value={oneResult.email} />
+								<Url label="Url" field={updateRemoteForm.fields.url} value={oneResult.url} />
+								<Textarea label="Textarea" field={updateRemoteForm.fields.textarea} value={oneResult.textarea} />
 								<Select
 									field={updateRemoteForm.fields.select_single}
 									value={oneResult.select_single}
@@ -257,8 +272,8 @@
 										label: value.toUpperCase()
 									}))}
 								/>
-								<!-- <File field={updateRemoteForm.fields.single_file} value={oneResult.single_file} /> -->
-								<File field={updateRemoteForm.fields.multiple_files} value={oneResult.multiple_files} />
+								<File field={updateRemoteForm.fields.single_file} value={oneResult.single_file} />
+								<File multiple field={updateRemoteForm.fields.multiple_files} value={oneResult.multiple_files} />
 							{/snippet}
 
 							{#snippet buttons()}

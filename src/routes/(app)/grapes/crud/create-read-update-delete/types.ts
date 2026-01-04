@@ -46,8 +46,11 @@ export const updateFormSchema = v.object({
 	...input.Datetime('purchase_date'),
 	...input.Select('select_single', { selectOptions: Object.values(TestDatatableSelectSingleOptions) }),
 	...input.Select('select_multiple', { multiple: true, selectOptions: Object.values(TestDatatableSelectMultipleOptions) }),
-	/* ...input.File('single_file', { required: true }), */
-	...input.File('multiple_files', { multiple: true, required: false })
+	...input.File('multiple_files', { multiple: true, required: true }),
+	...input.File('single_file', { required: true }),
+	...input.Email('email', { required: true }),
+	...input.Url('url', { required: false }),
+	...input.Textarea('textarea', { required: false })
 });
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
