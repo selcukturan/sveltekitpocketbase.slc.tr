@@ -32,6 +32,8 @@
 		...rest
 	}: Props = $props();
 
+	const componentId = $props.id();
+
 	const context = getFormInputsContext();
 
 	// ######################## VARIABLES ###############################################################################################
@@ -180,73 +182,82 @@
 	}
 </script>
 
-<div style:position="relative">
-	<label>
-		<h2>{label}</h2>
+<div class="group bg-surface-200 focus-within:bg-surface-300 relative m-0.5 mt-6 block w-full rounded-md">
+	<Popup {issues} />
+	<label
+		for={`${componentId}_Plus`}
+		class="text-surface-500 group-focus-within:text-surface-950 flex w-full items-center gap-1 rounded-tl-md rounded-tr-md bg-transparent pt-2.5 pr-3.5 pb-0.5 pl-3.5 text-xs font-semibold select-none"
+	>
+		{label}
+	</label>
+	<div class="p-3.5">
 		<button
+			name={`${componentId}_Plus`}
 			type="button"
 			onclick={() => plusInputElement?.click()}
-			class="slc-input bg-secondary-400 cursor-pointer rounded border px-2 py-1"
+			class="slc-input bg-surface-300 w-full cursor-pointer rounded border px-2 py-1"
 		>
 			<span>{multiple ? `Dosyaları Seç (${length})` : length > 0 ? 'Dosyayı Değiştir' : 'Dosya Seç'}</span>
 		</button>
+		<div class="mt-4 flex flex-col gap-2">
+			{#each displayFiles as file (file.name)}
+				<div class="border-surface-500 flex items-center gap-2 border-t p-2" class:opacity-50={file.deleted}>
+					<span class="{'text-xs font-bold'} {file.uploaded ? 'text-error-500' : 'text-success-500'}"
+						>{file.uploaded ? 'OLD' : 'NEW'}</span
+					>
+					<p class="flex-1 truncate">{file.name}</p>
 
-		<select {...mainInputAttributes} {...rest} bind:this={mainInputElement} class="sr-only" tabindex={-1} aria-hidden={true}>
-			{#if multiple}
-				{@const val = (value || []) as ValueTypeChoice<true>}
-				{#each val as option}
-					<option value={option} selected>{option}</option>
-				{/each}
-			{:else}
-				{@const val = (value || '') as ValueTypeChoice<false>}
-				<option value={val} selected>{val}</option>
-			{/if}
-		</select>
-
-		<input
-			{multiple}
-			bind:files={proxy.files}
-			bind:this={plusInputElement}
-			type="file"
-			name={plusName}
-			accept="image/*"
-			class="sr-only"
-			tabindex={-1}
-			aria-hidden={true}
-		/>
-
-		{#if multiple}
-			<select multiple name={minusName} bind:value={deletedFileNames} class="sr-only" tabindex={-1} aria-hidden={true}>
-				{#each deletedFileNames as option}
-					<option value={option} selected>{option}</option>
-				{/each}
-			</select>
-		{:else}
-			<input type="hidden" name={minusName} bind:value={deletedFileNames[0]} class="sr-only" tabindex={-1} aria-hidden={true} />
-		{/if}
-	</label>
-	<Popup {issues} />
-</div>
-
-<div class="mt-4 flex flex-col gap-2">
-	{#each displayFiles as file (file.name)}
-		<div class="flex items-center gap-2 rounded border p-2" class:opacity-50={file.deleted}>
-			<span class="text-xs font-bold">{file.uploaded ? 'ESKİ' : 'YENİ'}</span>
-			<p class="flex-1 truncate">{file.name}</p>
-
-			{#if file.deleted}
-				<button type="button" class="text-blue-500" onclick={() => restoreUploadedElement(file.name)}>Geri Al</button>
-			{:else}
-				<button
-					type="button"
-					class="text-red-500"
-					onclick={() => (file.uploaded ? removeUploadedElement(file.name) : removeFileInputElement(file.name))}
-				>
-					Kaldır
-				</button>
-			{/if}
+					{#if file.deleted}
+						<button type="button" class="text-blue-500" onclick={() => restoreUploadedElement(file.name)}>Geri Al</button>
+					{:else}
+						<button
+							type="button"
+							class="text-red-500"
+							onclick={() => (file.uploaded ? removeUploadedElement(file.name) : removeFileInputElement(file.name))}
+						>
+							Kaldır
+						</button>
+					{/if}
+				</div>
+			{/each}
 		</div>
-	{/each}
+	</div>
+
+	<!--Hidden Area-->
+
+	<select {...mainInputAttributes} {...rest} bind:this={mainInputElement} class="sr-only" tabindex={-1} aria-hidden={true}>
+		{#if multiple}
+			{@const val = (value || []) as ValueTypeChoice<true>}
+			{#each val as option}
+				<option value={option} selected>{option}</option>
+			{/each}
+		{:else}
+			{@const val = (value || '') as ValueTypeChoice<false>}
+			<option value={val} selected>{val}</option>
+		{/if}
+	</select>
+
+	<input
+		{multiple}
+		bind:files={proxy.files}
+		bind:this={plusInputElement}
+		type="file"
+		name={plusName}
+		accept="image/*"
+		class="sr-only"
+		tabindex={-1}
+		aria-hidden={true}
+	/>
+
+	{#if multiple}
+		<select multiple name={minusName} bind:value={deletedFileNames} class="sr-only" tabindex={-1} aria-hidden={true}>
+			{#each deletedFileNames as option}
+				<option value={option} selected>{option}</option>
+			{/each}
+		</select>
+	{:else}
+		<input type="hidden" name={minusName} bind:value={deletedFileNames[0]} class="sr-only" tabindex={-1} aria-hidden={true} />
+	{/if}
 </div>
 
 <style>

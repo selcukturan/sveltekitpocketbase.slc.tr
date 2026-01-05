@@ -45,14 +45,11 @@ export const url = v.union([
 // ########################### END STRING ###########################
 
 // ########################### BEGIN NUMBER ###########################
-export const number = v.union([
-	v.literal(0), // 0 ise kabul et
-	v.pipe(
-		v.number('Lütfen bir sayı giriniz.'),
-		v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
-		v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
-	) // Değilse number formatı ara
-]);
+export const number = v.pipe(
+	v.number('Lütfen bir sayı giriniz.'),
+	v.minValue(Number.MIN_SAFE_INTEGER, 'Sayısal değer çok küçük.'),
+	v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
+);
 
 export const maxDecimalPlaces = (max: number) =>
 	v.check(

@@ -28,7 +28,7 @@
 </script>
 
 <form class="{classes || ''} {internalClasses}" {...attributes}>
-	<div class="flex-1 overflow-y-auto">
+	<div class="flex-1 overflow-x-hidden overflow-y-auto px-6 pb-6">
 		{@render inputs?.()}
 	</div>
 	<div class="bg-surface-100/80 flex justify-end border-t p-4">

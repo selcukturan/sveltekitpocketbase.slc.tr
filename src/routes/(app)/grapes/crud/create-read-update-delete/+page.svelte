@@ -107,19 +107,23 @@
 			{@const data = await getList(params)}
 			<s.DataTable bind:this={dataTable} {data} {columns} {footers}>
 				{#snippet toolbar()}
-					<Text
-						bind:value={filterData.title}
-						placeholder="Search - Title contains..."
-						onkeydown={(e) => e.key === 'Enter' && searchData()}
-					/>
-					<Number
-						bind:value={filterData.quantity}
-						placeholder="Search - Quantity equals..."
-						onkeydown={(e) => e.key === 'Enter' && searchData()}
-					/>
-					<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
-					<Button label={t('refresh')} onclick={refreshData} />
-					<p>1 - $effect.pending() {$effect.pending()}</p>
+					<div class="flex gap-2">
+						<Text
+							id="filter_title"
+							bind:value={filterData.title}
+							placeholder="Search - Title contains..."
+							onkeydown={(e) => e.key === 'Enter' && searchData()}
+						/>
+						<Number
+							id="filter_quantity"
+							bind:value={filterData.quantity}
+							placeholder="Search - Quantity equals..."
+							onkeydown={(e) => e.key === 'Enter' && searchData()}
+						/>
+						<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
+						<Button label={t('refresh')} onclick={refreshData} />
+					</div>
+					<!-- <p>1 - $effect.pending() {$effect.pending()}</p> -->
 				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
@@ -272,8 +276,13 @@
 										label: value.toUpperCase()
 									}))}
 								/>
-								<File field={updateRemoteForm.fields.single_file} value={oneResult.single_file} />
-								<File multiple field={updateRemoteForm.fields.multiple_files} value={oneResult.multiple_files} />
+								<File label="Single File" field={updateRemoteForm.fields.single_file} value={oneResult.single_file} />
+								<File
+									multiple
+									label="Multiple Files"
+									field={updateRemoteForm.fields.multiple_files}
+									value={oneResult.multiple_files}
+								/>
 							{/snippet}
 
 							{#snippet buttons()}

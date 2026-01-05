@@ -316,11 +316,11 @@
 	}
 
 	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
-	const internalContainerClasses = 'relative inline-block max-w-full min-w-52 select-none';
+	const internalContainerClasses = 'relative block max-w-full min-w-52 select-none mt-6';
 	const internalTriggerClasses =
-		'slc-input bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none';
+		'slc-input bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none rounded-md';
 	const internalListboxClasses =
-		'slc-input bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none';
+		'slc-input bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none rounded-md';
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 

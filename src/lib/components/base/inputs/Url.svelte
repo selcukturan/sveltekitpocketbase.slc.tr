@@ -2,7 +2,7 @@
 	// ######################## IMPORTS #################################################################################################
 	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import Popup from './Popup.svelte';
+	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
@@ -43,9 +43,8 @@
 	};
 </script>
 
-<div style:position="relative">
-	<label>
-		<h2>{label}</h2>
+<Field {issues} {label} id={attributes.name || id}>
+	{#snippet input(inputClass)}
 		<input
 			bind:value={proxy.value}
 			type={attributes.type || 'url'}
@@ -53,8 +52,7 @@
 			name={attributes.name || name}
 			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
 			{...rest}
-			class={classes}
+			class="{classes} {inputClass}"
 		/>
-	</label>
-	<Popup {issues} />
-</div>
+	{/snippet}
+</Field>
