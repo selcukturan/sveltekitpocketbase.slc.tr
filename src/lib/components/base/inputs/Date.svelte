@@ -21,6 +21,9 @@
 	const attributes = $derived({ ...field?.as('date'), value: undefined });
 	const issues = $derived(field?.issues() ?? []);
 
+	const mainName = $derived(attributes.name || name);
+	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
+
 	const valueChange = (value: string) => {
 		field?.set(value);
 		context?.form.validate({ preflightOnly: true });
@@ -44,13 +47,13 @@
 	};
 </script>
 
-<Field {issues} {label} id={attributes.name || id}>
+<Field {issues} {required} {label} id={mainName || id}>
 	{#snippet input(inputClass)}
 		<input
 			bind:value={proxy.value}
 			type={attributes.type || 'date'}
-			id={attributes.name || id}
-			name={attributes.name || name}
+			id={mainName || id}
+			name={mainName}
 			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
 			{...rest}
 			class="{classes} {inputClass}"

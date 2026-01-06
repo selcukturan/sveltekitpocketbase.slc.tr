@@ -1,4 +1,5 @@
 import { getContext, setContext } from 'svelte';
+import * as v from 'valibot';
 import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
 import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 
@@ -13,6 +14,13 @@ class FormInputsContext<
 	constructor(form: RemoteForm<TInput, TOutput>, schema: TSchema) {
 		this.form = $state(form);
 		this.schema = $state(schema);
+	}
+
+	getValibotMetadata(key?: string) {
+		if (!key) return {};
+		const schemaEntry = this.schema?.entries?.[key];
+		const metadata = schemaEntry ? v.getMetadata(schemaEntry) : undefined;
+		return metadata;
 	}
 }
 

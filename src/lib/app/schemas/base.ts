@@ -70,7 +70,7 @@ export const decimal_9 = v.pipe(number, maxDecimalPlaces(9));
 // ########################### END NUMBER ###########################
 
 // ########################### BEGIN BOOLEAN ###########################
-export const boolean = v.boolean();
+export const bool = v.boolean('Lütfen bir boolean değer giriniz.');
 // ########################### END BOOLEAN ###########################
 
 // ########################### BEGIN DATE ###########################
@@ -109,7 +109,7 @@ export const allCurrentValue = v.union([
 	decimal_7,
 	decimal_8,
 	decimal_9,
-	boolean,
+	bool,
 	date,
 	datetime
 ]);

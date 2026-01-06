@@ -4,12 +4,14 @@ import * as base from './base';
 // ########################################## BEGIN FILE ######################################################
 // #### SINGLE
 // Optional
-
 const _SingleFileOptional = () =>
 	v.optional(
 		v.pipe(
 			v.string(),
-			v.transform(() => undefined)
+			v.transform(() => undefined),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -17,7 +19,10 @@ const _SingleFilePlusOptional = () =>
 	v.optional(
 		v.pipe(
 			v.file(),
-			v.transform((file) => (file ? file : undefined))
+			v.transform((file) => (file ? file : undefined)),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -26,7 +31,10 @@ const _SingleFileMinusOptional = () =>
 	v.optional(
 		v.pipe(
 			v.string(),
-			v.transform((str) => (str !== '' ? str : undefined))
+			v.transform((str) => (str !== '' ? str : undefined)),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -36,17 +44,26 @@ const _SingleFileRequired = () =>
 	v.pipe(
 		v.string(),
 		v.nonEmpty('Bu alan gereklidir.'),
-		v.transform(() => undefined)
+		v.transform(() => undefined),
+		v.metadata({
+			slc_required: true
+		})
 	);
 const _SingleFilePlusRequired = () =>
 	v.pipe(
 		v.optional(v.file()),
-		v.transform((file) => (file ? file : undefined))
+		v.transform((file) => (file ? file : undefined)),
+		v.metadata({
+			slc_required: true
+		})
 	);
 const _SingleFileMinusRequired = () =>
 	v.pipe(
 		v.optional(v.string(), ''),
-		v.transform((str) => (str !== '' ? str : undefined))
+		v.transform((str) => (str !== '' ? str : undefined)),
+		v.metadata({
+			slc_required: true
+		})
 	);
 
 // #### MULTIPLE
@@ -56,7 +73,10 @@ const _MultipleFileOptional = () =>
 		v.pipe(
 			v.optional(v.array(v.string()), []),
 			v.minLength(0),
-			v.transform(() => undefined)
+			v.transform(() => undefined),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -64,7 +84,10 @@ const _MultipleFilePlusOptional = () =>
 	v.optional(
 		v.pipe(
 			v.optional(v.array(v.file()), []),
-			v.transform((arr) => (arr.length > 0 ? arr : undefined))
+			v.transform((arr) => (arr.length > 0 ? arr : undefined)),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -72,7 +95,10 @@ const _MultipleFileMinusOptional = () =>
 	v.optional(
 		v.pipe(
 			v.optional(v.array(v.string()), []),
-			v.transform((arr) => (arr.length > 0 ? arr : undefined))
+			v.transform((arr) => (arr.length > 0 ? arr : undefined)),
+			v.metadata({
+				slc_required: false
+			})
 		),
 		undefined
 	);
@@ -82,17 +108,26 @@ const _MultipleFileRequired = () =>
 	v.pipe(
 		v.optional(v.array(v.string()), []),
 		v.minLength(1, 'En az 1 dosya seçilmelidir.'),
-		v.transform(() => undefined)
+		v.transform(() => undefined),
+		v.metadata({
+			slc_required: true
+		})
 	);
 const _MultipleFilePlusRequired = () =>
 	v.pipe(
 		v.optional(v.array(v.file()), []),
-		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+		v.transform((arr) => (arr.length > 0 ? arr : undefined)),
+		v.metadata({
+			slc_required: true
+		})
 	);
 const _MultipleFileMinusRequired = () =>
 	v.pipe(
 		v.optional(v.array(v.string()), []),
-		v.transform((arr) => (arr.length > 0 ? arr : undefined))
+		v.transform((arr) => (arr.length > 0 ? arr : undefined)),
+		v.metadata({
+			slc_required: true
+		})
 	);
 
 // #### SINGLE
@@ -175,8 +210,21 @@ export function File<Key extends string, Multiple extends boolean = false, Requi
 // ########################################## END FILE ######################################################
 
 // ########################################## BEGIN TEXT ######################################################
-const _TextOptional = () => v.optional(base.text, '');
-const _TextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message));
+const _TextOptional = () =>
+	v.pipe(
+		v.optional(base.text, ''),
+		v.metadata({
+			slc_required: false
+		})
+	);
+const _TextRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(
+		base.text,
+		v.nonEmpty(message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 
 type TextOptional = ReturnType<typeof _TextOptional>;
 type TextRequired = ReturnType<typeof _TextRequired>;
@@ -237,15 +285,22 @@ export function Hidden<Key extends string, Type extends 'id' | 'text' = 'id', Re
 // ########################################## END HIDDEN ######################################################
 
 // ########################################## BEGIN DATE ######################################################
-export const dateRequired = ({ message = 'Geçerli bir tarih giriniz.' }: { message?: string } = {}) => {
-	return v.pipe(base.date, v.nonEmpty(message));
-};
-export const dateOptional = () => {
-	return v.optional(base.date, '');
-};
 
-const _DateOptional = () => v.optional(base.date, '');
-const _DateRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.date, v.nonEmpty(message));
+const _DateOptional = () =>
+	v.pipe(
+		v.optional(base.date, ''),
+		v.metadata({
+			slc_required: false
+		})
+	);
+const _DateRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(
+		base.date,
+		v.nonEmpty(message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 
 type DateOptional = ReturnType<typeof _DateOptional>;
 type DateRequired = ReturnType<typeof _DateRequired>;
@@ -267,8 +322,21 @@ export function date<Key extends string, Required extends boolean = true>(
 // ########################################## END DATE ######################################################
 
 // ########################################## BEGIN DATETIME ######################################################
-const _DatetimeOptional = () => v.optional(base.datetime, '');
-const _DatetimeRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.datetime, v.nonEmpty(message));
+const _DatetimeOptional = () =>
+	v.pipe(
+		v.optional(base.datetime, ''),
+		v.metadata({
+			slc_required: false
+		})
+	);
+const _DatetimeRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(
+		base.datetime,
+		v.nonEmpty(message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 
 type DatetimeOptional = ReturnType<typeof _DatetimeOptional>;
 type DatetimeRequired = ReturnType<typeof _DatetimeRequired>;
@@ -292,9 +360,20 @@ export function Datetime<Key extends string, Required extends boolean = true>(
 // ########################################## BEGIN SELECT ######################################################
 // Optional
 const _SingleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
-	v.optional(v.picklist([...selectOptions, '']), '');
+	v.pipe(
+		v.optional(v.picklist([...selectOptions, '']), ''),
+		v.metadata({
+			slc_required: false
+		})
+	);
+
 const _MultipleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
-	v.optional(v.array(v.picklist(selectOptions)), []);
+	v.pipe(
+		v.optional(v.array(v.picklist(selectOptions)), []),
+		v.metadata({
+			slc_required: false
+		})
+	);
 
 // Required
 const _SingleSelectRequired = ({
@@ -303,12 +382,23 @@ const _SingleSelectRequired = ({
 }: {
 	selectOptions: string[];
 	message?: string;
-}) => v.pipe(v.optional(v.picklist([...selectOptions, '']), ''), v.nonEmpty(message));
+}) =>
+	v.pipe(
+		v.optional(v.picklist([...selectOptions, '']), ''),
+		v.nonEmpty(message),
+		v.metadata({
+			slc_required: true
+		})
+	);
+
 const _MultipleSelectRequired = ({ selectOptions = [], minLength = 1 }: { selectOptions: string[]; minLength?: number }) => {
 	const minLengthValue = minLength <= 0 ? 1 : minLength;
 	return v.pipe(
 		v.optional(v.array(v.picklist(selectOptions)), []),
-		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.')
+		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.'),
+		v.metadata({
+			slc_required: true
+		})
 	);
 };
 
@@ -352,25 +442,43 @@ export function Select<Key extends string, Multiple extends boolean = false, Req
 const _NumberRequiredInteger = ({ message = 'Bu alan gereklidir. Tamsayı olmalıdır.' }: { message?: string } = {}) => {
 	return v.pipe(
 		base.integer,
-		v.check((input) => input !== 0, message)
+		v.check((input) => input !== 0, message),
+		v.metadata({
+			slc_required: true
+		})
 	);
 };
 const _NumberRequiredPositiveInteger = ({
 	message = 'Bu alan gereklidir. Pozitif tamsayı olmalıdır.'
 }: { message?: string } = {}) => {
-	return v.pipe(base.integer, v.minValue(1, message));
+	return v.pipe(
+		base.integer,
+		v.minValue(1, message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 };
 const _NumberRequiredNegativeInteger = ({
 	message = 'Bu alan gereklidir. Negatif tamsayı olmalıdır.'
 }: { message?: string } = {}) => {
-	return v.pipe(base.integer, v.maxValue(-1, message));
+	return v.pipe(
+		base.integer,
+		v.maxValue(-1, message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 };
 const _NumberRequiredDecimal = ({ message = 'Bu alan gereklidir.', step = 2 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	return v.pipe(
 		base.number,
 		base.maxDecimalPlaces(stepVal),
-		v.check((input) => input !== 0, message)
+		v.check((input) => input !== 0, message),
+		v.metadata({
+			slc_required: true
+		})
 	);
 };
 const _NumberRequiredPositiveDecimal = ({
@@ -379,7 +487,14 @@ const _NumberRequiredPositiveDecimal = ({
 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	const minVal = Math.pow(10, -stepVal); // Örn: precision 2 için 10^-2 = 0.01
-	return v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.minValue(minVal, message));
+	return v.pipe(
+		base.number,
+		base.maxDecimalPlaces(stepVal),
+		v.minValue(minVal, message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 };
 const _NumberRequiredNegativeDecimal = ({
 	message = 'Bu alan gereklidir. 0 dan küçük olmalıdır.',
@@ -387,34 +502,71 @@ const _NumberRequiredNegativeDecimal = ({
 }: { message?: string; step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
 	const maxVal = Math.pow(10, -stepVal) * -1; // Örn: precision 2 için 10^-2 = 0.01
-	return v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.maxValue(maxVal, message));
+	return v.pipe(
+		base.number,
+		base.maxDecimalPlaces(stepVal),
+		v.maxValue(maxVal, message),
+		v.metadata({
+			slc_required: true
+		})
+	);
 };
 // Optional
 const _NumberOptionalInteger = () => {
-	return v.optional(base.integer, 0);
+	return v.pipe(
+		v.optional(base.integer, 0),
+		v.metadata({
+			slc_required: false
+		})
+	);
 };
 const _NumberOptionalPositiveInteger = () => {
-	return v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0);
+	return v.pipe(
+		v.optional(v.pipe(base.integer, v.minValue(0, 'Değer 0 veya daha büyük bir tamsayı olmalıdır.')), 0),
+		v.metadata({
+			slc_required: false
+		})
+	);
 };
 const _NumberOptionalNegativeInteger = () => {
-	return v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0);
+	return v.pipe(
+		v.optional(v.pipe(base.integer, v.maxValue(0, 'Değer 0 veya daha küçük bir tamsayı olmalıdır.')), 0),
+		v.metadata({
+			slc_required: false
+		})
+	);
 };
 const _NumberOptionalDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
-	return v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0);
+	return v.pipe(
+		v.optional(v.pipe(base.number, base.maxDecimalPlaces(stepVal)), 0),
+		v.metadata({
+			slc_required: false
+		})
+	);
 };
 const _NumberOptionalPositiveDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
-	return v.optional(
-		v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.minValue(0, 'Sayısal değer 0 veya daha büyük olmalıdır.')),
-		0
+	return v.pipe(
+		v.optional(
+			v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.minValue(0, 'Sayısal değer 0 veya daha büyük olmalıdır.')),
+			0
+		),
+		v.metadata({
+			slc_required: false
+		})
 	);
 };
 const _NumberOptionalNegativeDecimal = ({ step = 2 }: { step?: number } = {}) => {
 	const stepVal = step <= 0 ? 2 : step;
-	return v.optional(
-		v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.maxValue(0, 'Sayısal değer 0 veya daha küçük olmalıdır.')),
-		0
+	return v.pipe(
+		v.optional(
+			v.pipe(base.number, base.maxDecimalPlaces(stepVal), v.maxValue(0, 'Sayısal değer 0 veya daha küçük olmalıdır.')),
+			0
+		),
+		v.metadata({
+			slc_required: false
+		})
 	);
 };
 
@@ -507,8 +659,9 @@ export function Number<
 // ########################################## END NUMBER ######################################################
 
 // ########################################## BEGIN EMAIL ######################################################
-const _EmailOptional = () => v.optional(base.email, '');
-const _EmailRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.email, v.nonEmpty(message));
+const _EmailOptional = () => v.pipe(v.optional(base.email, ''), v.metadata({ slc_required: false }));
+const _EmailRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(base.email, v.nonEmpty(message), v.metadata({ slc_required: true }));
 
 type EmailOptional = ReturnType<typeof _EmailOptional>;
 type EmailRequired = ReturnType<typeof _EmailRequired>;
@@ -530,8 +683,9 @@ export function Email<Key extends string, Required extends boolean = true>(
 // ########################################## END EMAIL ######################################################
 
 // ########################################## BEGIN URL ######################################################
-const _UrlOptional = () => v.optional(base.url, '');
-const _UrlRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.url, v.nonEmpty(message));
+const _UrlOptional = () => v.pipe(v.optional(base.url, ''), v.metadata({ slc_required: false }));
+const _UrlRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(base.url, v.nonEmpty(message), v.metadata({ slc_required: true }));
 
 type UrlOptional = ReturnType<typeof _UrlOptional>;
 type UrlRequired = ReturnType<typeof _UrlRequired>;
@@ -553,8 +707,9 @@ export function Url<Key extends string, Required extends boolean = true>(
 // ########################################## END URL ######################################################
 
 // ########################################## BEGIN TEXTAREA ######################################################
-const _TextareaOptional = () => v.optional(base.textarea, '');
-const _TextareaRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.textarea, v.nonEmpty(message));
+const _TextareaOptional = () => v.pipe(v.optional(base.textarea, ''), v.metadata({ slc_required: false }));
+const _TextareaRequired = (message = 'Bu alan gereklidir.') =>
+	v.pipe(base.textarea, v.nonEmpty(message), v.metadata({ slc_required: true }));
 
 type TextareaOptional = ReturnType<typeof _TextareaOptional>;
 type TextareaRequired = ReturnType<typeof _TextareaRequired>;
@@ -574,3 +729,31 @@ export function Textarea<Key extends string, Required extends boolean = true>(
 	} as { [P in Key]: TextareaTypeChoice<Required> };
 }
 // ########################################## END TEXTAREA ######################################################
+
+// ########################################## BEGIN BOOL ######################################################
+const _BoolOptional = () => v.pipe(v.optional(base.bool, false), v.metadata({ slc_nonfalsey: false }));
+const _BoolNonfalsey = (message = 'Bu alan gereklidir.') =>
+	v.pipe(
+		v.optional(base.bool, false),
+		v.check((input) => input === true, 'Bu alan işaretlenmelidir (Onay vermelisiniz).'),
+		v.metadata({ slc_nonfalsey: true })
+	);
+
+type BoolOptional = ReturnType<typeof _BoolOptional>;
+type BoolNonfalsey = ReturnType<typeof _BoolNonfalsey>;
+
+type BoolTypeChoice<Nonfalsey extends boolean> = Nonfalsey extends true ? BoolNonfalsey : BoolOptional;
+
+export function Bool<Key extends string, Nonfalsey extends boolean = false>(
+	key: Key,
+	options: { nonfalsey?: Nonfalsey; message?: string } = {}
+) {
+	const { nonfalsey = false, message } = options;
+
+	const main = nonfalsey ? _BoolNonfalsey(message) : _BoolOptional();
+
+	return {
+		[`${key}`]: main
+	} as { [P in Key]: BoolTypeChoice<Nonfalsey> };
+}
+// ########################################## END BOOL ######################################################

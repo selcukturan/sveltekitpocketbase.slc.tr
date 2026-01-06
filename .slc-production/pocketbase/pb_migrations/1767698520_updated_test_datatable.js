@@ -4,15 +4,13 @@ migrate((app) => {
 
   // add field
   collection.fields.addAt(1, new Field({
-    "exceptDomains": [],
     "hidden": false,
-    "id": "email3885137012",
-    "name": "email",
-    "onlyDomains": [],
+    "id": "bool1434531474",
+    "name": "bool",
     "presentable": false,
     "required": false,
     "system": false,
-    "type": "email"
+    "type": "bool"
   }))
 
   return app.save(collection)
@@ -20,7 +18,7 @@ migrate((app) => {
   const collection = app.findCollectionByNameOrId("pbc_3040204514")
 
   // remove field
-  collection.fields.removeById("email3885137012")
+  collection.fields.removeById("bool1434531474")
 
   return app.save(collection)
 })

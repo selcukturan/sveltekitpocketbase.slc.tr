@@ -1,3 +1,4 @@
+export { default as Bool } from './Bool.svelte';
 export { default as Button } from './Button.svelte';
 export { default as Date } from './Date.svelte';
 export { default as Datetime } from './Datetime.svelte';

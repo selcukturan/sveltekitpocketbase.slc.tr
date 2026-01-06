@@ -28,7 +28,8 @@
 		File,
 		Email,
 		Url,
-		Textarea
+		Textarea,
+		Bool
 	} from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
@@ -283,6 +284,7 @@
 									field={updateRemoteForm.fields.multiple_files}
 									value={oneResult.multiple_files}
 								/>
+								<Bool label="Boolean" field={updateRemoteForm.fields.bool} value={oneResult.bool} />
 							{/snippet}
 
 							{#snippet buttons()}

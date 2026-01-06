@@ -1,7 +1,7 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
 	// ######################## IMPORTS #################################################################################################
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import Popup from './Popup.svelte';
+	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { SvelteHTMLElements } from 'svelte/elements';
@@ -48,11 +48,11 @@
 	);
 
 	const issues = $derived(field?.issues() ?? []);
-	const mainName = $derived(mainInputAttributes?.name);
+	const mainName = $derived(mainInputAttributes?.name.replace('[]', ''));
+	const plusName = $derived(multiple ? mainName + '_Plus[]' : mainName + '_Plus');
+	const minusName = $derived(multiple ? mainName + '_Minus[]' : mainName + '_Minus');
 
-	// Name logic: 'image' -> 'image_Plus', 'images[]' -> 'images_Plus[]'
-	const plusName = $derived(multiple ? mainName?.replace('[]', '_Plus[]') : mainName + '_Plus');
-	const minusName = $derived(multiple ? mainName?.replace('[]', '_Minus[]') : mainName + '_Minus');
+	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
 
 	let files = $state<FileList>();
 	let uploadedFiles = $state(value); // Başlangıçtaki dosyaları tutar
@@ -182,7 +182,80 @@
 	}
 </script>
 
-<div class="group bg-surface-200 focus-within:bg-surface-300 relative m-0.5 mt-6 block w-full rounded-md">
+<Field {issues} {required} {label} id={mainName || `${componentId}_Plus`}>
+	{#snippet input(inputClass)}
+		<div class="p-3.5">
+			<button
+				id={`${componentId}_Plus`}
+				type="button"
+				onclick={() => plusInputElement?.click()}
+				class="slc-input bg-surface-300 w-full cursor-pointer rounded border px-2 py-1"
+			>
+				<span>{multiple ? `Dosyaları Seç (${length})` : length > 0 ? 'Dosyayı Değiştir' : 'Dosya Seç'}</span>
+			</button>
+			<div class="mt-4 flex flex-col gap-2">
+				{#each displayFiles as file (file.name)}
+					<div class="border-surface-500 flex items-center gap-2 border-t p-2" class:opacity-50={file.deleted}>
+						<span class="{'text-xs font-bold'} {file.uploaded ? 'text-error-500' : 'text-success-500'}"
+							>{file.uploaded ? 'OLD' : 'NEW'}</span
+						>
+						<p class="flex-1 truncate">{file.name}</p>
+
+						{#if file.deleted}
+							<button type="button" class="text-blue-500" onclick={() => restoreUploadedElement(file.name)}>Geri Al</button>
+						{:else}
+							<button
+								type="button"
+								class="text-red-500"
+								onclick={() => (file.uploaded ? removeUploadedElement(file.name) : removeFileInputElement(file.name))}
+							>
+								Kaldır
+							</button>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<!--Hidden Area-->
+
+		<select {...mainInputAttributes} {...rest} bind:this={mainInputElement} class="sr-only" tabindex={-1} aria-hidden={true}>
+			{#if multiple}
+				{@const val = (value || []) as ValueTypeChoice<true>}
+				{#each val as option}
+					<option value={option} selected>{option}</option>
+				{/each}
+			{:else}
+				{@const val = (value || '') as ValueTypeChoice<false>}
+				<option value={val} selected>{val}</option>
+			{/if}
+		</select>
+
+		<input
+			{multiple}
+			bind:files={proxy.files}
+			bind:this={plusInputElement}
+			type="file"
+			name={plusName}
+			accept="image/*"
+			class="sr-only"
+			tabindex={-1}
+			aria-hidden={true}
+		/>
+
+		{#if multiple}
+			<select multiple name={minusName} bind:value={deletedFileNames} class="sr-only" tabindex={-1} aria-hidden={true}>
+				{#each deletedFileNames as option}
+					<option value={option} selected>{option}</option>
+				{/each}
+			</select>
+		{:else}
+			<input type="hidden" name={minusName} bind:value={deletedFileNames[0]} class="sr-only" tabindex={-1} aria-hidden={true} />
+		{/if}
+	{/snippet}
+</Field>
+
+<!-- <div class="group bg-surface-200 focus-within:bg-surface-300 relative m-0.5 mt-6 block w-full rounded-md">
 	<Popup {issues} />
 	<label
 		for={`${componentId}_Plus`}
@@ -190,75 +263,8 @@
 	>
 		{label}
 	</label>
-	<div class="p-3.5">
-		<button
-			name={`${componentId}_Plus`}
-			type="button"
-			onclick={() => plusInputElement?.click()}
-			class="slc-input bg-surface-300 w-full cursor-pointer rounded border px-2 py-1"
-		>
-			<span>{multiple ? `Dosyaları Seç (${length})` : length > 0 ? 'Dosyayı Değiştir' : 'Dosya Seç'}</span>
-		</button>
-		<div class="mt-4 flex flex-col gap-2">
-			{#each displayFiles as file (file.name)}
-				<div class="border-surface-500 flex items-center gap-2 border-t p-2" class:opacity-50={file.deleted}>
-					<span class="{'text-xs font-bold'} {file.uploaded ? 'text-error-500' : 'text-success-500'}"
-						>{file.uploaded ? 'OLD' : 'NEW'}</span
-					>
-					<p class="flex-1 truncate">{file.name}</p>
-
-					{#if file.deleted}
-						<button type="button" class="text-blue-500" onclick={() => restoreUploadedElement(file.name)}>Geri Al</button>
-					{:else}
-						<button
-							type="button"
-							class="text-red-500"
-							onclick={() => (file.uploaded ? removeUploadedElement(file.name) : removeFileInputElement(file.name))}
-						>
-							Kaldır
-						</button>
-					{/if}
-				</div>
-			{/each}
-		</div>
-	</div>
-
-	<!--Hidden Area-->
-
-	<select {...mainInputAttributes} {...rest} bind:this={mainInputElement} class="sr-only" tabindex={-1} aria-hidden={true}>
-		{#if multiple}
-			{@const val = (value || []) as ValueTypeChoice<true>}
-			{#each val as option}
-				<option value={option} selected>{option}</option>
-			{/each}
-		{:else}
-			{@const val = (value || '') as ValueTypeChoice<false>}
-			<option value={val} selected>{val}</option>
-		{/if}
-	</select>
-
-	<input
-		{multiple}
-		bind:files={proxy.files}
-		bind:this={plusInputElement}
-		type="file"
-		name={plusName}
-		accept="image/*"
-		class="sr-only"
-		tabindex={-1}
-		aria-hidden={true}
-	/>
-
-	{#if multiple}
-		<select multiple name={minusName} bind:value={deletedFileNames} class="sr-only" tabindex={-1} aria-hidden={true}>
-			{#each deletedFileNames as option}
-				<option value={option} selected>{option}</option>
-			{/each}
-		</select>
-	{:else}
-		<input type="hidden" name={minusName} bind:value={deletedFileNames[0]} class="sr-only" tabindex={-1} aria-hidden={true} />
-	{/if}
-</div>
+	
+</div> -->
 
 <style>
 	.sr-only {

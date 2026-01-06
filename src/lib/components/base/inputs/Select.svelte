@@ -2,13 +2,14 @@
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import Popup from './Popup.svelte';
+	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
 	import { watchState } from '$lib/utils/watch-states.svelte';
 
 	type PropsType = {
 		multiple?: boolean;
 		value: string | string[];
+		label?: string;
 		field?: RemoteFormField<string> | RemoteFormField<string[]>;
 		options: {
 			value: string;
@@ -20,7 +21,6 @@
 		optionClass?: string;
 		disabled?: boolean;
 		readonly?: boolean;
-		required?: boolean;
 		escClose?: boolean;
 		deSelectText?: string;
 	};
@@ -28,6 +28,7 @@
 	let {
 		multiple = false,
 		value = $bindable(multiple ? ([] as string[]) : ('' as string)),
+		label,
 		field,
 		options,
 		class: classes = '',
@@ -36,7 +37,6 @@
 		optionClass = '',
 		disabled,
 		readonly,
-		required = false,
 		escClose = true,
 		deSelectText = '-- Seçiniz --'
 	}: PropsType = $props();
@@ -51,6 +51,18 @@
 		if (!field) return { type: 'select multiple' as const };
 		return (field as RemoteFormField<string[]>).as('select multiple');
 	};
+
+	const getName = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
+		if (multiple) {
+			if (!field) return '';
+			return (field as RemoteFormField<string[]>).as('select multiple')?.name;
+		}
+		if (!field) return '';
+		return (field as RemoteFormField<string>).as('select')?.name;
+	};
+
+	const mainName = $derived(getName(field).replace('[]', ''));
+	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
 
 	const id = $props.id();
 
@@ -347,108 +359,111 @@
 	onfocusin={handleWindowFocusChange}
 />
 
-<!-- Select Container -->
-<div bind:this={container} class="{internalContainerClasses} {classes}">
-	<!-- Select Trigger -->
-	<button
-		bind:this={trigger}
-		id={triggerId}
-		role="combobox"
-		type="button"
-		aria-controls={listboxId}
-		aria-expanded={isOpenPopup}
-		aria-haspopup="listbox"
-		aria-labelledby={triggerId}
-		aria-activedescendant={activeOptionId}
-		aria-invalid={!isValid}
-		class="{internalTriggerClasses} {triggerClass} {!isValid ? internalInvalidTriggerClasses : ''}"
-		onclick={() => toggle()}
-		onkeydown={handleTriggerKeyDown}
-		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
-		disabled={disabled || displayOptions.length === 0}
-	>
-		<span class="flex-1 p-1 {textEllipsisClasses}">{selectedLabels}</span>
-		<svg
-			stroke="currentColor"
-			fill="currentColor"
-			stroke-width="0"
-			viewBox="0 0 1024 1024"
-			height="1em"
-			width="1em"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"
-			></path>
-		</svg>
-	</button>
-	<!-- Select Listbox -->
-	{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
-		<ul
-			bind:this={listbox}
-			id={listboxId}
-			role="listbox"
-			aria-labelledby={triggerId}
-			tabindex={-1}
-			onkeydown={handleListboxKeydown}
-			class="{internalListboxClasses} {listboxClass}"
-			transition:fly={{ y: 5, duration: 300 }}
-		>
-			<!-- Select Options -->
-			{#each displayOptions as option, i (i)}
-				{@const isSelected = selectedIndexes.includes(i)}
-				{@const isActive = i === activeIndex}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<li
-					bind:this={optionsLi[i]}
-					id="{optionId}-{i}"
-					role="option"
-					tabindex={-1}
-					aria-selected={isSelected}
-					class:bg-success-200={isSelected}
-					class:outline-2={isActive}
-					class="{internalOptionClasses} {optionClass}"
-					onclick={() => selectOption(i)}
+<Field {issues} {required} {label} id={mainName || id}>
+	{#snippet input(inputClass)}
+		<!-- Select Container -->
+		<div bind:this={container} class="{internalContainerClasses} {classes}">
+			<!-- Select Trigger -->
+			<button
+				bind:this={trigger}
+				id={triggerId}
+				role="combobox"
+				type="button"
+				aria-controls={listboxId}
+				aria-expanded={isOpenPopup}
+				aria-haspopup="listbox"
+				aria-labelledby={triggerId}
+				aria-activedescendant={activeOptionId}
+				aria-invalid={!isValid}
+				class="{internalTriggerClasses} {triggerClass} {!isValid ? internalInvalidTriggerClasses : ''}"
+				onclick={() => toggle()}
+				onkeydown={handleTriggerKeyDown}
+				tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
+				disabled={disabled || displayOptions.length === 0}
+			>
+				<span class="flex-1 p-1 {textEllipsisClasses}">{selectedLabels}</span>
+				<svg
+					stroke="currentColor"
+					fill="currentColor"
+					stroke-width="0"
+					viewBox="0 0 1024 1024"
+					height="1em"
+					width="1em"
+					xmlns="http://www.w3.org/2000/svg"
 				>
-					<span class="flex-1 {textEllipsisClasses}">
-						{option.label}
-					</span>
-					<span aria-hidden={!isSelected} hidden={!isSelected}>
-						<svg
-							stroke="currentColor"
-							fill="currentColor"
-							stroke-width="0"
-							viewBox="0 0 24 24"
-							height="1em"
-							width="1em"
-							xmlns="http://www.w3.org/2000/svg"
+					<path
+						d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"
+					></path>
+				</svg>
+			</button>
+			<!-- Select Listbox -->
+			{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
+				<ul
+					bind:this={listbox}
+					id={listboxId}
+					role="listbox"
+					aria-labelledby={triggerId}
+					tabindex={-1}
+					onkeydown={handleListboxKeydown}
+					class="{internalListboxClasses} {listboxClass}"
+					transition:fly={{ y: 5, duration: 300 }}
+				>
+					<!-- Select Options -->
+					{#each displayOptions as option, i (i)}
+						{@const isSelected = selectedIndexes.includes(i)}
+						{@const isActive = i === activeIndex}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<li
+							bind:this={optionsLi[i]}
+							id="{optionId}-{i}"
+							role="option"
+							tabindex={-1}
+							aria-selected={isSelected}
+							class:bg-success-200={isSelected}
+							class:outline-2={isActive}
+							class="{internalOptionClasses} {optionClass}"
+							onclick={() => selectOption(i)}
 						>
-							<path fill="none" d="M0 0h24v24H0z"></path>
-							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
-						</svg>
-					</span>
-				</li>
-			{/each}
-		</ul>
-	{/if}
+							<span class="flex-1 {textEllipsisClasses}">
+								{option.label}
+							</span>
+							<span aria-hidden={!isSelected} hidden={!isSelected}>
+								<svg
+									stroke="currentColor"
+									fill="currentColor"
+									stroke-width="0"
+									viewBox="0 0 24 24"
+									height="1em"
+									width="1em"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path fill="none" d="M0 0h24v24H0z"></path>
+									<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+								</svg>
+							</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
 
-	<Popup {issues} />
-
-	{#if multiple}
-		{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
-		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes} bind:this={selectInput}>
-			{#each displayOptions as option, i (i)}
-				<option>{option.value}</option>
-			{/each}
-		</select>
-	{:else}
-		{@const selectAttributes = getSelectAttributes(field)}
-		<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes} bind:this={selectInput}>
-			{#each displayOptions as option, i (i)}
-				<option>{option.value}</option>
-			{/each}
-		</select>
-	{/if}
-</div>
+			{#if multiple}
+				{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
+				<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes} bind:this={selectInput}>
+					{#each displayOptions as option, i (i)}
+						<option>{option.value}</option>
+					{/each}
+				</select>
+			{:else}
+				{@const selectAttributes = getSelectAttributes(field)}
+				<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes} bind:this={selectInput}>
+					{#each displayOptions as option, i (i)}
+						<option>{option.value}</option>
+					{/each}
+				</select>
+			{/if}
+		</div>
+	{/snippet}
+</Field>
 
 <style>
 	.sr-only {

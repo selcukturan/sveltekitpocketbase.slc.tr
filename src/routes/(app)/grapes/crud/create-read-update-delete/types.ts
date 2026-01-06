@@ -44,13 +44,14 @@ export const updateFormSchema = v.object({
 	...input.Text('title'),
 	...input.Number('quantity', { type: 'integer', required: true }),
 	...input.Datetime('purchase_date'),
-	...input.Select('select_single', { selectOptions: Object.values(TestDatatableSelectSingleOptions) }),
+	...input.Select('select_single', { required: true, selectOptions: Object.values(TestDatatableSelectSingleOptions) }),
 	...input.Select('select_multiple', { multiple: true, selectOptions: Object.values(TestDatatableSelectMultipleOptions) }),
 	...input.File('multiple_files', { multiple: true, required: true }),
 	...input.File('single_file', { required: true }),
 	...input.Email('email', { required: true }),
-	...input.Url('url', { required: false }),
-	...input.Textarea('textarea', { required: false })
+	...input.Url('url', { required: true }),
+	...input.Textarea('textarea', { required: true }),
+	...input.Bool('bool', { nonfalsey: false })
 });
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;

@@ -376,6 +376,7 @@ export enum TestDatatableSelectMultipleOptions {
 export type TestDatatableRecord = {
 	active?: boolean
 	amount?: number
+	bool?: boolean
 	caption?: string
 	created: IsoAutoDateString
 	district?: string
