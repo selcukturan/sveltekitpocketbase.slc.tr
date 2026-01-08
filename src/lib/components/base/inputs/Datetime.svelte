@@ -24,7 +24,7 @@
 	const mainName = $derived(attributes.name || name);
 	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
 
-	const valueChange = (value: string) => {
+	const valueChanged = (value: string) => {
 		field?.set(value);
 		context?.form.validate({ preflightOnly: true });
 	};
@@ -35,14 +35,14 @@
 			const currentValue = formatDatetimeIsoToInput(value);
 			if (first) {
 				first = false;
-				valueChange(currentValue);
+				valueChanged(currentValue);
 			}
 			return currentValue;
 		},
 		set value(v) {
 			const currentValue = parseDatetimeInputToIso(v);
 			value = currentValue;
-			valueChange(currentValue);
+			valueChanged(currentValue);
 		}
 	};
 </script>

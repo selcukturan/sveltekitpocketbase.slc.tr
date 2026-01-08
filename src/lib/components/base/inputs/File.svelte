@@ -77,7 +77,7 @@
 		}
 	};
 
-	const valueChange = (newValue: ValueTypeChoice<Tmultiple>) => {
+	const valueChanged = (newValue: ValueTypeChoice<Tmultiple>) => {
 		let val: ValueTypeChoice<Tmultiple>;
 
 		if (multiple) {
@@ -108,7 +108,7 @@
 						});
 					}
 				});
-				valueChange(getMapNotDeletedFiles());
+				valueChanged(getMapNotDeletedFiles());
 			}
 			return files ?? null;
 		},
@@ -134,7 +134,7 @@
 			}
 			files = dt.files;
 			value = getMapNotDeletedFiles();
-			valueChange(value);
+			valueChanged(value);
 		}
 	};
 
@@ -147,7 +147,7 @@
 		dt = newDt;
 		files = dt.files;
 		value = getMapNotDeletedFiles();
-		valueChange(value);
+		valueChanged(value);
 	}
 
 	function removeUploadedElement(nameToDelete: string) {
@@ -158,7 +158,7 @@
 				deletedFileNames = [...deletedFileNames, nameToDelete];
 			}
 			value = getMapNotDeletedFiles();
-			valueChange(value);
+			valueChanged(value);
 		}
 	}
 
@@ -177,7 +177,7 @@
 
 			valueMap.set(nameToRestore, { ...item, deleted: false });
 			value = getMapNotDeletedFiles();
-			valueChange(value);
+			valueChanged(value);
 		}
 	}
 </script>

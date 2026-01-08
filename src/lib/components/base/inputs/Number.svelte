@@ -23,7 +23,7 @@
 	const mainName = $derived(attributes.name || name || '');
 	const required = $derived(context?.getValibotMetadata(mainName.replace('n:', ''))?.slc_required === true ? true : false);
 
-	const valueChange = (value: number) => {
+	const valueChanged = (value: number) => {
 		field?.set(value);
 		context?.form.validate({ preflightOnly: true });
 	};
@@ -34,14 +34,14 @@
 			const currentValue = value;
 			if (first) {
 				first = false;
-				valueChange(currentValue);
+				valueChanged(currentValue);
 			}
 			return currentValue;
 		},
 		set value(v) {
 			const currentValue = v;
 			value = currentValue;
-			valueChange(currentValue);
+			valueChanged(currentValue);
 		}
 	};
 </script>

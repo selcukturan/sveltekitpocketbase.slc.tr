@@ -29,7 +29,8 @@
 		Email,
 		Url,
 		Textarea,
-		Bool
+		Bool,
+		Relation
 	} from '$lib/components/base/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
@@ -260,7 +261,14 @@
 								<Email label="Email" field={updateRemoteForm.fields.email} value={oneResult.email} />
 								<Url label="Url" field={updateRemoteForm.fields.url} value={oneResult.url} />
 								<Textarea label="Textarea" field={updateRemoteForm.fields.textarea} value={oneResult.textarea} />
+								<Relation
+									multiple
+									label="Relation"
+									field={updateRemoteForm.fields.select_multiple}
+									value={oneResult.select_multiple}
+								/>
 								<Select
+									label="Select Single"
 									field={updateRemoteForm.fields.select_single}
 									value={oneResult.select_single}
 									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
@@ -270,6 +278,7 @@
 								/>
 								<Select
 									multiple
+									label="Select Multiple"
 									field={updateRemoteForm.fields.select_multiple}
 									value={oneResult.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({

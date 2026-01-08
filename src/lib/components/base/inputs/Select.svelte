@@ -359,7 +359,7 @@
 	onfocusin={handleWindowFocusChange}
 />
 
-<Field {issues} {required} {label} id={mainName || id}>
+<Field {issues} {required} {label} id={triggerId}>
 	{#snippet input(inputClass)}
 		<!-- Select Container -->
 		<div bind:this={container} class="{internalContainerClasses} {classes}">
