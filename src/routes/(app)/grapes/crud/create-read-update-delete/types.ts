@@ -51,8 +51,15 @@ export const updateFormSchema = v.object({
 	...input.Email('email', { required: true }),
 	...input.Url('url', { required: true }),
 	...input.Textarea('textarea', { required: true }),
-	...input.Bool('bool', { nonfalsey: false })
+	...input.Bool('bool', { nonfalsey: false }),
+	relation_single: v.optional(v.string()),
+	relation_multiple: v.optional(v.array(v.string()))
 });
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
+export const relationListParamsSchema = v.object({
+	search: v.string()
+});
+export type RelationListParamsSchemaType = v.InferOutput<typeof relationListParamsSchema>;

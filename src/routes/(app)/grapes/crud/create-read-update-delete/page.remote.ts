@@ -6,7 +6,7 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '$lib/server/error';
 import { paramsFileKeyTransform } from '$lib/utils/transform-params-helper';
 
-import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
+import { listParamsSchema, oneParamsSchema, updateFormSchema, relationListParamsSchema } from './types';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -78,4 +78,46 @@ export const updateForm = form(updateFormSchema, async (params) => {
 	}
 
 	return updatedResult.value;
+});
+
+// ------------------------------------------------------------------------------------------------------------------------------------
+
+export const getRelationMultipleList = query(relationListParamsSchema, async (params) => {
+	// 🔒🔐
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	const listResult = await ResultAsync.fromPromise(
+		locals.pb.collection(Collections.CrudRelationMultiple).getList(1, 30, {
+			filter: `title ~ "${params.search}"`
+		}),
+		mapUnknownToError
+	);
+
+	if (listResult.isErr()) {
+		throwError(listResult.error);
+	}
+
+	return listResult.value;
+});
+
+export const getRelationSingleList = query(relationListParamsSchema, async (params) => {
+	// 🔒🔐
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	const listResult = await ResultAsync.fromPromise(
+		locals.pb.collection(Collections.CrudRelationSingle).getList(1, 30, {
+			filter: `title ~ "${params.search}"`
+		}),
+		mapUnknownToError
+	);
+
+	if (listResult.isErr()) {
+		throwError(listResult.error);
+	}
+
+	return listResult.value;
 });

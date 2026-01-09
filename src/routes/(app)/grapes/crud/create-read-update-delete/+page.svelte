@@ -36,7 +36,7 @@
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
-	import { getOne, getList, updateForm } from './page.remote';
+	import { getOne, getList, updateForm, getRelationMultipleList, getRelationSingleList } from './page.remote';
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const appToaster = getToaster('app-toaster');
@@ -261,12 +261,28 @@
 								<Email label="Email" field={updateRemoteForm.fields.email} value={oneResult.email} />
 								<Url label="Url" field={updateRemoteForm.fields.url} value={oneResult.url} />
 								<Textarea label="Textarea" field={updateRemoteForm.fields.textarea} value={oneResult.textarea} />
+
+								<Relation
+									label="Relation Single"
+									field={updateRemoteForm.fields.relation_single}
+									value={oneResult.relation_single}
+									data={await getRelationSingleList({ search: '' })}
+									refresh={(params) => {
+										getRelationSingleList(params).refresh();
+									}}
+								/>
+
 								<Relation
 									multiple
-									label="Relation"
-									field={updateRemoteForm.fields.select_multiple}
-									value={oneResult.select_multiple}
+									label="Relation Multiple"
+									field={updateRemoteForm.fields.relation_multiple}
+									value={oneResult.relation_multiple}
+									data={await getRelationMultipleList({ search: '' })}
+									refresh={(params) => {
+										getRelationMultipleList(params).refresh();
+									}}
 								/>
+
 								<Select
 									label="Select Single"
 									field={updateRemoteForm.fields.select_single}

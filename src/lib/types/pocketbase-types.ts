@@ -19,6 +19,8 @@ export enum Collections {
 	AclRolesMenus = "acl_roles_menus",
 	AclRolesMenusView = "acl_roles_menus_view",
 	AppRegions = "app_regions",
+	CrudRelationMultiple = "crud_relation_multiple",
+	CrudRelationSingle = "crud_relation_single",
 	SysCompanys = "sys_companys",
 	SysLogs = "sys_logs",
 	SysMenuItems = "sys_menu_items",
@@ -268,6 +270,22 @@ export type AppRegionsRecord<Tavailable_permissions = unknown> = {
 	updated: IsoAutoDateString
 }
 
+export type CrudRelationMultipleRecord = {
+	caption?: string
+	created: IsoAutoDateString
+	id: string
+	title?: string
+	updated: IsoAutoDateString
+}
+
+export type CrudRelationSingleRecord = {
+	caption?: string
+	created: IsoAutoDateString
+	id: string
+	title?: string
+	updated: IsoAutoDateString
+}
+
 export enum SysCompanysTypeOptions {
 	"company" = "company",
 	"storage" = "storage",
@@ -393,6 +411,8 @@ export type TestDatatableRecord = {
 	purchase_date?: IsoDateString
 	quantity?: number
 	region?: string
+	relation_multiple?: RecordIdString[]
+	relation_single?: RecordIdString
 	select_multiple?: TestDatatableSelectMultipleOptions[]
 	select_relation?: RecordIdString
 	select_single?: TestDatatableSelectSingleOptions
@@ -470,6 +490,8 @@ export type AclRolesCompanysResponse<Tvalid_permissions = unknown, Texpand = unk
 export type AclRolesMenusResponse<Tvalid_permissions = unknown, Texpand = unknown> = Required<AclRolesMenusRecord<Tvalid_permissions>> & BaseSystemFields<Texpand>
 export type AclRolesMenusViewResponse<Tavailable_permissions = unknown, Tvalid_permissions = unknown, Texpand = unknown> = Required<AclRolesMenusViewRecord<Tavailable_permissions, Tvalid_permissions>> & BaseSystemFields<Texpand>
 export type AppRegionsResponse<Tavailable_permissions = unknown, Texpand = unknown> = Required<AppRegionsRecord<Tavailable_permissions>> & BaseSystemFields<Texpand>
+export type CrudRelationMultipleResponse<Texpand = unknown> = Required<CrudRelationMultipleRecord> & BaseSystemFields<Texpand>
+export type CrudRelationSingleResponse<Texpand = unknown> = Required<CrudRelationSingleRecord> & BaseSystemFields<Texpand>
 export type SysCompanysResponse<Tavailable_permissions = unknown, Texpand = unknown> = Required<SysCompanysRecord<Tavailable_permissions>> & BaseSystemFields<Texpand>
 export type SysLogsResponse<Texpand = unknown> = Required<SysLogsRecord> & BaseSystemFields<Texpand>
 export type SysMenuItemsResponse<Tavailable_permissions = unknown, Texpand = unknown> = Required<SysMenuItemsRecord<Tavailable_permissions>> & BaseSystemFields<Texpand>
@@ -498,6 +520,8 @@ export type CollectionRecords = {
 	acl_roles_menus: AclRolesMenusRecord
 	acl_roles_menus_view: AclRolesMenusViewRecord
 	app_regions: AppRegionsRecord
+	crud_relation_multiple: CrudRelationMultipleRecord
+	crud_relation_single: CrudRelationSingleRecord
 	sys_companys: SysCompanysRecord
 	sys_logs: SysLogsRecord
 	sys_menu_items: SysMenuItemsRecord
@@ -525,6 +549,8 @@ export type CollectionResponses = {
 	acl_roles_menus: AclRolesMenusResponse
 	acl_roles_menus_view: AclRolesMenusViewResponse
 	app_regions: AppRegionsResponse
+	crud_relation_multiple: CrudRelationMultipleResponse
+	crud_relation_single: CrudRelationSingleResponse
 	sys_companys: SysCompanysResponse
 	sys_logs: SysLogsResponse
 	sys_menu_items: SysMenuItemsResponse
