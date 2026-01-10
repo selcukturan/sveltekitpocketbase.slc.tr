@@ -36,7 +36,7 @@
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
-	import { getOne, getList, updateForm, getRelationMultipleList, getRelationSingleList } from './page.remote';
+	import { getOne, getList, updateForm } from './page.remote';
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const appToaster = getToaster('app-toaster');
@@ -264,23 +264,17 @@
 
 								<Relation
 									label="Relation Single"
+									collection="crud_relation_single"
 									field={updateRemoteForm.fields.relation_single}
 									value={oneResult.relation_single}
-									data={await getRelationSingleList({ search: '' })}
-									refresh={(params) => {
-										getRelationSingleList(params).refresh();
-									}}
 								/>
 
 								<Relation
 									multiple
 									label="Relation Multiple"
+									collection="crud_relation_multiple"
 									field={updateRemoteForm.fields.relation_multiple}
 									value={oneResult.relation_multiple}
-									data={await getRelationMultipleList({ search: '' })}
-									refresh={(params) => {
-										getRelationMultipleList(params).refresh();
-									}}
 								/>
 
 								<Select

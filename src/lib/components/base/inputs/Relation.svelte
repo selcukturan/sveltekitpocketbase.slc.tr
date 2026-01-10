@@ -5,15 +5,22 @@
 	import { getFormInputsContext } from './context.svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import type { Snippet } from 'svelte';
-	import type { ValueType, ResolveData, ListResult } from './relation/type';
-	import { watchState } from '$lib/utils/watch-states.svelte';
+	import type { ListResult } from 'pocketbase';
+	import Field from './Field.svelte';
+	import { Collections } from '$lib/types/pocketbase-types';
+	import { getRelationList } from '$lib/remotes/relations.remote';
+
+	type ValueType<T extends boolean> = T extends true ? string[] : string;
+
+	type ResolveData<T extends boolean> = {
+		confirm: boolean;
+	};
 
 	type Props = Omit<SvelteHTMLElements['select'], 'id' | 'value' | 'multiple' | 'name'> & {
+		collection: Exclude<`${Collections}`, `_${string}`>;
 		id?: string;
 		name?: string;
 		label?: string;
-		picker?: Snippet<[{ search: string; multiple: Tmultiple }]>;
 		message?: string;
 		yes?: string;
 		no?: string;
@@ -22,11 +29,11 @@
 		value?: ValueType<Tmultiple>;
 		field?: RemoteFormField<ValueType<Tmultiple>>;
 		defaultSearch?: string;
-		data?: ListResult<TData>;
-		refresh?: ({ search }: { search: string }) => void;
+		lazy?: boolean;
 	};
 
 	let {
+		collection,
 		multiple = false as Tmultiple,
 		value = $bindable((multiple ? [] : '') as ValueType<Tmultiple>),
 		field,
@@ -34,34 +41,26 @@
 		yes = 'Evet',
 		no = 'Hayır',
 		class: classes,
-		picker,
 		id,
 		name,
 		label,
 		animationDuration = 150, // Animasyon süresini, JS ve CSS'te senkronize tut.
 		defaultSearch = '',
-		data,
-		refresh,
+		lazy = false,
+
 		...rest
 	}: Props = $props();
-
-	watchState(
-		() => data,
-		(currentData) => {
-			console.log('currentData', currentData);
-		}
-	);
 
 	const componentId = $props.id();
 	const context = getFormInputsContext();
 
-	// svelte-ignore state_referenced_locally
-	/* const relationContext = createRelationInputContext(multiple); */
+	let remoteData: ListResult<TData> | undefined = $state();
+	let internalRemoteData = $derived(remoteData); // initial data
 
-	let searchString = $derived(defaultSearch);
-
+	let pickerAnswer = $state('init');
 	// svelte-ignore state_referenced_locally
-	let pickerSelected: ValueType<Tmultiple> = $state((multiple ? [] : '') as ValueType<Tmultiple>);
+	let pickerSearchString = $state(defaultSearch);
+	let pickerSelected = $state(value);
 
 	let selectInput: HTMLSelectElement | undefined = $state();
 
@@ -69,8 +68,6 @@
 	let isOpen = $state(false);
 	let resolvePromise: ((data: ResolveData<Tmultiple>) => void) | null = null;
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
-
-	let pickerAnswer = $state('init');
 
 	const fieldAttributes = $derived(
 		field
@@ -99,11 +96,8 @@
 	const show = (): Promise<ResolveData<Tmultiple>> => {
 		return new Promise<ResolveData<Tmultiple>>((resolve) => {
 			resolvePromise = resolve;
-
 			isOpen = true;
-
 			tick().then(() => {
-				refresh?.({ search: searchString });
 				dialog?.showModal();
 			});
 		});
@@ -112,18 +106,13 @@
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const hide = async (log: string, confirm: boolean) => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma.
-
 		isClosing = true; // Artık kapatma işlemi başlayabilir. Kapatma işlemi CSS `.closing` animasyonu başlar.
-
 		await sleep(animationDuration); // CSS animasyonu için bekleniyor. Kod burada duraklar.
-
 		// Bekleme bittikten sonra bu kodlar çalışır. Kapatma işlemi CSS `.closing` animasyonu biter.
 		isClosing = false;
 		dialog?.close();
 		isOpen = false;
-
 		resolvePromise?.({ confirm });
-
 		resolvePromise = null;
 	};
 
@@ -165,7 +154,12 @@
 			const currentValue = value;
 			if (first) {
 				first = false;
-				pickerSelected = currentValue; // initial value, daha sonraki değerler Data.svelte component'inde bind:group ile güncellenir.
+				// pickerSelected = currentValue; // initial value, daha sonraki değerler bind:group ile güncellenir.
+				if (!lazy) {
+					getRelationList({ search: pickerSearchString, collection }).then((data) => {
+						remoteData = data as any;
+					});
+				}
 				valueChanged(currentValue);
 			}
 			return currentValue;
@@ -177,132 +171,159 @@
 		}
 	};
 
-	let selectedFullList = $derived.by(() => {
-		return data?.items.filter((item) => {
-			return value.includes(item.id as string);
-		});
-	});
+	function handleToggle(item: any, isChecked: boolean) {
+		if (multiple && Array.isArray(pickerSelected)) {
+			if (isChecked) {
+				pickerSelected = [...pickerSelected, item.id] as ValueType<Tmultiple>;
+			} else {
+				pickerSelected = pickerSelected.filter((id) => id !== item.id) as ValueType<Tmultiple>;
+			}
+		} else {
+			if (isChecked) {
+				pickerSelected = item.id as ValueType<Tmultiple>;
+			}
+		}
+	}
 </script>
 
-<svelte:boundary>
-	<!-- Begin Dialog -->
-	<button
-		type="button"
-		onclick={async () => {
-			pickerAnswer = 'waiting';
+<!-- <svelte:boundary> -->
+<Field {issues} {required} {label} id={labelFor}>
+	{#snippet input(inputClass)}
+		<!-- Begin Trigger -->
+		<button
+			type="button"
+			id={labelFor}
+			onclick={async () => {
+				pickerAnswer = 'waiting';
+				pickerSelected = value;
+				pickerSearchString = defaultSearch;
 
-			const { confirm } = await show();
+				getRelationList({ search: pickerSearchString, collection }).then((data) => {
+					remoteData = data as any;
+				});
 
-			if (confirm) {
-				pickerAnswer = 'true';
-				proxy.value = pickerSelected;
-			} else {
-				pickerAnswer = 'false';
-			}
-		}}
-		class="slc-input bg-secondary-400!"
-	>
-		Relation Picker ({pickerAnswer})
-	</button>
-	<!-- End Dialog -->
+				const { confirm } = await show();
 
-	<!-- Begin value List -->
-	<!-- {#if multiple}
-		{#each value as val}
-			<p>{val}</p>
-		{/each}
-	{:else}
-		<p>{value}</p>
-	{/if} -->
-	<!-- End value List -->
-
-	<!-- {JSON.stringify(relationContext.pickerData?.items)} -->
-
-	<!-- Begin selectedFullList List -->
-	{#each selectedFullList as item}
-		<p>{item.caption}</p>
-	{/each}
-	<!-- End selectedFullList List -->
-
-	<!-- Begin Select -->
-	{#if multiple}
-		<select
-			multiple
-			bind:this={selectInput}
-			bind:value={proxy.value}
-			name={mainName}
-			id={mainName || id}
-			class="sr-only"
-			tabindex={-1}
-			aria-hidden={true}
+				if (confirm) {
+					pickerAnswer = 'true';
+					proxy.value = pickerSelected;
+				} else {
+					pickerAnswer = 'false';
+				}
+			}}
+			class="slc-input bg-secondary-400!"
 		>
-			{#each value as option, i (i)}
-				<option value={option} selected>{option}</option>
+			Relation Picker ({pickerAnswer})
+		</button>
+		<!-- End Trigger -->
+
+		<!-- Begin value List -->
+		{#if multiple}
+			{#each value as val}
+				<p>{val} - ({internalRemoteData?.items.find((item) => item.id === val)?.caption})</p>
 			{/each}
-		</select>
-	{:else}
-		<select
-			bind:this={selectInput}
-			bind:value={proxy.value}
-			name={mainName}
-			id={mainName || id}
-			class="sr-only"
-			tabindex={-1}
-			aria-hidden={true}
-		>
-			<option {value} selected>{value}</option>
-		</select>
-	{/if}
-	<!-- End Select -->
+		{:else}
+			<p>{value} - ({internalRemoteData?.items.find((item) => item.id === value)?.caption})</p>
+		{/if}
+		<!-- End value List -->
+	{/snippet}
+</Field>
 
-	{#if isOpen}
-		<dialog
-			style="--confirm-animation-duration: {animationDuration / 1000}s"
-			{closedby}
-			{@attach dialogAttach}
-			class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
-			bind:this={dialog}
-			class:closing={isClosing}
-			{@attach focustrap}
-			{@attach portal}
-		>
-			<div class="dialog-content">
-				<p>{message}</p>
-				<input
-					type="text"
-					onkeydown={(e) => {
-						if (e.key === 'Enter') {
-							const target = e.target as HTMLInputElement;
-							console.log('target.value ', target.value);
-							refresh?.({ search: target.value });
-						}
-					}}
-				/>
-				<!-- {@render picker?.({ search: searchString, multiple })} -->
-				{#each data?.items ?? [] as item}
+<!-- Begin Select -->
+{#if multiple}
+	<select
+		multiple
+		bind:this={selectInput}
+		bind:value={proxy.value}
+		name={mainName}
+		id={mainName || id}
+		class="sr-only"
+		tabindex={-1}
+		aria-hidden={true}
+	>
+		{#each value as option, i (i)}
+			<option value={option} selected>{option}</option>
+		{/each}
+	</select>
+{:else}
+	<select
+		bind:this={selectInput}
+		bind:value={proxy.value}
+		name={mainName}
+		id={mainName || id}
+		class="sr-only"
+		tabindex={-1}
+		aria-hidden={true}
+	>
+		<option {value} selected>{value}</option>
+	</select>
+{/if}
+<!-- End Select -->
+
+{#if isOpen}
+	<!-- Begin Dialog -->
+	<dialog
+		style="--confirm-animation-duration: {animationDuration / 1000}s"
+		{closedby}
+		{@attach dialogAttach}
+		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
+		bind:this={dialog}
+		class:closing={isClosing}
+		{@attach focustrap}
+		{@attach portal}
+	>
+		<div class="dialog-content">
+			<p>{message}</p>
+			<input
+				type="text"
+				onkeydown={(e) => {
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						const target = e.target as HTMLInputElement;
+						pickerSearchString = target.value;
+						getRelationList({ search: pickerSearchString, collection }).then((data) => {
+							remoteData = data as any;
+						});
+					}
+				}}
+			/>
+
+			{#each internalRemoteData?.items ?? [] as item}
+				{#if typeof item.id === 'string'}
 					<label>
-						{#if multiple}
-							<!-- Multiple true ise context.selected bir array gibi davranır -->
-							<input type="checkbox" value={item.id} name={componentId} bind:group={pickerSelected} />
+						{#if Array.isArray(pickerSelected)}
+							<input
+								type="checkbox"
+								name={componentId}
+								checked={pickerSelected.includes(item.id)}
+								onchange={(e) => handleToggle(item, e.currentTarget.checked)}
+							/>
 						{:else}
-							<!-- Multiple false ise context.selected tek bir değer tutar -->
-							<input type="radio" value={item.id} name={componentId} bind:group={pickerSelected} />
+							<input
+								type="radio"
+								name={componentId}
+								checked={pickerSelected.includes(item.id)}
+								onchange={(e) => handleToggle(item, e.currentTarget.checked)}
+							/>
 						{/if}
 						{item.title}
 					</label>
-				{/each}
-				<button onclick={() => hide('no button clicked', false)}>{no}</button>
-				<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
-			</div>
-		</dialog>
-	{/if}
+				{/if}
+			{/each}
 
-	<!-- Begin Pending -->
-	{#snippet pending()}
+			<button onclick={() => hide('no button clicked', false)}>{no}</button>
+			<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
+		</div>
+	</dialog>
+	<!-- End Dialog -->
+{/if}
+
+<!-- Begin Pending -->
+<!-- {#snippet pending()}
 		<p class="slc-boundary-relation-picker-pending">Loading...</p>
-	{/snippet}
-	<!-- End Pending -->
-</svelte:boundary>
+	{/snippet} -->
+<!-- End Pending -->
+<!-- </svelte:boundary> -->
 
 <style>
 	.sr-only {

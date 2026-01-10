@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import * as input from '$lib/app/schemas/inputs';
 import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
 import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
+import { Collections } from '$lib/types/pocketbase-types';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 const templateConditions = {
@@ -60,6 +61,7 @@ export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const relationListParamsSchema = v.object({
-	search: v.string()
+	search: v.string(),
+	collection: v.picklist([...Object.values(Collections)])
 });
 export type RelationListParamsSchemaType = v.InferOutput<typeof relationListParamsSchema>;
