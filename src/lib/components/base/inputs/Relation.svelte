@@ -1,20 +1,17 @@
 <script lang="ts" generics="Tmultiple extends boolean = false, TData extends Record<string, unknown> = Record<string, unknown>">
 	import { focustrap, portal } from '$lib/attachments';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { getFormInputsContext } from './context.svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { RemoteFormField } from '@sveltejs/kit';
-	import type { ListResult } from 'pocketbase';
 	import Field from './Field.svelte';
 	import { Collections } from '$lib/types/pocketbase-types';
-	import { getRelationList } from '$lib/remotes/relations.remote';
+	import { getRelationList, getRelationView } from '$lib/remotes/relations.remote';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
-
-	type ResolveData<T extends boolean> = {
-		confirm: boolean;
-	};
+	type ResolveData = { confirm: boolean };
 
 	type Props = Omit<SvelteHTMLElements['select'], 'id' | 'value' | 'multiple' | 'name'> & {
 		collection: Exclude<`${Collections}`, `_${string}`>;
@@ -29,7 +26,6 @@
 		value?: ValueType<Tmultiple>;
 		field?: RemoteFormField<ValueType<Tmultiple>>;
 		defaultSearch?: string;
-		lazy?: boolean;
 	};
 
 	let {
@@ -46,55 +42,64 @@
 		label,
 		animationDuration = 150, // Animasyon süresini, JS ve CSS'te senkronize tut.
 		defaultSearch = '',
-		lazy = false,
-
 		...rest
 	}: Props = $props();
 
 	const componentId = $props.id();
 	const context = getFormInputsContext();
 
-	let remoteData: ListResult<TData> | undefined = $state();
-	let internalRemoteData = $derived(remoteData); // initial data
+	let isMounted = $state(false);
+	let selectInput: HTMLSelectElement | undefined = $state();
 
-	let pickerAnswer = $state('init');
 	// svelte-ignore state_referenced_locally
 	let pickerSearchString = $state(defaultSearch);
-	let pickerSelected = $state(value);
-
-	let selectInput: HTMLSelectElement | undefined = $state();
+	let pickerAnswer = $state('init');
+	let pickerSelected = $state<string | string[]>(value);
+	let pickerData = $derived(await getRelationList({ search: pickerSearchString, collection }));
+	let pickerSelectedItemCache = new SvelteMap<string, Record<string, string>>();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
-	let resolvePromise: ((data: ResolveData<Tmultiple>) => void) | null = null;
+	let resolvePromise: ((data: ResolveData) => void) | null = null;
 	let isClosing = $state(false); // Kapanma animasyonu durumunu tutmak için bir state
+	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
 
 	const fieldAttributes = $derived(
 		field
-			? {
-					...field.as(multiple ? 'select multiple' : ('select' as any)),
-					value: undefined
-				}
-			: {
-					type: multiple ? 'select multiple' : 'select',
-					name: undefined as string | undefined
-				}
+			? multiple
+				? { ...(field as RemoteFormField<ValueType<true>>).as('select multiple'), value: undefined } // multiple
+				: { ...(field as RemoteFormField<ValueType<false>>).as('select'), value: undefined } // single
+			: { type: multiple ? ('select multiple' as const) : ('select' as const), name: undefined } // undefined field
 	);
-
-	/* const fieldAttributes = $derived(
-		multiple
-			? (field as RemoteFormField<ValueType<true>> | undefined)?.as('select multiple')
-			: (field as RemoteFormField<ValueType<false>> | undefined)?.as('select')
-	); */
 	const issues = $derived(field?.issues() ?? []);
 	const mainName = $derived(fieldAttributes?.name || name);
 	const required = $derived(context?.getValibotMetadata(mainName?.replace('[]', ''))?.slc_required === true ? true : false);
-	const labelFor = $derived(mainName || id || componentId + '-relation-picker-button');
+	const labelFor = $derived(mainName || id || componentId + '_relation_picker_button');
 
-	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
+	let first = true;
+	const proxy = {
+		get value() {
+			const currentValue = value;
+			if (first) {
+				first = false;
+				valueChanged(currentValue);
+			}
+			return currentValue;
+		},
+		set value(v) {
+			const currentValue = v;
+			value = currentValue;
+			valueChanged(currentValue);
+		}
+	};
 
-	const show = (): Promise<ResolveData<Tmultiple>> => {
-		return new Promise<ResolveData<Tmultiple>>((resolve) => {
+	const valueChanged = (value: ValueType<Tmultiple>) => {
+		field?.set(value);
+		context?.form.validate({ preflightOnly: true });
+	};
+
+	const show = (): Promise<ResolveData> => {
+		return new Promise<ResolveData>((resolve) => {
 			resolvePromise = resolve;
 			isOpen = true;
 			tick().then(() => {
@@ -143,50 +148,31 @@
 		};
 	};
 
-	const valueChanged = (value: ValueType<Tmultiple>) => {
-		field?.set(value);
-		context?.form.validate({ preflightOnly: true });
-	};
+	async function handleToggle<T extends Record<string, string>>(item: T, isChecked: boolean) {
+		if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption }); // cache for display caption
 
-	let first = true;
-	const proxy = {
-		get value() {
-			const currentValue = value;
-			if (first) {
-				first = false;
-				// pickerSelected = currentValue; // initial value, daha sonraki değerler bind:group ile güncellenir.
-				if (!lazy) {
-					getRelationList({ search: pickerSearchString, collection }).then((data) => {
-						remoteData = data as any;
-					});
-				}
-				valueChanged(currentValue);
-			}
-			return currentValue;
-		},
-		set value(v) {
-			const currentValue = v;
-			value = currentValue;
-			valueChanged(currentValue);
-		}
-	};
-
-	function handleToggle(item: any, isChecked: boolean) {
 		if (multiple && Array.isArray(pickerSelected)) {
 			if (isChecked) {
-				pickerSelected = [...pickerSelected, item.id] as ValueType<Tmultiple>;
+				pickerSelected = [...pickerSelected, item.id];
 			} else {
-				pickerSelected = pickerSelected.filter((id) => id !== item.id) as ValueType<Tmultiple>;
+				pickerSelected = pickerSelected.filter((id) => id !== item.id);
 			}
 		} else {
 			if (isChecked) {
-				pickerSelected = item.id as ValueType<Tmultiple>;
+				pickerSelected = item.id;
 			}
 		}
 	}
+
+	onMount(() => {
+		isMounted = true;
+		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
+		pickerData.items.forEach((item) => {
+			if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption });
+		});
+	});
 </script>
 
-<!-- <svelte:boundary> -->
 <Field {issues} {required} {label} id={labelFor}>
 	{#snippet input(inputClass)}
 		<!-- Begin Trigger -->
@@ -196,17 +182,13 @@
 			onclick={async () => {
 				pickerAnswer = 'waiting';
 				pickerSelected = value;
-				pickerSearchString = defaultSearch;
-
-				getRelationList({ search: pickerSearchString, collection }).then((data) => {
-					remoteData = data as any;
-				});
+				pickerSearchString = '';
 
 				const { confirm } = await show();
 
 				if (confirm) {
 					pickerAnswer = 'true';
-					proxy.value = pickerSelected;
+					proxy.value = pickerSelected as unknown as ValueType<Tmultiple>;
 				} else {
 					pickerAnswer = 'false';
 				}
@@ -220,10 +202,32 @@
 		<!-- Begin value List -->
 		{#if multiple}
 			{#each value as val}
-				<p>{val} - ({internalRemoteData?.items.find((item) => item.id === val)?.caption})</p>
+				<p>
+					{val} - (
+					{#if pickerSelectedItemCache.has(val)}
+						{pickerSelectedItemCache.get(val)?.caption}
+					{:else if isMounted}
+						{(await getRelationView({ id: val, collection }))?.caption}
+					{:else}
+						{val}
+					{/if}
+					)
+				</p>
 			{/each}
+		{:else if typeof value === 'string'}
+			<p>
+				{value} - (
+				{#if pickerSelectedItemCache.has(value)}
+					{pickerSelectedItemCache.get(value)?.caption}
+				{:else if isMounted}
+					{(await getRelationView({ id: value, collection }))?.caption}
+				{:else}
+					{value}
+				{/if}
+				)
+			</p>
 		{:else}
-			<p>{value} - ({internalRemoteData?.items.find((item) => item.id === value)?.caption})</p>
+			<p>N/A</p>
 		{/if}
 		<!-- End value List -->
 	{/snippet}
@@ -260,70 +264,62 @@
 {/if}
 <!-- End Select -->
 
-{#if isOpen}
-	<!-- Begin Dialog -->
-	<dialog
-		style="--confirm-animation-duration: {animationDuration / 1000}s"
-		{closedby}
-		{@attach dialogAttach}
-		class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
-		bind:this={dialog}
-		class:closing={isClosing}
-		{@attach focustrap}
-		{@attach portal}
-	>
-		<div class="dialog-content">
-			<p>{message}</p>
-			<input
-				type="text"
-				onkeydown={(e) => {
-					if (e.key === 'Enter') {
-						e.preventDefault();
-						const target = e.target as HTMLInputElement;
-						pickerSearchString = target.value;
-						getRelationList({ search: pickerSearchString, collection }).then((data) => {
-							remoteData = data as any;
-						});
-					}
-				}}
-			/>
+<!-- {#if isOpen} -->
+<!-- Begin Dialog -->
+<dialog
+	style="--confirm-animation-duration: {animationDuration / 1000}s"
+	{closedby}
+	{@attach dialogAttach}
+	class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
+	bind:this={dialog}
+	class:closing={isClosing}
+	{@attach focustrap}
+	{@attach portal}
+>
+	<div class="dialog-content">
+		<p>{message}</p>
+		<input
+			value={pickerSearchString}
+			type="text"
+			onkeydown={(e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					const target = e.target as HTMLInputElement;
+					pickerSearchString = target.value; // trigger search
+				}
+			}}
+		/>
 
-			{#each internalRemoteData?.items ?? [] as item}
-				{#if typeof item.id === 'string'}
-					<label>
-						{#if Array.isArray(pickerSelected)}
-							<input
-								type="checkbox"
-								name={componentId}
-								checked={pickerSelected.includes(item.id)}
-								onchange={(e) => handleToggle(item, e.currentTarget.checked)}
-							/>
-						{:else}
-							<input
-								type="radio"
-								name={componentId}
-								checked={pickerSelected.includes(item.id)}
-								onchange={(e) => handleToggle(item, e.currentTarget.checked)}
-							/>
-						{/if}
-						{item.title}
-					</label>
-				{/if}
-			{/each}
+		{#each pickerData?.items ?? [] as item}
+			{#if typeof item.id === 'string'}
+				<label>
+					{#if Array.isArray(pickerSelected)}
+						<input
+							type="checkbox"
+							name={componentId}
+							checked={pickerSelected.includes(item.id)}
+							onchange={(e) => handleToggle(item, e.currentTarget.checked)}
+						/>
+					{:else}
+						<input
+							type="radio"
+							name={componentId}
+							checked={pickerSelected.includes(item.id)}
+							onchange={(e) => handleToggle(item, e.currentTarget.checked)}
+						/>
+					{/if}
+					{item.title}
+				</label>
+			{/if}
+		{/each}
 
-			<button onclick={() => hide('no button clicked', false)}>{no}</button>
-			<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
-		</div>
-	</dialog>
-	<!-- End Dialog -->
-{/if}
+		<button onclick={() => hide('no button clicked', false)}>{no}</button>
+		<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
+	</div>
+</dialog>
 
-<!-- Begin Pending -->
-<!-- {#snippet pending()}
-		<p class="slc-boundary-relation-picker-pending">Loading...</p>
-	{/snippet} -->
-<!-- End Pending -->
-<!-- </svelte:boundary> -->
+<!-- End Dialog -->
+<!-- {/if} -->
 
 <style>
 	.sr-only {

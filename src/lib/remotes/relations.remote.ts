@@ -31,3 +31,26 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 
 	return listResult.value;
 });
+
+const relationViewParamsSchema = v.object({
+	id: v.string(),
+	collection: v.picklist(filteredCollectionValues)
+});
+
+export const getRelationView = query(relationViewParamsSchema, async (params) => {
+	// 🔒🔐
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	const recordResult = await ResultAsync.fromPromise(
+		locals.pb.collection(params.collection).getOne(params.id),
+		mapUnknownToError
+	);
+
+	if (recordResult.isErr()) {
+		throwError(recordResult.error);
+	}
+
+	return recordResult.value;
+});
