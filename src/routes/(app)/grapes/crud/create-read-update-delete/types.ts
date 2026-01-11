@@ -53,8 +53,8 @@ export const updateFormSchema = v.object({
 	...input.Url('url', { required: true }),
 	...input.Textarea('textarea', { required: true }),
 	...input.Bool('bool', { nonfalsey: false }),
-	relation_single: v.optional(v.string()),
-	relation_multiple: v.optional(v.array(v.string()))
+	...input.Relation('relation_single', { required: true }),
+	...input.Relation('relation_multiple', { multiple: true, required: true })
 });
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;

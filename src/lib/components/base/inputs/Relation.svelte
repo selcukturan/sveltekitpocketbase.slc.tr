@@ -200,21 +200,23 @@
 		<!-- End Trigger -->
 
 		<!-- Begin value List -->
-		{#if multiple}
+		{#if multiple && Array.isArray(value)}
 			{#each value as val}
-				<p>
-					{val} - (
-					{#if pickerSelectedItemCache.has(val)}
-						{pickerSelectedItemCache.get(val)?.caption}
-					{:else if isMounted}
-						{(await getRelationView({ id: val, collection }))?.caption}
-					{:else}
-						{val}
-					{/if}
-					)
-				</p>
+				{#if typeof val === 'string' && val && collection}
+					<p>
+						{val} - (
+						{#if pickerSelectedItemCache.has(val)}
+							{pickerSelectedItemCache.get(val)?.caption}
+						{:else if isMounted}
+							{(await getRelationView({ id: val, collection }))?.caption}
+						{:else}
+							{val}
+						{/if}
+						)
+					</p>
+				{/if}
 			{/each}
-		{:else if typeof value === 'string'}
+		{:else if typeof value === 'string' && value && collection}
 			<p>
 				{value} - (
 				{#if pickerSelectedItemCache.has(value)}
@@ -226,8 +228,6 @@
 				{/if}
 				)
 			</p>
-		{:else}
-			<p>N/A</p>
 		{/if}
 		<!-- End value List -->
 	{/snippet}
