@@ -7,8 +7,8 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Field from './Field.svelte';
 	import { Collections } from '$lib/types/pocketbase-types';
-	import { getRelationList, getRelationView } from '$lib/remotes/relations.remote';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
+	import { watchState } from '$lib/utils/watch-states.svelte';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };
@@ -55,8 +55,6 @@
 	let pickerSearchString = $state(defaultSearch);
 	let pickerAnswer = $state('init');
 	let pickerSelected = $state<string | string[]>(value);
-	let pickerData = $derived(await getRelationList({ search: pickerSearchString, collection }));
-	let pickerSelectedItemCache = new SvelteMap<string, Record<string, string>>();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -75,28 +73,6 @@
 	const mainName = $derived(fieldAttributes?.name || name);
 	const required = $derived(context?.getValibotMetadata(mainName?.replace('[]', ''))?.slc_required === true ? true : false);
 	const labelFor = $derived(mainName || id || componentId + '_relation_picker_button');
-
-	let first = true;
-	const proxy = {
-		get value() {
-			const currentValue = value;
-			if (first) {
-				first = false;
-				valueChanged(currentValue);
-			}
-			return currentValue;
-		},
-		set value(v) {
-			const currentValue = v;
-			value = currentValue;
-			valueChanged(currentValue);
-		}
-	};
-
-	const valueChanged = (value: ValueType<Tmultiple>) => {
-		field?.set(value);
-		context?.form.validate({ preflightOnly: true });
-	};
 
 	const show = (): Promise<ResolveData> => {
 		return new Promise<ResolveData>((resolve) => {
@@ -148,28 +124,30 @@
 		};
 	};
 
-	async function handleToggle<T extends Record<string, string>>(item: T, isChecked: boolean) {
-		if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption }); // cache for display caption
-
-		if (multiple && Array.isArray(pickerSelected)) {
-			if (isChecked) {
-				pickerSelected = [...pickerSelected, item.id];
-			} else {
-				pickerSelected = pickerSelected.filter((id) => id !== item.id);
-			}
-		} else {
-			if (isChecked) {
-				pickerSelected = item.id;
-			}
+	function handleToggle(item: Record<string, string>) {
+		const isSelected = Array.isArray(pickerSelected) ? pickerSelected.includes(item.id) : pickerSelected === item.id;
+		// Eğer dizi ise (Checkbox mantığı)
+		if (Array.isArray(pickerSelected)) {
+			const newSelection = isSelected ? pickerSelected.filter((id) => id !== item.id) : [...pickerSelected, item.id];
+			pickerSelected = newSelection;
+		}
+		// Eğer dizi değilse (Radio mantığı + Seçimi Kaldırma)
+		else {
+			const newSelection = isSelected ? '' : item.id;
+			pickerSelected = newSelection;
 		}
 	}
+
+	watchState(
+		() => value,
+		() => {
+			context?.form.validate({ preflightOnly: true });
+		}
+	);
 
 	onMount(() => {
 		isMounted = true;
 		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
-		pickerData.items.forEach((item) => {
-			if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption });
-		});
 	});
 </script>
 
@@ -188,7 +166,9 @@
 
 				if (confirm) {
 					pickerAnswer = 'true';
-					proxy.value = pickerSelected as unknown as ValueType<Tmultiple>;
+					const newValue = pickerSelected as unknown as ValueType<Tmultiple>;
+					field?.set(newValue);
+					value = newValue;
 				} else {
 					pickerAnswer = 'false';
 				}
@@ -201,33 +181,19 @@
 
 		<!-- Begin value List -->
 		{#if multiple && Array.isArray(value)}
-			{#each value as val}
-				{#if typeof val === 'string' && val && collection}
-					<p>
-						{val} - (
-						{#if pickerSelectedItemCache.has(val)}
-							{pickerSelectedItemCache.get(val)?.caption}
-						{:else if isMounted}
-							{(await getRelationView({ id: val, collection }))?.caption}
-						{:else}
-							{val}
-						{/if}
-						)
-					</p>
-				{/if}
+			{@const relationList = await getMultipleRelationSelectedList({ ids: value, collection })}
+			{#each relationList as item}
+				<p>
+					{item.id} - ({item.caption})
+				</p>
 			{/each}
 		{:else if typeof value === 'string' && value && collection}
-			<p>
-				{value} - (
-				{#if pickerSelectedItemCache.has(value)}
-					{pickerSelectedItemCache.get(value)?.caption}
-				{:else if isMounted}
-					{(await getRelationView({ id: value, collection }))?.caption}
-				{:else}
-					{value}
-				{/if}
-				)
-			</p>
+			{@const relationList = await getSingleRelationSelectedList({ id: value, collection })}
+			{#each relationList as item}
+				<p>
+					{item.id} - ({item.caption})
+				</p>
+			{/each}
 		{/if}
 		<!-- End value List -->
 	{/snippet}
@@ -238,28 +204,20 @@
 	<select
 		multiple
 		bind:this={selectInput}
-		bind:value={proxy.value}
+		bind:value
 		name={mainName}
 		id={mainName || id}
 		class="sr-only"
 		tabindex={-1}
 		aria-hidden={true}
 	>
-		{#each value as option, i (i)}
-			<option value={option} selected>{option}</option>
+		{#each value as val, i (i)}
+			<option value={val}>{val}</option>
 		{/each}
 	</select>
 {:else}
-	<select
-		bind:this={selectInput}
-		bind:value={proxy.value}
-		name={mainName}
-		id={mainName || id}
-		class="sr-only"
-		tabindex={-1}
-		aria-hidden={true}
-	>
-		<option {value} selected>{value}</option>
+	<select bind:this={selectInput} bind:value name={mainName} id={mainName || id} class="sr-only" tabindex={-1} aria-hidden={true}>
+		<option {value}>{value}</option>
 	</select>
 {/if}
 <!-- End Select -->
@@ -289,29 +247,55 @@
 				}
 			}}
 		/>
+		{#if isOpen}
+			{@const pickerData = await getRelationList({ search: pickerSearchString, collection })}
+			{#each pickerData?.items ?? [] as item}
+				{#if typeof item.id === 'string'}
+					{@const isMultiple = Array.isArray(pickerSelected)}
+					{@const isRadio = !isMultiple}
+					{@const isSelected = isMultiple ? pickerSelected.includes(item.id) : pickerSelected === item.id}
+					<button
+						type="button"
+						aria-checked={isSelected}
+						role={isRadio ? 'radio' : 'checkbox'}
+						onclick={() => handleToggle(item)}
+					>
+						<div class="bg-secondary-400 flex items-center gap-2 rounded p-2">
+							<span class="indicator">{isSelected ? '✓' : ''}</span>
+							<span>
+								{item.title}
+							</span>
+						</div>
+					</button>
+				{/if}
+			{/each}
 
-		{#each pickerData?.items ?? [] as item}
-			{#if typeof item.id === 'string'}
-				<label>
-					{#if Array.isArray(pickerSelected)}
-						<input
-							type="checkbox"
-							name={componentId}
-							checked={pickerSelected.includes(item.id)}
-							onchange={(e) => handleToggle(item, e.currentTarget.checked)}
-						/>
-					{:else}
-						<input
-							type="radio"
-							name={componentId}
-							checked={pickerSelected.includes(item.id)}
-							onchange={(e) => handleToggle(item, e.currentTarget.checked)}
-						/>
-					{/if}
-					{item.title}
-				</label>
+			{#if multiple && Array.isArray(pickerSelected) && collection}
+				{@const relationList = await getMultipleRelationSelectedList({ ids: pickerSelected, collection })}
+				{#each relationList as item}
+					<div class="flex items-center gap-2">
+						<span>
+							{item.id} - ({item.caption})
+						</span>
+						<button onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
+					</div>
+				{/each}
+			{:else if typeof pickerSelected === 'string' && pickerSelected && collection}
+				{@const relationList = await getSingleRelationSelectedList({ id: pickerSelected, collection })}
+				{#each relationList as item}
+					<div class="flex items-center gap-2">
+						<span>
+							{item.id} - ({item.caption})
+						</span>
+						<button onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
+					</div>
+				{/each}
 			{/if}
-		{/each}
+
+			{#if pickerSelected === '' || (Array.isArray(pickerSelected) && pickerSelected.length === 0)}
+				<p>Seçili kayıt yok.</p>
+			{/if}
+		{/if}
 
 		<button onclick={() => hide('no button clicked', false)}>{no}</button>
 		<button onclick={() => hide('yes button clicked', true)}>{yes}</button>

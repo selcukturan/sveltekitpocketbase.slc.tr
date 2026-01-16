@@ -32,6 +32,66 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 	return listResult.value;
 });
 
+const relationMultipleSelectedListParamsSchema = v.object({
+	ids: v.array(v.string()),
+	collection: v.picklist(filteredCollectionValues)
+});
+export const getMultipleRelationSelectedList = query(relationMultipleSelectedListParamsSchema, async (params) => {
+	// 🔒🔐
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	if (params.ids.length === 0) {
+		return [];
+	}
+
+	// array to string => id = "1" || id = "2" || id = "3"
+	const idsString = params.ids.map((id) => `id = "${id}"`).join(' || ');
+
+	const listResult = await ResultAsync.fromPromise(
+		locals.pb.collection(params.collection).getFullList({
+			filter: idsString
+		}),
+		mapUnknownToError
+	);
+
+	if (listResult.isErr()) {
+		throwError(listResult.error);
+	}
+
+	return listResult.value;
+});
+
+const relationSingleSelectedListParamsSchema = v.object({
+	id: v.string(),
+	collection: v.picklist(filteredCollectionValues)
+});
+export const getSingleRelationSelectedList = query(relationSingleSelectedListParamsSchema, async (params) => {
+	// 🔒🔐
+	await checkAuthenticated();
+
+	const { locals } = getRequestEvent();
+
+	if (params.id === '') {
+		return [];
+	}
+
+	const listResult = await ResultAsync.fromPromise(
+		locals.pb.collection(params.collection).getFullList({
+			filter: `id = "${params.id}"`
+		}),
+		mapUnknownToError
+	);
+
+	if (listResult.isErr()) {
+		throwError(listResult.error);
+	}
+
+	return listResult.value;
+});
+
+/* 
 const relationViewParamsSchema = v.object({
 	id: v.string(),
 	collection: v.picklist(filteredCollectionValues)
@@ -53,4 +113,5 @@ export const getRelationView = query(relationViewParamsSchema, async (params) =>
 	}
 
 	return recordResult.value;
-});
+}); 
+*/
