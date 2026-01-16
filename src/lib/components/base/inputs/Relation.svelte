@@ -277,7 +277,7 @@
 						<span>
 							{item.id} - ({item.caption})
 						</span>
-						<button onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
+						<button type="button" onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
 					</div>
 				{/each}
 			{:else if typeof pickerSelected === 'string' && pickerSelected && collection}
@@ -287,7 +287,7 @@
 						<span>
 							{item.id} - ({item.caption})
 						</span>
-						<button onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
+						<button type="button" onclick={() => handleToggle(item)} class="bg-error-500 rounded-full p-1">X</button>
 					</div>
 				{/each}
 			{/if}
@@ -297,8 +297,8 @@
 			{/if}
 		{/if}
 
-		<button onclick={() => hide('no button clicked', false)}>{no}</button>
-		<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
+		<button type="button" onclick={() => hide('no button clicked', false)}>{no}</button>
+		<button type="button" onclick={() => hide('yes button clicked', true)}>{yes}</button>
 	</div>
 </dialog>
 
