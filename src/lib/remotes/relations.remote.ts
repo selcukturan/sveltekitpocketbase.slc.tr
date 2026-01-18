@@ -91,7 +91,6 @@ export const getSingleRelationSelectedList = query(relationSingleSelectedListPar
 	return listResult.value;
 });
 
-/* 
 const relationViewParamsSchema = v.object({
 	id: v.string(),
 	collection: v.picklist(filteredCollectionValues)
@@ -113,5 +112,4 @@ export const getRelationView = query(relationViewParamsSchema, async (params) =>
 	}
 
 	return recordResult.value;
-}); 
-*/
+});

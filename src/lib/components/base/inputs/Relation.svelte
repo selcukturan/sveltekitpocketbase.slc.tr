@@ -8,6 +8,7 @@
 	import Field from './Field.svelte';
 	import { Collections } from '$lib/types/pocketbase-types';
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };
@@ -54,6 +55,7 @@
 	let pickerSearchString = $state(defaultSearch);
 	let pickerAnswer = $state('init');
 	let pickerSelected = $state<string | string[]>(value);
+	let pickerSelectedItemCache = new SvelteMap<string, Record<string, string>>();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -125,6 +127,9 @@
 
 	function handleToggle(item: Record<string, string>) {
 		const isSelected = Array.isArray(pickerSelected) ? pickerSelected.includes(item.id) : pickerSelected === item.id;
+
+		if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption }); // cache for display caption
+
 		// Eğer dizi ise (Checkbox mantığı)
 		if (Array.isArray(pickerSelected)) {
 			const newSelection = isSelected ? pickerSelected.filter((id) => id !== item.id) : [...pickerSelected, item.id];
@@ -140,6 +145,9 @@
 	onMount(() => {
 		isMounted = true;
 		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
+		/* pickerData.items.forEach((item) => {
+			if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption });
+		}); */
 	});
 </script>
 
@@ -162,9 +170,9 @@
 					field?.set(newValue);
 					value = newValue;
 
-					tick().then(() => {
-						context?.form.validate({ preflightOnly: true });
-					});
+					await tick();
+
+					context?.form.validate({ preflightOnly: true });
 				} else {
 					pickerAnswer = 'false';
 				}
