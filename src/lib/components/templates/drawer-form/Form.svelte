@@ -22,7 +22,7 @@
 	// svelte-ignore state_referenced_locally
 	const context = createFormInputsContext<TInput, TOutput, TSchema>(form, schema); // init
 
-	$inspect('DrawerFormContent.Content.Form -> context.schema', context.schema);
+	// $inspect('DrawerFormContent.Content.Form -> context.schema', context.schema);
 
 	const internalClasses = 'flex flex-1 flex-col overflow-hidden';
 </script>

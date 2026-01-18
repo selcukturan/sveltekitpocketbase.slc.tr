@@ -8,7 +8,6 @@
 	import Field from './Field.svelte';
 	import { Collections } from '$lib/types/pocketbase-types';
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
-	import { watchState } from '$lib/utils/watch-states.svelte';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };
@@ -138,13 +137,6 @@
 		}
 	}
 
-	watchState(
-		() => value,
-		() => {
-			context?.form.validate({ preflightOnly: true });
-		}
-	);
-
 	onMount(() => {
 		isMounted = true;
 		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
@@ -169,6 +161,10 @@
 					const newValue = pickerSelected as unknown as ValueType<Tmultiple>;
 					field?.set(newValue);
 					value = newValue;
+
+					tick().then(() => {
+						context?.form.validate({ preflightOnly: true });
+					});
 				} else {
 					pickerAnswer = 'false';
 				}

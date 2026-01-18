@@ -37,6 +37,7 @@
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
+	import Form from '$lib/components/base/inputs/Form.svelte';
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const appToaster = getToaster('app-toaster');
@@ -217,12 +218,11 @@
 					</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
-						{@const updateRemoteForm = updateForm.for(drawerCommand.cmd).preflight(updateFormSchema)}
 						<DrawerFormContent.Content.Form
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
-							form={updateRemoteForm}
-							{...updateRemoteForm.enhance(async ({ submit }) => {
+							form={updateForm}
+							{...updateForm.preflight(updateFormSchema).enhance(async ({ submit }) => {
 								try {
 									await submit().updates(getList(params));
 									drawer?.close();
@@ -239,14 +239,14 @@
 									});
 								} catch (error) {
 									const myError = isHttpError(error) ? error : null;
-									drawer?.toast({
+									pageToaster.add({
 										type: 'error',
 										title: 'Hata!',
 										description: 'Client: ' + myError?.body.message,
 										action: {
 											label: t('close'),
 											onClick: (id) => {
-												drawer?.removeToast(id);
+												pageToaster.remove(id);
 											}
 										}
 									});
@@ -254,32 +254,29 @@
 							})}
 						>
 							{#snippet inputs()}
-								<Hidden field={updateRemoteForm.fields.id} value={oneResult.id} />
-								<Text label="Title" field={updateRemoteForm.fields.title} value={oneResult.title} />
-								<Number label="Quantity" field={updateRemoteForm.fields.quantity} value={oneResult.quantity} />
-								<Datetime label="Purchase Date" field={updateRemoteForm.fields.purchase_date} value={oneResult.purchase_date} />
-								<Email label="Email" field={updateRemoteForm.fields.email} value={oneResult.email} />
-								<Url label="Url" field={updateRemoteForm.fields.url} value={oneResult.url} />
-								<Textarea label="Textarea" field={updateRemoteForm.fields.textarea} value={oneResult.textarea} />
-
+								<Hidden field={updateForm.fields.id} value={oneResult.id} />
+								<Text label="Title" field={updateForm.fields.title} value={oneResult.title} />
+								<Number label="Quantity" field={updateForm.fields.quantity} value={oneResult.quantity} />
+								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={oneResult.purchase_date} />
+								<Email label="Email" field={updateForm.fields.email} value={oneResult.email} />
+								<Url label="Url" field={updateForm.fields.url} value={oneResult.url} />
+								<Textarea label="Textarea" field={updateForm.fields.textarea} value={oneResult.textarea} />
 								<Relation
 									label="Relation Single"
 									collection="crud_relation_single"
-									field={updateRemoteForm.fields.relation_single}
+									field={updateForm.fields.relation_single}
 									value={oneResult.relation_single}
 								/>
-
 								<Relation
 									multiple
 									label="Relation Multiple"
 									collection="crud_relation_multiple"
-									field={updateRemoteForm.fields.relation_multiple}
+									field={updateForm.fields.relation_multiple}
 									value={oneResult.relation_multiple}
 								/>
-
 								<Select
 									label="Select Single"
-									field={updateRemoteForm.fields.select_single}
+									field={updateForm.fields.select_single}
 									value={oneResult.select_single}
 									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
 										value,
@@ -289,26 +286,21 @@
 								<Select
 									multiple
 									label="Select Multiple"
-									field={updateRemoteForm.fields.select_multiple}
+									field={updateForm.fields.select_multiple}
 									value={oneResult.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({
 										value,
 										label: value.toUpperCase()
 									}))}
 								/>
-								<File label="Single File" field={updateRemoteForm.fields.single_file} value={oneResult.single_file} />
-								<File
-									multiple
-									label="Multiple Files"
-									field={updateRemoteForm.fields.multiple_files}
-									value={oneResult.multiple_files}
-								/>
-								<Bool label="Boolean" field={updateRemoteForm.fields.bool} value={oneResult.bool} />
+								<File label="Single File" field={updateForm.fields.single_file} value={oneResult.single_file} />
+								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={oneResult.multiple_files} />
+								<Bool label="Boolean" field={updateForm.fields.bool} value={oneResult.bool} />
 							{/snippet}
 
 							{#snippet buttons()}
 								<Button label={t('close')} onclick={() => drawer?.close(true)} />
-								<Submit label={t('update')} disabled={Boolean(updateRemoteForm.pending)} />
+								<Submit label={t('update')} disabled={Boolean(updateForm.pending)} />
 							{/snippet}
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
