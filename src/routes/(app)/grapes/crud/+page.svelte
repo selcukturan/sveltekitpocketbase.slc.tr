@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
+	import { watch } from 'runed';
+	import { page } from '$app/state';
+
+	watch(
+		() => page.url.hash,
+		(currentHash) => {
+			console.log('currentHash', currentHash);
+		}
+	);
 </script>
 
 <Head>

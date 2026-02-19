@@ -12,7 +12,7 @@
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
-	import { confirm } from '$lib/components/base/confirm';
+	/* import { confirm } from '$lib/components/base/confirm'; */
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
@@ -37,16 +37,12 @@
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
-	import Form from '$lib/components/base/inputs/Form.svelte';
+	/* import Form from '$lib/components/base/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const appToaster = getToaster('app-toaster');
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	// ----------- End Page Context ------------------------------------------------------------------------------------------------------------------
-
-	// ----------- Begin Page Variables --------------------------------------------------------------------------------------------------------------
-	const pageUrlHash = $derived(page.url.hash);
-	// ----------- End Page Variables ----------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
 	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
@@ -65,7 +61,7 @@
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
 	watch(
-		() => pageUrlHash,
+		() => page.url.hash,
 		(currentHash) => {
 			const cmd = getParam('cmd', currentHash) || '';
 			const id = getParam('id', currentHash) || '';
@@ -88,10 +84,6 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
-
-	// await_waterfall TEST
-	// const testPromise = $derived(getList(params));
-	// let test = $derived(await testPromise);
 </script>
 
 <Head>
@@ -107,8 +99,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			{@const data = await getList(params)}
-			<s.DataTable bind:this={dataTable} {data} {columns} {footers}>
+			<s.DataTable bind:this={dataTable} data={await getList(params)} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
@@ -126,7 +117,6 @@
 						<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
 						<Button label={t('refresh')} onclick={refreshData} />
 					</div>
-					<!-- <p>1 - $effect.pending() {$effect.pending()}</p> -->
 				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
