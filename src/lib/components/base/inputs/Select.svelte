@@ -4,7 +4,7 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
-	import { watchState } from '$lib/utils/watch-states.svelte';
+	import { watch, onClickOutside, activeElement } from 'runed';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -79,7 +79,6 @@
 	let selectInput: HTMLSelectElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
-	let isOutsideMouseDown = false;
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
 
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
@@ -152,6 +151,16 @@
 		return 0;
 	});
 
+	const clickListboxOutside = onClickOutside(
+		() => listbox,
+		() => {
+			// Eğer tıklanan öğe trigger ise veya trigger'ın bir parçasıysa, kapatma işlemini atla.
+			if (activeElement.current === trigger || trigger?.contains(activeElement.current)) return;
+			close();
+		},
+		{ immediate: false }
+	);
+
 	const open = async () => {
 		if (disabled || readonly) return;
 
@@ -162,6 +171,8 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
+		clickListboxOutside.start();
+
 		listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
 
 		optionsLi[activeIndex]?.scrollIntoView({
@@ -170,39 +181,13 @@
 		});
 	};
 
-	const close = () => {
+	const close = async () => {
 		isOpenPopup = false;
-
-		// await tick(); // Bekle, DOM güncelleniyor.
-
-		trigger?.focus();
+		await tick(); // Bekle, DOM güncelleniyor.
+		clickListboxOutside.stop();
 	};
 
 	const toggle = () => (isOpenPopup ? close() : open());
-
-	function handleWindowOutsideMousedown(e: MouseEvent) {
-		if (!isOpenPopup) return;
-		const target = e.target as HTMLElement;
-		isOutsideMouseDown = !container?.contains(target);
-	}
-	function handleWindowOutsideClick(e: MouseEvent) {
-		const target = e.target as HTMLElement;
-		if (isOpenPopup && isOutsideMouseDown && !container?.contains(target)) {
-			close();
-		}
-	}
-	function handleWindowEscPress(e: KeyboardEvent) {
-		if (isOpenPopup && escClose && e.code === 'Escape') {
-			e.preventDefault();
-			close();
-		}
-	}
-	function handleWindowFocusChange(e: FocusEvent) {
-		const target = e.target as HTMLElement;
-		if (isOpenPopup && !trigger?.contains(target) && !container?.contains(target)) {
-			toggle();
-		}
-	}
 
 	const handleTriggerKeyDown = (e: KeyboardEvent) => {
 		switch (e.code) {
@@ -283,9 +268,7 @@
 			case 'Enter':
 			case 'Space': {
 				e.preventDefault();
-				/* if (activeIndex !== -1) { */
 				selectOption(activeIndex);
-				/* } */
 				break;
 			}
 
@@ -293,6 +276,7 @@
 			case 'Escape': {
 				e.preventDefault();
 				close();
+				trigger?.focus();
 				break;
 			}
 
@@ -324,6 +308,7 @@
 		} else {
 			value = newSelectedValue;
 			close();
+			trigger?.focus();
 		}
 	}
 
@@ -336,7 +321,7 @@
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
-	watchState(
+	watch(
 		() => selectedIndexes,
 		() => {
 			const currentValue = value;
@@ -351,13 +336,6 @@
 		}
 	);
 </script>
-
-<svelte:window
-	onclick={handleWindowOutsideClick}
-	onmousedown={handleWindowOutsideMousedown}
-	onkeydown={handleWindowEscPress}
-	onfocusin={handleWindowFocusChange}
-/>
 
 <Field {issues} {required} {label} id={triggerId}>
 	{#snippet input(inputClass)}
