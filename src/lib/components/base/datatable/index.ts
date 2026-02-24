@@ -5,7 +5,10 @@ export { default as FooterCell } from './FooterCell.svelte';
 export { default as FooterRow } from './FooterRow.svelte';
 export { default as HeaderCell } from './HeaderCell.svelte';
 export { default as HeaderRow } from './HeaderRow.svelte';
+
 export type { Column, Footer } from './types';
+
+export { default as ActionButton } from './ActionButton.svelte';
 
 /* import Table from './DataTable.svelte';
 import HeaderRowX from './HeaderRow.svelte';

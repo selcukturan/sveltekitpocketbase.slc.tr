@@ -19,7 +19,7 @@ class TableContext<TData extends Row> {
 	footerRowHeight = $state(35);
 
 	// Context variables
-	allRows = $derived<readonly $state.Snapshot<TData>[]>($state.snapshot(this.rawData.items));
+	allRows = $derived($state.snapshot(this.rawData.items));
 	el = $state<HTMLElement>();
 	headerLength = $state(1);
 	dataLength = $derived(this.allRows.length);

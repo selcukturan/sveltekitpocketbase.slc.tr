@@ -90,7 +90,7 @@
 		const handleCancel = (e: Event) => {
 			e.preventDefault();
 			if (e.target === dialog) {
-				// hide('handleCancel - Backdrop click', false);
+				hide('handleCancel - Backdrop click', false);
 			}
 		};
 

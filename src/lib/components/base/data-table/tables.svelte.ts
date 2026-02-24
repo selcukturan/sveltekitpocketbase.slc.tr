@@ -89,9 +89,7 @@ class Table<TData extends Row> {
 	readonly srcWidth = $derived(this.#src.width || this.#defSrc.width);
 	readonly srcHeight = $derived(this.#src.height || this.#defSrc.height);
 	readonly srcRowSelection = $derived(this.#src.rowSelection || this.#defSrc.rowSelection);
-	readonly srcRowSelectionColumnWidth = $derived(
-		this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth
-	);
+	readonly srcRowSelectionColumnWidth = $derived(this.#src.rowSelectionColumnWidth || this.#defSrc.rowSelectionColumnWidth);
 	readonly srcSubtotal = $derived(this.#src.subtotal || this.#defSrc.subtotal);
 	readonly srcActions = $derived(this.#src.actions || this.#defSrc.actions);
 	readonly srcRowAction = $derived(this.#src.rowAction ?? this.#defSrc.rowAction);
@@ -130,11 +128,9 @@ class Table<TData extends Row> {
 	}
 
 	readonly #gridTemplateRows = $derived.by(() => {
-		const repeatThead =
-			this.headerRowsCountState >= 1 ? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)` : ``;
+		const repeatThead = this.headerRowsCountState >= 1 ? `repeat(${this.headerRowsCountState}, ${this.srcTheadRowHeight}px)` : ``;
 		const repeatTbody = this.srcData.length > 0 ? `repeat(${this.srcData.length}, ${this.srcTbodyRowHeight}px)` : ``;
-		const repeatTfoot =
-			this.srcFooters.length > 0 ? `repeat(${this.srcFooters.length}, ${this.srcTfootRowHeight}px)` : ``;
+		const repeatTfoot = this.srcFooters.length > 0 ? `repeat(${this.srcFooters.length}, ${this.srcTfootRowHeight}px)` : ``;
 		return `${repeatThead} ${repeatTbody} ${repeatTfoot}`;
 	});
 
@@ -227,12 +223,7 @@ class Table<TData extends Row> {
 		const focusedChanged = focusedCellRowIndex !== currentIndices.focusedCellRowIndex;
 
 		// 4. Erken Çıkış Kontrolü
-		if (
-			currentIndices.scrollTop === scrollTop &&
-			currentIndices.clientHeight === clientHeight &&
-			!force &&
-			!focusedChanged
-		) {
+		if (currentIndices.scrollTop === scrollTop && currentIndices.clientHeight === clientHeight && !force && !focusedChanged) {
 			return;
 		}
 
@@ -270,8 +261,7 @@ class Table<TData extends Row> {
 		const overscanEndIndex = Math.min(dataLength - 1, visibleEndIndex + overscanThreshold);
 
 		// 8. Mevcut Overscan Indexler Değişti mi?
-		const indicesChanged =
-			overscanStartIndex !== currentIndices.overscanStart || overscanEndIndex !== currentIndices.overscanEnd;
+		const indicesChanged = overscanStartIndex !== currentIndices.overscanStart || overscanEndIndex !== currentIndices.overscanEnd;
 
 		// 9. Mevcut Odaklanmış Satır, Yeni Index Aralığında mı?
 		const isFocusedRowAlreadyIncluded =
@@ -517,9 +507,7 @@ class Table<TData extends Row> {
 
 			const itemClassName = type === 'header' ? 'slc-table-th-action-popup' : 'slc-table-td-action-popup';
 
-			const selectedItem = this.element?.querySelector<HTMLElement>(
-				`.${itemClassName}-item[data-index="${nextIndex}"]`
-			);
+			const selectedItem = this.element?.querySelector<HTMLElement>(`.${itemClassName}-item[data-index="${nextIndex}"]`);
 			let action = selectedItem?.dataset.action;
 
 			const length =
@@ -558,9 +546,7 @@ class Table<TData extends Row> {
 								?.querySelectorAll<HTMLElement>(`.${itemClassName}-item`)
 								.forEach((item) => item.classList.remove(`${itemClassName}-item-nav`));
 
-							const selectedItem = this.element?.querySelector<HTMLElement>(
-								`.${itemClassName}-item[data-index="${nextIndex}"]`
-							);
+							const selectedItem = this.element?.querySelector<HTMLElement>(`.${itemClassName}-item[data-index="${nextIndex}"]`);
 							action = selectedItem?.dataset.action;
 							selectedItem?.classList.add(`${itemClassName}-item-nav`);
 						}
@@ -625,11 +611,7 @@ class Table<TData extends Row> {
 		this.#actionIsOutsideMouseDown = !this.#actionActiveContainerNode?.contains(target); // Tıklama container dışındaysa true olur
 	};
 	private handleWindowOutsideClick = (e: MouseEvent) => {
-		if (
-			this.#actionIsOutsideMouseDown &&
-			this.#actionActiveRowIndex != null &&
-			this.#actionActiveContainerNode != null
-		) {
+		if (this.#actionIsOutsideMouseDown && this.#actionActiveRowIndex != null && this.#actionActiveContainerNode != null) {
 			this.hideActionPopup();
 		}
 	};
@@ -676,8 +658,7 @@ class Table<TData extends Row> {
 
 		const countableRowsLength = this.countableRowsLength();
 
-		this.#headerIsIndeterminate =
-			this.#selectedRows.size > 0 && this.#selectedRows.size < countableRowsLength ? true : false;
+		this.#headerIsIndeterminate = this.#selectedRows.size > 0 && this.#selectedRows.size < countableRowsLength ? true : false;
 
 		this.#headerIsChecked = this.#selectedRows.size === countableRowsLength;
 
@@ -783,13 +764,7 @@ class Table<TData extends Row> {
 		this.#editingCell = true;
 		this.#editingCellPath = `r${rowIndex}c${colIndex}`;
 	};
-	private setCellValue = (
-		newValue: unknown,
-		oldValue: unknown,
-		rowIndex: number,
-		colIndex: number,
-		field: Field<TData>
-	) => {
+	private setCellValue = (newValue: unknown, oldValue: unknown, rowIndex: number, colIndex: number, field: Field<TData>) => {
 		if (newValue === oldValue) return;
 
 		if (this.#src.data && typeof this.#src.data[rowIndex][field] === typeof newValue) {
@@ -869,8 +844,7 @@ class Table<TData extends Row> {
 			this.srcColumns.forEach((column, index) => {
 				if (index !== coi && column?.width?.startsWith('minmax')) {
 					const width =
-						this.element?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect()
-							.width || 100;
+						this.element?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect().width || 100;
 					this.setColumnWidth(index, width, field);
 				}
 			});
@@ -884,11 +858,7 @@ class Table<TData extends Row> {
 			if (!(node instanceof HTMLElement)) return;
 			// kurulum buraya gidiyor
 			const pointerdown = (event: PointerEvent) => {
-				if (
-					(event.pointerType === 'mouse' && event.button === 2) ||
-					(event.pointerType !== 'mouse' && !event.isPrimary)
-				)
-					return;
+				if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
 
 				const parentNode = node.parentNode;
 				if (!parentNode || !(parentNode instanceof HTMLElement)) return;
@@ -1013,10 +983,7 @@ class Table<TData extends Row> {
 			].includes(key);
 			const isActionKey = ['F2', ' ', 'c', 'C', 'v', 'V', 'Escape'].includes(key); // Boşluk, F2, Kopyala/Yapıştır, Escape
 			const isTypable =
-				typableNumber.includes(key) ||
-				typableLower.includes(key) ||
-				typableUpper.includes(key) ||
-				typableOther.includes(key);
+				typableNumber.includes(key) || typableLower.includes(key) || typableUpper.includes(key) || typableOther.includes(key);
 
 			// İzin verilmeyen tuşlar veya anlık eylemler önce ele alınır
 			if (!isNavigationKey && !isActionKey && !isTypable) {
@@ -1292,8 +1259,7 @@ class Table<TData extends Row> {
 					: ''
 			}
 		`,
-		'aria-colcount':
-			this.visibleColumns.length + (this.srcRowSelection !== 'none' ? 1 : 0) + (this.srcRowAction ? 1 : 0),
+		'aria-colcount': this.visibleColumns.length + (this.srcRowSelection !== 'none' ? 1 : 0) + (this.srcRowAction ? 1 : 0),
 		'aria-rowcount': this.srcData.length + this.srcFooters.length + this.headerRowsCountState
 	});
 	trhProps = {

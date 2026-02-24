@@ -6,7 +6,7 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '$lib/server/error';
 import { paramsFileKeyTransform } from '$lib/utils/transform-params-helper';
 
-import { listParamsSchema, oneParamsSchema, updateFormSchema } from './types';
+import { listParamsSchema, oneParamsSchema, updateFormSchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

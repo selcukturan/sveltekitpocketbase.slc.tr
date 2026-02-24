@@ -148,7 +148,7 @@ function showTooltip(node: HTMLElement, data: TooltipOptionType) {
 	);
 }
 
-export function tooltip(tooltipData: string | object): Attachment {
+export function tooltip(tooltipData: string | TooltipOptionType): Attachment {
 	// console.log(`Started. ${new Date().getTime()}`);
 	let data: TooltipOptionType = normalize(tooltipData);
 

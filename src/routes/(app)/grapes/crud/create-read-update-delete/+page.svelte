@@ -12,7 +12,7 @@
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
 	import { Drawer } from '$lib/components/base/drawer';
-	/* import { confirm } from '$lib/components/base/confirm'; */
+	import { confirm } from '$lib/components/base/confirm';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
 	import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/base/datatable';
@@ -33,7 +33,7 @@
 		Relation
 	} from '$lib/components/base/inputs';
 	// Types and Schemas
-	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './types';
+	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './page.shared';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
@@ -73,9 +73,10 @@
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
-	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number];
+	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number] & { slcAction?: string };
 	let dataTable: s.DataTable<ItemType> | undefined = $state(undefined);
 	let columns: s.Column<ItemType>[] = [
+		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
 		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
 		{ field: 'caption', label: 'caption', width: 'minmax(50px,1fr)' },
@@ -130,9 +131,50 @@
 				{#snippet dataRow(dr)}
 					<s.DataRow {dr}>
 						{#snippet dataCell(dc)}
-							<s.DataCell {dr} {dc}>
-								{dc.value}
-							</s.DataCell>
+							{#if String(dc.col.data.field) === 'slcAction'}
+								<s.DataCell {dr} {dc}>
+									<div class="flex h-full w-full items-center justify-center gap-1">
+										<s.ActionButton
+											label={t('update')}
+											icon="ri-pencil-line"
+											onclick={() => {
+												setParams({ cmd: 'update', id: dr.row.id });
+											}}
+										/>
+										<s.ActionButton
+											label={t('delete')}
+											icon="ri-delete-bin-line"
+											class="text-error-500!"
+											onclick={async () => {
+												let shouldDelete = false;
+												shouldDelete = await confirm({
+													message: `[${dr.row.id}] ID'li kaydı silmek istediğinize emin misiniz?`,
+													yes: 'Evet',
+													no: 'Hayır'
+												});
+												if (shouldDelete) {
+													pageToaster.add({
+														type: 'success',
+														title: 'Başarıyla silindi!',
+														description: `[${dr.row.id}] ID'li kayıt silindi!`
+													});
+												}
+											}}
+										/>
+										<s.ActionButton
+											label={t('view')}
+											icon="ri-eye-line"
+											onclick={() => {
+												setParams({ cmd: 'view', id: dr.row.id });
+											}}
+										/>
+									</div>
+								</s.DataCell>
+							{:else}
+								<s.DataCell {dr} {dc}>
+									{dc.value}
+								</s.DataCell>
+							{/if}
 						{/snippet}
 					</s.DataRow>
 				{/snippet}
