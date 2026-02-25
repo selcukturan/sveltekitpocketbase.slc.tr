@@ -10,10 +10,16 @@ class FormInputsContext<
 > {
 	form: RemoteForm<TInput, TOutput>;
 	schema: TSchema;
+	initialValidate: boolean;
 
-	constructor(form: RemoteForm<TInput, TOutput>, schema: TSchema) {
+	constructor(form: RemoteForm<TInput, TOutput>, schema: TSchema, initialValidate: boolean) {
 		this.form = $state(form);
 		this.schema = $state(schema);
+		this.initialValidate = initialValidate;
+
+		/* setTimeout(() => {
+			this.form.validate({ preflightOnly: true, includeUntouched: true });
+		}, 1000); */
 	}
 
 	getValibotMetadata(key?: string) {
@@ -30,8 +36,8 @@ export function createFormInputsContext<
 	TInput extends RemoteFormInput | void,
 	TOutput,
 	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
->(form: RemoteForm<TInput, TOutput>, schema: TSchema) {
-	return setContext(key, new FormInputsContext<TInput, TOutput, TSchema>(form, schema));
+>(form: RemoteForm<TInput, TOutput>, schema: TSchema, initialValidate: boolean) {
+	return setContext(key, new FormInputsContext<TInput, TOutput, TSchema>(form, schema, initialValidate));
 }
 export function getFormInputsContext<
 	TInput extends RemoteFormInput | void,

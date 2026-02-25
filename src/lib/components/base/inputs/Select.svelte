@@ -321,6 +321,7 @@
 	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
+	let initialValidate = false;
 	watch(
 		() => selectedIndexes,
 		() => {
@@ -331,7 +332,12 @@
 				} else {
 					(field as RemoteFormField<string>).set(currentValue as string);
 				}
-				context?.form.validate({ preflightOnly: true });
+
+				if (!context?.initialValidate && !initialValidate) {
+					initialValidate = true;
+					return;
+				}
+				context?.form.validate({ preflightOnly: true, includeUntouched: true });
 			}
 		}
 	);

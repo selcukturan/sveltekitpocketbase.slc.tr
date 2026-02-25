@@ -5,6 +5,7 @@
 	import { getFormInputsContext } from './context.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { watch } from 'runed';
 
 	type ValueTypeChoice<T extends boolean> = T extends true ? string[] : string;
 
@@ -87,7 +88,8 @@
 		}
 
 		field?.set(val);
-		context?.form.validate({ preflightOnly: true });
+		// Eskiden eklenmiş dosyalar "kaldır" olarak işaretlendiğinde çalışır.
+		context?.form.validate({ preflightOnly: true, includeUntouched: true });
 	};
 
 	let dt = new DataTransfer();
@@ -137,6 +139,19 @@
 			valueChanged(value);
 		}
 	};
+
+	let initialValidate = false;
+	watch(
+		() => proxy.files,
+		() => {
+			if (!context?.initialValidate && !initialValidate) {
+				initialValidate = true;
+				return;
+			}
+			// Başlangıç dahil, gerçekten her dosya değişiminde çalışır.
+			context?.form.validate({ preflightOnly: true, includeUntouched: true });
+		}
+	);
 
 	function removeFileInputElement(nameToDelete: string) {
 		valueMap.delete(nameToDelete);

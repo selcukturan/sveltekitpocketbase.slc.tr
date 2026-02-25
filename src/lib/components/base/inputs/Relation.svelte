@@ -9,6 +9,7 @@
 	import { Collections } from '$lib/types/pocketbase-types';
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { watch } from 'runed';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };
@@ -142,6 +143,18 @@
 		}
 	}
 
+	let initialValidate = false;
+	watch(
+		() => value,
+		() => {
+			if (!context?.initialValidate && !initialValidate) {
+				initialValidate = true;
+				return;
+			}
+			context?.form.validate({ preflightOnly: true, includeUntouched: true });
+		}
+	);
+
 	onMount(() => {
 		isMounted = true;
 		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
@@ -172,7 +185,7 @@
 
 					await tick();
 
-					context?.form.validate({ preflightOnly: true });
+					// context?.form.validate({ preflightOnly: true });
 				} else {
 					pickerAnswer = 'false';
 				}

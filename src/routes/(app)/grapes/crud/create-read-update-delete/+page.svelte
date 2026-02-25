@@ -251,12 +251,14 @@
 					<DrawerFormContent.Content boundary>
 						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 						<DrawerFormContent.Content.Form
+							initialValidate={true}
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
 							form={updateForm}
-							{...updateForm.preflight(updateFormSchema).enhance(async ({ submit }) => {
+							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
 								try {
 									await submit().updates(getList(params));
+									form.reset();
 									drawer?.close();
 									pageToaster.add({
 										type: 'success',

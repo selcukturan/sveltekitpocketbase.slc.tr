@@ -15,14 +15,15 @@
 		children?: Snippet;
 		buttons?: Snippet;
 		class?: string;
+		initialValidate?: boolean;
 	};
 
-	let { children, class: classes, inputs, buttons, form, schema, ...attributes }: Props = $props();
+	let { children, class: classes, inputs, buttons, form, schema, initialValidate = false, ...attributes }: Props = $props();
 
 	// svelte-ignore state_referenced_locally
-	const context = createFormInputsContext<TInput, TOutput, TSchema>(form, schema); // init
+	const context = createFormInputsContext<TInput, TOutput, TSchema>(form, schema, initialValidate); // init
 
-	// $inspect('DrawerFormContent.Content.Form -> context.schema', context.schema);
+	// $inspect('Form - allIssues()', context.form.fields.allIssues());
 
 	const internalClasses = 'flex flex-1 flex-col overflow-hidden';
 </script>

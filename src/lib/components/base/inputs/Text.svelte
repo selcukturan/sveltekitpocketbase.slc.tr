@@ -4,6 +4,7 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import { getFormInputsContext } from './context.svelte';
 	import Field from './Field.svelte';
+	import { watch } from 'runed';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
 		id?: string;
@@ -25,7 +26,6 @@
 
 	const valueChanged = (value: string) => {
 		field?.set(value);
-		context?.form.validate({ preflightOnly: true });
 	};
 
 	let first = true;
@@ -44,6 +44,18 @@
 			valueChanged(currentValue);
 		}
 	};
+
+	let initialValidate = false;
+	watch(
+		() => proxy.value,
+		() => {
+			if (!context?.initialValidate && !initialValidate) {
+				initialValidate = true;
+				return;
+			}
+			context?.form.validate({ preflightOnly: true, includeUntouched: true });
+		}
+	);
 </script>
 
 <Field {issues} {required} {label} id={mainName || id}>
