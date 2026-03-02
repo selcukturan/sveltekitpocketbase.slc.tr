@@ -61,7 +61,7 @@ export type FooterCellType<TData> = {
 	colVisibleIndex: number;
 };
 
-type ListResult<TData> = {
+export type ListResult<TData> = {
 	page: number;
 	perPage: number;
 	totalItems: number;

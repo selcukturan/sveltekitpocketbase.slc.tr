@@ -74,7 +74,7 @@
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
 	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number] & { slcAction?: string };
-	let dataTable: s.DataTable<ItemType> | undefined = $state(undefined);
+	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
 	let columns: s.Column<ItemType>[] = [
 		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
@@ -100,7 +100,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<s.DataTable bind:this={dataTable} data={await getList(params)} {columns} {footers}>
+			<s.DataTable bind:this={datatable} data={await getList(params)} {columns} {footers} pending={Boolean($effect.pending())}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text

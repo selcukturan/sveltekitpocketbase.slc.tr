@@ -1,103 +1,28 @@
 <script lang="ts" generics="TData extends Row">
-	import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { type Snippet } from 'svelte';
-	import { watch } from 'runed';
-	import { createTableContext } from './context.svelte';
+	import type { Row } from './types.d';
+	import { createTableContext, type MainProps } from './context.svelte';
 
-	type Props = HTMLAttributes<HTMLDivElement> & {
-		data?: ListResult<TData>;
-		columns: Column<TData>[];
-		footers?: Footer<TData>[];
-		toolbar?: Snippet;
-		headerRow: Snippet<[hr: HeaderRowType<TData>]>;
-		dataRow: Snippet<[dr: DataRowType<TData>]>;
-		footerRow?: Snippet<[fr: FooterRowType<TData>]>;
-		statusbar?: Snippet;
-		class?: string;
-		containerClass?: string;
-		mainClass?: string;
-		loading?: boolean;
-		headerRowHeight?: number;
-		dataRowHeight?: number;
-		footerRowHeight?: number;
-	};
-
-	let {
-		data = {
-			page: 1, // context
-			perPage: 30, // context
-			totalItems: 0, // context
-			totalPages: 0, // context
-			items: [] // context
-		}, // context
-		columns, // context
-		footers = [], // context
-		headerRowHeight = 35, // context
-		dataRowHeight = 35, // context
-		footerRowHeight = 35, // context
-		toolbar,
-		headerRow,
-		dataRow,
-		footerRow,
-		statusbar,
-		class: tableClass,
-		containerClass,
-		mainClass,
-		loading = false,
-		...attributes
-	}: Props = $props();
+	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
-	const context = createTableContext<TData>(data, columns, footers); // init
-	watch(
-		() => data,
-		(currentData) => {
-			context.rawData = currentData;
-		},
-		{ lazy: true }
-	);
-	watch(
-		() => columns,
-		(currentColumns) => {
-			context.columns = currentColumns;
-		},
-		{ lazy: true }
-	);
-	watch(
-		() => footers,
-		(currentFooters) => {
-			context.footers = currentFooters;
-		},
-		{ lazy: true }
-	);
-	// ############################################################################################################################################
-	watch(
-		() => headerRowHeight,
-		(v) => {
-			context.headerRowHeight = v;
-		}
-	);
-	watch(
-		() => dataRowHeight,
-		(v) => {
-			context.dataRowHeight = v;
-		}
-	);
-	watch(
-		() => footerRowHeight,
-		(v) => {
-			context.footerRowHeight = v;
-		}
-	);
+	const context = createTableContext<TData>(props); // init
 
-	export const test = () => {
-		console.log('test object');
+	// Parent kullanımı: tableRef?.helpers.testHelper1()
+	export const helpers = context.helpers;
+
+	// Parent kullanımı: {tableRef?.states.pending}
+	export const states = {
+		get pending() {
+			return context.propsPending;
+		},
+		get headerRowHeight() {
+			return context.propsHeaderRowHeight;
+		}
 	};
 </script>
 
-<div class:slc-table-main={true} class={mainClass} style:width={`100%`} style:height={`100%`}>
-	{@render toolbar?.()}
+<div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
+	{@render context.propsToolbar?.()}
 	<div style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);">
 		<div>
 			fps: {context.fpsLimit} / {context.animation.fps.toFixed(0)}
@@ -108,31 +33,31 @@
 		<div>frames: {context.frames}</div>
 	</div>
 
-	<div class:slc-table-container={true} class={containerClass}>
+	<div class:slc-table-container={true} class={context.propsContainerClass}>
 		{#if context.dataLength === 0}
 			<div class="slc-table-nodata">No data to display</div>
 		{/if}
-		{#if loading}
+		{#if context.propsPending}
 			<div class="slc-table-nodata">Loading...</div>
 		{/if}
 		<div
 			class:slc-table={true}
-			class={tableClass}
+			class={context.propsTableClass}
 			role="grid"
 			bind:this={context.el}
-			{...attributes}
+			// {...attributes}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>
 			{#if context.headerLength > 0}
-				{@render headerRow?.({
+				{@render context.propsHeaderRow?.({
 					test: 'test'
 				})}
 			{/if}
 
 			{#if context.dataLength > 0}
 				{#each context.virtualData as row, virtualIndex (row.data.id)}
-					{@render dataRow?.({
+					{@render context.propsDataRow?.({
 						row: row.data,
 						rowVirtualIndex: virtualIndex,
 						rowOriginalIndex: row.originalIndex
@@ -141,8 +66,8 @@
 			{/if}
 
 			{#if context.dataLength > 0 && context.footerLength > 0}
-				{#each context.footers as row, footerIndex (footerIndex)}
-					{@render footerRow?.({
+				{#each context.propsFooters as row, footerIndex (footerIndex)}
+					{@render context.propsFooterRow?.({
 						footerRow: row,
 						footerIndex
 					})}
@@ -150,7 +75,7 @@
 			{/if}
 		</div>
 	</div>
-	{@render statusbar?.()}
+	{@render context.propsStatusbar?.()}
 </div>
 
 <style>

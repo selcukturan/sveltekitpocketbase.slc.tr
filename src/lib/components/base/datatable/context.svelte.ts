@@ -1,29 +1,114 @@
-import type { Column, Footer, Row, ListResult } from './types';
+// https://github.com/vincjo/datatables/blob/main/src/lib/src/client/AbstractTableHandler.svelte.ts#L40
+
+import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick } from 'svelte';
 import { watch, ScrollState, AnimationFrames, useResizeObserver } from 'runed';
-import { untrack } from 'svelte';
+import { untrack, type Snippet } from 'svelte';
+
+export interface MainProps<TData extends Row> {
+	// Veri Yapısı
+	data?: ListResult<TData>;
+	columns: Column<TData>[]; // required
+	footers?: Footer<TData>[];
+	// Snippets (Render Fonksiyonları)
+	toolbar?: Snippet;
+	headerRow: Snippet<[hr: HeaderRowType<TData>]>; // required
+	dataRow: Snippet<[dr: DataRowType<TData>]>; // required
+	footerRow?: Snippet<[fr: FooterRowType<TData>]>;
+	statusbar?: Snippet;
+	// UI State & Styling
+	pending?: boolean;
+	headerRowHeight?: number;
+	dataRowHeight?: number;
+	footerRowHeight?: number;
+	// Özel Class Tanımları
+	tableClass?: string;
+	containerClass?: string;
+	mainClass?: string;
+}
 
 class TableContext<TData extends Row> {
-	// required DataTable props
-	rawData = $state<ListResult<TData>>({
-		page: 1,
-		perPage: 30,
-		totalItems: 0,
-		totalPages: 0,
-		items: []
-	});
-	columns = $state<Column<TData>[]>([]);
-	footers = $state<Footer<TData>[]>([]);
-	headerRowHeight = $state(35);
-	dataRowHeight = $state(35);
-	footerRowHeight = $state(35);
+	// ############### BEGIN PROPS ###############
+	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
+	#props = $state() as MainProps<TData>;
+	// Veri Yapısı
+	get propsData() {
+		return this.#props.data;
+	}
+	get propsItems() {
+		return this.#props.data?.items ?? [];
+	}
+	get propsTotalItems() {
+		return this.#props.data?.totalItems ?? 0;
+	}
+	get propsPage() {
+		return this.#props.data?.page ?? 1;
+	}
+	get propsPerPage() {
+		return this.#props.data?.perPage ?? 30;
+	}
+	get propsTotalPages() {
+		return this.#props.data?.totalPages ?? 0;
+	}
+	get propsColumns() {
+		return this.#props.columns; // required
+	}
+	get propsFooters() {
+		return this.#props.footers ?? [];
+	}
+	// Snippets (Render Fonksiyonları)
+	get propsToolbar() {
+		return this.#props.toolbar;
+	}
+	get propsHeaderRow() {
+		return this.#props.headerRow; // required
+	}
+	get propsDataRow() {
+		return this.#props.dataRow; // required
+	}
+	get propsFooterRow() {
+		return this.#props.footerRow;
+	}
+	get propsStatusbar() {
+		return this.#props.statusbar;
+	}
+	// UI State & Styling
+	get propsPending() {
+		return this.#props.pending ?? false;
+	}
+	get propsHeaderRowHeight() {
+		return this.#props.headerRowHeight ?? 35;
+	}
+	get propsDataRowHeight() {
+		return this.#props.dataRowHeight ?? 35;
+	}
+	get propsFooterRowHeight() {
+		return this.#props.footerRowHeight ?? 35;
+	}
+	// Özel Class Tanımları
+	get propsTableClass() {
+		return this.#props.tableClass;
+	}
+	get propsContainerClass() {
+		return this.#props.containerClass;
+	}
+	get propsMainClass() {
+		return this.#props.mainClass;
+	}
+	// ############### END PROPS ###############
 
-	// Context variables
-	allRows = $derived($state.snapshot(this.rawData.items));
+	constructor(initialProps: MainProps<TData>) {
+		this.#props = initialProps;
+		this.#init();
+	}
+
+	// base variables
 	el = $state<HTMLElement>();
 	headerLength = $state(1);
-	dataLength = $derived(this.allRows.length);
-	footerLength = $derived(this.footers.length);
+	dataLength = $derived(this.propsItems.length);
+	footerLength = $derived(this.propsFooters.length);
+
+	// virtual scroll variables
 	clientHeight = $state(0);
 	throttledY = $state(0);
 	fpsLimit = $state(60);
@@ -43,38 +128,10 @@ class TableContext<TData extends Row> {
 		{ fpsLimit: () => this.fpsLimit }
 	);
 
-	constructor(data: ListResult<TData>, columns: Column<TData>[], footers: Footer<TData>[]) {
-		// https://github.com/vincjo/datatables/blob/main/src/lib/src/client/AbstractTableHandler.svelte.ts#L40
-		this.rawData = data;
-		this.columns = columns;
-		this.footers = footers;
-
-		useResizeObserver(
-			() => this.el,
-			(entries) => {
-				const entry = entries[0];
-				if (!entry) return;
-				this.clientHeight = entry.contentRect.height;
-			}
-		);
-
-		watch(
-			() => this.rawData,
-			() => {
-				tick().then(() => {
-					this.updateVisibleIndexes(true);
-				});
-			}
-		);
-
-		watch([() => this.throttledY, () => this.clientHeight], () => {
-			this.updateVisibleIndexes();
-		});
-	}
-
+	// Manuel çalıştırılır. rowIndices güncellenir.
 	updateVisibleIndexes = (force: boolean = false) => {
 		const overscan = 10;
-		const rowHeight = this.dataRowHeight;
+		const rowHeight = this.propsDataRowHeight;
 
 		let start = Math.max(0, Math.floor(this.throttledY / rowHeight) - overscan);
 		let end = Math.min(this.dataLength - 1, Math.floor((this.throttledY + this.clientHeight) / rowHeight) + overscan);
@@ -89,8 +146,9 @@ class TableContext<TData extends Row> {
 		}
 	};
 
+	// `rowIndices` her değiştiğinde çalışır.
 	virtualData = $derived.by(() => {
-		const rawData = untrack(() => this.allRows);
+		const rawData = untrack(() => this.propsItems);
 
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
@@ -104,11 +162,12 @@ class TableContext<TData extends Row> {
 		return processedData;
 	});
 
+	// `propsColumns` her değiştiğinde çalışır.
 	visibleColumns = $derived.by(() => {
 		const processedColumns: { data: Column<TData>; originalIndex: number }[] = [];
 
-		for (let i = 0; i <= this.columns.length; i++) {
-			const col = this.columns[i];
+		for (let i = 0; i <= this.propsColumns.length; i++) {
+			const col = this.propsColumns[i];
 			if (col && col.hidden !== true) {
 				processedColumns.push({ data: col, originalIndex: i });
 			}
@@ -119,9 +178,9 @@ class TableContext<TData extends Row> {
 
 	gridTemplateRows = $derived.by(() => {
 		const headerLength = this.headerLength;
-		const headerRowHeight = this.headerRowHeight;
-		const dataRowHeight = this.dataRowHeight;
-		const footerRowHeight = this.footerRowHeight;
+		const headerRowHeight = this.propsHeaderRowHeight;
+		const dataRowHeight = this.propsDataRowHeight;
+		const footerRowHeight = this.propsFooterRowHeight;
 		const footerLength = this.footerLength;
 		const itemLength = this.dataLength;
 
@@ -136,16 +195,48 @@ class TableContext<TData extends Row> {
 		const columnsWidth = this.visibleColumns.map((col) => col.data.width ?? `150px`);
 		return columnsWidth.join(' ');
 	});
+
+	helpers = {
+		testHelper1: () => {
+			console.log('Mevcut veri:', this.propsItems);
+		},
+		testHelper2: (index: number) => {
+			console.log('Satır yüksekliği:', this.propsDataRowHeight);
+		}
+	};
+
+	#init() {
+		// Observer kurulumu
+		useResizeObserver(
+			() => this.el,
+			(entries) => {
+				const entry = entries[0];
+				if (!entry) return;
+				this.clientHeight = entry.contentRect.height;
+			}
+		);
+
+		// Veri değişimini izle (items her değiştiğinde visible indexleri güncelle)
+		watch(
+			() => this.propsItems,
+			() => {
+				tick().then(() => {
+					this.updateVisibleIndexes(true);
+				});
+			}
+		);
+
+		// Scroll ve Yükseklik değişimini izle
+		watch([() => this.throttledY, () => this.clientHeight], () => {
+			this.updateVisibleIndexes();
+		});
+	}
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
 // ################################## BEGIN Export Table Context ##############################################################################################################################
-export function createTableContext<TData extends Row>(
-	data: ListResult<TData>,
-	columns: Column<TData>[],
-	footers: Footer<TData>[]
-) {
-	return setContext(key, new TableContext<TData>(data, columns, footers));
+export function createTableContext<TData extends Row>(initialProps: MainProps<TData>) {
+	return setContext(key, new TableContext<TData>(initialProps));
 }
 export function getTableContext<TData extends Row>() {
 	return getContext<ReturnType<typeof createTableContext<TData>>>(key);
