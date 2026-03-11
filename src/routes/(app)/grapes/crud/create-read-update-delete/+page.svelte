@@ -96,7 +96,7 @@
 
 <Page>
 	<Page.Header>
-		<p>Page Header</p>
+		<p>Page Header - X</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
