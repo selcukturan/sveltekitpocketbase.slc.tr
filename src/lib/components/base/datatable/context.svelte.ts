@@ -229,6 +229,7 @@ class TableContext<TData extends Row> {
 
 		// Scroll ve Yükseklik değişimini izle
 		watch([() => this.throttledY, () => this.clientHeight], () => {
+			console.log('this.clientHeight', this.clientHeight);
 			this.updateVisibleIndexes();
 		});
 	}

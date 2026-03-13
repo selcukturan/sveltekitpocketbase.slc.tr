@@ -98,7 +98,7 @@
 		display: grid;
 		block-size: 100%;
 		contain: content;
-		/* content-visibility: auto; */
+		content-visibility: auto;
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
