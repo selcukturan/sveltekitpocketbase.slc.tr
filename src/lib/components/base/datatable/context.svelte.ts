@@ -101,7 +101,7 @@ class TableContext<TData extends Row> {
 		this.#props = initialProps;
 		this.#init();
 
-		$effect(() => {
+		/* $effect(() => {
 			this.throttledY;
 			this.clientHeight;
 			untrack(() => {
@@ -109,7 +109,7 @@ class TableContext<TData extends Row> {
 				console.log('this.clientHeight', this.clientHeight);
 				this.updateVisibleIndexes();
 			});
-		});
+		}); */
 	}
 
 	// base variables

@@ -1,4 +1,5 @@
 <script lang="ts" generics="TData extends Row">
+	import { untrack, tick } from 'svelte';
 	import type { Row } from './types.d';
 	import { createTableContext, type MainProps } from './context.svelte';
 
@@ -6,6 +7,16 @@
 
 	// svelte-ignore state_referenced_locally
 	const context = createTableContext<TData>(props); // init
+
+	$effect(() => {
+		context.throttledY;
+		context.clientHeight;
+		untrack(() => {
+			console.log('context.throttledY_x', context.throttledY);
+			console.log('context.clientHeight_x', context.clientHeight);
+			context.updateVisibleIndexes();
+		});
+	});
 
 	// Parent kullanımı: tableRef?.helpers.testHelper1()
 	export const helpers = context.helpers;
