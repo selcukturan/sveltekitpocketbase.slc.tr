@@ -45,6 +45,7 @@
 			class={context.propsTableClass}
 			role="grid"
 			bind:this={context.el}
+			bind:clientHeight={context.clientHeight}
 			// {...attributes}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}

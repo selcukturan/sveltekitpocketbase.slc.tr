@@ -2,7 +2,7 @@
 
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick } from 'svelte';
-import { watch, ScrollState, AnimationFrames, useResizeObserver } from 'runed';
+import { watch, ScrollState, AnimationFrames } from 'runed';
 import { untrack, type Snippet } from 'svelte';
 
 export interface MainProps<TData extends Row> {
@@ -208,14 +208,14 @@ class TableContext<TData extends Row> {
 
 	#init() {
 		// Observer kurulumu
-		useResizeObserver(
+		/* useResizeObserver(
 			() => this.el,
 			(entries) => {
 				const entry = entries[0];
 				if (!entry) return;
 				this.clientHeight = entry.contentRect.height;
 			}
-		);
+		); */
 
 		// Veri değişimini izle (items her değiştiğinde visible indexleri güncelle)
 		watch(
