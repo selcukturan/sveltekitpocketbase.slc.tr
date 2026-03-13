@@ -121,6 +121,7 @@ class TableContext<TData extends Row> {
 	scroll = new ScrollState({ element: () => this.el });
 	animation = new AnimationFrames(
 		(args) => {
+			console.log(this.scroll.y);
 			this.frames++;
 			this.delta = args.delta;
 			this.throttledY = this.scroll.y;
