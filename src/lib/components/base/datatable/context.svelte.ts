@@ -228,9 +228,18 @@ class TableContext<TData extends Row> {
 		);
 
 		// Scroll ve Yükseklik değişimini izle
-		watch([() => this.throttledY, () => this.clientHeight], () => {
+		/* watch([() => this.throttledY, () => this.clientHeight], () => {
 			console.log('this.clientHeight', this.clientHeight);
 			this.updateVisibleIndexes();
+		}); */
+
+		$effect(() => {
+			this.throttledY;
+			this.clientHeight;
+			untrack(() => {
+				console.log('this.clientHeight', this.clientHeight);
+				this.updateVisibleIndexes();
+			});
 		});
 	}
 }
