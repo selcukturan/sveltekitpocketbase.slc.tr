@@ -32,13 +32,13 @@
 		{/if}
 		<div
 			role="grid"
+			class:slc-table={true}
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
 			use:context.scrollAction
 			use:context.rafAction
 			{@attach context.testTableScrollAttach}
 			class={context.propsTableClass}
-			class:slc-table={true}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>
