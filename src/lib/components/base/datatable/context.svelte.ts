@@ -216,6 +216,7 @@ class TableContext<TData extends Row> {
 
 	// Scroll takibi attachment'ı — {@attach context.scrollAttach}
 	scrollAttach: Attachment = (node) => {
+		console.log('scrollAttach çalıştı, node:', node);
 		if (!(node instanceof HTMLElement)) return;
 		const scroll = () => {
 			this.#scrollY = node.scrollTop;
