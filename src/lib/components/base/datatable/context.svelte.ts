@@ -1,5 +1,4 @@
 // https://github.com/vincjo/datatables/blob/main/src/lib/src/client/AbstractTableHandler.svelte.ts#L40
-import type { Attachment } from 'svelte/attachments';
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick } from 'svelte';
 import { untrack, type Snippet } from 'svelte';
@@ -100,6 +99,7 @@ class TableContext<TData extends Row> {
 		this.#props = initialProps;
 		this.#init();
 	}
+	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element (container)
 
 	// base variables
 	headerLength = $state(1);
@@ -193,6 +193,37 @@ class TableContext<TData extends Row> {
 	};
 
 	#init() {
+		// Scroll takibi
+		$effect(() => {
+			const el = this.el;
+			if (!el) return;
+			const scroll = () => {
+				this.#scrollY = el.scrollTop;
+			};
+			el.addEventListener('scroll', scroll, { passive: true });
+			return () => el.removeEventListener('scroll', scroll);
+		});
+
+		// RAF döngüsü
+		$effect(() => {
+			const el = this.el;
+			if (!el) return;
+			const fps = 10;
+			let rafId: number;
+			let lastTime = 0;
+			const loop = (timestamp: number) => {
+				const interval = 1000 / fps;
+				const elapsed = timestamp - lastTime;
+				if (elapsed >= interval) {
+					lastTime = timestamp - (elapsed % interval);
+					this.#rafY = this.#scrollY;
+				}
+				rafId = requestAnimationFrame(loop);
+			};
+			rafId = requestAnimationFrame(loop);
+			return () => cancelAnimationFrame(rafId);
+		});
+
 		// watch: Veri değişimini izle
 		$effect(() => {
 			this.propsItems;
@@ -212,42 +243,6 @@ class TableContext<TData extends Row> {
 			});
 		});
 	}
-
-	// Scroll takibi attachment'ı — {@attach context.scrollAttach}
-	scrollAttach: Attachment = (node) => {
-		console.log('scrollAttach çalıştı, node:', node);
-		if (!(node instanceof HTMLElement)) return;
-		const scroll = () => {
-			this.#scrollY = node.scrollTop;
-			console.log('this.#scrollY', this.#scrollY);
-		};
-		node.addEventListener('scroll', scroll, { passive: true });
-		return () => node.removeEventListener('scroll', scroll);
-	};
-
-	// RAF döngüsü attachment'ı — {@attach context.rafAttach}
-	rafAttach: Attachment = (node) => {
-		console.log('rafAttach çalıştı, node:', node);
-		if (!(node instanceof HTMLElement)) return;
-
-		const fps = 10; // 60 FPS için
-		let rafId: number;
-		let lastTime = 0;
-
-		const loop = (timestamp: number) => {
-			const interval = 1000 / fps;
-			const elapsed = timestamp - lastTime;
-			if (elapsed >= interval) {
-				lastTime = timestamp - (elapsed % interval);
-				this.#rafY = this.#scrollY;
-				console.log('this.#rafY', this.#rafY);
-			}
-			rafId = requestAnimationFrame(loop);
-		};
-
-		rafId = requestAnimationFrame(loop);
-		return () => cancelAnimationFrame(rafId);
-	};
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');

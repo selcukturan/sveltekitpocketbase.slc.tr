@@ -1,8 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
 	import { createTableContext, type MainProps } from './context.svelte';
-	import type { Attachment } from 'svelte/attachments';
-
 	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
@@ -20,16 +18,6 @@
 			return context.propsHeaderRowHeight;
 		}
 	};
-
-	const testAttach: Attachment = (node) => {
-		console.log('scrollAttach çalıştı, node:', node);
-		if (!(node instanceof HTMLElement)) return;
-		const scroll = () => {
-			console.log('node.scrollTop', node.scrollTop);
-		};
-		node.addEventListener('scroll', scroll, { passive: true });
-		return () => node.removeEventListener('scroll', scroll);
-	};
 </script>
 
 <div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
@@ -43,11 +31,9 @@
 		{/if}
 		<div
 			role="grid"
+			bind:this={context.el}
 			class:slc-table={true}
 			class={context.propsTableClass}
-			{@attach context.scrollAttach}
-			{@attach context.rafAttach}
-			{@attach testAttach}
 			bind:clientHeight={context.clientHeight}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
