@@ -35,14 +35,6 @@
 			bind:clientHeight={context.clientHeight}
 			use:context.scrollAction
 			use:context.rafAction
-			{@attach context.mountAttach}
-			{@attach () => {
-				console.log('inline attach');
-
-				$effect(() => {
-					console.log('inline attach effect');
-				});
-			}}
 			class={context.propsTableClass}
 			class:slc-table={true}
 			style:grid-template-rows={context.gridTemplateRows}
