@@ -1,6 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
-	import { createTableContext, type MainProps } from './context.svelte';
+	import { createTableContext, type MainProps } from './contextX.svelte';
 
 	let props: MainProps<TData> = $props();
 
@@ -30,10 +30,10 @@
 		{#if context.propsPending}
 			<div class="slc-table-nodata">Loading...</div>
 		{/if}
-		<div
+		<span
 			role="grid"
 			class:slc-table={true}
-			bind:this={context.el}
+			//			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
 			use:context.scrollAction
 			use:context.rafAction
@@ -68,7 +68,7 @@
 					})}
 				{/each}
 			{/if}
-		</div>
+		</span>
 	</div>
 	{@render context.propsStatusbar?.()}
 </div>
