@@ -255,7 +255,7 @@ class TableContext<TData extends Row> {
 	};
 
 	// Scroll takibi attachment'ı — {@attach context.testScrollAttach}
-	testTableScrollAttach: Attachment = (node) => {
+	readonly testTableScrollAttach: Attachment = (node) => {
 		console.log('testTableScrollAttach çalıştı, node:', node);
 
 		if (!(node instanceof HTMLElement)) return;
@@ -267,6 +267,22 @@ class TableContext<TData extends Row> {
 
 		node.addEventListener('scroll', scroll, { passive: true });
 		return () => node.removeEventListener('scroll', scroll);
+	};
+
+	readonly actionAttach = (): Attachment => {
+		return (node) => {
+			console.log('actionAttach çalıştı, node:', node);
+
+			if (!(node instanceof HTMLElement)) return;
+			node.dataset.actionAttach = 'mountedX'; // DOM'a yazar
+
+			const scroll = () => {
+				node.dataset.actionAttach = `mountedX-${node.scrollTop}`; // DOM'a yazar
+			};
+
+			node.addEventListener('scroll', scroll, { passive: true });
+			return () => node.removeEventListener('scroll', scroll);
+		};
 	};
 }
 

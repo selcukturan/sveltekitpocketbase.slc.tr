@@ -38,6 +38,8 @@
 			use:context.scrollAction
 			use:context.rafAction
 			{@attach context.testTableScrollAttach}
+			{@attach context.actionAttach()}
+			data-context={context ? 'available' : 'unavailable'}
 			class={context.propsTableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
