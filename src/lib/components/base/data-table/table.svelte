@@ -4,6 +4,7 @@
 	/* import { fly } from 'svelte/transition'; */
 
 	let { sources }: { sources: Sources<TData> } = $props();
+	// svelte-ignore state_referenced_locally
 	const t = getTable<TData>(sources.id);
 	// $inspect('$inspect-editingCellPath', t.editingCellPath);
 	// $inspect(t.srcData, 'srcData');
@@ -73,8 +74,7 @@
 							}}
 							class:slc-table-td-focused={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${-1}`}
 							style:grid-column={`1 / 2`}
-							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${-1}` &&
-							t.focusedCellState?.tabIndex != null
+							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${-1}` && t.focusedCellState?.tabIndex != null
 								? t.focusedCellState?.tabIndex
 								: -1}
 						>
@@ -104,8 +104,7 @@
 							style:grid-column={`${
 								ci + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)
 							} / ${ci + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
-							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${ci}` &&
-							t.focusedCellState?.tabIndex != null
+							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${ci}` && t.focusedCellState?.tabIndex != null
 								? t.focusedCellState?.tabIndex
 								: -1}
 						>
@@ -126,8 +125,7 @@
 								colIndex: t.visibleColumns.length,
 								cancelEditable: String(rowWrapper.data.id).startsWith('subtotal')
 							}}
-							class:slc-table-td-focused={t.focusedCellState?.originalCell ===
-								`${rowWrapper.roi}_${t.visibleColumns.length}`}
+							class:slc-table-td-focused={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${t.visibleColumns.length}`}
 							style:grid-column={`${t.visibleColumns.length + 1 + (t.srcRowSelection !== 'none' ? 1 : 0)} / ${t.visibleColumns.length + 2 + (t.srcRowSelection !== 'none' ? 1 : 0)}`}
 							tabindex={t.focusedCellState?.originalCell === `${rowWrapper.roi}_${t.visibleColumns.length}` &&
 							t.focusedCellState?.tabIndex != null
@@ -266,15 +264,7 @@
 	{/if}
 {/snippet}
 
-{#snippet selectionContent({
-	type,
-	checked,
-	roi
-}: {
-	type: 'header' | 'footer' | 'data';
-	checked?: boolean;
-	roi?: number;
-})}
+{#snippet selectionContent({ type, checked, roi }: { type: 'header' | 'footer' | 'data'; checked?: boolean; roi?: number })}
 	<div style="display: flex; height: 100%; width: 100%; justify-content: space-between;">
 		<div style="display: none; align-items: center;">x</div>
 		<div style="display: flex; min-width: 0px; flex: 1 1 0%; align-items: center; justify-content: center;">
@@ -319,12 +309,7 @@
 			<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 				{#if type === 'header' && t.srcActions.tableActions != null && t.srcActions.tableActions.length > 0 && roi != null}
 					<div class="slc-table-th-action-container">
-						<button
-							class="slc-table-th-action-trigger"
-							{@attach t.actionAttach({ type, roi })}
-							type="button"
-							tabindex="-1"
-						>
+						<button class="slc-table-th-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>
@@ -356,12 +341,7 @@
 					</div>
 				{:else if type === 'data' && t.srcActions.rowActions != null && t.srcActions.rowActions.length > 0 && roi != null}
 					<div class="slc-table-td-action-container">
-						<button
-							class="slc-table-td-action-trigger"
-							{@attach t.actionAttach({ type, roi })}
-							type="button"
-							tabindex="-1"
-						>
+						<button class="slc-table-td-action-trigger" {@attach t.actionAttach({ type, roi })} type="button" tabindex="-1">
 							<span>
 								{@html `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`}
 							</span>

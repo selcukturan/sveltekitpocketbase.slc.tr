@@ -18,10 +18,12 @@
 	}: { children?: Snippet; class?: string; schema: Schema; defaultValues: Partial<v.InferInput<Schema>> } = $props();
 
 	// Set Context
+
+	// svelte-ignore state_referenced_locally
 	const ctx = createForm(schema, defaultValues);
 
 	// $inspect('ctx.inputs', ctx.inputs);
-	$inspect('ctx.data', ctx.data);
+	// $inspect('ctx.data', ctx.data);
 
 	const svelteForm = (): SubmitFunction => {
 		return async ({ formElement, formData, action, cancel }) => {
