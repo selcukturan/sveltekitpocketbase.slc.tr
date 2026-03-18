@@ -255,6 +255,44 @@ class TableContext<TData extends Row> {
 			node.removeEventListener('scroll', scroll);
 		};
 	};
+
+	// Scroll takibi attachment'ı — {@attach context.scrollAttach}
+	/* scrollAttach: Attachment = (node) => {
+		console.log('scrollAttach çalıştı, node:', node);
+		if (!(node instanceof HTMLElement)) return;
+
+		const scroll = () => {
+			this.#scrollY = node.scrollTop;
+			console.log('this.#scrollY', this.#scrollY);
+		};
+
+		node.addEventListener('scroll', scroll, { passive: true });
+		return () => node.removeEventListener('scroll', scroll);
+	}; */
+
+	// RAF döngüsü attachment'ı — {@attach context.rafAttach}
+	/* rafAttach: Attachment = (node) => {
+		console.log('rafAttach çalıştı, node:', node);
+		if (!(node instanceof HTMLElement)) return;
+
+		const fps = 10;
+		let rafId: number;
+		let lastTime = 0;
+
+		const loop = (timestamp: number) => {
+			const interval = 1000 / fps;
+			const elapsed = timestamp - lastTime;
+			if (elapsed >= interval) {
+				lastTime = timestamp - (elapsed % interval);
+				this.#rafY = this.#scrollY;
+				console.log('this.#rafY', this.#rafY);
+			}
+			rafId = requestAnimationFrame(loop);
+		};
+
+		rafId = requestAnimationFrame(loop);
+		return () => cancelAnimationFrame(rafId);
+	}; */
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
