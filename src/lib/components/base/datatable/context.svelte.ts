@@ -217,21 +217,23 @@ class TableContext<TData extends Row> {
 
 	// Scroll takibi — use:context.scrollAction
 	readonly scrollAction: Action = (node) => {
-		// the node has been mounted in the DOM
+		// mount
 		$effect(() => {
+			// setup
 			const scroll = () => {
 				this.#scrollY = node.scrollTop;
-				console.log('this.#scrollY', this.#scrollY);
 			};
 			node.addEventListener('scroll', scroll, { passive: true });
+			// cleanup
 			return () => node.removeEventListener('scroll', scroll);
 		});
 	};
 
 	// RAF döngüsü — use:context.rafAction
 	readonly rafAction: Action = (node) => {
-		// the node has been mounted in the DOM
+		// mount
 		$effect(() => {
+			// setup
 			const fps = 10;
 			let rafId: number;
 			let lastTime = 0;
@@ -242,14 +244,27 @@ class TableContext<TData extends Row> {
 				if (elapsed >= interval) {
 					lastTime = timestamp - (elapsed % interval);
 					this.#rafY = this.#scrollY;
-					console.log('this.#rafY', this.#rafY);
 				}
 				rafId = requestAnimationFrame(loop);
 			};
-
 			rafId = requestAnimationFrame(loop);
+
+			// cleanup
 			return () => cancelAnimationFrame(rafId);
 		});
+	};
+
+	// Scroll takibi attachment'ı — {@attach context.testScrollAttach}
+	testTableScrollAttach: Attachment = (node) => {
+		console.log('testScrollAttach çalıştı, node:', node);
+		if (!(node instanceof HTMLElement)) return;
+
+		const scroll = () => {
+			console.log('testTableScrollAttach', node.scrollTop);
+		};
+
+		node.addEventListener('scroll', scroll, { passive: true });
+		return () => node.removeEventListener('scroll', scroll);
 	};
 }
 

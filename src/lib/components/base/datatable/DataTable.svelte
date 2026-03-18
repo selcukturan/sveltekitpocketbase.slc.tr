@@ -1,6 +1,7 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
 	import { createTableContext, type MainProps } from './context.svelte';
+
 	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
@@ -35,6 +36,7 @@
 			bind:clientHeight={context.clientHeight}
 			use:context.scrollAction
 			use:context.rafAction
+			{@attach context.testTableScrollAttach}
 			class={context.propsTableClass}
 			class:slc-table={true}
 			style:grid-template-rows={context.gridTemplateRows}
