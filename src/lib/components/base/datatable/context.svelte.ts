@@ -3,6 +3,7 @@ import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, Li
 import { getContext, setContext, tick } from 'svelte';
 import { untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
+import type { Action } from 'svelte/action';
 
 export interface MainProps<TData extends Row> {
 	// Veri Yapısı
@@ -254,6 +255,23 @@ class TableContext<TData extends Row> {
 		return () => {
 			node.removeEventListener('scroll', scroll);
 		};
+	};
+	readonly mountAction: Action = (node) => {
+		// the node has been mounted in the DOM
+
+		$effect(() => {
+			// setup goes here
+			const scroll = () => {
+				console.log('node.scrollTop-action', node.scrollTop);
+			};
+
+			node.addEventListener('scroll', scroll, { passive: true });
+
+			return () => {
+				// teardown goes here
+				node.removeEventListener('scroll', scroll);
+			};
+		});
 	};
 
 	// Scroll takibi attachment'ı — {@attach context.scrollAttach}
