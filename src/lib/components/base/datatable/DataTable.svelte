@@ -32,9 +32,10 @@
 		<div
 			role="grid"
 			bind:this={context.el}
-			class:slc-table={true}
-			class={context.propsTableClass}
 			bind:clientHeight={context.clientHeight}
+			{@attach context.mountAttach}
+			class={context.propsTableClass}
+			class:slc-table={true}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>

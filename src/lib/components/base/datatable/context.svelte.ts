@@ -2,6 +2,7 @@
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick } from 'svelte';
 import { untrack, type Snippet } from 'svelte';
+import type { Attachment } from 'svelte/attachments';
 
 export interface MainProps<TData extends Row> {
 	// Veri Yapısı
@@ -243,6 +244,17 @@ class TableContext<TData extends Row> {
 			});
 		});
 	}
+
+	readonly mountAttach: Attachment = (node) => {
+		const scroll = () => {
+			console.log('node.scrollTop', node.scrollTop);
+		};
+		node.addEventListener('scroll', scroll, { passive: true });
+
+		return () => {
+			node.removeEventListener('scroll', scroll);
+		};
+	};
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
