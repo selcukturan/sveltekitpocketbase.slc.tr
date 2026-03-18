@@ -196,7 +196,7 @@ class TableContext<TData extends Row> {
 
 	#init() {
 		// Scroll takibi
-		$effect(() => {
+		/* $effect(() => {
 			const el = this.el;
 			if (!el) return;
 			const scroll = () => {
@@ -204,10 +204,10 @@ class TableContext<TData extends Row> {
 			};
 			el.addEventListener('scroll', scroll, { passive: true });
 			return () => el.removeEventListener('scroll', scroll);
-		});
+		}); */
 
 		// RAF döngüsü
-		$effect(() => {
+		/* $effect(() => {
 			const el = this.el;
 			if (!el) return;
 			const fps = 10;
@@ -224,7 +224,7 @@ class TableContext<TData extends Row> {
 			};
 			rafId = requestAnimationFrame(loop);
 			return () => cancelAnimationFrame(rafId);
-		});
+		}); */
 
 		// watch: Veri değişimini izle
 		$effect(() => {
@@ -258,7 +258,6 @@ class TableContext<TData extends Row> {
 	};
 	readonly mountAction: Action = (node) => {
 		// the node has been mounted in the DOM
-
 		$effect(() => {
 			// setup goes here
 			const scroll = () => {
@@ -271,6 +270,41 @@ class TableContext<TData extends Row> {
 				// teardown goes here
 				node.removeEventListener('scroll', scroll);
 			};
+		});
+	};
+
+	readonly scrollAction: Action = (node) => {
+		// the node has been mounted in the DOM
+		$effect(() => {
+			const scroll = () => {
+				this.#scrollY = node.scrollTop;
+				console.log('this.#scrollY', this.#scrollY);
+			};
+			node.addEventListener('scroll', scroll, { passive: true });
+			return () => node.removeEventListener('scroll', scroll);
+		});
+	};
+
+	readonly rafAction: Action = (node) => {
+		// the node has been mounted in the DOM
+		$effect(() => {
+			const fps = 10;
+			let rafId: number;
+			let lastTime = 0;
+
+			const loop = (timestamp: number) => {
+				const interval = 1000 / fps;
+				const elapsed = timestamp - lastTime;
+				if (elapsed >= interval) {
+					lastTime = timestamp - (elapsed % interval);
+					this.#rafY = this.#scrollY;
+					console.log('this.#rafY', this.#rafY);
+				}
+				rafId = requestAnimationFrame(loop);
+			};
+
+			rafId = requestAnimationFrame(loop);
+			return () => cancelAnimationFrame(rafId);
 		});
 	};
 

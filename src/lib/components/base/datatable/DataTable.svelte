@@ -33,7 +33,8 @@
 			role="grid"
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
-			use:context.mountAction
+			use:context.scrollAction
+			use:context.rafAction
 			{@attach context.mountAttach}
 			{@attach () => {
 				console.log('inline attach');
