@@ -1,8 +1,7 @@
 // https://github.com/vincjo/datatables/blob/main/src/lib/src/client/AbstractTableHandler.svelte.ts#L40
-
+import type { Attachment } from 'svelte/attachments';
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick } from 'svelte';
-import { watch, ScrollState, AnimationFrames } from 'runed';
 import { untrack, type Snippet } from 'svelte';
 
 export interface MainProps<TData extends Row> {
@@ -100,57 +99,35 @@ class TableContext<TData extends Row> {
 	constructor(initialProps: MainProps<TData>) {
 		this.#props = initialProps;
 		this.#init();
-
-		$effect(() => {
-			this.throttledY;
-			this.clientHeight;
-			untrack(() => {
-				console.log('this.throttledY', this.throttledY);
-				console.log('this.clientHeight', this.clientHeight);
-				this.updateVisibleIndexes();
-			});
-		});
 	}
 
 	// base variables
-	el = $state<HTMLElement>();
 	headerLength = $state(1);
 	dataLength = $derived(this.propsItems.length);
 	footerLength = $derived(this.propsFooters.length);
 
 	// virtual scroll variables
-	clientHeight = $state(0);
-	throttledY = $state(0);
-	fpsLimit = $state(60);
-	frames = $state(0);
-	delta = $state(0);
-	rowIndices = $state.raw({
+	clientHeight = $state(0); // bind:clientHeight
+	#scrollY = $state(0);
+	#rafY = $state(0);
+	#fpsLimit = $state(10);
+	#rowIndices = $state.raw({
 		start: 0,
 		end: 0
 	});
-	scroll = new ScrollState({ element: () => this.el });
-	animation = new AnimationFrames(
-		(args) => {
-			console.log(this.scroll.y);
-			this.frames++;
-			this.delta = args.delta;
-			this.throttledY = this.scroll.y;
-		},
-		{ fpsLimit: () => this.fpsLimit }
-	);
 
 	// Manuel çalıştırılır. rowIndices güncellenir.
 	updateVisibleIndexes = (force: boolean = false) => {
 		const overscan = 10;
 		const rowHeight = this.propsDataRowHeight;
 
-		let start = Math.max(0, Math.floor(this.throttledY / rowHeight) - overscan);
-		let end = Math.min(this.dataLength - 1, Math.floor((this.throttledY + this.clientHeight) / rowHeight) + overscan);
+		let start = Math.max(0, Math.floor(this.#rafY / rowHeight) - overscan);
+		let end = Math.min(this.dataLength - 1, Math.floor((this.#rafY + this.clientHeight) / rowHeight) + overscan);
 
-		const indicesChanged = start !== this.rowIndices.start || end !== this.rowIndices.end;
+		const indicesChanged = start !== this.#rowIndices.start || end !== this.#rowIndices.end;
 
 		if (force || indicesChanged) {
-			this.rowIndices = {
+			this.#rowIndices = {
 				start: start >= end ? 0 : start,
 				end: end
 			};
@@ -163,7 +140,7 @@ class TableContext<TData extends Row> {
 
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
-		for (let i = this.rowIndices.start; i <= this.rowIndices.end; i++) {
+		for (let i = this.#rowIndices.start; i <= this.#rowIndices.end; i++) {
 			const row = rawData[i];
 			if (row) {
 				processedData.push({ data: row as TData, originalIndex: i });
@@ -217,32 +194,54 @@ class TableContext<TData extends Row> {
 	};
 
 	#init() {
-		// Observer kurulumu
-		/* useResizeObserver(
-			() => this.el,
-			(entries) => {
-				const entry = entries[0];
-				if (!entry) return;
-				this.clientHeight = entry.contentRect.height;
-			}
-		); */
-
-		// Veri değişimini izle (items her değiştiğinde visible indexleri güncelle)
-		watch(
-			() => this.propsItems,
-			() => {
+		// watch: Veri değişimini izle (items her değiştiğinde visible indexleri güncelle)
+		$effect(() => {
+			this.propsItems;
+			untrack(() => {
 				tick().then(() => {
 					this.updateVisibleIndexes(true);
 				});
-			}
-		);
+			});
+		});
 
-		// Scroll ve Yükseklik değişimini izle
-		/* watch([() => this.throttledY, () => this.clientHeight], () => {
-			console.log('this.clientHeight', this.clientHeight);
-			this.updateVisibleIndexes();
-		}); */
+		// watch: Scroll ve Yükseklik değişimini izle
+		$effect(() => {
+			this.#rafY;
+			this.clientHeight;
+			untrack(() => {
+				this.updateVisibleIndexes();
+			});
+		});
 	}
+
+	// Scroll takibi attachment'ı — {@attach ctx.scrollAttach}
+	scrollAttach: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+		const scroll = () => (this.#scrollY = node.scrollTop);
+		node.addEventListener('scroll', scroll, { passive: true });
+		return () => node.removeEventListener('scroll', scroll);
+	};
+
+	// RAF döngüsü attachment'ı — {@attach ctx.rafAttach}
+	rafAttach: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		let rafId: number;
+		let lastTime = 0;
+
+		const loop = (timestamp: number) => {
+			const interval = 1000 / this.#fpsLimit;
+			const elapsed = timestamp - lastTime;
+			if (elapsed >= interval) {
+				lastTime = timestamp - (elapsed % interval);
+				this.#rafY = this.#scrollY;
+			}
+			rafId = requestAnimationFrame(loop);
+		};
+
+		rafId = requestAnimationFrame(loop);
+		return () => cancelAnimationFrame(rafId);
+	};
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');

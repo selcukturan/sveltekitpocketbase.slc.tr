@@ -23,16 +23,6 @@
 
 <div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
 	{@render context.propsToolbar?.()}
-	<div style="display: flex; gap: 1rem; padding: 0.5rem; font-size: 0.75rem; color: var(--color-text-500);">
-		<div>
-			fps: {context.fpsLimit} / {context.animation.fps.toFixed(0)}
-		</div>
-		<div>
-			delta: 16.67 / {context.delta.toFixed(2)}
-		</div>
-		<div>frames: {context.frames}</div>
-	</div>
-
 	<div class:slc-table-container={true} class={context.propsContainerClass}>
 		{#if context.dataLength === 0}
 			<div class="slc-table-nodata">No data to display</div>
@@ -44,7 +34,8 @@
 			class:slc-table={true}
 			class={context.propsTableClass}
 			role="grid"
-			bind:this={context.el}
+			{@attach context.scrollAttach}
+			{@attach context.rafAttach}
 			bind:clientHeight={context.clientHeight}
 			// {...attributes}
 			style:grid-template-rows={context.gridTemplateRows}

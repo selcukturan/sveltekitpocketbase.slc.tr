@@ -20,8 +20,9 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
 
+	// params.perPage
 	const listResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
+		locals.pb.collection(Collections.TestDatatable).getList(params.page, 1000, {
 			filter: filterString,
 			...params.options
 		}),
