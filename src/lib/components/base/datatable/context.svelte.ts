@@ -256,13 +256,13 @@ class TableContext<TData extends Row> {
 
 	// Scroll takibi attachment'ı — {@attach context.testScrollAttach}
 	testTableScrollAttach: Attachment = (node) => {
-		console.log('testScrollAttach çalıştı, node:', node);
+		console.log('testTableScrollAttach çalıştı, node:', node);
 
 		if (!(node instanceof HTMLElement)) return;
-		node.dataset.testTableScrollAttach = 'mounted'; // DOM'a yazar
+		node.dataset.testTableScrollAttach = 'mountedX'; // DOM'a yazar
 
 		const scroll = () => {
-			node.dataset.testTableScrollAttach = `${node.scrollTop}`; // DOM'a yazar
+			node.dataset.testTableScrollAttach = `mountedX-${node.scrollTop}`; // DOM'a yazar
 		};
 
 		node.addEventListener('scroll', scroll, { passive: true });
