@@ -27,6 +27,6 @@ vite.config.ts.timestamp-*
 # /.slc-production/pocketbase/pb_migrations
 # /.slc-production/pocketbase/pb_public
 # .vscode
-package-lock.json
+
 /src/lib/server/dev-sql
 /src/routes/(app)/erp
