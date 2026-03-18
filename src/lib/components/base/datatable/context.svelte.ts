@@ -217,7 +217,10 @@ class TableContext<TData extends Row> {
 	// Scroll takibi attachment'ı — {@attach ctx.scrollAttach}
 	scrollAttach: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
-		const scroll = () => (this.#scrollY = node.scrollTop);
+		const scroll = () => {
+			this.#scrollY = node.scrollTop;
+			console.log('this.#scrollY', this.#scrollY);
+		};
 		node.addEventListener('scroll', scroll, { passive: true });
 		return () => node.removeEventListener('scroll', scroll);
 	};
@@ -235,6 +238,7 @@ class TableContext<TData extends Row> {
 			if (elapsed >= interval) {
 				lastTime = timestamp - (elapsed % interval);
 				this.#rafY = this.#scrollY;
+				console.log('this.#rafY', this.#rafY);
 			}
 			rafId = requestAnimationFrame(loop);
 		};

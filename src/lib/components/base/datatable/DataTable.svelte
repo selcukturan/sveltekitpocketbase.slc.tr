@@ -31,13 +31,12 @@
 			<div class="slc-table-nodata">Loading...</div>
 		{/if}
 		<div
+			role="grid"
 			class:slc-table={true}
 			class={context.propsTableClass}
-			role="grid"
 			{@attach context.scrollAttach}
 			{@attach context.rafAttach}
 			bind:clientHeight={context.clientHeight}
-			// {...attributes}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>
