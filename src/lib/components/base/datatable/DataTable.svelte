@@ -34,6 +34,13 @@
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
 			{@attach context.mountAttach}
+			{@attach () => {
+				console.log('inline attach');
+
+				$effect(() => {
+					console.log('inline attach effect');
+				});
+			}}
 			class={context.propsTableClass}
 			class:slc-table={true}
 			style:grid-template-rows={context.gridTemplateRows}
