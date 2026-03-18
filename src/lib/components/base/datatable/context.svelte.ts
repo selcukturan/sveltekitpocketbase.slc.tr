@@ -194,7 +194,7 @@ class TableContext<TData extends Row> {
 	};
 
 	#init() {
-		// watch: Veri değişimini izle (items her değiştiğinde visible indexleri güncelle)
+		// watch: Veri değişimini izle
 		$effect(() => {
 			this.propsItems;
 			untrack(() => {
@@ -214,7 +214,7 @@ class TableContext<TData extends Row> {
 		});
 	}
 
-	// Scroll takibi attachment'ı — {@attach ctx.scrollAttach}
+	// Scroll takibi attachment'ı — {@attach context.scrollAttach}
 	scrollAttach: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 		const scroll = () => {
@@ -225,7 +225,7 @@ class TableContext<TData extends Row> {
 		return () => node.removeEventListener('scroll', scroll);
 	};
 
-	// RAF döngüsü attachment'ı — {@attach ctx.rafAttach}
+	// RAF döngüsü attachment'ı — {@attach context.rafAttach}
 	rafAttach: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 
