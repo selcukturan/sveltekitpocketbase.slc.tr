@@ -110,7 +110,6 @@ class TableContext<TData extends Row> {
 	clientHeight = $state(0); // bind:clientHeight
 	#scrollY = $state(0);
 	#rafY = $state(0);
-	#fpsLimit = $state(10);
 	#rowIndices = $state.raw({
 		start: 0,
 		end: 0
@@ -228,13 +227,15 @@ class TableContext<TData extends Row> {
 
 	// RAF döngüsü attachment'ı — {@attach context.rafAttach}
 	rafAttach: Attachment = (node) => {
+		console.log('rafAttach çalıştı, node:', node);
 		if (!(node instanceof HTMLElement)) return;
 
+		const fps = 10; // 60 FPS için
 		let rafId: number;
 		let lastTime = 0;
 
 		const loop = (timestamp: number) => {
-			const interval = 1000 / this.#fpsLimit;
+			const interval = 1000 / fps;
 			const elapsed = timestamp - lastTime;
 			if (elapsed >= interval) {
 				lastTime = timestamp - (elapsed % interval);
