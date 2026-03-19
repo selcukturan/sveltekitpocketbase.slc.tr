@@ -1,6 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
-	import { createTableContext, type MainProps } from './ctx.svelte';
+	import { createTableContext, type MainProps } from './context.svelte';
 
 	let props: MainProps<TData> = $props();
 
@@ -38,6 +38,7 @@
 			use:context.scrollAction
 			use:context.rafAction
 			{@attach context.testTableScrollAttach}
+			{@attach context.testTableScrollAttachh()}
 			{@attach context.actionAttach()}
 			data-context={context ? 'available' : 'unavailable'}
 			class={context.propsTableClass}
