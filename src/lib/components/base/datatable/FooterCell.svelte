@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, FooterRowType, FooterCellType } from './types';
-	import { getTableContext } from './context.svelte';
+	import { getTableContext } from './ctx.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">

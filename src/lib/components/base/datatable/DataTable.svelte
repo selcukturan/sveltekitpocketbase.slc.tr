@@ -1,6 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
-	import { createTableContext, type MainProps } from './contextX.svelte';
+	import { createTableContext, type MainProps } from './ctx.svelte';
 
 	let props: MainProps<TData> = $props();
 
