@@ -30,10 +30,10 @@
 		{#if context.propsPending}
 			<div class="slc-table-nodata">Loading...</div>
 		{/if}
-		<span
+		<div
 			role="grid"
 			class:slc-table={true}
-			//			bind:this={context.el}
+			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
 			use:context.scrollAction
 			use:context.rafAction
@@ -69,7 +69,7 @@
 					})}
 				{/each}
 			{/if}
-		</span>
+		</div>
 	</div>
 	{@render context.propsStatusbar?.()}
 </div>

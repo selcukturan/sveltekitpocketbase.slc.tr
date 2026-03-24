@@ -101,6 +101,7 @@ class TableContext<TData extends Row> {
 		this.#props = initialProps;
 		this.#init();
 	}
+
 	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element (container)
 
 	// base variables
