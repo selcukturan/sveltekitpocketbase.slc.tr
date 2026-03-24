@@ -110,9 +110,9 @@ class TableContext<TData extends Row> {
 	footerLength = $derived(this.propsFooters.length);
 
 	// virtual scroll variables
-	clientHeight = $state(0); // bind:clientHeight
-	#scrollY = $state(0);
+	#currentScrollY = 0;
 	#rafY = $state(0);
+	clientHeight = $state(0); // bind:clientHeight
 	#rowIndices = $state.raw({
 		start: 0,
 		end: 0
@@ -222,7 +222,7 @@ class TableContext<TData extends Row> {
 		$effect(() => {
 			// setup
 			const scroll = () => {
-				this.#scrollY = node.scrollTop;
+				this.#currentScrollY = node.scrollTop;
 			};
 			node.addEventListener('scroll', scroll, { passive: true });
 			// cleanup
@@ -244,7 +244,7 @@ class TableContext<TData extends Row> {
 				const elapsed = timestamp - lastTime;
 				if (elapsed >= interval) {
 					lastTime = timestamp - (elapsed % interval);
-					this.#rafY = this.#scrollY;
+					this.#rafY = this.#currentScrollY;
 				}
 				rafId = requestAnimationFrame(loop);
 			};
