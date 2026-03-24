@@ -15,8 +15,11 @@ services:
       PB_BACKEND_URL: ${PB_BACKEND_URL}
     ports:
       - ${PORT}:${PORT}
+    depends_on:
+      - s_pocketbase
     networks:
       - network_0
+
   # POCKETBASE SQLITE DB
   s_pocketbase:
     build:
@@ -28,8 +31,6 @@ services:
       - ./pocketbase/pb_data:/pb/pb_data
     ports:
       - ${PB_PORT}:${PB_PORT}
-    depends_on:
-      - s_app
     networks:
       - network_0
 
