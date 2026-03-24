@@ -256,7 +256,7 @@ class TableContext<TData extends Row> {
 	};
 
 	// Scroll takibi attachment'ı — {@attach context.testTableScrollAttach}
-	readonly testTableScrollAttach: Attachment = (node) => {
+	/* readonly testTableScrollAttach: Attachment = (node) => {
 		console.log('testTableScrollAttach çalıştı, node:', node);
 
 		if (!(node instanceof HTMLElement)) return;
@@ -268,16 +268,16 @@ class TableContext<TData extends Row> {
 
 		node.addEventListener('scroll', scroll, { passive: true });
 		return () => node.removeEventListener('scroll', scroll);
-	};
+	}; */
 
-	testTableScrollAttachh(): Attachment {
+	/* testTableScrollAttachh(): Attachment {
 		return (node) => {
 			console.log('testTableScrollAttachh mounted');
 			return () => console.log('testTableScrollAttachh destroyed');
 		};
-	}
+	} */
 
-	readonly actionAttach = (): Attachment => {
+	/* readonly actionAttach = (): Attachment => {
 		return (node) => {
 			console.log('actionAttach çalıştı, node:', node);
 
@@ -291,7 +291,7 @@ class TableContext<TData extends Row> {
 			node.addEventListener('scroll', scroll, { passive: true });
 			return () => node.removeEventListener('scroll', scroll);
 		};
-	};
+	}; */
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
