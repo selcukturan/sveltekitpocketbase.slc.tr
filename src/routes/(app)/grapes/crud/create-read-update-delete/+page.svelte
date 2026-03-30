@@ -276,7 +276,6 @@
 							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
 								try {
 									await submit().updates(getList(params));
-									// await submit();
 									form.reset();
 									drawer?.close();
 									pageToaster.add({
