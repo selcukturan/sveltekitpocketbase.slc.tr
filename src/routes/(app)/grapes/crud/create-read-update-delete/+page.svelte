@@ -99,7 +99,7 @@
 		<p>Page Header - X</p>
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table boundary>
+		<Page.Main.Table>
 			<s.DataTable bind:this={datatable} data={await getList(params)} {columns} {footers} pending={Boolean($effect.pending())}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
