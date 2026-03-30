@@ -100,7 +100,8 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<s.DataTable bind:this={datatable} data={await getList(params)} {columns} {footers} pending={Boolean($effect.pending())}>
+			{@const data = await getList(params)}
+			<s.DataTable bind:this={datatable} {data} {columns} {footers} pending={Boolean($effect.pending())}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
