@@ -37,6 +37,7 @@
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
+	import { onMount } from 'svelte';
 	/* import Form from '$lib/components/base/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
@@ -82,9 +83,10 @@
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
-	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number] & { slcAction?: string };
+	type DataType = Awaited<ReturnType<typeof getList>>;
+	type ItemType = DataType['items'][number] & { slcAction?: string };
 	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
-	let data = $state(undefined as ListResult<ItemType> | undefined);
+	let data = $state(undefined as DataType | undefined);
 	let columns: s.Column<ItemType>[] = [
 		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
@@ -95,6 +97,12 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
+
+	onMount(() => {
+		getList(params).then((r) => {
+			data = r;
+		});
+	});
 </script>
 
 <Head>
@@ -268,6 +276,7 @@
 							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
 								try {
 									await submit().updates(getList(params));
+									// await submit();
 									form.reset();
 									drawer?.close();
 									pageToaster.add({

@@ -18,7 +18,7 @@
 
 	const gridRowStart = $derived(context.dataLength + context.headerLength + fr.footerIndex + 1);
 	const gridColumn = $derived(`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`);
-	const bottom = $derived(`${(context.footerLength - fr.footerIndex - 1) * context.footerRowHeight}px`);
+	const bottom = $derived(`${(context.footerLength - fr.footerIndex - 1) * context.propsFooterRowHeight}px`);
 </script>
 
 <div
