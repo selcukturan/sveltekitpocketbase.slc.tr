@@ -52,8 +52,17 @@
 	});
 	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
 
-	const searchData = () => (params = injectFilterData(listParamsSchema, filterData));
-	const refreshData = () => getList(params).refresh();
+	const searchData = () => {
+		params = injectFilterData(listParamsSchema, filterData);
+		getList(params).then((r) => {
+			data = r;
+		});
+	};
+	const refreshData = () => {
+		getList(params).then((r) => {
+			data = r;
+		});
+	};
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
@@ -75,6 +84,7 @@
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
 	type ItemType = Awaited<ReturnType<typeof getList>>['items'][number] & { slcAction?: string };
 	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
+	let data = $state(undefined as ListResult<ItemType> | undefined);
 	let columns: s.Column<ItemType>[] = [
 		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
@@ -100,7 +110,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<s.DataTable bind:this={datatable} data={await getList(params)} {columns} {footers}>
+			<s.DataTable bind:this={datatable} {data} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text

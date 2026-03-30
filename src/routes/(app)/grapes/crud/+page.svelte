@@ -3,6 +3,10 @@
 
 	import * as s from '$lib/components/base/datatable';
 
+	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
+	import { getList } from './create-read-update-delete/page.remote';
+	import { listParamsSchema, type ListParamsSchemaType } from './create-read-update-delete/page.shared';
+
 	const myTestData = {
 		page: 1,
 		perPage: 10,
@@ -222,6 +226,13 @@
 		]
 	};
 
+	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
+	let filterData = $state<ListParamsSchemaType['filterData']>({
+		title: listParamsDefaults.filterData.title ?? '',
+		quantity: listParamsDefaults.filterData.quantity ?? 0
+	});
+	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
+
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
 	type ItemType = (typeof myTestData.items)[number];
 	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
@@ -247,7 +258,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<s.DataTable bind:this={datatable} data={myTestData} {columns} {footers} pending={false}>
+			<s.DataTable bind:this={datatable} data={myTestData} {columns} {footers}>
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
