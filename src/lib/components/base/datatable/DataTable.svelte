@@ -6,7 +6,7 @@
 	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
-	const context = createTableContext<TData>(props); // init
+	const context = createTableContext<TData>(() => props); // init
 
 	// Parent kullanımı: tableRef?.helpers.testHelper1()
 	export const helpers = context.helpers;

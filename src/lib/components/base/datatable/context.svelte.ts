@@ -29,8 +29,12 @@ export interface MainProps<TData extends Row> {
 
 class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
-	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
-	#props = $state() as MainProps<TData>;
+	// Reaktiviteyi koparmamak için prop'u her seferinde tazeleyen bir fonksiyon tutuyoruz
+	#getProps: () => MainProps<TData>;
+
+	get #props() {
+		return this.#getProps();
+	}
 	// Veri Yapısı
 	get propsData() {
 		return this.#props.data ?? { items: [], totalItems: 0, page: 1, perPage: 30, totalPages: 0 };
@@ -97,8 +101,8 @@ class TableContext<TData extends Row> {
 	}
 	// ############### END PROPS ###############
 
-	constructor(initialProps: MainProps<TData>) {
-		this.#props = initialProps;
+	constructor(getProps: () => MainProps<TData>) {
+		this.#getProps = getProps;
 		this.#init();
 	}
 
@@ -296,8 +300,8 @@ class TableContext<TData extends Row> {
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
 // ################################## BEGIN Export Table Context ##############################################################################################################################
-export function createTableContext<TData extends Row>(initialProps: MainProps<TData>) {
-	return setContext(key, new TableContext<TData>(initialProps));
+export function createTableContext<TData extends Row>(getProps: () => MainProps<TData>) {
+	return setContext(key, new TableContext<TData>(getProps));
 }
 export function getTableContext<TData extends Row>() {
 	return getContext<ReturnType<typeof createTableContext<TData>>>(key);
