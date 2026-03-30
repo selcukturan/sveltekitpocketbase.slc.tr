@@ -33,7 +33,7 @@ class TableContext<TData extends Row> {
 	#props = $state() as MainProps<TData>;
 	// Veri Yapısı
 	get propsData() {
-		return this.#props.data;
+		return this.#props.data ?? { items: [], totalItems: 0, page: 1, perPage: 30, totalPages: 0 };
 	}
 	get propsItems() {
 		return this.#props.data?.items ?? [];
