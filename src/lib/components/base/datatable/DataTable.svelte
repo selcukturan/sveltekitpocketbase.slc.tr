@@ -50,9 +50,10 @@
 			class:slc-table={true}
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
-			use:context.scrollAction
-			use:context.rafAction
-			{@attach myAttach('test-content')}
+			// use:context.scrollAction
+			// use:context.rafAction
+			{@attach context.trackTableScroll}
+			{@attach context.trackTableRaf}
 			class={context.propsTableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}

@@ -217,7 +217,7 @@ class TableContext<TData extends Row> {
 	}
 
 	// Scroll takibi — use:context.scrollAction
-	readonly scrollAction: Action = (node) => {
+	/* readonly scrollAction: Action = (node) => {
 		// mount
 		$effect(() => {
 			// setup
@@ -228,10 +228,49 @@ class TableContext<TData extends Row> {
 			// cleanup
 			return () => node.removeEventListener('scroll', scroll);
 		});
+	}; */
+
+	// Scroll takibi
+	readonly trackTableScroll: Attachment = (node) => {
+		// mount
+		if (!(node instanceof HTMLElement)) return;
+
+		// setup
+		const scroll = () => {
+			this.#currentScrollY = node.scrollTop;
+		};
+		node.addEventListener('scroll', scroll, { passive: true });
+
+		// cleanup
+		return () => node.removeEventListener('scroll', scroll);
+	};
+	// RAF döngüsü
+	readonly trackTableRaf: Attachment = (node) => {
+		// mount
+		if (!(node instanceof HTMLElement)) return;
+
+		// setup
+		const fps = 10;
+		let rafId: number;
+		let lastTime = 0;
+
+		const loop = (timestamp: number) => {
+			const interval = 1000 / fps;
+			const elapsed = timestamp - lastTime;
+			if (elapsed >= interval) {
+				lastTime = timestamp - (elapsed % interval);
+				this.#rafY = this.#currentScrollY;
+			}
+			rafId = requestAnimationFrame(loop);
+		};
+		rafId = requestAnimationFrame(loop);
+
+		// cleanup
+		return () => cancelAnimationFrame(rafId);
 	};
 
 	// RAF döngüsü — use:context.rafAction
-	readonly rafAction: Action = (node) => {
+	/* readonly rafAction: Action = (node) => {
 		// mount
 		$effect(() => {
 			// setup
@@ -253,7 +292,7 @@ class TableContext<TData extends Row> {
 			// cleanup
 			return () => cancelAnimationFrame(rafId);
 		});
-	};
+	}; */
 
 	// Scroll takibi attachment'ı — {@attach context.testTableScrollAttach}
 	/* readonly testTableScrollAttach: Attachment = (node) => {
