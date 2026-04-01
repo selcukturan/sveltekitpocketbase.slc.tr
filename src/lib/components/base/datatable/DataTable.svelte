@@ -1,7 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
 	import { createTableContext, type MainProps } from './context.svelte';
-	import type { Attachment } from 'svelte/attachments';
 
 	let props: MainProps<TData> = $props();
 
@@ -20,20 +19,6 @@
 			return context.propsHeaderRowHeight;
 		}
 	};
-
-	function myAttach(content: string): Attachment {
-		console.log('myAttach mount.', content);
-		return (element) => {
-			console.log('myAttach setup.', content);
-
-			const scroll = () => {
-				console.log(`myAttach-scroll-${element.scrollTop}`, content);
-			};
-
-			element.addEventListener('scroll', scroll, { passive: true });
-			return () => element.removeEventListener('scroll', scroll);
-		};
-	}
 </script>
 
 <div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
@@ -50,8 +35,8 @@
 			class:slc-table={true}
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
-			// use:context.scrollAction
-			// use:context.rafAction
+			{@attach context.watchScrollAndClientHeight}
+			{@attach context.watchItemsChanged}
 			{@attach context.trackTableScroll}
 			{@attach context.trackTableRaf}
 			class={context.propsTableClass}

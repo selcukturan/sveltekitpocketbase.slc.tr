@@ -1,9 +1,6 @@
-// https://github.com/vincjo/datatables/blob/main/src/lib/src/client/AbstractTableHandler.svelte.ts#L40
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
-import { getContext, setContext, tick } from 'svelte';
-import { untrack, type Snippet } from 'svelte';
+import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
-import type { Action } from 'svelte/action';
 
 export interface MainProps<TData extends Row> {
 	// Veri Yapısı
@@ -99,7 +96,6 @@ class TableContext<TData extends Row> {
 
 	constructor(initialProps: MainProps<TData>) {
 		this.#props = initialProps;
-		this.#init();
 	}
 
 	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element (container)
@@ -195,40 +191,27 @@ class TableContext<TData extends Row> {
 		}
 	};
 
-	#init() {
-		// watch: Veri değişimini izle
-		$effect(() => {
-			this.propsItems;
-			untrack(() => {
-				tick().then(() => {
-					this.updateVisibleIndexes(true);
-				});
+	readonly watchItemsChanged: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		this.propsItems;
+		untrack(() => {
+			tick().then(() => {
+				this.updateVisibleIndexes(true);
 			});
 		});
+	};
 
-		// watch: Scroll ve Yükseklik değişimini izle
-		$effect(() => {
-			this.#rafY;
-			this.clientHeight;
-			untrack(() => {
-				this.updateVisibleIndexes();
-			});
-		});
-	}
+	readonly watchScrollAndClientHeight: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
 
-	// Scroll takibi — use:context.scrollAction
-	/* readonly scrollAction: Action = (node) => {
-		// mount
-		$effect(() => {
-			// setup
-			const scroll = () => {
-				this.#currentScrollY = node.scrollTop;
-			};
-			node.addEventListener('scroll', scroll, { passive: true });
-			// cleanup
-			return () => node.removeEventListener('scroll', scroll);
+		this.#rafY;
+		this.clientHeight;
+
+		untrack(() => {
+			this.updateVisibleIndexes();
 		});
-	}; */
+	};
 
 	// Scroll takibi
 	readonly trackTableScroll: Attachment = (node) => {
@@ -268,69 +251,6 @@ class TableContext<TData extends Row> {
 		// cleanup
 		return () => cancelAnimationFrame(rafId);
 	};
-
-	// RAF döngüsü — use:context.rafAction
-	/* readonly rafAction: Action = (node) => {
-		// mount
-		$effect(() => {
-			// setup
-			const fps = 10;
-			let rafId: number;
-			let lastTime = 0;
-
-			const loop = (timestamp: number) => {
-				const interval = 1000 / fps;
-				const elapsed = timestamp - lastTime;
-				if (elapsed >= interval) {
-					lastTime = timestamp - (elapsed % interval);
-					this.#rafY = this.#currentScrollY;
-				}
-				rafId = requestAnimationFrame(loop);
-			};
-			rafId = requestAnimationFrame(loop);
-
-			// cleanup
-			return () => cancelAnimationFrame(rafId);
-		});
-	}; */
-
-	// Scroll takibi attachment'ı — {@attach context.testTableScrollAttach}
-	/* readonly testTableScrollAttach: Attachment = (node) => {
-		console.log('testTableScrollAttach çalıştı, node:', node);
-
-		if (!(node instanceof HTMLElement)) return;
-		node.dataset.testTableScrollAttach = 'mountedX'; // DOM'a yazar
-
-		const scroll = () => {
-			node.dataset.testTableScrollAttach = `mountedX-${node.scrollTop}`; // DOM'a yazar
-		};
-
-		node.addEventListener('scroll', scroll, { passive: true });
-		return () => node.removeEventListener('scroll', scroll);
-	}; */
-
-	/* testTableScrollAttachh(): Attachment {
-		return (node) => {
-			console.log('testTableScrollAttachh mounted');
-			return () => console.log('testTableScrollAttachh destroyed');
-		};
-	} */
-
-	/* readonly actionAttach = (): Attachment => {
-		return (node) => {
-			console.log('actionAttach çalıştı, node:', node);
-
-			if (!(node instanceof HTMLElement)) return;
-			node.dataset.actionAttach = 'mountedX'; // DOM'a yazar
-
-			const scroll = () => {
-				node.dataset.actionAttach = `mountedX-${node.scrollTop}`; // DOM'a yazar
-			};
-
-			node.addEventListener('scroll', scroll, { passive: true });
-			return () => node.removeEventListener('scroll', scroll);
-		};
-	}; */
 }
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
