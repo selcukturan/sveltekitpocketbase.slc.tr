@@ -102,7 +102,7 @@ class TableContext<TData extends Row> {
 		this.#props = initialProps;
 	}
 
-	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element (container)
+	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element
 
 	// base variables
 	headerLength = $state(1);
@@ -110,8 +110,8 @@ class TableContext<TData extends Row> {
 	footerLength = $derived(this.propsFooters.length);
 
 	// virtual scroll variables
-	#currentScrollY = 0;
-	#rafY = $state(0);
+	#currentScrollY = 0; // scroll event'inde güncellenir
+	#rafY = $state(0); // requestAnimationFrame ile güncellenir
 	clientHeight = $state(0); // bind:clientHeight
 	#rowIndices = $state.raw({
 		start: 0,
@@ -199,6 +199,7 @@ class TableContext<TData extends Row> {
 		if (!(node instanceof HTMLElement)) return;
 
 		this.propsItems;
+
 		untrack(() => {
 			tick().then(() => {
 				this.updateVisibleIndexes(true);
@@ -231,7 +232,7 @@ class TableContext<TData extends Row> {
 		// cleanup
 		return () => node.removeEventListener('scroll', scroll);
 	};
-	// RAF döngüsü
+	// requestAnimationFrame döngüsü
 	readonly trackTableRaf: Attachment = (node) => {
 		// mount
 		if (!(node instanceof HTMLElement)) return;

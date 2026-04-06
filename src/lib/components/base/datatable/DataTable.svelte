@@ -25,11 +25,11 @@
 	{@render context.propsToolbar?.()}
 	<div class:slc-table-container={true} class={context.propsContainerClass}>
 		{#if context.propsLoading === true}
-			<div class="slc-table-nodata">Loading...</div>
+			<div class="slc-table-message">Loading...</div>
 		{:else if context.propsError !== undefined}
-			<div class="slc-table-nodata">Error occurred</div>
+			<div class="slc-table-message">Error occurred</div>
 		{:else if context.dataLength === 0}
-			<div class="slc-table-nodata">No data to display</div>
+			<div class="slc-table-message">No data to display</div>
 		{/if}
 		<div
 			role="grid"
@@ -105,7 +105,7 @@
 		grid-row: 1 / -1;
 	}
 	/******************************************************/
-	.slc-table-nodata {
+	.slc-table-message {
 		display: flex;
 		position: absolute;
 		top: 0;
