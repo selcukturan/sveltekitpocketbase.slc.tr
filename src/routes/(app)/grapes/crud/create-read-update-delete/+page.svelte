@@ -55,14 +55,15 @@
 
 	const searchData = () => {
 		params = injectFilterData(listParamsSchema, filterData);
-		getList(params).then((r) => {
+		/* getList(params).then((r) => {
 			data = r;
-		});
+		}); */
 	};
 	const refreshData = () => {
-		getList(params).then((r) => {
+		getList(params).refresh();
+		/* getList(params).then((r) => {
 			data = r;
-		});
+		}); */
 	};
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
@@ -98,11 +99,16 @@
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
 
-	onMount(() => {
+	/* onMount(() => {
 		getList(params).then((r) => {
 			data = r;
 		});
-	});
+	}); */
+
+	let aPromise = $derived(getList(params));
+	let test = $derived(await aPromise);
+
+	$inspect(test);
 </script>
 
 <Head>
@@ -118,7 +124,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<s.DataTable bind:this={datatable} {data} {columns} {footers}>
+			<s.DataTable bind:this={datatable} data={test} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
