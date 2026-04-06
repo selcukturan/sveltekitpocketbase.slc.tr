@@ -2,7 +2,7 @@
 	// SvelteKit
 	import { page } from '$app/state';
 	import { isHttpError } from '@sveltejs/kit';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
@@ -67,11 +67,13 @@
 	const watchUrlForDrawer: Attachment = () => {
 		const currentHash = page.url.hash;
 		untrack(() => {
-			const cmd = getParam('cmd', currentHash) || '';
-			const id = getParam('id', currentHash) || '';
-			drawerCommand = { cmd, id };
-			if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-			drawer.open();
+			tick().then(() => {
+				const cmd = getParam('cmd', currentHash) || '';
+				const id = getParam('id', currentHash) || '';
+				drawerCommand = { cmd, id };
+				if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
+				drawer.open();
+			});
 		});
 	};
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
