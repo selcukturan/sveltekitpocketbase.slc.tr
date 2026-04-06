@@ -55,6 +55,7 @@
 
 	const searchData = () => {
 		params = injectFilterData(listParamsSchema, filterData);
+		// getList(params).refresh();
 		/* getList(params).then((r) => {
 			data = r;
 		}); */
@@ -99,16 +100,18 @@
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
 
-	/* onMount(() => {
-		getList(params).then((r) => {
+	onMount(() => {
+		/* getList(params).then((r) => {
 			data = r;
-		});
-	}); */
+		}); */
+	});
 
-	let aPromise = $derived(getList(params));
+	/* let aPromise = $derived(getList(params));
 	let test = $derived(await aPromise);
+	$inspect(test); */
 
-	$inspect(test);
+	// svelte-ignore state_referenced_locally
+	// const query = getList(params);
 </script>
 
 <Head>
@@ -121,10 +124,21 @@
 <Page>
 	<Page.Header>
 		<p>Page Header - X</p>
+		<!-- {#if query.error}
+			<p>oops!</p>
+		{:else if query.loading}
+			<p>loading...</p>
+		{:else}
+			<ul>
+				{#each query.current?.items as { title, caption }}
+					<li><a href="/blog/{caption}">{title}</a></li>
+				{/each}
+			</ul>
+		{/if} -->
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<s.DataTable bind:this={datatable} data={test} {columns} {footers}>
+			<s.DataTable bind:this={datatable} data={getList(params).current} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
