@@ -2,12 +2,12 @@
 	// SvelteKit
 	import { page } from '$app/state';
 	import { isHttpError } from '@sveltejs/kit';
+	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
 	import { t } from '$lib/app/localization.svelte';
-	// Utilities
-	import { watch } from 'runed';
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
@@ -37,7 +37,6 @@
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
-	import { onMount } from 'svelte';
 	/* import Form from '$lib/components/base/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
@@ -47,48 +46,40 @@
 
 	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
 	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
+
 	let filterData = $state<ListParamsSchemaType['filterData']>({
 		title: listParamsDefaults.filterData.title ?? '',
 		quantity: listParamsDefaults.filterData.quantity ?? 0
 	});
+
 	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
 
-	const searchData = () => {
-		params = injectFilterData(listParamsSchema, filterData);
-		// getList(params).refresh();
-		/* getList(params).then((r) => {
-			data = r;
-		}); */
-	};
-	const refreshData = () => {
-		getList(params).refresh();
-		/* getList(params).then((r) => {
-			data = r;
-		}); */
-	};
+	const query = $derived(getList(params));
+
+	const searchData = () => (params = injectFilterData(listParamsSchema, filterData));
+	const refreshData = () => query.refresh();
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
-	watch(
-		() => page.url.hash,
-		(currentHash) => {
+	const watchUrlForDrawer: Attachment = () => {
+		const currentHash = page.url.hash;
+		untrack(() => {
 			const cmd = getParam('cmd', currentHash) || '';
 			const id = getParam('id', currentHash) || '';
 			drawerCommand = { cmd, id };
 			if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
 			drawer.open();
-		}
-	);
+		});
+	};
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
-	type DataType = Awaited<ReturnType<typeof getList>>;
+	type DataType = Awaited<typeof query>;
 	type ItemType = DataType['items'][number] & { slcAction?: string };
 	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
-	let data = $state(undefined as DataType | undefined);
 	let columns: s.Column<ItemType>[] = [
 		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
@@ -99,19 +90,6 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
-
-	onMount(() => {
-		/* getList(params).then((r) => {
-			data = r;
-		}); */
-	});
-
-	/* let aPromise = $derived(getList(params));
-	let test = $derived(await aPromise);
-	$inspect(test); */
-
-	// svelte-ignore state_referenced_locally
-	// const query = getList(params);
 </script>
 
 <Head>
@@ -124,21 +102,10 @@
 <Page>
 	<Page.Header>
 		<p>Page Header - X</p>
-		<!-- {#if query.error}
-			<p>oops!</p>
-		{:else if query.loading}
-			<p>loading...</p>
-		{:else}
-			<ul>
-				{#each query.current?.items as { title, caption }}
-					<li><a href="/blog/{caption}">{title}</a></li>
-				{/each}
-			</ul>
-		{/if} -->
 	</Page.Header>
 	<Page.Main>
-		<Page.Main.Table boundary>
-			<s.DataTable bind:this={datatable} data={getList(params).current} {columns} {footers}>
+		<Page.Main.Table>
+			<s.DataTable {columns} {footers} bind:this={datatable} current={query.current} loading={query.loading} error={query.error}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
@@ -153,7 +120,7 @@
 							placeholder="Search - Quantity equals..."
 							onkeydown={(e) => e.key === 'Enter' && searchData()}
 						/>
-						<Button label={t('search')} onclick={searchData} disabled={Boolean($effect.pending())} />
+						<Button label={t('search')} onclick={searchData} disabled={query.loading} />
 						<Button label={t('refresh')} onclick={refreshData} />
 					</div>
 				{/snippet}
@@ -255,6 +222,7 @@
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
+			{@attach watchUrlForDrawer}
 			onBeforeClose={async () => {
 				let shouldClose = true;
 				/* shouldClose = await confirm({

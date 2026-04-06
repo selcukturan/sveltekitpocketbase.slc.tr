@@ -10,10 +10,10 @@
 	// Parent kullanımı: tableRef?.helpers.testHelper1()
 	export const helpers = context.helpers;
 
-	// Parent kullanımı: {tableRef?.states.pending}
+	// Parent kullanımı: {tableRef?.states.loading}
 	export const states = {
-		get pending() {
-			return context.propsPending;
+		get loading() {
+			return context.propsLoading;
 		},
 		get headerRowHeight() {
 			return context.propsHeaderRowHeight;
@@ -24,11 +24,12 @@
 <div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
 	{@render context.propsToolbar?.()}
 	<div class:slc-table-container={true} class={context.propsContainerClass}>
-		{#if context.dataLength === 0}
-			<div class="slc-table-nodata">No data to display</div>
-		{/if}
-		{#if context.propsPending}
+		{#if context.propsLoading === true}
 			<div class="slc-table-nodata">Loading...</div>
+		{:else if context.propsError !== undefined}
+			<div class="slc-table-nodata">Error occurred</div>
+		{:else if context.dataLength === 0}
+			<div class="slc-table-nodata">No data to display</div>
 		{/if}
 		<div
 			role="grid"

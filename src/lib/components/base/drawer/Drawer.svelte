@@ -19,7 +19,8 @@
 		onBeforeClose,
 		escClose = true,
 		contentLoading = false,
-		animationDuration = 150 // Animasyon süresini, JS ve CSS'te senkronize tut.
+		animationDuration = 150, // Animasyon süresini, JS ve CSS'te senkronize tut.
+		...props
 	}: {
 		children?: Snippet;
 		onOpen?: () => void;
@@ -200,6 +201,7 @@
 	bind:this={dialog}
 	{@attach focustrap}
 	{@attach dialogAttach}
+	{...props}
 >
 	<Toasts toasterName={toasterId} />
 	<div class="h-full w-full">

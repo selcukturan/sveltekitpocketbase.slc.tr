@@ -4,7 +4,7 @@ import type { Attachment } from 'svelte/attachments';
 
 export interface MainProps<TData extends Row> {
 	// Veri Yapısı
-	data?: ListResult<TData>;
+	current?: ListResult<TData>;
 	columns: Column<TData>[]; // required
 	footers?: Footer<TData>[];
 	// Snippets (Render Fonksiyonları)
@@ -14,7 +14,8 @@ export interface MainProps<TData extends Row> {
 	footerRow?: Snippet<[fr: FooterRowType<TData>]>;
 	statusbar?: Snippet;
 	// UI State & Styling
-	pending?: boolean;
+	loading?: boolean;
+	error?: unknown;
 	headerRowHeight?: number;
 	dataRowHeight?: number;
 	footerRowHeight?: number;
@@ -30,22 +31,22 @@ class TableContext<TData extends Row> {
 	#props = $state() as MainProps<TData>;
 	// Veri Yapısı
 	get propsData() {
-		return this.#props.data;
+		return this.#props.current;
 	}
 	get propsItems() {
-		return this.#props.data?.items ?? [];
+		return this.#props.current?.items ?? [];
 	}
 	get propsTotalItems() {
-		return this.#props.data?.totalItems ?? 0;
+		return this.#props.current?.totalItems ?? 0;
 	}
 	get propsPage() {
-		return this.#props.data?.page ?? 1;
+		return this.#props.current?.page ?? 1;
 	}
 	get propsPerPage() {
-		return this.#props.data?.perPage ?? 30;
+		return this.#props.current?.perPage ?? 30;
 	}
 	get propsTotalPages() {
-		return this.#props.data?.totalPages ?? 0;
+		return this.#props.current?.totalPages ?? 0;
 	}
 	get propsColumns() {
 		return this.#props.columns; // required
@@ -70,8 +71,11 @@ class TableContext<TData extends Row> {
 		return this.#props.statusbar;
 	}
 	// UI State & Styling
-	get propsPending() {
-		return this.#props.pending ?? false;
+	get propsLoading() {
+		return this.#props.loading ?? false;
+	}
+	get propsError() {
+		return this.#props.error;
 	}
 	get propsHeaderRowHeight() {
 		return this.#props.headerRowHeight ?? 35;
