@@ -9,7 +9,8 @@
 	import { Collections } from '$lib/types/pocketbase-types';
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { watch } from 'runed';
+	import { untrack } from 'svelte';
+	// import { watch } from 'runed';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };
@@ -144,7 +145,26 @@
 	}
 
 	let initialValidate = false;
-	watch(
+	const watch: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		value;
+
+		const cleanup = untrack(() => {
+			if (!context?.initialValidate && !initialValidate) {
+				initialValidate = true;
+				return;
+			}
+			context?.form.validate({ preflightOnly: true, includeUntouched: true });
+
+			return () => {
+				// cleanup code
+			};
+		});
+
+		return cleanup;
+	};
+	/* watch(
 		() => value,
 		() => {
 			if (!context?.initialValidate && !initialValidate) {
@@ -153,7 +173,7 @@
 			}
 			context?.form.validate({ preflightOnly: true, includeUntouched: true });
 		}
-	);
+	); */
 
 	onMount(() => {
 		isMounted = true;
@@ -191,6 +211,7 @@
 				}
 			}}
 			class="slc-input bg-secondary-400!"
+			{@attach watch}
 		>
 			Relation Picker ({pickerAnswer})
 		</button>

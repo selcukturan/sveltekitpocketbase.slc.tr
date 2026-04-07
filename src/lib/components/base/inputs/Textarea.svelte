@@ -4,7 +4,9 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
-	import { watch } from 'runed';
+	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	// import { watch } from 'runed';
 	// ######################## PROPS TYPE ##############################################################################################
 	type Props = Omit<SvelteHTMLElements['textarea'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
 		id?: string;
@@ -46,16 +48,25 @@
 	};
 
 	let initialValidate = false;
-	watch(
-		() => proxy.value,
-		() => {
+	const watch: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		proxy.value;
+
+		const cleanup = untrack(() => {
 			if (!context?.initialValidate && !initialValidate) {
 				initialValidate = true;
 				return;
 			}
 			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-		}
-	);
+
+			return () => {
+				// cleanup code
+			};
+		});
+
+		return cleanup;
+	};
 </script>
 
 <Field {issues} {required} {label} id={mainName || id}>
@@ -67,6 +78,7 @@
 			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
 			{...rest}
 			class="{classes} {inputClass}"
+			{@attach watch}
 		></textarea>
 	{/snippet}
 </Field>

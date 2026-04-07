@@ -1,5 +1,6 @@
 // https://github.com/svecosystem/runed/blob/main/packages/runed/src/lib/utilities/watch/watch.svelte.ts#L24
 import { untrack } from 'svelte';
+
 type Getter<T> = () => T;
 type Options = {
 	lazy?: boolean;

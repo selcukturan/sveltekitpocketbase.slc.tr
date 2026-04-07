@@ -29,24 +29,26 @@ class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
 	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
 	#props = $state() as MainProps<TData>;
+	// Loading sırasında eski veriyi korumak için cache
+	#cachedCurrent = $state<ListResult<TData> | undefined>(undefined);
 	// Veri Yapısı
 	get propsData() {
-		return this.#props.current;
+		return this.#cachedCurrent;
 	}
 	get propsItems() {
-		return this.#props.current?.items ?? [];
+		return this.#cachedCurrent?.items ?? [];
 	}
 	get propsTotalItems() {
-		return this.#props.current?.totalItems ?? 0;
+		return this.#cachedCurrent?.totalItems ?? 0;
 	}
 	get propsPage() {
-		return this.#props.current?.page ?? 1;
+		return this.#cachedCurrent?.page ?? 1;
 	}
 	get propsPerPage() {
-		return this.#props.current?.perPage ?? 30;
+		return this.#cachedCurrent?.perPage ?? 30;
 	}
 	get propsTotalPages() {
-		return this.#props.current?.totalPages ?? 0;
+		return this.#cachedCurrent?.totalPages ?? 0;
 	}
 	get propsColumns() {
 		return this.#props.columns; // required
@@ -195,16 +197,37 @@ class TableContext<TData extends Row> {
 		}
 	};
 
+	// current sadece gerçek veri geldiğinde güncellenir; loading sırasında eski veri korunur
+	readonly watchCurrentChanged: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		const c = this.#props.current;
+
+		const cleanup = untrack(() => {
+			if (c !== undefined) this.#cachedCurrent = c;
+			return () => {
+				// cleanup code burada olabilir, ancak şu anda gerek yok.
+			};
+		});
+
+		return cleanup;
+	};
+
 	readonly watchItemsChanged: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 
 		this.propsItems;
 
-		untrack(() => {
+		const cleanup = untrack(() => {
 			tick().then(() => {
 				this.updateVisibleIndexes(true);
 			});
+			return () => {
+				// cleanup code burada olabilir, ancak şu anda gerek yok.
+			};
 		});
+
+		return cleanup;
 	};
 
 	readonly watchScrollAndClientHeight: Attachment = (node) => {
@@ -213,9 +236,14 @@ class TableContext<TData extends Row> {
 		this.#rafY;
 		this.clientHeight;
 
-		untrack(() => {
+		const cleanup = untrack(() => {
 			this.updateVisibleIndexes();
+			return () => {
+				// cleanup code burada olabilir, ancak şu anda gerek yok.
+			};
 		});
+
+		return cleanup;
 	};
 
 	// Scroll takibi
@@ -238,7 +266,7 @@ class TableContext<TData extends Row> {
 		if (!(node instanceof HTMLElement)) return;
 
 		// setup
-		const fps = 10;
+		const fps = 60; // saniyede 60 güncelleme için
 		let rafId: number;
 		let lastTime = 0;
 

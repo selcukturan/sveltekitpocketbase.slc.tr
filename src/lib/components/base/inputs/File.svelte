@@ -5,7 +5,9 @@
 	import { getFormInputsContext } from './context.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { SvelteHTMLElements } from 'svelte/elements';
-	import { watch } from 'runed';
+	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	// import { watch } from 'runed';
 
 	type ValueTypeChoice<T extends boolean> = T extends true ? string[] : string;
 
@@ -141,7 +143,27 @@
 	};
 
 	let initialValidate = false;
-	watch(
+	const watch: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		proxy.files;
+
+		const cleanup = untrack(() => {
+			if (!context?.initialValidate && !initialValidate) {
+				initialValidate = true;
+				return;
+			}
+			// Başlangıç dahil, gerçekten her dosya değişiminde çalışır.
+			context?.form.validate({ preflightOnly: true, includeUntouched: true });
+
+			return () => {
+				// cleanup code
+			};
+		});
+
+		return cleanup;
+	};
+	/* watch(
 		() => proxy.files,
 		() => {
 			if (!context?.initialValidate && !initialValidate) {
@@ -151,7 +173,7 @@
 			// Başlangıç dahil, gerçekten her dosya değişiminde çalışır.
 			context?.form.validate({ preflightOnly: true, includeUntouched: true });
 		}
-	);
+	); */
 
 	function removeFileInputElement(nameToDelete: string) {
 		valueMap.delete(nameToDelete);
@@ -256,6 +278,7 @@
 			class="sr-only"
 			tabindex={-1}
 			aria-hidden={true}
+			{@attach watch}
 		/>
 
 		{#if multiple}
