@@ -4,7 +4,9 @@
 	import type { RemoteFormField } from '@sveltejs/kit';
 	import Field from './Field.svelte';
 	import { getFormInputsContext } from './context.svelte';
-	import { watch, onClickOutside, activeElement } from 'runed';
+	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	// import { watch, onClickOutside, activeElement } from 'runed';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -79,6 +81,7 @@
 	let selectInput: HTMLSelectElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
+	let isOutsideMouseDown = false;
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
 
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
@@ -151,7 +154,7 @@
 		return 0;
 	});
 
-	const clickListboxOutside = onClickOutside(
+	/* const clickListboxOutside = onClickOutside(
 		() => listbox,
 		() => {
 			// Eğer tıklanan öğe trigger ise veya trigger'ın bir parçasıysa, kapatma işlemini atla.
@@ -159,7 +162,7 @@
 			close();
 		},
 		{ immediate: false }
-	);
+	); */
 
 	const open = async () => {
 		if (disabled || readonly) return;
@@ -171,7 +174,7 @@
 
 		await tick(); // Bekle, DOM güncelleniyor.
 
-		clickListboxOutside.start();
+		// clickListboxOutside.start();
 
 		listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
 
@@ -183,8 +186,8 @@
 
 	const close = async () => {
 		isOpenPopup = false;
-		await tick(); // Bekle, DOM güncelleniyor.
-		clickListboxOutside.stop();
+		// await tick(); // Bekle, DOM güncelleniyor.
+		// clickListboxOutside.stop();
 	};
 
 	const toggle = () => (isOpenPopup ? close() : open());
@@ -272,8 +275,8 @@
 				break;
 			}
 
-			case 'Tab':
-			case 'Escape': {
+			case 'Escape':
+			case 'Tab': {
 				e.preventDefault();
 				close();
 				trigger?.focus();
@@ -322,9 +325,12 @@
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
 	let initialValidate = false;
-	watch(
-		() => selectedIndexes,
-		() => {
+	const watch: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+
+		selectedIndexes;
+
+		const cleanup = untrack(() => {
 			const currentValue = value;
 			if (field) {
 				if (multiple) {
@@ -339,14 +345,26 @@
 				}
 				context?.form.validate({ preflightOnly: true, includeUntouched: true });
 			}
-		}
-	);
+
+			return () => {
+				// cleanup code
+			};
+		});
+
+		return cleanup;
+	};
+
+	const outsideclick: Attachment = () => {
+		const click = (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close();
+		document.addEventListener('click', click, true);
+		return () => document.removeEventListener('click', click, true);
+	};
 </script>
 
 <Field {issues} {required} {label} id={triggerId}>
 	{#snippet input(inputClass)}
 		<!-- Select Container -->
-		<div bind:this={container} class="{internalContainerClasses} {classes}">
+		<div bind:this={container} class="{internalContainerClasses} {classes}" {@attach watch} {@attach outsideclick}>
 			<!-- Select Trigger -->
 			<button
 				bind:this={trigger}

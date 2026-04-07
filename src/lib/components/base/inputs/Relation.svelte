@@ -50,7 +50,6 @@
 	const componentId = $props.id();
 	const context = getFormInputsContext();
 
-	let isMounted = $state(false);
 	let selectInput: HTMLSelectElement | undefined = $state();
 
 	// svelte-ignore state_referenced_locally
@@ -175,8 +174,31 @@
 		}
 	); */
 
+	async function handlePickerOpen() {
+		pickerAnswer = 'waiting';
+		pickerSelected = value;
+		pickerSearchString = '';
+
+		const { confirm } = await show();
+
+		if (confirm) {
+			pickerAnswer = 'true';
+			if (multiple && Array.isArray(pickerSelected)) {
+				const newValue = pickerSelected as string[];
+				(field as RemoteFormField<string[]> | undefined)?.set(newValue);
+				value = newValue as ValueType<Tmultiple>;
+			} else if (!multiple && typeof pickerSelected === 'string') {
+				const newValue = pickerSelected as string;
+				(field as RemoteFormField<string> | undefined)?.set(newValue);
+				value = newValue as ValueType<Tmultiple>;
+			}
+			await tick();
+		} else {
+			pickerAnswer = 'false';
+		}
+	}
+
 	onMount(() => {
-		isMounted = true;
 		pickerSelected = value; // initial value, daha sonraki değerler bind:group ile güncellenir.
 		/* pickerData.items.forEach((item) => {
 			if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { caption: item.caption });
@@ -187,32 +209,7 @@
 <Field {issues} {required} {label} id={labelFor}>
 	{#snippet input(inputClass)}
 		<!-- Begin Trigger -->
-		<button
-			type="button"
-			id={labelFor}
-			onclick={async () => {
-				pickerAnswer = 'waiting';
-				pickerSelected = value;
-				pickerSearchString = '';
-
-				const { confirm } = await show();
-
-				if (confirm) {
-					pickerAnswer = 'true';
-					const newValue = pickerSelected as unknown as ValueType<Tmultiple>;
-					field?.set(newValue);
-					value = newValue;
-
-					await tick();
-
-					// context?.form.validate({ preflightOnly: true });
-				} else {
-					pickerAnswer = 'false';
-				}
-			}}
-			class="slc-input bg-secondary-400!"
-			{@attach watch}
-		>
+		<button type="button" id={labelFor} onclick={handlePickerOpen} class="slc-input bg-secondary-400!" {@attach watch}>
 			Relation Picker ({pickerAnswer})
 		</button>
 		<!-- End Trigger -->

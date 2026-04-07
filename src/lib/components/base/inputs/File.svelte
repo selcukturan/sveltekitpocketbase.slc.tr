@@ -81,15 +81,13 @@
 	};
 
 	const valueChanged = (newValue: ValueTypeChoice<Tmultiple>) => {
-		let val: ValueTypeChoice<Tmultiple>;
-
 		if (multiple) {
-			val = (newValue || []) as ValueTypeChoice<Tmultiple>;
+			const val = (newValue || []) as string[];
+			(field as RemoteFormField<string[]> | undefined)?.set(val);
 		} else {
-			val = (newValue || '') as ValueTypeChoice<Tmultiple>;
+			const val = (newValue || '') as string;
+			(field as RemoteFormField<string> | undefined)?.set(val);
 		}
-
-		field?.set(val);
 		// Eskiden eklenmiş dosyalar "kaldır" olarak işaretlendiğinde çalışır.
 		context?.form.validate({ preflightOnly: true, includeUntouched: true });
 	};
