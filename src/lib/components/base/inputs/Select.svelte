@@ -6,7 +6,7 @@
 	import { getFormInputsContext } from './context.svelte';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	// import { watch, onClickOutside, activeElement } from 'runed';
+	import { on } from 'svelte/events';
 
 	type PropsType = {
 		multiple?: boolean;
@@ -81,7 +81,6 @@
 	let selectInput: HTMLSelectElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
-	let isOutsideMouseDown = false;
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
 
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
@@ -325,12 +324,10 @@
 	const internalInvalidTriggerClasses = ' !bg-error-400';
 
 	let initialValidate = false;
-	const watch: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
+	const watch = () => {
 		selectedIndexes;
 
-		const cleanup = untrack(() => {
+		return untrack(() => {
 			const currentValue = value;
 			if (field) {
 				if (multiple) {
@@ -345,19 +342,11 @@
 				}
 				context?.form.validate({ preflightOnly: true, includeUntouched: true });
 			}
-
-			return () => {
-				// cleanup code
-			};
 		});
-
-		return cleanup;
 	};
 
-	const outsideclick: Attachment = () => {
-		const click = (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close();
-		document.addEventListener('click', click, true);
-		return () => document.removeEventListener('click', click, true);
+	const outsideclick = () => {
+		return on(window, 'click', (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close());
 	};
 </script>
 

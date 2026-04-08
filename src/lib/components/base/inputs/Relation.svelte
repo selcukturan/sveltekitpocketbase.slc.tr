@@ -10,7 +10,6 @@
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '$lib/remotes/relations.remote';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { untrack } from 'svelte';
-	// import { watch } from 'runed';
 
 	type ValueType<T extends boolean> = T extends true ? string[] : string;
 	type ResolveData = { confirm: boolean };

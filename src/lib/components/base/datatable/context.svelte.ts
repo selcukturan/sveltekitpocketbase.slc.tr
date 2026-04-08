@@ -1,6 +1,7 @@
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
+import { on } from 'svelte/events';
 
 export interface MainProps<TData extends Row> {
 	// Veri Yapısı
@@ -29,25 +30,31 @@ class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
 	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
 	#props = $state() as MainProps<TData>;
-	// Loading sırasında eski veriyi korumak için cache
+	// Loading sırasında eski veriyi korumak için cache. current sadece gerçek veri geldiğinde güncellenir; loading sırasında eski veri korunur
 	#cachedCurrent = $state<ListResult<TData> | undefined>(undefined);
+	watchCurrentChanged: Attachment = () => {
+		const c = this.#props.current;
+		untrack(() => {
+			if (c !== undefined) this.#cachedCurrent = c;
+		});
+	};
 	// Veri Yapısı
-	get propsData() {
+	get propsCurrent() {
 		return this.#cachedCurrent;
 	}
-	get propsItems() {
+	get items() {
 		return this.#cachedCurrent?.items ?? [];
 	}
-	get propsTotalItems() {
+	get totalItems() {
 		return this.#cachedCurrent?.totalItems ?? 0;
 	}
-	get propsPage() {
+	get page() {
 		return this.#cachedCurrent?.page ?? 1;
 	}
-	get propsPerPage() {
+	get perPage() {
 		return this.#cachedCurrent?.perPage ?? 30;
 	}
-	get propsTotalPages() {
+	get totalPages() {
 		return this.#cachedCurrent?.totalPages ?? 0;
 	}
 	get propsColumns() {
@@ -108,7 +115,7 @@ class TableContext<TData extends Row> {
 
 	// base variables
 	headerLength = $state(1);
-	dataLength = $derived(this.propsItems.length);
+	dataLength = $derived(this.items.length);
 	footerLength = $derived(this.propsFooters.length);
 
 	// virtual scroll variables
@@ -140,7 +147,7 @@ class TableContext<TData extends Row> {
 
 	// `rowIndices` her değiştiğinde çalışır.
 	virtualData = $derived.by(() => {
-		const rawData = untrack(() => this.propsItems);
+		const rawData = untrack(() => this.items);
 
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
@@ -190,75 +197,46 @@ class TableContext<TData extends Row> {
 
 	helpers = {
 		testHelper1: () => {
-			console.log('Mevcut veri:', this.propsItems);
+			console.log('Mevcut veri:', this.items);
 		},
 		testHelper2: (index: number) => {
 			console.log('Satır yüksekliği:', this.propsDataRowHeight);
 		}
 	};
 
-	// current sadece gerçek veri geldiğinde güncellenir; loading sırasında eski veri korunur
-	readonly watchCurrentChanged: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
-		const c = this.#props.current;
-
-		const cleanup = untrack(() => {
-			if (c !== undefined) this.#cachedCurrent = c;
-			return () => {
-				// cleanup code burada olabilir, ancak şu anda gerek yok.
-			};
-		});
-
-		return cleanup;
-	};
-
 	readonly watchItemsChanged: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 
-		this.propsItems;
+		this.items;
 
 		const cleanup = untrack(() => {
 			tick().then(() => {
 				this.updateVisibleIndexes(true);
 			});
 			return () => {
-				// cleanup code burada olabilir, ancak şu anda gerek yok.
+				// cleanup code
 			};
 		});
 
 		return cleanup;
 	};
 
-	readonly watchScrollAndClientHeight: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
+	readonly watchScrollAndClientHeight = () => {
 		this.#rafY;
 		this.clientHeight;
-
-		const cleanup = untrack(() => {
-			this.updateVisibleIndexes();
-			return () => {
-				// cleanup code burada olabilir, ancak şu anda gerek yok.
-			};
-		});
-
-		return cleanup;
+		untrack(() => this.updateVisibleIndexes());
 	};
 
 	// Scroll takibi
-	readonly trackTableScroll: Attachment = (node) => {
-		// mount
-		if (!(node instanceof HTMLElement)) return;
-
-		// setup
-		const scroll = () => {
-			this.#currentScrollY = node.scrollTop;
-		};
-		node.addEventListener('scroll', scroll, { passive: true });
-
-		// cleanup
-		return () => node.removeEventListener('scroll', scroll);
+	readonly trackTableScroll = (node: HTMLElement) => {
+		return on(
+			node,
+			'scroll',
+			() => {
+				this.#currentScrollY = node.scrollTop;
+			},
+			{ passive: true }
+		);
 	};
 	// requestAnimationFrame döngüsü
 	readonly trackTableRaf: Attachment = (node) => {

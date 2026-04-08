@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PageContent from './PageContent.svelte';
 	import { Page, Head } from '$lib/components/templates';
 </script>
 
