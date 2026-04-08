@@ -3,14 +3,7 @@
 	import { Page, Head } from '$lib/components/templates';
 	import { getUser } from '$lib/remotes/guarded.remote';
 
-	import { Counter } from '$lib/app/counter.svelte';
-	const counter = new Counter();
-
-	import { createCounter } from '$lib/app/counter.svelte';
 	import { goto } from '$app/navigation';
-
-	/* const locales = getLocalizationContext(); */
-	let navigator = createCounter('');
 
 	$inspect(navigator);
 
@@ -61,12 +54,6 @@
 					LINK: Go DataTable with filter and recordId in hash
 				</a>
 
-				<button
-					onclick={counter.increment}
-					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
-				>
-					Count:{counter.count}
-				</button>
 				<a
 					href="/login"
 					class="bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"

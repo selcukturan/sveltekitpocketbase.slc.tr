@@ -265,8 +265,8 @@
 							form={updateForm}
 							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
 								try {
-									await submit().updates(getList(params));
-									form.reset();
+									await submit().updates(query);
+									/* form.reset(); */
 									drawer?.close();
 									pageToaster.add({
 										type: 'success',

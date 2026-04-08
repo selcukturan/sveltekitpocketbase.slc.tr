@@ -1,14 +1,5 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
-	import { getFullList } from '$lib/remotes/tabulator.remote';
-	import { page } from '$app/state';
-	import Tabulator from '$lib/components/base/tabulator/Tabulator.svelte';
-
-	let promise = $derived(getFullList(page.url.hash));
-
-	let filter = $derived(await promise);
-
-	let data = $derived(filter.items);
 </script>
 
 <Head>
@@ -22,7 +13,8 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table boundary>
-			<Tabulator {data} />
+			<!-- <PageContent /> -->
+			<p>test</p>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>

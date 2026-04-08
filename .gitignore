@@ -30,6 +30,3 @@ vite.config.ts.timestamp-*
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
-
-/src/lib/server/dev-sql
-/src/routes/(app)/erp

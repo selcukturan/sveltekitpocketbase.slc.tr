@@ -32,11 +32,11 @@ const envSchema = v.object({
 
 export type EnvSchemaType = v.InferOutput<typeof envSchema>;
 
-const result = config({ path: envFile });
-if (result.error) {
-	console.warn(`Uyarı: ${envFile} dosyası bulunamadı veya yüklenemedi. Varsayılan ortam değişkenleri kullanılıyor.`);
+// Sadece production dışında dotenv'e ihtiyaç var
+if (process.env.NODE_ENV !== 'production') {
+	const result = config({ path: envFile }); // process.env'ye yükler
+	expand(result); // env değişkenlerinin birbirine referans vermesini sağlar
 }
-expand(result);
 
 let validatedEnv: EnvSchemaType;
 

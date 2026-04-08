@@ -1,5 +1,4 @@
 <script lang="ts">
-	import 'tabulator-tables/dist/css/tabulator_simple.min.css';
 	import { AppLayout, type SidebarDataType } from '$lib/components/layouts/app';
 	import { initGlobalContext } from '$lib/app/global.svelte';
 	import { navigating } from '$app/state';
