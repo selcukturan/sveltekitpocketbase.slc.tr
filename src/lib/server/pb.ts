@@ -32,13 +32,6 @@ export class CustomAuthStore extends LocalAuthStore {
 		return super.exportToCookie(options, key || 'sess');
 	}
 
-	// ##### SLC Auth Methods
-	/* logout(goto = true) {
-		this.clear();
-		if (goto) {
-			return redirect(303, '/login');
-		}
-	} */
 	error(err: ClientResponseError, notify = true, defaultMsg = '') {
 		if (!err || !(err instanceof ClientResponseError) || err.isAbort) return;
 
@@ -50,11 +43,6 @@ export class CustomAuthStore extends LocalAuthStore {
 		if (notify && msg) {
 			console.warn('SLC: pb.ts - add toast error notification |', msg);
 		}
-
-		// populate form field errors
-		/* if (!CommonHelper.isEmpty(responseData.data)) {
-            setErrors(responseData.data);
-        } */
 
 		// unauthorized
 		if (statusCode === 401) {

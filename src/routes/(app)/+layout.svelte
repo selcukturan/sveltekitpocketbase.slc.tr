@@ -4,15 +4,13 @@
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
-	/* import { getUser } from '$lib/remotes/guarded.remote';
-	import { untrack } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths'; */
 
 	let { children } = $props();
 
 	const global = initGlobalContext();
 	const toasterName = 'app-toaster';
+
+	createToaster({ name: toasterName });
 
 	let sidebarData: SidebarDataType[] = $state([
 		{
@@ -46,28 +44,13 @@
 			icon: 'ri-tools-line'
 		}
 	]);
-
-	createToaster({ name: toasterName });
-
-	/* let user = getUser();
-	const watch = () => {
-		const currentUser = user.current;
-		untrack(() => currentUser === null && goto(resolve('/login')));
-	}; */
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<!-- <div class:slc-user-watcher={true} style:display="contents" {@attach watch}>
-	{#if user.current !== null} -->
 <Toasts {toasterName} />
-
 <ProgressBar navigate={navigating}>
 	<AppLayout {sidebarData}>
 		{@render children?.()}
 	</AppLayout>
 </ProgressBar>
-<!-- 	{:else}
-		<div>Not Authenticated</div>
-	{/if}
-</div> -->

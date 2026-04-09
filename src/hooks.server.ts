@@ -1,5 +1,4 @@
-import type { Handle, HandleServerError, HandleValidationError } from '@sveltejs/kit';
-import { isHttpError } from '@sveltejs/kit';
+import type { Handle } from '@sveltejs/kit';
 import env from '$lib/server/env';
 import { Collections } from '$lib/types/pocketbase-types';
 import { createPocketBaseInstance } from '$lib/server/pb';
@@ -31,39 +30,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.auth.exportToCookie({
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'strict', // strict olduğunda bazı tarayıcılarda sorun çıkabilir. 'lax' | 'strict'. safaride düzeldi. kullanılabilir.
+			sameSite: 'strict', // lax | strict - strict olduğunda bazı tarayıcılarda sorun çıkabilir mi?
 			priority: 'High'
 		})
 	);
 
 	// 🏆 ############################################################################################################################
 	return response;
-};
-
-export const handleError: HandleServerError = async ({ error, event, status, message }) => {
-	const myError = isHttpError(error) ? error : null;
-
-	const type = myError?.body.type || 'general';
-	const errorId = myError?.body.errorId || '#SLC:HandleServerError';
-	const msg = myError?.body.message || message;
-
-	// console.log('HandleServerError', type, errorId, msg, error);
-
-	return {
-		type,
-		errorId,
-		message: msg
-	};
-};
-
-export const handleValidationError: HandleValidationError = ({ event, issues }) => {
-	const myError = issues[0];
-
-	console.log('HandleValidationError', issues);
-
-	return {
-		type: 'general',
-		errorId: '#SLC:HandleValidationError',
-		message: myError.message
-	};
 };
