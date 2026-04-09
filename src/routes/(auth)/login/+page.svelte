@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { enhance, applyAction } from '$app/forms';
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/app/config';
 	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
-	import { goto } from '$app/navigation';
+	import { getUser, login } from '$lib/remotes/guarded.remote';
 
 	const loginPageToaster = createToaster({
 		name: 'login-page-toaster',
@@ -109,49 +108,23 @@
 		dark:bg-transparent"
 	>
 		<form
-			action="/login?/login"
-			method="POST"
-			use:enhance={() => {
-				isLoading = true;
-				return async ({ result }) => {
-					isLoading = false;
-					if (result.type === 'success') {
-						// getUser().refresh();
-						goto('/');
-					} else if (result.type === 'failure') {
-						alert('failure-data-validation');
-					} else if (result.type === 'error') {
-						alert('error-pb');
-					} else if (result.type === 'redirect') {
-						goto(result.location);
+			{...login.enhance(async ({ submit }) => {
+				try {
+					if (await submit().updates(getUser())) {
+						console.log('Successfully logged in!');
 					} else {
-						alert('unknown');
+						console.log('Invalid data!');
 					}
-				};
-			}}
-			class="flex w-full flex-col
-				px-2
-				pb-4
-				sm:px-4
-				md:px-6
-				lg:px-8
-				xl:px-10
-				2xl:px-12"
+				} catch (error) {
+					console.log('Oh no! Something went wrong');
+				}
+			})}
 		>
 			<div class="flex flex-col gap-5">
 				<label class="grid gap-1">
 					<span class="select-none">E-Posta</span>
 					<input
-						required
-						id="email"
-						name="email"
-						placeholder="E-Posta"
-						type="email"
-						autocapitalize="none"
-						autocomplete="email"
-						autocorrect="off"
-						disabled={isLoading}
-						value="demo@slc.tr"
+						{...login.fields.email.as('text', 'demo@slc.tr')}
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
 				</label>
@@ -159,37 +132,15 @@
 				<label class="grid gap-1">
 					<span class="select-none">Şifre</span>
 					<input
-						required
-						id="password"
-						name="password"
-						placeholder="Şifre"
-						type="password"
-						autocapitalize="none"
-						autocorrect="off"
-						disabled={isLoading}
-						value="SLc1234567"
+						{...login.fields._password.as('password', 'SLc1234567')}
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
 				</label>
 
 				<button
-					type="submit"
-					disabled={isLoading}
 					class="bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 text-surface-token-900 flex h-10 w-full cursor-pointer items-center justify-center rounded-sm text-base font-bold shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
 				>
-					{#if isLoading}
-						<!-- Dönen spinner ikonu -->
-						<svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg>
-					{:else}
-						Giriş Yap
-					{/if}
+					Giriş
 				</button>
 			</div>
 		</form>
