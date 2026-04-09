@@ -5,12 +5,14 @@
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
 	import { getUser } from '$lib/remotes/guarded.remote';
-
-	// import { appToaster } from '$lib/components/base/toast';
+	import { untrack } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	let { children } = $props();
 
 	const global = initGlobalContext();
+	const toasterName = 'app-toaster';
 
 	let sidebarData: SidebarDataType[] = $state([
 		{
@@ -45,39 +47,29 @@
 		}
 	]);
 
-	createToaster({ name: 'app-toaster' });
+	createToaster({ name: toasterName });
 
 	// let user = $derived(await getUser());
 	let user = getUser();
 
-	/* console.log('role', role); */
-
-	let filteredSidebarData = $derived.by(() => {
-		console.log(user.current?.role);
-		/* if (user.current?.role.startsWith(':demo:')) {
-			return sidebarData.filter((item) => item.title !== 'ERP');
-		} */
-		return sidebarData;
-	});
+	const watch = () => {
+		user.current;
+		untrack(() => user.current === null && goto(resolve('/login')));
+	};
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-<!-- {#if user.error}
-	<p>oops!</p>
-{:else if user.loading}
-	<p>loading...</p>
-{:else} -->
-<!-- <p>{user.current?.email}</p> -->
-{#if user.current !== null && filteredSidebarData}
-	<Toasts toasterName="app-toaster" />
+<div class:slc-user-watcher={true} style:display="contents" {@attach watch}>
+	{#if user.current !== null}
+		<Toasts {toasterName} />
 
-	<ProgressBar navigate={navigating}>
-		<AppLayout sidebarData={filteredSidebarData}>
-			{@render children?.()}
-		</AppLayout>
-	</ProgressBar>
-{:else}
-	<div>Not Authenticated</div>
-{/if}
-<!-- {/if} -->
+		<ProgressBar navigate={navigating}>
+			<AppLayout {sidebarData}>
+				{@render children?.()}
+			</AppLayout>
+		</ProgressBar>
+	{:else}
+		<!-- <div>Not Authenticated</div> -->
+	{/if}
+</div>
