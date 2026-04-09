@@ -34,11 +34,6 @@
 			icon: 'ri-line-chart-line'
 		},
 		{
-			title: 'ERP',
-			href: '/erp',
-			icon: 'ri-clapperboard-line'
-		},
-		{
 			title: 'Developments',
 			href: '/developments',
 			icon: 'ri-code-box-line'
@@ -52,23 +47,29 @@
 
 	createToaster({ name: 'app-toaster' });
 
-	let user = $derived(await getUser());
-	// let user = $derived(data?.user);
+	// let user = $derived(await getUser());
+	let user = getUser();
 
 	/* console.log('role', role); */
 
 	let filteredSidebarData = $derived.by(() => {
-		console.log(user?.role);
-		if (user?.role.startsWith(':demo:')) {
+		console.log(user.current?.role);
+		/* if (user.current?.role.startsWith(':demo:')) {
 			return sidebarData.filter((item) => item.title !== 'ERP');
-		}
+		} */
 		return sidebarData;
 	});
 </script>
 
 <svelte:window bind:innerWidth={global.windowWidth} />
 
-{#if user !== null && filteredSidebarData}
+<!-- {#if user.error}
+	<p>oops!</p>
+{:else if user.loading}
+	<p>loading...</p>
+{:else} -->
+<!-- <p>{user.current?.email}</p> -->
+{#if user.current !== null && filteredSidebarData}
 	<Toasts toasterName="app-toaster" />
 
 	<ProgressBar navigate={navigating}>
@@ -79,3 +80,4 @@
 {:else}
 	<div>Not Authenticated</div>
 {/if}
+<!-- {/if} -->

@@ -14,7 +14,7 @@
 	<Page.Main>
 		<Page.Main.Table boundary>
 			<!-- <PageContent /> -->
-			<p>test</p>
+			<p>test-1</p>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Footer>

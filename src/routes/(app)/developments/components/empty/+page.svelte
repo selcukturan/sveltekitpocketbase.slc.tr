@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PageContent from './PageContent.svelte';
 	import { Page, Head } from '$lib/components/templates';
 </script>
 
@@ -14,7 +13,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel boundary>
-			<PageContent />
+			<p>dddd</p>
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>

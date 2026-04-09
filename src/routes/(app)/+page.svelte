@@ -5,9 +5,7 @@
 
 	import { goto } from '$app/navigation';
 
-	$inspect(navigator);
-
-	let user = await getUser();
+	let user = getUser();
 
 	function onclick() {
 		goto('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9');
@@ -21,7 +19,7 @@
 
 <Page>
 	<Page.Header>
-		<button onclick={() => getUser().refresh()}> Check getUser() {user?.email}</button>
+		<button onclick={() => user.refresh()}> Check getUser() {user.current?.email}</button>
 
 		<p>{t('hello_world')}</p>
 	</Page.Header>
