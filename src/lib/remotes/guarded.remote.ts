@@ -1,11 +1,10 @@
 import * as v from 'valibot';
-import { error, fail } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
+import { error, redirect } from '@sveltejs/kit';
 import { Collections } from '$lib/types/pocketbase-types';
 import { ResultAsync } from 'neverthrow';
 import { mapUnknownToError } from '$lib/server/error';
 import { getRequestEvent, query, form } from '$app/server';
-import { redirect } from '@sveltejs/kit';
-import { resolve } from '$app/paths';
 
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -29,7 +28,8 @@ export const checkAuthenticated = query(() => {
 export const logout = form(() => {
 	const { locals } = getRequestEvent();
 	locals.auth.clear();
-	throw redirect(302, resolve('/login'));
+	// SUCCESS
+	throw redirect(303, resolve('/login'));
 });
 
 export const login = form(
@@ -51,12 +51,6 @@ export const login = form(
 		}
 
 		// SUCCESS
-		throw redirect(302, resolve('/'));
-		// return {};
+		throw redirect(303, resolve('/'));
 	}
 );
-
-// FAIL: return fail(400, { success: false, email, message: 'E-posta ve şifre alanları zorunludur.' });
-// ERROR: return error(500, { type: 'general', errorId: 'general', message: 'Hata oluştu' });
-// REDIRECT: return redirect(303, '/');
-// SUCCESS: return {};
