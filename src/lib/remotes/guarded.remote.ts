@@ -1,4 +1,4 @@
-import { getRequestEvent, query } from '$app/server';
+import { getRequestEvent, query, form } from '$app/server';
 import { redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
 
@@ -19,4 +19,10 @@ export const checkAuthenticated = query(() => {
 	if (!locals.user) {
 		throw redirect(302, resolve('/login'));
 	}
+});
+
+export const logout = form(() => {
+	const { locals } = getRequestEvent();
+	locals.auth.clear();
+	throw redirect(302, resolve('/login'));
 });
