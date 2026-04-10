@@ -1,13 +1,16 @@
 // ####################################### BEGIN TRANSLATIONS ####################################
 
 import { browser } from '$app/environment';
+import { login } from '$lib/remotes/guarded.remote';
 
 // ---------------------------------------- TR Translations
 const trTranslations = {
 	hello_world: 'Merhaba Dünya',
+	app_name: 'SLC Web Uygulamaları',
 	login: 'Giriş Yap',
 	logout: 'Çıkış Yap',
 	change_theme: 'Temayı Değiştir',
+	error: 'Hata',
 	close: 'Kapat',
 	create: 'Oluştur',
 	delete: 'Sil',
@@ -16,6 +19,15 @@ const trTranslations = {
 	search: 'Ara',
 	view: 'Görüntüle',
 	update: 'Güncelle',
+	change_language_turkish: "Türkçe'ye geç",
+	change_language_english: 'Switch to English',
+	login_page_title: 'Giriş Sayfası',
+	login_page_welcome_message: 'Merhaba, Hoş Geldiniz',
+	login_page_email_label: 'E-posta',
+	login_page_password_label: 'Parola',
+	login_page_email_placeholder: 'Kullanıcı Adı',
+	login_page_password_placeholder: 'Parola',
+	login_page_submit_button: 'Giriş Yap',
 	// schema messages
 	invalid_data: 'Geçersiz veri!',
 	invalid_email: 'Geçersiz e-posta adresi!',
@@ -28,6 +40,7 @@ const trTranslations = {
 	error_not_found: 'Sayfa bulunamadı!',
 	error_internal_server: 'Sunucu hatası!',
 	error_bad_request: 'Geçersiz istek!',
+	error_user_or_password_incorrect: 'Kullanıcı adı veya parola hatalı!',
 	err0001: 'Bilinmeyen bir hata oluştu!'
 } as const;
 
@@ -36,9 +49,11 @@ const translations: Translations = {
 	tr: trTranslations,
 	en: {
 		hello_world: 'Hello World',
+		app_name: 'SLC Web Applications',
 		login: 'Login',
 		logout: 'Logout',
 		change_theme: 'Change Theme',
+		error: 'Error',
 		close: 'Close',
 		create: 'Create',
 		delete: 'Delete',
@@ -47,6 +62,15 @@ const translations: Translations = {
 		search: 'Search',
 		view: 'View',
 		update: 'Update',
+		change_language_turkish: "Türkçe'ye geç",
+		change_language_english: 'Switch to English',
+		login_page_title: 'Login Page',
+		login_page_welcome_message: 'Hello, Welcome',
+		login_page_email_label: 'Email',
+		login_page_password_label: 'Password',
+		login_page_email_placeholder: 'Username',
+		login_page_password_placeholder: 'Password',
+		login_page_submit_button: 'Login',
 		//messages
 		invalid_data: 'Invalid data!',
 		invalid_email: 'Invalid email address!',
@@ -59,6 +83,7 @@ const translations: Translations = {
 		error_not_found: 'Page not found!',
 		error_internal_server: 'Internal server error!',
 		error_bad_request: 'Bad request!',
+		error_user_or_password_incorrect: 'User or password is incorrect!',
 		err0001: 'An unknown error occurred!'
 	}
 } as const;

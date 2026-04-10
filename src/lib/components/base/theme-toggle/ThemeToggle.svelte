@@ -43,14 +43,14 @@
 	onclick={toggle}
 	aria-pressed={theme.current === 'dark' ? 'true' : 'false'}
 	aria-label="Theme mode"
-	class="bg-surface-50 hover:border-surface-400 relative block h-[22px] w-10 rounded-xl border hover:cursor-pointer"
+	class="bg-surface-50 hover:border-surface-400 relative block h-5.5 w-10 rounded-xl border hover:cursor-pointer"
 	{@attach tooltip(t('change_theme'))}
 >
 	<span
-		class={`bg-surface-300 pointer-events-none absolute top-px left-px h-[18px] w-[18px] rounded-full shadow transition-transform ${theme.current === 'dark' ? 'translate-x-[18px]' : ''}`}
+		class={`bg-surface-300 pointer-events-none absolute top-px left-px h-4.5 w-4.5 rounded-full shadow transition-transform ${theme.current === 'dark' ? 'translate-x-4.5' : ''}`}
 	>
 		<span
-			class="relative block h-[18px] w-[18px] overflow-hidden rounded-full [&_svg]:absolute [&_svg]:top-[3px] [&_svg]:left-[3px] [&_svg]:h-3 [&_svg]:w-3"
+			class="relative block h-4.5 w-4.5 overflow-hidden rounded-full [&_svg]:absolute [&_svg]:top-0.75 [&_svg]:left-0.75 [&_svg]:h-3 [&_svg]:w-3"
 		>
 			{#if browser}
 				{#if theme.current === 'dark'}

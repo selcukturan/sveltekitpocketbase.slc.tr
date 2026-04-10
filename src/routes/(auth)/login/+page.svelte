@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
+	import { LangToggle } from '$lib/components/base/lang-toggle';
 	import { config } from '$lib/app/config';
 	import { Toasts, createToaster } from '$lib/components/base/toast';
 	import { getUser, login } from '$lib/remotes/guarded.remote';
@@ -15,8 +16,8 @@
 </script>
 
 <svelte:head>
-	<title>{`Login - ${config.appName}`}</title>
-	<meta name="description" content={`Login - ${config.appName}`} />
+	<title>{`${t('login_page_title')} - ${t('app_name')}`}</title>
+	<meta name="description" content={`${t('login_page_title')} - ${t('app_name')}`} />
 </svelte:head>
 
 <Toasts toasterName="login-page-toaster" />
@@ -27,9 +28,12 @@
 			<img class="h-full w-full select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</div>
 	</a>
-	<span class="absolute top-0 right-0 z-10 m-4 inline-flex h-10 w-10 items-center md:m-10">
-		<div>
+	<span class="absolute top-0 right-0 z-10 m-10 flex h-10 w-10 items-center justify-center gap-2">
+		<div class="flex items-center justify-center">
 			<ThemeToggle />
+		</div>
+		<div class="flex items-center justify-center">
+			<LangToggle />
 		</div>
 	</span>
 	<div
@@ -52,7 +56,7 @@
 			sm:text-lg
 			md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl"
 		>
-			Merhaba, Hoşgeldiniz
+			{t('login_page_welcome_message')}
 		</h3>
 		<img
 			class="inline-block
@@ -68,7 +72,7 @@
 		/>
 		<div class="flex flex-row gap-4">
 			<div class="flex flex-col items-center justify-center gap-1">
-				<p class="text-surface-500">{`${config.appName} | ${config.version}`}</p>
+				<p class="text-surface-500">{`${t('app_name')} | ${config.version}`}</p>
 				<img class="object-fit inset-0 h-6 w-6 brightness-85 grayscale" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 			</div>
 		</div>
@@ -94,21 +98,21 @@
 
 				try {
 					if (await submit().updates(getUser())) {
-						console.log('Successfully logged in!');
+						// giriş başarılı
 						isLoading = false;
 					} else {
 						loginPageToaster.add({
 							type: 'error',
-							title: 'Hata',
-							description: 'Geçersiz veri!' // Invalid data!
+							title: t('error'),
+							description: t('invalid_data')
 						});
 						isLoading = false;
 					}
 				} catch (e) {
 					loginPageToaster.add({
 						type: 'error',
-						title: 'Hata',
-						description: 'Kullanıcı adı veya şifre geçersiz!' // Invalid username or password!
+						title: t('error'),
+						description: t('error_user_or_password_incorrect')
 					});
 					isLoading = false;
 				}
@@ -116,7 +120,7 @@
 		>
 			<div class="flex flex-col gap-5">
 				<label class="grid gap-1">
-					<span class="select-none">E-Posta</span>
+					<span class="select-none">{t('login_page_email_label')}</span>
 
 					<input
 						{...login.fields.email.as('text', 'demo@slc.tr')}
@@ -129,7 +133,7 @@
 				</label>
 
 				<label class="grid gap-1">
-					<span class="select-none">Şifre</span>
+					<span class="select-none">{t('login_page_password_label')}</span>
 
 					<input
 						{...login.fields._password.as('password', 'SLc1234567')}
@@ -143,7 +147,7 @@
 				<button
 					class="bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 text-surface-token-900 flex h-10 w-full cursor-pointer items-center justify-center rounded-sm text-base font-bold shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
 				>
-					Giriş
+					{t('login_page_submit_button')}
 				</button>
 			</div>
 		</form>
