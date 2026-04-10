@@ -4,7 +4,7 @@
 >
 	import { type Snippet } from 'svelte';
 	import type { HTMLFormAttributes } from 'svelte/elements';
-	import { createFormInputsContext } from '$lib/components/base/inputs/context.svelte';
+	import { createFormInputsContext } from '$lib/components/ui/inputs/context.svelte';
 	import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
 	import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 

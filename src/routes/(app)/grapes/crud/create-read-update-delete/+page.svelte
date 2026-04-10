@@ -11,11 +11,11 @@
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
-	import { Drawer } from '$lib/components/base/drawer';
-	import { confirm } from '$lib/components/base/confirm';
-	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
+	import { Drawer } from '$lib/components/ui/drawer';
+	import { confirm } from '$lib/components/ui/confirm';
+	import { Toasts, createToaster, getToaster } from '$lib/components/ui/toast';
 	import { Boundary } from '$lib/components/base/boundary';
-	import * as s from '$lib/components/base/datatable';
+	import * as s from '$lib/components/ui/datatable';
 	// Inputs
 	import {
 		Hidden,
@@ -31,13 +31,13 @@
 		Textarea,
 		Bool,
 		Relation
-	} from '$lib/components/base/inputs';
+	} from '$lib/components/ui/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './page.shared';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
-	/* import Form from '$lib/components/base/inputs/Form.svelte'; */
+	/* import Form from '$lib/components/ui/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const appToaster = getToaster('app-toaster');

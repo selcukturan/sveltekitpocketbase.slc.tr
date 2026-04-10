@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { ThemeToggle } from '$lib/components/base/theme-toggle';
-	import { LangToggle } from '$lib/components/base/lang-toggle';
+	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
+	import { LangToggle } from '$lib/components/ui/lang-toggle';
 	import { config } from '$lib/app/config';
-	import { Toasts, createToaster } from '$lib/components/base/toast';
+	import { Toasts, createToaster } from '$lib/components/ui/toast';
 	import { getUser, login } from '$lib/remotes/guarded.remote';
 	import { loginSchema } from '$lib/app/schemas/login';
 	import { t, type TranslationKeys } from '$lib/app/localization.svelte';

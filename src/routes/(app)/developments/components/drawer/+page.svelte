@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Drawer } from '$lib/components/base/drawer';
-	import { confirm } from '$lib/components/base/confirm';
+	import { Drawer } from '$lib/components/ui/drawer';
+	import { confirm } from '$lib/components/ui/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
 	let drawer1: Drawer;

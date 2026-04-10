@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { confirm } from '$lib/components/base/confirm';
+	import { confirm } from '$lib/components/ui/confirm';
 	import { Page, Head } from '$lib/components/templates';
 
 	let answer = $state('init');

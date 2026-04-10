@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getGlobalContext } from '$lib/app/global.svelte';
 	import { t } from '$lib/app/localization.svelte';
-	import { ThemeToggle } from '$lib/components/base/theme-toggle';
-	import { LangToggle } from '$lib/components/base/lang-toggle';
+	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
+	import { LangToggle } from '$lib/components/ui/lang-toggle';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';
 	import { config } from '$lib/app/config';
 	import type { SvelteHTMLElements } from 'svelte/elements';

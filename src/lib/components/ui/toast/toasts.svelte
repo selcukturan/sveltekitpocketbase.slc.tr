@@ -1,5 +1,4 @@
 <script lang="ts">
-	// https://github.com/huntabyte/svelte-5-context-classes
 	import type { ToasterOptions, Toast, ToastsProps } from './types';
 	import { getToaster } from './toaster.svelte';
 	import { slide, fly } from 'svelte/transition';
