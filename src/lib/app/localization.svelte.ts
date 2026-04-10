@@ -15,7 +15,20 @@ const trTranslations = {
 	refresh: 'Yenile',
 	search: 'Ara',
 	view: 'Görüntüle',
-	update: 'Güncelle'
+	update: 'Güncelle',
+	// schema messages
+	invalid_data: 'Geçersiz veri!',
+	invalid_email: 'Geçersiz e-posta adresi!',
+	email_required: 'E-posta adresi gereklidir!',
+	password_required: 'Parola gereklidir!',
+	// error messages
+	error_generic: 'Bir hata oluştu!',
+	error_unauthorized: 'Yetkisiz erişim!',
+	error_forbidden: 'Erişim engellendi!',
+	error_not_found: 'Sayfa bulunamadı!',
+	error_internal_server: 'Sunucu hatası!',
+	error_bad_request: 'Geçersiz istek!',
+	err0001: 'Bilinmeyen bir hata oluştu!'
 } as const;
 
 // ---------------------------------------- EN Translations
@@ -33,14 +46,27 @@ const translations: Translations = {
 		refresh: 'Refresh',
 		search: 'Search',
 		view: 'View',
-		update: 'Update'
+		update: 'Update',
+		//messages
+		invalid_data: 'Invalid data!',
+		invalid_email: 'Invalid email address!',
+		email_required: 'Email is required!',
+		password_required: 'Password is required!',
+		// error messages
+		error_generic: 'An error occurred!',
+		error_unauthorized: 'Unauthorized access!',
+		error_forbidden: 'Access forbidden!',
+		error_not_found: 'Page not found!',
+		error_internal_server: 'Internal server error!',
+		error_bad_request: 'Bad request!',
+		err0001: 'An unknown error occurred!'
 	}
 } as const;
 // ####################################### END TRANSLATIONS ######################################
 
 // ------------------------------ BEGIN Types -----------------------------------------------------
 type SupportedLangs = 'tr' | 'en';
-type TranslationKeys = keyof typeof trTranslations;
+export type TranslationKeys = keyof typeof trTranslations;
 type Translations = Record<SupportedLangs, Record<TranslationKeys, string>>;
 type Language = {
 	readonly code: SupportedLangs;
@@ -96,6 +122,6 @@ export function setSelectedLang(lang: SupportedLangs) {
  * @returns Çevrilmiş metin
  */
 export function t(key: TranslationKeys): string {
-	return translations[selected][key];
+	return translations[selected][key] || `Translation for key "${key}" not found in language "${selected}"`;
 }
 // ------------------------------ END Get Translation --------------------------------------------

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { ThemeToggle } from '$lib/components/base/theme-toggle';
 	import { config } from '$lib/app/config';
-	import { Toasts, createToaster, getToaster } from '$lib/components/base/toast';
+	import { Toasts, createToaster } from '$lib/components/base/toast';
 	import { getUser, login } from '$lib/remotes/guarded.remote';
+	import { loginSchema } from '$lib/app/schemas/login';
+	import { t, type TranslationKeys } from '$lib/app/localization.svelte';
 
 	const loginPageToaster = createToaster({
 		name: 'login-page-toaster',
@@ -12,34 +14,12 @@
 	let isLoading = false;
 </script>
 
-<!-- <span class="slc-screen-test bg-surface-900 text-surface-50 fixed top-28 left-1/2 z-50 block -translate-x-1/2 -translate-y-1/2 font-extrabold"></span> -->
-
 <svelte:head>
 	<title>{`Login - ${config.appName}`}</title>
 	<meta name="description" content={`Login - ${config.appName}`} />
 </svelte:head>
 
 <Toasts toasterName="login-page-toaster" />
-
-<!-- <button
-	class="bg-info-400 text-info-50 rounded"
-	onclick={() => {
-		loginPageToaster.add({
-			type: 'info',
-			title: 'Bilgi',
-			description:
-				'Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit. Info lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-			action: {
-				label: 'Detay',
-				onClick: () => {
-					console.log('onClick');
-				}
-			}
-		});
-	}}
->
-	Toast
-</button> -->
 
 <main class="flex min-h-dvh flex-row">
 	<a href="/" class="contents">
@@ -108,33 +88,56 @@
 		dark:bg-transparent"
 	>
 		<form
-			{...login.enhance(async ({ submit }) => {
+			{...login.preflight(loginSchema).enhance(async ({ submit }) => {
+				if (isLoading) return;
+				isLoading = true;
+
 				try {
 					if (await submit().updates(getUser())) {
 						console.log('Successfully logged in!');
+						isLoading = false;
 					} else {
-						console.log('Invalid data!');
+						loginPageToaster.add({
+							type: 'error',
+							title: 'Hata',
+							description: 'Geçersiz veri!' // Invalid data!
+						});
+						isLoading = false;
 					}
-				} catch (error) {
-					console.log('Oh no! Something went wrong');
+				} catch (e) {
+					loginPageToaster.add({
+						type: 'error',
+						title: 'Hata',
+						description: 'Kullanıcı adı veya şifre geçersiz!' // Invalid username or password!
+					});
+					isLoading = false;
 				}
 			})}
 		>
 			<div class="flex flex-col gap-5">
 				<label class="grid gap-1">
 					<span class="select-none">E-Posta</span>
+
 					<input
 						{...login.fields.email.as('text', 'demo@slc.tr')}
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
+
+					{#each login.fields.email.issues() ?? [] as issue}
+						<p class="text-error-500">{t(issue.message as TranslationKeys)}</p>
+					{/each}
 				</label>
 
 				<label class="grid gap-1">
 					<span class="select-none">Şifre</span>
+
 					<input
 						{...login.fields._password.as('password', 'SLc1234567')}
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
+					{#each login.fields._password.issues() ?? [] as issue}
+						<p class="text-error-500">{t(issue.message as TranslationKeys)}</p>
+					{/each}
 				</label>
 
 				<button
