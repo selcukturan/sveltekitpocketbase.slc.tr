@@ -1,11 +1,11 @@
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult } from './types';
+import type { RemoteQuery } from '@sveltejs/kit';
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
 export interface MainProps<TData extends Row> {
-	// Veri Yapısı
-	current?: ListResult<TData>;
+	query?: RemoteQuery<ListResult<TData>>;
 	columns: Column<TData>[]; // required
 	footers?: Footer<TData>[];
 	// Snippets (Render Fonksiyonları)
@@ -15,8 +15,6 @@ export interface MainProps<TData extends Row> {
 	footerRow?: Snippet<[fr: FooterRowType<TData>]>;
 	statusbar?: Snippet;
 	// UI State & Styling
-	loading?: boolean;
-	error?: unknown;
 	headerRowHeight?: number;
 	dataRowHeight?: number;
 	footerRowHeight?: number;
@@ -28,41 +26,47 @@ export interface MainProps<TData extends Row> {
 
 class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
+
 	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
 	#props = $state() as MainProps<TData>;
-	// Loading sırasında eski veriyi korumak için cache. current sadece gerçek veri geldiğinde güncellenir; loading sırasında eski veri korunur
-	#cachedCurrent = $state<ListResult<TData> | undefined>(undefined);
-	watchCurrentChanged: Attachment = () => {
-		const c = this.#props.current;
-		untrack(() => {
-			if (c !== undefined) this.#cachedCurrent = c;
-		});
+
+	// Current Data
+	#currentData = $state<ListResult<TData> | undefined>(undefined);
+	get propsQuery() {
+		return this.#props.query;
+	}
+	watchCurrentChanged = () => {
+		if (this.propsQuery?.ready) this.#currentData = this.propsQuery?.current;
 	};
-	// Veri Yapısı
+
+	// Data structure
 	get propsCurrent() {
-		return this.#cachedCurrent;
+		return this.#currentData;
 	}
 	get items() {
-		return this.#cachedCurrent?.items ?? [];
+		return this.#currentData?.items ?? [];
 	}
 	get totalItems() {
-		return this.#cachedCurrent?.totalItems ?? 0;
+		return this.#currentData?.totalItems ?? 0;
 	}
 	get page() {
-		return this.#cachedCurrent?.page ?? 1;
+		return this.#currentData?.page ?? 1;
 	}
 	get perPage() {
-		return this.#cachedCurrent?.perPage ?? 30;
+		return this.#currentData?.perPage ?? 30;
 	}
 	get totalPages() {
-		return this.#cachedCurrent?.totalPages ?? 0;
+		return this.#currentData?.totalPages ?? 0;
 	}
+
+	// Table structure
 	get propsColumns() {
 		return this.#props.columns; // required
 	}
 	get propsFooters() {
 		return this.#props.footers ?? [];
 	}
+
 	// Snippets (Render Fonksiyonları)
 	get propsToolbar() {
 		return this.#props.toolbar;
@@ -79,13 +83,8 @@ class TableContext<TData extends Row> {
 	get propsStatusbar() {
 		return this.#props.statusbar;
 	}
+
 	// UI State & Styling
-	get propsLoading() {
-		return this.#props.loading ?? false;
-	}
-	get propsError() {
-		return this.#props.error;
-	}
 	get propsHeaderRowHeight() {
 		return this.#props.headerRowHeight ?? 35;
 	}
@@ -95,6 +94,7 @@ class TableContext<TData extends Row> {
 	get propsFooterRowHeight() {
 		return this.#props.footerRowHeight ?? 35;
 	}
+
 	// Özel Class Tanımları
 	get propsTableClass() {
 		return this.#props.tableClass;

@@ -13,7 +13,7 @@
 	// Parent kullanımı: {tableRef?.states.loading}
 	export const states = {
 		get loading() {
-			return context.propsLoading;
+			return context.propsQuery?.loading ?? false;
 		},
 		get headerRowHeight() {
 			return context.propsHeaderRowHeight;
@@ -24,9 +24,9 @@
 <div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
 	{@render context.propsToolbar?.()}
 	<div class:slc-table-container={true} class={context.propsContainerClass}>
-		{#if context.propsLoading === true}
+		{#if context.propsQuery?.loading === true}
 			<div class="slc-table-message">Loading...</div>
-		{:else if context.propsError !== undefined}
+		{:else if context.propsQuery?.error !== undefined}
 			<div class="slc-table-message">Error occurred</div>
 		{:else if context.dataLength === 0}
 			<div class="slc-table-message">No data to display</div>
@@ -72,6 +72,7 @@
 		</div>
 	</div>
 	{@render context.propsStatusbar?.()}
+	{`ready: ${context.propsQuery?.ready}, loading: ${context.propsQuery?.loading}, Data Length: ${context.propsQuery?.current?.items.length ?? 'undefined'}`}
 </div>
 
 <style>

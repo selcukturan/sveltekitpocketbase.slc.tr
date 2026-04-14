@@ -1,4 +1,4 @@
-import { getRequestEvent, query, form } from '$app/server';
+import { getRequestEvent, query, form, requested } from '$app/server';
 import { Collections } from '$lib/types/pocketbase-types';
 import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
@@ -77,6 +77,8 @@ export const updateForm = form(updateFormSchema, async (params) => {
 	if (updatedResult.isErr()) {
 		throwError(updatedResult.error);
 	}
+
+	await requested(getList, 1).refreshAll();
 
 	return updatedResult.value;
 });

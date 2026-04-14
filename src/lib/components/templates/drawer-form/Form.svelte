@@ -1,15 +1,17 @@
 <script
 	lang="ts"
-	generics="TInput extends RemoteFormInput | void, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>"
+	generics=" TInput extends RemoteFormInput | void, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>"
 >
 	import { type Snippet } from 'svelte';
 	import type { HTMLFormAttributes } from 'svelte/elements';
 	import { createFormInputsContext } from '$lib/components/ui/inputs/context.svelte';
 	import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
 	import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
+	import type { RemoteQuery } from '@sveltejs/kit';
 
 	type Props = HTMLFormAttributes & {
 		form: RemoteForm<TInput, TOutput>;
+
 		schema: TSchema;
 		inputs?: Snippet;
 		children?: Snippet;
@@ -18,7 +20,17 @@
 		initialValidate?: boolean;
 	};
 
-	let { children, class: classes, inputs, buttons, form, schema, initialValidate = false, ...attributes }: Props = $props();
+	let {
+		children,
+		class: classes,
+		inputs,
+		buttons,
+		form,
+
+		schema,
+		initialValidate = false,
+		...attributes
+	}: Props = $props();
 
 	// svelte-ignore state_referenced_locally
 	const context = createFormInputsContext<TInput, TOutput, TSchema>(form, schema, initialValidate); // init

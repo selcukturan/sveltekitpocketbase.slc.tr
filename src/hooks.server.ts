@@ -24,6 +24,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event);
 	// 🔽 - istek sunucu tarafından işlendikten sonraki kodlar aşağıdadır.
 	// 📡 after resolving the request #################################################################################################
+
 	// ⌛🍪 Set Cookie ################################################################################################################
 	response.headers.append(
 		'set-cookie',

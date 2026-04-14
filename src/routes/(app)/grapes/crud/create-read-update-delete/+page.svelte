@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import { isHttpError } from '@sveltejs/kit';
 	import { tick, untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
@@ -64,15 +63,18 @@
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
-	const watchUrlForDrawer: Attachment = () => {
+	const watchUrlForDrawer = () => {
 		const currentHash = page.url.hash;
 		untrack(() => {
 			tick().then(() => {
 				const cmd = getParam('cmd', currentHash) || '';
 				const id = getParam('id', currentHash) || '';
-				drawerCommand = { cmd, id };
-				if ((cmd !== 'create' && cmd !== 'update' && cmd !== 'view') || !drawer) return;
-				drawer.open();
+				if (['create', 'update', 'view', 'delete'].includes(cmd) && id && drawer) {
+					drawer.open();
+					drawerCommand = { cmd, id };
+				} else {
+					drawerCommand = { cmd: '', id: '' };
+				}
 			});
 		});
 	};
@@ -103,11 +105,11 @@
 
 <Page>
 	<Page.Header>
-		<p>Page Header - X</p>
+		<p>Page.Header</p>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<s.DataTable {columns} {footers} bind:this={datatable} current={query.current} loading={query.loading} error={query.error}>
+			<s.DataTable {columns} {footers} bind:this={datatable} {query}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text
@@ -265,21 +267,31 @@
 							form={updateForm}
 							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
 								try {
-									await submit().updates(query);
-									/* form.reset(); */
-									drawer?.close();
-									pageToaster.add({
-										type: 'success',
-										title: 'Başarıyla kaydedildi!',
-										description: 'Başarıyla kaydedildi!',
-										action: {
-											label: t('close'),
-											onClick: (id) => {
-												pageToaster.remove(id);
+									if (await submit().updates(query)) {
+										// başarılı
+										pageToaster.add({
+											type: 'success',
+											title: 'Başarıyla kaydedildi!',
+											description: 'Başarıyla kaydedildi!',
+											action: {
+												label: t('close'),
+												onClick: (id) => {
+													pageToaster.remove(id);
+												}
 											}
-										}
-									});
+										});
+										form.reset();
+										drawer?.close();
+									} else {
+										// geçersiz veri
+										pageToaster.add({
+											type: 'error',
+											title: t('error'),
+											description: t('invalid_data')
+										});
+									}
 								} catch (error) {
+									// hata
 									const myError = isHttpError(error) ? error : null;
 									pageToaster.add({
 										type: 'error',
@@ -348,12 +360,18 @@
 					</DrawerFormContent.Content>
 				</DrawerFormContent>
 			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
-				<Boundary>
+				<!-- {@const oneResult = getOne({ ...oneParamsDefaults, id: drawerCommand.id }).current} -->
+				<!-- <Boundary> -->
+				<p>This is a drawer for creating a new record.</p>
+				<!-- <pre>
+					{JSON.stringify(derivedOneResult.current, null, 2)}
+				</pre> -->
+				<!-- <Boundary>
 					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
 					<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				</Boundary>
+				</Boundary> -->
 			{/if}
 		</Drawer>
 	</Page.Drawer>

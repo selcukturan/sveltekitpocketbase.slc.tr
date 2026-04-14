@@ -4,6 +4,7 @@
 	import { navigating } from '$app/state';
 	import { ProgressBar } from '$lib/components/base/app-progress-bar';
 	import { Toasts, createToaster } from '$lib/components/ui/toast';
+	import { getUser } from '$lib/remotes/guarded.remote';
 
 	let { children } = $props();
 

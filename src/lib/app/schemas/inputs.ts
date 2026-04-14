@@ -71,7 +71,7 @@ const _SingleFileMinusRequired = () =>
 const _MultipleFileOptional = () =>
 	v.optional(
 		v.pipe(
-			v.optional(v.array(v.string()), []),
+			v.fallback(v.array(v.string()), []),
 			v.minLength(0),
 			v.transform(() => undefined),
 			v.metadata({
@@ -83,7 +83,7 @@ const _MultipleFileOptional = () =>
 const _MultipleFilePlusOptional = () =>
 	v.optional(
 		v.pipe(
-			v.optional(v.array(v.file()), []),
+			v.fallback(v.array(v.file()), []),
 			v.transform((arr) => (arr.length > 0 ? arr : undefined)),
 			v.metadata({
 				slc_required: false
@@ -94,7 +94,7 @@ const _MultipleFilePlusOptional = () =>
 const _MultipleFileMinusOptional = () =>
 	v.optional(
 		v.pipe(
-			v.optional(v.array(v.string()), []),
+			v.fallback(v.array(v.string()), []),
 			v.transform((arr) => (arr.length > 0 ? arr : undefined)),
 			v.metadata({
 				slc_required: false
@@ -106,7 +106,7 @@ const _MultipleFileMinusOptional = () =>
 // Required
 const _MultipleFileRequired = () =>
 	v.pipe(
-		v.optional(v.array(v.string()), []),
+		v.fallback(v.array(v.string()), []),
 		v.minLength(1, 'En az 1 dosya seçilmelidir.'),
 		v.transform(() => undefined),
 		v.metadata({
@@ -115,7 +115,7 @@ const _MultipleFileRequired = () =>
 	);
 const _MultipleFilePlusRequired = () =>
 	v.pipe(
-		v.optional(v.array(v.file()), []),
+		v.fallback(v.array(v.file()), []),
 		v.transform((arr) => (arr.length > 0 ? arr : undefined)),
 		v.metadata({
 			slc_required: true
@@ -123,7 +123,7 @@ const _MultipleFilePlusRequired = () =>
 	);
 const _MultipleFileMinusRequired = () =>
 	v.pipe(
-		v.optional(v.array(v.string()), []),
+		v.fallback(v.array(v.string()), []),
 		v.transform((arr) => (arr.length > 0 ? arr : undefined)),
 		v.metadata({
 			slc_required: true
@@ -369,7 +369,7 @@ const _SingleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[]
 
 const _MultipleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
 	v.pipe(
-		v.optional(v.array(v.picklist(selectOptions)), []),
+		v.fallback(v.array(v.picklist(selectOptions)), []),
 		v.metadata({
 			slc_required: false
 		})
@@ -394,7 +394,7 @@ const _SingleSelectRequired = ({
 const _MultipleSelectRequired = ({ selectOptions = [], minLength = 1 }: { selectOptions: string[]; minLength?: number }) => {
 	const minLengthValue = minLength <= 0 ? 1 : minLength;
 	return v.pipe(
-		v.optional(v.array(v.picklist(selectOptions)), []),
+		v.fallback(v.array(v.picklist(selectOptions)), []),
 		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.'),
 		v.metadata({
 			slc_required: true
@@ -770,7 +770,7 @@ const _RelationSingleOptional = () =>
 
 const _RelationMultipleOptional = () =>
 	v.pipe(
-		v.optional(v.array(v.string()), []),
+		v.fallback(v.array(v.string()), []),
 		v.metadata({
 			slc_required: false
 		})
@@ -789,7 +789,7 @@ const _RelationSingleRequired = ({ message = 'Bu alan gereklidir.' }: { message?
 const _RelationMultipleRequired = ({ minLength = 1 }: { minLength?: number }) => {
 	const minLengthValue = minLength <= 0 ? 1 : minLength;
 	return v.pipe(
-		v.optional(v.array(v.string()), []),
+		v.fallback(v.array(v.string()), []),
 		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.'),
 		v.metadata({
 			slc_required: true

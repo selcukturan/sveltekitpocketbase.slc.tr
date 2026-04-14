@@ -7,7 +7,6 @@
 	}: {
 		children?: Snippet;
 	} = $props();
-	isHttpError;
 </script>
 
 <svelte:boundary>
