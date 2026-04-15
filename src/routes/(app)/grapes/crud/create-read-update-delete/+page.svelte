@@ -269,6 +269,8 @@
 								try {
 									if (await submit().updates(query)) {
 										// başarılı
+										drawer?.close();
+
 										pageToaster.add({
 											type: 'success',
 											title: 'Başarıyla kaydedildi!',
@@ -280,8 +282,6 @@
 												}
 											}
 										});
-										form.reset();
-										drawer?.close();
 									} else {
 										// geçersiz veri
 										pageToaster.add({

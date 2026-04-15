@@ -24,15 +24,15 @@ const trTranslations = {
 	login_page_title: 'Giriş Sayfası',
 	login_page_welcome_message: 'Merhaba, Hoş Geldiniz',
 	login_page_email_label: 'E-posta',
-	login_page_password_label: 'Parola',
+	login_page_password_label: 'Şifre',
 	login_page_email_placeholder: 'Kullanıcı Adı',
-	login_page_password_placeholder: 'Parola',
-	login_page_submit_button: 'Giriş Yap',
+	login_page_password_placeholder: 'Şifre',
+	login_page_submit_button: 'Giriş',
 	// schema messages
 	invalid_data: 'Geçersiz veri!',
 	invalid_email: 'Geçersiz e-posta adresi!',
 	email_required: 'E-posta adresi gereklidir!',
-	password_required: 'Parola gereklidir!',
+	password_required: 'Şifre gereklidir!',
 	// error messages
 	error_generic: 'Bir hata oluştu!',
 	error_unauthorized: 'Yetkisiz erişim!',
@@ -40,7 +40,7 @@ const trTranslations = {
 	error_not_found: 'Sayfa bulunamadı!',
 	error_internal_server: 'Sunucu hatası!',
 	error_bad_request: 'Geçersiz istek!',
-	error_user_or_password_incorrect: 'Kullanıcı adı veya parola hatalı!',
+	error_user_or_password_incorrect: 'E-posta veya şifre hatalı!',
 	err0001: 'Bilinmeyen bir hata oluştu!'
 } as const;
 
@@ -66,7 +66,7 @@ const translations: Translations = {
 		change_language_english: 'Switch to English',
 		login_page_title: 'Login Page',
 		login_page_welcome_message: 'Hello, Welcome',
-		login_page_email_label: 'Email',
+		login_page_email_label: 'E-mail',
 		login_page_password_label: 'Password',
 		login_page_email_placeholder: 'Username',
 		login_page_password_placeholder: 'Password',
@@ -83,7 +83,7 @@ const translations: Translations = {
 		error_not_found: 'Page not found!',
 		error_internal_server: 'Internal server error!',
 		error_bad_request: 'Bad request!',
-		error_user_or_password_incorrect: 'User or password is incorrect!',
+		error_user_or_password_incorrect: 'E-mail or password is incorrect!',
 		err0001: 'An unknown error occurred!'
 	}
 } as const;
