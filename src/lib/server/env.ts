@@ -1,4 +1,4 @@
-import * as v from 'valibot'; // Valibot'u namespace olarak import etme
+import * as v from 'valibot';
 import { env } from '$env/dynamic/private';
 
 const portNumberSchema = v.pipe(
@@ -35,7 +35,6 @@ try {
 	validatedEnv = v.parse(envSchema, env);
 } catch (error) {
 	if (error instanceof v.ValiError) {
-		// ValiError'a v. öneki ile erişim
 		let message = 'Ortam değişkeni doğrulaması başarısız oldu:\n';
 		error.issues.forEach((issue) => {
 			const pathString =
