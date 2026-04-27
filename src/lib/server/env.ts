@@ -1,6 +1,7 @@
-import { config } from 'dotenv';
-import { expand } from 'dotenv-expand';
+/* import { config } from 'dotenv';
+import { expand } from 'dotenv-expand'; */
 import * as v from 'valibot'; // Valibot'u namespace olarak import etme
+import { env } from '$env/dynamic/private';
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 
@@ -33,15 +34,15 @@ const envSchema = v.object({
 export type EnvSchemaType = v.InferOutput<typeof envSchema>;
 
 // Sadece production dışında dotenv'e ihtiyaç var
-if (process.env.NODE_ENV !== 'production') {
+/* if (process.env.NODE_ENV !== 'production') {
 	const result = config({ path: envFile }); // process.env'ye yükler
 	expand(result); // env değişkenlerinin birbirine referans vermesini sağlar
-}
+} */
 
 let validatedEnv: EnvSchemaType;
 
 try {
-	validatedEnv = v.parse(envSchema, process.env);
+	validatedEnv = v.parse(envSchema, env);
 } catch (error) {
 	if (error instanceof v.ValiError) {
 		// ValiError'a v. öneki ile erişim
