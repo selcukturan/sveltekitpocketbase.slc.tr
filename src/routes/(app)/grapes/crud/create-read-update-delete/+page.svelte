@@ -47,6 +47,7 @@
 	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
 
 	let filterData = $state<ListParamsSchemaType['filterData']>({
+		id: getParam('id', page.url.hash) || '',
 		title: listParamsDefaults.filterData.title ?? '',
 		quantity: listParamsDefaults.filterData.quantity ?? 0
 	});
@@ -69,12 +70,8 @@
 			tick().then(() => {
 				const cmd = getParam('cmd', currentHash) || '';
 				const id = getParam('id', currentHash) || '';
-				if (['create', 'update', 'view', 'delete'].includes(cmd) && id && drawer) {
-					drawer.open();
-					drawerCommand = { cmd, id };
-				} else {
-					drawerCommand = { cmd: '', id: '' };
-				}
+				drawerCommand = { cmd, id };
+				if (drawer && id && ['create', 'update', 'view'].includes(cmd)) drawer.open();
 			});
 		});
 	};
@@ -109,9 +106,15 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<s.DataTable {columns} {footers} bind:this={datatable} {query}>
+			<s.DataTable bind:this={datatable} {query} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
+						<Text
+							id="filter_id"
+							bind:value={filterData.id}
+							placeholder="Search - ID equals..."
+							onkeydown={(e) => e.key === 'Enter' && searchData()}
+						/>
 						<Text
 							id="filter_title"
 							bind:value={filterData.title}
