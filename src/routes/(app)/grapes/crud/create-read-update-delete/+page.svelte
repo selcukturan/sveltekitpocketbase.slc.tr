@@ -12,8 +12,8 @@
 	// Components
 	import { Drawer } from '$lib/components/ui/drawer';
 	import { confirm } from '$lib/components/ui/confirm';
-	import { Toasts, createToaster, getToaster } from '$lib/components/ui/toast';
-	import { Boundary } from '$lib/components/base/boundary';
+	import { Toasts, createToaster /* , getToaster */ } from '$lib/components/ui/toast';
+	// import { Boundary } from '$lib/components/base/boundary';
 	import * as s from '$lib/components/ui/datatable';
 	// Inputs
 	import {
@@ -39,7 +39,7 @@
 	/* import Form from '$lib/components/ui/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
-	const appToaster = getToaster('app-toaster');
+	// const appToaster = getToaster('app-toaster');
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	// ----------- End Page Context ------------------------------------------------------------------------------------------------------------------
 
@@ -155,8 +155,7 @@
 											icon="ri-delete-bin-line"
 											class="text-error-500!"
 											onclick={async () => {
-												let shouldDelete = false;
-												shouldDelete = await confirm({
+												const shouldDelete = await confirm({
 													message: `[${dr.row.id}] ID'li kaydı silmek istediğinize emin misiniz?`,
 													yes: 'Evet',
 													no: 'Hayır'
@@ -242,12 +241,12 @@
 			}}
 		>
 			{#if drawerCommand.cmd === 'create'}
-				<Boundary>
-					<p>This is a drawer for creating a new record.</p>
-					<pre>
+				<!-- <Boundary> -->
+				<p>This is a drawer for creating a new record.</p>
+				<pre>
 						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
 					</pre>
-				</Boundary>
+				<!-- </Boundary> -->
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`Update ID: ${drawerCommand.id}`}>
@@ -265,7 +264,7 @@
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
 							form={updateForm}
-							{...updateForm.preflight(updateFormSchema).enhance(async ({ form, submit }) => {
+							{...updateForm.preflight(updateFormSchema).enhance(async ({ /* form, */ submit }) => {
 								try {
 									if (await submit().updates(query)) {
 										// başarılı

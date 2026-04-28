@@ -18,7 +18,6 @@
 		onBeforeOpen,
 		onBeforeClose,
 		escClose = true,
-		contentLoading = false,
 		animationDuration = 150, // Animasyon süresini, JS ve CSS'te senkronize tut.
 		...props
 	}: {
@@ -28,7 +27,6 @@
 		onBeforeOpen?: () => boolean | Promise<boolean>;
 		onBeforeClose?: () => boolean | Promise<boolean>;
 		escClose?: boolean;
-		contentLoading?: boolean;
 		animationDuration?: number;
 	} = $props();
 

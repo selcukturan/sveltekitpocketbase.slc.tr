@@ -132,8 +132,8 @@ class TableContext<TData extends Row> {
 		const overscan = 10;
 		const rowHeight = this.propsDataRowHeight;
 
-		let start = Math.max(0, Math.floor(this.#rafY / rowHeight) - overscan);
-		let end = Math.min(this.dataLength - 1, Math.floor((this.#rafY + this.clientHeight) / rowHeight) + overscan);
+		const start = Math.max(0, Math.floor(this.#rafY / rowHeight) - overscan);
+		const end = Math.min(this.dataLength - 1, Math.floor((this.#rafY + this.clientHeight) / rowHeight) + overscan);
 
 		const indicesChanged = start !== this.#rowIndices.start || end !== this.#rowIndices.end;
 
@@ -200,14 +200,14 @@ class TableContext<TData extends Row> {
 			console.log('Mevcut veri:', this.items);
 		},
 		testHelper2: (index: number) => {
-			console.log('Satır yüksekliği:', this.propsDataRowHeight);
+			console.log('Satır yüksekliği:' + index, this.propsDataRowHeight);
 		}
 	};
 
 	readonly watchItemsChanged: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 
-		this.items;
+		void this.items;
 
 		const cleanup = untrack(() => {
 			tick().then(() => {
@@ -222,8 +222,8 @@ class TableContext<TData extends Row> {
 	};
 
 	readonly watchScrollAndClientHeight = () => {
-		this.#rafY;
-		this.clientHeight;
+		void this.#rafY;
+		void this.clientHeight;
 		untrack(() => this.updateVisibleIndexes());
 	};
 

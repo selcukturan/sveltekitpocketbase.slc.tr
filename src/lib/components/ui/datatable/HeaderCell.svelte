@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, HeaderRowType, HeaderCellType } from './types';
-	import { getTableContext } from './context.svelte';
+	// import { getTableContext } from './context.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -14,7 +14,7 @@
 	};
 	const { children, class: classes, hr, hc, ...attributes }: Props = $props();
 
-	const context = getTableContext<TData>();
+	// const context = getTableContext<TData>();
 
 	const gridRowStart = 1;
 	const gridColumn = $derived(`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`);
@@ -23,6 +23,7 @@
 <div
 	class:slc-table-headercell={true}
 	role="columnheader"
+	data-test-headerrow={hr.test}
 	style:position="sticky"
 	style:top={0}
 	style:background="var(--color-surface-200)"

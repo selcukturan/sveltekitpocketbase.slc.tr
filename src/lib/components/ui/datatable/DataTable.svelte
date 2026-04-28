@@ -21,7 +21,7 @@
 	};
 </script>
 
-<div class:slc-table-main={true} class={context.propsMainClass} style:width={`100%`} style:height={`100%`}>
+<div class:slc-table-main={true} class={context.propsMainClass} style:width="100%" style:height="100%">
 	{@render context.propsToolbar?.()}
 	<div class:slc-table-container={true} class={context.propsContainerClass}>
 		{#if context.propsQuery?.loading === true}

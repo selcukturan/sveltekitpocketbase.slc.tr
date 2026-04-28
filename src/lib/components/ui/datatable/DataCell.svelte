@@ -24,6 +24,7 @@
 <div
 	data-slc-table-datacell
 	role="gridcell"
+	class={classes}
 	style:grid-row-start={gridRowStart}
 	style:grid-column={gridColumn}
 	style:background
