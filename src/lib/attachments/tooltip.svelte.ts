@@ -66,8 +66,8 @@ function refreshTooltip(node: HTMLElement, data: TooltipOptionType) {
 	const tooltipWidth = tooltip.offsetWidth;
 
 	const nodeRect = node.getBoundingClientRect();
-	let top = 0;
-	let left = 0;
+	let top;
+	let left;
 	const tolerance = 5;
 
 	// calculate tooltip position position
@@ -150,7 +150,7 @@ function showTooltip(node: HTMLElement, data: TooltipOptionType) {
 
 export function tooltip(tooltipData: string | TooltipOptionType): Attachment {
 	// console.log(`Started. ${new Date().getTime()}`);
-	let data: TooltipOptionType = normalize(tooltipData);
+	const data: TooltipOptionType = normalize(tooltipData);
 
 	return (node) => {
 		// console.log(`Element DOM'a monte edildi. ${new Date().getTime()}`);

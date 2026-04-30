@@ -32,7 +32,6 @@ const templateConditions = {
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const listParamsSchema = v.object({
 	filterData: v.object({
-		...input.Text('id', { required: false }),
 		...input.Text('title', { required: false }),
 		...input.Number('quantity', { required: false })
 	}),

@@ -16,7 +16,7 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	await sleep(300);
+	// await sleep(300);
 
 	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
 
@@ -42,7 +42,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	await sleep(1000);
+	// await sleep(1000);
 
 	const oneResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getOne(params.id, {
@@ -69,10 +69,7 @@ export const updateForm = form(updateFormSchema, async (params) => {
 	const id = transformedParams.id;
 	const values = { ...transformedParams, id: undefined };
 
-	const updatedResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.TestDatatable).update(id, values),
-		mapUnknownToError
-	);
+	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.TestDatatable).update(id, values), mapUnknownToError);
 
 	if (updatedResult.isErr()) {
 		throwError(updatedResult.error);

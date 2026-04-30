@@ -1,8 +1,6 @@
 <script lang="ts">
 	// SvelteKit
-	import { page } from '$app/state';
 	import { isHttpError } from '@sveltejs/kit';
-	import { tick, untrack } from 'svelte';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
@@ -12,34 +10,20 @@
 	// Components
 	import { Drawer } from '$lib/components/ui/drawer';
 	import { confirm } from '$lib/components/ui/confirm';
-	import { Toasts, createToaster /* , getToaster */ } from '$lib/components/ui/toast';
-	// import { Boundary } from '$lib/components/base/boundary';
+	import { Toasts, createToaster } from '$lib/components/ui/toast';
+	// Datatable
 	import * as s from '$lib/components/ui/datatable';
+	// Attachments
+	import { watchUrlHash } from '$lib/attachments';
 	// Inputs
-	import {
-		Hidden,
-		Text,
-		Number,
-		Datetime,
-		Submit,
-		Button,
-		Select,
-		File,
-		Email,
-		Url,
-		Textarea,
-		Bool,
-		Relation
-	} from '$lib/components/ui/inputs';
+	import { Hidden, Text, Number, Datetime, Submit, Button, Select, File, Email, Url, Textarea, Bool, Relation } from '$lib/components/ui/inputs';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './page.shared';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
-	/* import Form from '$lib/components/ui/inputs/Form.svelte'; */
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
-	// const appToaster = getToaster('app-toaster');
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	// ----------- End Page Context ------------------------------------------------------------------------------------------------------------------
 
@@ -47,7 +31,6 @@
 	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
 
 	let filterData = $state<ListParamsSchemaType['filterData']>({
-		id: getParam('id', page.url.hash) || '',
 		title: listParamsDefaults.filterData.title ?? '',
 		quantity: listParamsDefaults.filterData.quantity ?? 0
 	});
@@ -64,17 +47,6 @@
 	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
-	const watchUrlForDrawer = () => {
-		const currentHash = page.url.hash;
-		untrack(() => {
-			tick().then(() => {
-				const cmd = getParam('cmd', currentHash) || '';
-				const id = getParam('id', currentHash) || '';
-				drawerCommand = { cmd, id };
-				if (drawer && id && ['create', 'update', 'view'].includes(cmd)) drawer.open();
-			});
-		});
-	};
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
@@ -91,6 +63,8 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
+
+	// const drawerUpdateQuery = $derived(getOne({ ...oneParamsDefaults, id: drawerCommand.id }));
 </script>
 
 <Head>
@@ -109,12 +83,6 @@
 			<s.DataTable bind:this={datatable} {query} {columns} {footers}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
-						<Text
-							id="filter_id"
-							bind:value={filterData.id}
-							placeholder="Search - ID equals..."
-							onkeydown={(e) => e.key === 'Enter' && searchData()}
-						/>
 						<Text
 							id="filter_title"
 							bind:value={filterData.title}
@@ -228,7 +196,12 @@
 	<Page.Drawer>
 		<Drawer
 			bind:this={drawer}
-			{@attach watchUrlForDrawer}
+			{@attach watchUrlHash((currentHash) => {
+				const cmd = getParam('cmd', currentHash) || '';
+				const id = getParam('id', currentHash) || '';
+				drawerCommand = { cmd, id };
+				if (drawer && id && ['create', 'update', 'view'].includes(cmd)) drawer.open();
+			})}
 			onBeforeClose={async () => {
 				let shouldClose = true;
 				/* shouldClose = await confirm({
@@ -260,9 +233,11 @@
 							}}
 						/>
 					</DrawerFormContent.Header>
-					<DrawerFormContent.Content boundary>
-						{@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
+					<DrawerFormContent.Content>
+						<!-- {@const queryx = getOne({ ...oneParamsDefaults, id: drawerCommand.id })} -->
+						<!-- {@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })} -->
 						<DrawerFormContent.Content.Form
+							query={getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 							initialValidate={true}
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
@@ -309,31 +284,26 @@
 								}
 							})}
 						>
-							{#snippet inputs()}
-								<Hidden field={updateForm.fields.id} value={oneResult.id} />
-								<Text label="Title" field={updateForm.fields.title} value={oneResult.title} />
-								<Number label="Quantity" field={updateForm.fields.quantity} value={oneResult.quantity} />
-								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={oneResult.purchase_date} />
-								<Email label="Email" field={updateForm.fields.email} value={oneResult.email} />
-								<Url label="Url" field={updateForm.fields.url} value={oneResult.url} />
-								<Textarea label="Textarea" field={updateForm.fields.textarea} value={oneResult.textarea} />
-								<Relation
-									label="Relation Single"
-									collection="crud_relation_single"
-									field={updateForm.fields.relation_single}
-									value={oneResult.relation_single}
-								/>
+							{#snippet inputs({ data })}
+								<Hidden field={updateForm.fields.id} value={data.id} />
+								<Text label="Title" field={updateForm.fields.title} value={data.title} />
+								<Number label="Quantity" field={updateForm.fields.quantity} value={data.quantity} />
+								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={data.purchase_date} />
+								<Email label="Email" field={updateForm.fields.email} value={data.email} />
+								<Url label="Url" field={updateForm.fields.url} value={data.url} />
+								<Textarea label="Textarea" field={updateForm.fields.textarea} value={data.textarea} />
+								<Relation label="Relation Single" collection="crud_relation_single" field={updateForm.fields.relation_single} value={data.relation_single} />
 								<Relation
 									multiple
 									label="Relation Multiple"
 									collection="crud_relation_multiple"
 									field={updateForm.fields.relation_multiple}
-									value={oneResult.relation_multiple}
+									value={data.relation_multiple}
 								/>
 								<Select
 									label="Select Single"
 									field={updateForm.fields.select_single}
-									value={oneResult.select_single}
+									value={data.select_single}
 									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
 										value,
 										label: value.charAt(0).toUpperCase() + value.slice(1)
@@ -343,15 +313,15 @@
 									multiple
 									label="Select Multiple"
 									field={updateForm.fields.select_multiple}
-									value={oneResult.select_multiple}
+									value={data.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({
 										value,
 										label: value.toUpperCase()
 									}))}
 								/>
-								<File label="Single File" field={updateForm.fields.single_file} value={oneResult.single_file} />
-								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={oneResult.multiple_files} />
-								<Bool label="Boolean" field={updateForm.fields.bool} value={oneResult.bool} />
+								<File label="Single File" field={updateForm.fields.single_file} value={data.single_file} />
+								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={data.multiple_files} />
+								<Bool label="Boolean" field={updateForm.fields.bool} value={data.bool} />
 							{/snippet}
 
 							{#snippet buttons()}
