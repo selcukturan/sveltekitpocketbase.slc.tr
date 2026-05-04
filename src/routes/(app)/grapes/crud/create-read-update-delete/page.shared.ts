@@ -11,12 +11,6 @@ const templateConditions = {
 	children: [
 		{
 			type: 'condition',
-			field: 'id',
-			operator: '~',
-			value: ''
-		},
-		{
-			type: 'condition',
 			field: 'title',
 			operator: '~',
 			value: ''

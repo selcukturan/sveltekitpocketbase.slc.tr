@@ -1,5 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
+	import Pagination from './parts/Pagination.svelte';
 	import { createTableContext, type MainProps } from './context.svelte';
 
 	let props: MainProps<TData> = $props();
@@ -71,8 +72,18 @@
 			{/if}
 		</div>
 	</div>
+	<div>
+		<Pagination
+			totalItems={context.totalItems}
+			page={context.page}
+			perPage={context.perPage}
+			totalPages={context.totalPages}
+			onChange={(data) => {
+				context.propsOnPagination?.(data);
+			}}
+		/>
+	</div>
 	{@render context.propsStatusbar?.()}
-	{`ready: ${context.propsQuery?.ready}, loading: ${context.propsQuery?.loading}, Data Length: ${context.propsQuery?.current?.items.length ?? 'undefined'}`}
 </div>
 
 <style>

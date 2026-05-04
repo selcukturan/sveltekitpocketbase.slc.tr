@@ -22,6 +22,8 @@ export interface MainProps<TData extends Row> {
 	tableClass?: string;
 	containerClass?: string;
 	mainClass?: string;
+	// events
+	onPagination?: ({ page, perPage }: { page: number; perPage: number }) => void;
 }
 
 class TableContext<TData extends Row> {
@@ -104,6 +106,10 @@ class TableContext<TData extends Row> {
 	}
 	get propsMainClass() {
 		return this.#props.mainClass;
+	}
+	// Events
+	get propsOnPagination() {
+		return this.#props.onPagination;
 	}
 	// ############### END PROPS ###############
 

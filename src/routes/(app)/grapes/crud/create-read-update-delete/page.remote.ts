@@ -18,11 +18,12 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	// await sleep(300);
 
-	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb);
+	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb); // (title ~ 'nazan' && quantity > 0)
+	// const filterString = `title ~ '${params.filterData.title}' && quantity > ${params.filterData.quantity}`;
 
 	// params.perPage
 	const listResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.TestDatatable).getList(params.page, 1000, {
+		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
 			filter: filterString,
 			...params.options
 		}),

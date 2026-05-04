@@ -51,7 +51,7 @@
 <nav class="pagination">
 	<button onclick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}> Geri </button>
 
-	{#each visiblePages as page}
+	{#each visiblePages as page, index (index)}
 		{#if page === '...'}
 			<span class="ellipsis">...</span>
 		{:else}

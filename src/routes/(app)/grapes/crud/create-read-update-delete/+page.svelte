@@ -78,7 +78,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<s.DataTable bind:this={datatable} {query} {columns} {footers}>
+			<s.DataTable bind:this={datatable} {query} {columns} {footers} onPagination={(p) => (params = { ...params, ...p })}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
 						<Text

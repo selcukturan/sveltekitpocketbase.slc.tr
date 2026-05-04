@@ -3,7 +3,7 @@
 </script>
 
 <div class="container">
-	<Toggler placement="top-start" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-5000">
+	<Toggler placement="top-start" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-5000">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>top-start</button>
 		{/snippet}
@@ -85,7 +85,7 @@
 		{/snippet}
 	</Toggler>
 
-	<Toggler placement="top-end" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-50">
+	<Toggler placement="top-end" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>top-end</button>
 		{/snippet}
@@ -107,7 +107,7 @@
 		{/snippet}
 	</Toggler>
 
-	<Toggler placement="top-center" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-50">
+	<Toggler placement="top-center" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>top-center</button>
 		{/snippet}
@@ -129,7 +129,7 @@
 		{/snippet}
 	</Toggler>
 
-	<Toggler placement="bottom-start" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-50">
+	<Toggler placement="bottom-start" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>bottom-start</button>
 		{/snippet}
@@ -151,7 +151,7 @@
 		{/snippet}
 	</Toggler>
 
-	<Toggler placement="bottom-end" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-50">
+	<Toggler placement="bottom-end" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>bottom-end</button>
 		{/snippet}
@@ -173,7 +173,7 @@
 		{/snippet}
 	</Toggler>
 
-	<Toggler placement="bottom-center" contentClasses="border-1 border-red-500 bg-warning-100 shadow-lg z-50">
+	<Toggler placement="bottom-center" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
 		{#snippet trigger({ toggle })}
 			<button onclick={toggle}>bottom-center</button>
 		{/snippet}
