@@ -185,8 +185,7 @@
 	};
 
 	const dialogClasses = 'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
-	const dialogFocusOverrideClasses =
-		'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
+	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 
 <!-- {#if isOpen} -->

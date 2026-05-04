@@ -63,8 +63,6 @@
 	];
 	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
-
-	// const drawerUpdateQuery = $derived(getOne({ ...oneParamsDefaults, id: drawerCommand.id }));
 </script>
 
 <Head>
@@ -233,11 +231,9 @@
 							}}
 						/>
 					</DrawerFormContent.Header>
-					<DrawerFormContent.Content>
-						<!-- {@const queryx = getOne({ ...oneParamsDefaults, id: drawerCommand.id })} -->
-						<!-- {@const oneResult = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })} -->
+					<DrawerFormContent.Content boundary>
 						<DrawerFormContent.Content.Form
-							query={getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
+							inputData={await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
 							initialValidate={true}
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
@@ -284,26 +280,31 @@
 								}
 							})}
 						>
-							{#snippet inputs({ data })}
-								<Hidden field={updateForm.fields.id} value={data.id} />
-								<Text label="Title" field={updateForm.fields.title} value={data.title} />
-								<Number label="Quantity" field={updateForm.fields.quantity} value={data.quantity} />
-								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={data.purchase_date} />
-								<Email label="Email" field={updateForm.fields.email} value={data.email} />
-								<Url label="Url" field={updateForm.fields.url} value={data.url} />
-								<Textarea label="Textarea" field={updateForm.fields.textarea} value={data.textarea} />
-								<Relation label="Relation Single" collection="crud_relation_single" field={updateForm.fields.relation_single} value={data.relation_single} />
+							{#snippet inputs({ inputData })}
+								<Hidden field={updateForm.fields.id} value={inputData.id} />
+								<Text label="Title" field={updateForm.fields.title} value={inputData.title} />
+								<Number label="Quantity" field={updateForm.fields.quantity} value={inputData.quantity} />
+								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={inputData.purchase_date} />
+								<Email label="Email" field={updateForm.fields.email} value={inputData.email} />
+								<Url label="Url" field={updateForm.fields.url} value={inputData.url} />
+								<Textarea label="Textarea" field={updateForm.fields.textarea} value={inputData.textarea} />
+								<Relation
+									label="Relation Single"
+									collection="crud_relation_single"
+									field={updateForm.fields.relation_single}
+									value={inputData.relation_single}
+								/>
 								<Relation
 									multiple
 									label="Relation Multiple"
 									collection="crud_relation_multiple"
 									field={updateForm.fields.relation_multiple}
-									value={data.relation_multiple}
+									value={inputData.relation_multiple}
 								/>
 								<Select
 									label="Select Single"
 									field={updateForm.fields.select_single}
-									value={data.select_single}
+									value={inputData.select_single}
 									options={Object.values(TestDatatableSelectSingleOptions).map((value) => ({
 										value,
 										label: value.charAt(0).toUpperCase() + value.slice(1)
@@ -313,15 +314,15 @@
 									multiple
 									label="Select Multiple"
 									field={updateForm.fields.select_multiple}
-									value={data.select_multiple}
+									value={inputData.select_multiple}
 									options={Object.values(TestDatatableSelectMultipleOptions).map((value) => ({
 										value,
 										label: value.toUpperCase()
 									}))}
 								/>
-								<File label="Single File" field={updateForm.fields.single_file} value={data.single_file} />
-								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={data.multiple_files} />
-								<Bool label="Boolean" field={updateForm.fields.bool} value={data.bool} />
+								<File label="Single File" field={updateForm.fields.single_file} value={inputData.single_file} />
+								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={inputData.multiple_files} />
+								<Bool label="Boolean" field={updateForm.fields.bool} value={inputData.bool} />
 							{/snippet}
 
 							{#snippet buttons()}

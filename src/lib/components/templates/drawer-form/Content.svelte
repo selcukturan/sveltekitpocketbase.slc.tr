@@ -12,7 +12,7 @@
 	const internalClasses = 'flex flex-1 flex-col overflow-hidden';
 </script>
 
-<main class="{classes} {internalClasses} {`bg-surface-100/80`}" {...attributes}>
+<main class="{classes} {internalClasses} bg-surface-100/80" {...attributes}>
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}
