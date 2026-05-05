@@ -1,7 +1,6 @@
 // ####################################### BEGIN TRANSLATIONS ####################################
 
 import { browser } from '$app/environment';
-import { login } from '$lib/remotes/guarded.remote';
 
 // ---------------------------------------- TR Translations
 const trTranslations = {
@@ -33,6 +32,13 @@ const trTranslations = {
 	invalid_email: 'Geçersiz e-posta adresi!',
 	email_required: 'E-posta adresi gereklidir!',
 	password_required: 'Şifre gereklidir!',
+	// datatable columns
+	dt_actions: 'İşlemler',
+	dt_id: 'ID',
+	dt_title: 'Ürün Adı',
+	dt_caption: 'Açıklama',
+	dt_quantity: 'Miktar',
+	dt_purchase_date: 'Satın Alma Tarihi',
 	// error messages
 	error_generic: 'Bir hata oluştu!',
 	error_unauthorized: 'Yetkisiz erişim!',
@@ -76,6 +82,13 @@ const translations: Translations = {
 		invalid_email: 'Invalid email address!',
 		email_required: 'Email is required!',
 		password_required: 'Password is required!',
+		// datatable columns
+		dt_actions: 'Actions',
+		dt_id: 'ID',
+		dt_title: 'Title',
+		dt_caption: 'Caption',
+		dt_quantity: 'Quantity',
+		dt_purchase_date: 'Purchase Date',
 		// error messages
 		error_generic: 'An error occurred!',
 		error_unauthorized: 'Unauthorized access!',

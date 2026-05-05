@@ -1,6 +1,5 @@
 import { getRequestEvent, query, form, requested } from '$app/server';
 import { Collections } from '$lib/types/pocketbase-types';
-import { jsonToPocketBaseFilter } from '$lib/utils/filter-string-helper';
 import { checkAuthenticated } from '$lib/remotes/guarded.remote';
 import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '$lib/server/error';
@@ -11,17 +10,14 @@ import { listParamsSchema, oneParamsSchema, updateFormSchema } from './page.shar
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getList = query(listParamsSchema, async (params) => {
-	// 🔒🔐
-	await checkAuthenticated();
+	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
 
 	// await sleep(300);
 
-	const filterString = jsonToPocketBaseFilter(params.filter, locals.pb); // (title ~ 'nazan' && quantity > 0)
-	// const filterString = `title ~ '${params.filterData.title}' && quantity > ${params.filterData.quantity}`;
+	const filterString = locals.pb.filter('(title ~ {:title} && quantity >= {:quantity})', { ...params.filterData });
 
-	// params.perPage
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.TestDatatable).getList(params.page, params.perPage, {
 			filter: filterString,
@@ -38,8 +34,7 @@ export const getList = query(listParamsSchema, async (params) => {
 });
 
 export const getOne = query(oneParamsSchema, async (params) => {
-	// 🔒🔐
-	await checkAuthenticated();
+	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -60,8 +55,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 });
 
 export const updateForm = form(updateFormSchema, async (params) => {
-	// 🔒🔐
-	await checkAuthenticated();
+	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
 

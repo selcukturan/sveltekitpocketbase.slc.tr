@@ -52,10 +52,7 @@ export const number = v.pipe(
 );
 
 export const maxDecimalPlaces = (max: number) =>
-	v.check(
-		(input: number) => new RegExp(`^-?\\d+(\\.\\d{1,${max}})?$`).test(String(input)),
-		`Sayı en fazla ${max} ondalık basamağa sahip olabilir. `
-	);
+	v.check((input: number) => new RegExp(`^-?\\d+(\\.\\d{1,${max}})?$`).test(String(input)), `Sayı en fazla ${max} ondalık basamağa sahip olabilir. `);
 
 export const integer = v.pipe(number, v.integer('Sayı tam sayı olmalıdır.'));
 export const decimal_1 = v.pipe(number, maxDecimalPlaces(1));
@@ -96,7 +93,7 @@ export const datetime = v.pipe(
 // ########################### END DATETIME ###########################
 
 // ########################### BEGIN ALL CURRENT VALUE ###########################
-export const allCurrentValue = v.union([
+/* export const allCurrentValue = v.union([
 	id,
 	text,
 	integer,
@@ -113,5 +110,5 @@ export const allCurrentValue = v.union([
 	date,
 	datetime
 ]);
-export type AllCurrentValue = v.InferOutput<typeof allCurrentValue>;
+export type AllCurrentValue = v.InferOutput<typeof allCurrentValue>; */
 // ########################### END ALL CURRENT VALUE ###########################

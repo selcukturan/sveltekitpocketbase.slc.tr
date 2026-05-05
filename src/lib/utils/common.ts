@@ -14,13 +14,7 @@ export function isFocusable(element: HTMLElement): boolean {
 export function isInput(element: HTMLElement): boolean {
 	const tagName = element && element.tagName ? element.tagName.toLowerCase() : '';
 
-	return (
-		tagName === 'input' ||
-		tagName === 'select' ||
-		tagName === 'textarea' ||
-		element?.isContentEditable ||
-		element?.classList.contains('slc-input')
-	);
+	return tagName === 'input' || tagName === 'select' || tagName === 'textarea' || element?.isContentEditable || element?.classList.contains('slc-input');
 }
 
 export function randomString(length?: number): string {
@@ -95,27 +89,13 @@ export function validTC(tc: string): boolean {
 	// olmali, string olmali, ilk rakam 0 olamaz, 11 karakter olmali
 	if (!tc || typeof tc !== 'string' || tc[0] === '0' || tc.length !== 11) return false;
 
-	let sum_1_3_5_7_9 = 0;
-	let sum_2_4_6_8 = 0;
-	let sum_first_10_char = 0;
-
-	const impossible = [
-		'11111111110',
-		'22222222220',
-		'33333333330',
-		'44444444440',
-		'55555555550',
-		'66666666660',
-		'77777777770',
-		'88888888880',
-		'99999999990'
-	];
+	const impossible = ['11111111110', '22222222220', '33333333330', '44444444440', '55555555550', '66666666660', '77777777770', '88888888880', '99999999990'];
 
 	const digits = tc.split('').map(Number);
 
-	sum_1_3_5_7_9 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]; // 1. 3. 5. 7. ve 9. hanelerin toplami
-	sum_2_4_6_8 = digits[1] + digits[3] + digits[5] + digits[7]; // 2. 4. 6. ve 8. hanelerin toplami
-	sum_first_10_char = digits.slice(0, 10).reduce((acc, val) => acc + val, 0); // 10 hanenin toplami
+	const sum_1_3_5_7_9 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]; // 1. 3. 5. 7. ve 9. hanelerin toplami
+	const sum_2_4_6_8 = digits[1] + digits[3] + digits[5] + digits[7]; // 2. 4. 6. ve 8. hanelerin toplami
+	const sum_first_10_char = digits.slice(0, 10).reduce((acc, val) => acc + val, 0); // 10 hanenin toplami
 
 	let mod_1 = (sum_1_3_5_7_9 * 7 - sum_2_4_6_8) % 10; // 1. 3. 5. 7. ve 9. hanelerin toplaminin 7 ile çarpimindan 2. 4. 6. ve 8. haneler cikartildiginda geriye kalan sayinin 10′a gore modu bize 10. haneyi verir.
 	mod_1 = mod_1 < 0 ? mod_1 + 10 : mod_1; // mod sonucu negatif cikar ise, sonuc mod ile toplanir.( sonuc hatali cikar ise abs(10) ile topla )

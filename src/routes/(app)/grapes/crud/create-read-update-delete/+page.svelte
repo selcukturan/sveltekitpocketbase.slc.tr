@@ -1,10 +1,11 @@
 <script lang="ts">
+	// Valibot
+	import { getDefaults } from 'valibot';
 	// SvelteKit
 	import { isHttpError } from '@sveltejs/kit';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { getDefaultsFromSchema, injectFilterData } from '$lib/utils/filter-string-helper';
-	import { t } from '$lib/app/localization.svelte';
+	import { t, type TranslationKeys } from '$lib/app/localization.svelte';
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
 	// Components
@@ -28,23 +29,18 @@
 	// ----------- End Page Context ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
-	const listParamsDefaults = getDefaultsFromSchema(listParamsSchema);
-
-	let filterData = $state<ListParamsSchemaType['filterData']>({
-		title: listParamsDefaults.filterData.title ?? '',
-		quantity: listParamsDefaults.filterData.quantity ?? 0
-	});
-
-	let params = $state.raw(injectFilterData(listParamsSchema, filterData));
+	const listParamsSchemaDefaults: ListParamsSchemaType = getDefaults(listParamsSchema);
+	let params = $state.raw(listParamsSchemaDefaults); // initial
+	let filterData = $state(listParamsSchemaDefaults.filterData); // initial
 
 	const query = $derived(getList(params));
 
-	const searchData = () => (params = injectFilterData(listParamsSchema, filterData));
-	const refreshData = () => query.refresh();
+	const search = () => (params = { ...params, filterData: { ...filterData } });
+	const refresh = () => query.refresh();
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
-	const oneParamsDefaults = getDefaultsFromSchema(oneParamsSchema); // kaldırılacak
+	const oneParamsDefaults = getDefaults(oneParamsSchema);
 	let drawer = null as Drawer | null;
 	let drawerCommand = $state({ cmd: '', id: '' });
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
@@ -81,27 +77,22 @@
 			<s.DataTable bind:this={datatable} {query} {columns} {footers} onPagination={(p) => (params = { ...params, ...p })}>
 				{#snippet toolbar()}
 					<div class="flex gap-2">
-						<Text
-							id="filter_title"
-							bind:value={filterData.title}
-							placeholder="Search - Title contains..."
-							onkeydown={(e) => e.key === 'Enter' && searchData()}
-						/>
+						<Text id="filter_title" bind:value={filterData.title} placeholder="Search - Title contains..." onkeydown={(e) => e.key === 'Enter' && search()} />
 						<Number
 							id="filter_quantity"
 							bind:value={filterData.quantity}
 							placeholder="Search - Quantity equals..."
-							onkeydown={(e) => e.key === 'Enter' && searchData()}
+							onkeydown={(e) => e.key === 'Enter' && search()}
 						/>
-						<Button label={t('search')} onclick={searchData} disabled={query.loading} />
-						<Button label={t('refresh')} onclick={refreshData} />
+						<Button label={t('search')} onclick={search} disabled={query.loading} />
+						<Button label={t('refresh')} onclick={refresh} />
 					</div>
 				{/snippet}
 				{#snippet headerRow(hr)}
 					<s.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
 							<s.HeaderCell {hr} {hc}>
-								{hc.label}
+								{t(('dt_' + hc.label) as TranslationKeys)}
 							</s.HeaderCell>
 						{/snippet}
 					</s.HeaderRow>

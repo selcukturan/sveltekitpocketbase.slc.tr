@@ -1,40 +1,33 @@
 import * as v from 'valibot';
 import * as input from '$lib/app/schemas/inputs';
-import { filterSchema, pocketbaseListSchema, pocketbaseOneSchema } from '$lib/app/schemas/filter-conditions';
 import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 import { Collections } from '$lib/types/pocketbase-types';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
-const templateConditions = {
-	type: 'group',
-	operator: '&&',
-	children: [
-		{
-			type: 'condition',
-			field: 'title',
-			operator: '~',
-			value: ''
-		},
-		{
-			type: 'condition',
-			field: 'quantity',
-			operator: '>',
-			value: ''
-		}
-	]
-};
-// --------------------------------------------------------------------------------------------------------------------------------------------
 export const listParamsSchema = v.object({
+	filter: v.optional(v.string()),
+	page: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 1), 1),
+	perPage: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 30), 30),
+	options: v.object({
+		sort: v.optional(v.string()),
+		expand: v.optional(v.string()),
+		fields: v.optional(v.string()),
+		skipTotal: v.optional(v.fallback(v.boolean(), false), false)
+	}),
 	filterData: v.object({
 		...input.Text('title', { required: false }),
 		...input.Number('quantity', { required: false })
-	}),
-	filter: v.optional(v.fallback(filterSchema, templateConditions), templateConditions),
-	...pocketbaseListSchema.entries
+	})
 });
 export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
-export const oneParamsSchema = pocketbaseOneSchema;
+export const oneParamsSchema = v.object({
+	id: v.optional(v.fallback(v.string(), ''), ''),
+	options: v.object({
+		expand: v.optional(v.string()),
+		fields: v.optional(v.string())
+	})
+});
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +52,7 @@ export const updateFormSchema = v.object({
 
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
+
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const relationListParamsSchema = v.object({
 	search: v.string(),
