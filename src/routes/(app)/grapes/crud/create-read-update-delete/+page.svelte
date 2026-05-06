@@ -120,9 +120,9 @@
 											class="text-error-500!"
 											onclick={async () => {
 												const shouldDelete = await confirm({
-													message: `[${dr.row.id}] ID'li kaydı silmek istediğinize emin misiniz?`,
-													yes: 'Evet',
-													no: 'Hayır'
+													message: t('delete_confirm_with_id', { id: dr.row.id }),
+													yes: t('yes'),
+													no: t('no')
 												});
 												if (shouldDelete) {
 													pageToaster.add({

@@ -27,6 +27,10 @@ const trTranslations = {
 	login_page_email_placeholder: 'Kullanıcı Adı',
 	login_page_password_placeholder: 'Şifre',
 	login_page_submit_button: 'Giriş',
+	// confirmations
+	yes: 'Evet',
+	no: 'Hayır',
+	delete_confirm_with_id: '"{id}" ID’li kaydı silmek istediğinize emin misiniz?',
 	// schema messages
 	invalid_data: 'Geçersiz veri!',
 	invalid_email: 'Geçersiz e-posta adresi!',
@@ -77,7 +81,11 @@ const translations: Translations = {
 		login_page_email_placeholder: 'Username',
 		login_page_password_placeholder: 'Password',
 		login_page_submit_button: 'Login',
-		//messages
+		// confirmations
+		yes: 'Yes',
+		no: 'No',
+		delete_confirm_with_id: 'Are you sure you want to delete the record with ID "{id}"?',
+		// schema messages
 		invalid_data: 'Invalid data!',
 		invalid_email: 'Invalid email address!',
 		email_required: 'Email is required!',
@@ -153,13 +161,19 @@ export function setSelectedLang(lang: SupportedLangs) {
 // ------------------------------ END Selected State and Language Management ---------------------
 
 // ------------------------------ BEGIN Get Translation ------------------------------------------
-/**
- * Belirtilen anahtar için seçili dildeki çeviriyi döner.
- *
- * @param key Çevrilecek metin anahtarı
- * @returns Çevrilmiş metin
- */
-export function t(key: TranslationKeys): string {
-	return translations[selected][key] || `Translation for key "${key}" not found in language "${selected}"`;
+// Çeviri tanımı:
+// welcome_message: 'Merhaba {name}, {count} yeni mesajın var'
+
+// Kullanım:
+// t('welcome_message', { name: 'Selçuk', count: 5 })
+// → "Merhaba Selçuk, 5 yeni mesajın var"
+
+export type TranslationParams = Record<string, string | number>;
+
+export function t(key: TranslationKeys, params?: TranslationParams): string {
+	const text = translations[selected][key] || `"${key}" not found in "${selected}"`;
+	if (!params) return text;
+	return text.replace(/\{(\w+)\}/g, (_, k) => (k in params ? String(params[k]) : `{${k}}`));
 }
+
 // ------------------------------ END Get Translation --------------------------------------------
