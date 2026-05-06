@@ -6,20 +6,19 @@
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
 	import { t, type TranslationKeys } from '$lib/app/localization.svelte';
+	import { watchUrlHash } from '$lib/attachments';
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
+	// All Input Components
+	import * as input from '$lib/components/ui/inputs';
+	// All Datatable Components
+	import * as dt from '$lib/components/ui/datatable';
 	// Components
 	import { Drawer } from '$lib/components/ui/drawer';
 	import { confirm } from '$lib/components/ui/confirm';
 	import { Toasts, createToaster } from '$lib/components/ui/toast';
-	// Datatable
-	import * as s from '$lib/components/ui/datatable';
-	// Attachments
-	import { watchUrlHash } from '$lib/attachments';
-	// Inputs
-	import { Hidden, Text, Number, Datetime, Submit, Button, Select, File, Email, Url, Textarea, Bool, Relation } from '$lib/components/ui/inputs';
 	// Types and Schemas
-	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType } from './page.shared';
+	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType, type OneParamsSchemaType } from './page.shared';
 	import { TestDatatableSelectSingleOptions, TestDatatableSelectMultipleOptions } from '$lib/types/pocketbase-types';
 	// Remote functions
 	import { getOne, getList, updateForm } from './page.remote';
@@ -40,16 +39,16 @@
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Drawer Logic ----------------------------------------------------------------------------------------------------------------
-	const oneParamsDefaults = getDefaults(oneParamsSchema);
-	let drawer = null as Drawer | null;
-	let drawerCommand = $state({ cmd: '', id: '' });
+	const oneParamsDefaults: OneParamsSchemaType = getDefaults(oneParamsSchema);
+	let drawer = $state<Drawer | undefined>(undefined);
+	let drawerCommand = $state({ cmd: '', id: '' }); // initial
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
 	type DataType = Awaited<typeof query>;
 	type ItemType = DataType['items'][number] & { slcAction?: string };
-	let datatable: s.DataTable<ItemType> | undefined = $state(undefined);
-	let columns: s.Column<ItemType>[] = [
+	let datatable = $state<dt.DataTable<ItemType> | undefined>(undefined);
+	let columns: dt.Column<ItemType>[] = [
 		{ field: 'slcAction', label: 'actions', width: '150px' },
 		{ field: 'id', label: 'id', width: 'minmax(50px,1fr)' },
 		{ field: 'title', label: 'title', width: 'minmax(50px,1fr)' },
@@ -57,7 +56,7 @@
 		{ field: 'quantity', label: 'quantity', width: 'minmax(50px,1fr)' },
 		{ field: 'purchase_date', label: 'purchase_date', width: 'minmax(50px,1fr)' }
 	];
-	let footers: s.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
+	let footers: dt.Footer<ItemType>[] = [{ caption: 'x1' }, { quantity: 'x2' }];
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
 </script>
 
@@ -70,47 +69,52 @@
 
 <Page>
 	<Page.Header>
-		<p>Page.Header</p>
+		<input.Button label={t('create')} onclick={() => setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' })} />
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<s.DataTable bind:this={datatable} {query} {columns} {footers} onPagination={(p) => (params = { ...params, ...p })}>
+			<dt.DataTable bind:this={datatable} {query} {columns} {footers} onPagination={(p) => (params = { ...params, ...p })}>
 				{#snippet toolbar()}
-					<div class="flex gap-2">
-						<Text id="filter_title" bind:value={filterData.title} placeholder="Search - Title contains..." onkeydown={(e) => e.key === 'Enter' && search()} />
-						<Number
+					<div class="flex gap-2 p-2">
+						<input.Text
+							id="filter_title"
+							bind:value={filterData.title}
+							placeholder="Search - Title contains..."
+							onkeydown={(e) => e.key === 'Enter' && search()}
+						/>
+						<input.Number
 							id="filter_quantity"
 							bind:value={filterData.quantity}
 							placeholder="Search - Quantity equals..."
 							onkeydown={(e) => e.key === 'Enter' && search()}
 						/>
-						<Button label={t('search')} onclick={search} disabled={query.loading} />
-						<Button label={t('refresh')} onclick={refresh} />
+						<input.Button label={t('search')} onclick={search} disabled={query.loading} />
+						<input.Button label={t('refresh')} onclick={refresh} />
 					</div>
 				{/snippet}
 				{#snippet headerRow(hr)}
-					<s.HeaderRow {hr}>
+					<dt.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
-							<s.HeaderCell {hr} {hc}>
+							<dt.HeaderCell {hr} {hc}>
 								{t(('dt_' + hc.label) as TranslationKeys)}
-							</s.HeaderCell>
+							</dt.HeaderCell>
 						{/snippet}
-					</s.HeaderRow>
+					</dt.HeaderRow>
 				{/snippet}
 				{#snippet dataRow(dr)}
-					<s.DataRow {dr}>
+					<dt.DataRow {dr}>
 						{#snippet dataCell(dc)}
 							{#if String(dc.col.data.field) === 'slcAction'}
-								<s.DataCell {dr} {dc}>
+								<dt.DataCell {dr} {dc}>
 									<div class="flex h-full w-full items-center justify-center gap-1">
-										<s.ActionButton
+										<dt.ActionButton
 											label={t('update')}
 											icon="ri-pencil-line"
 											onclick={() => {
 												setParams({ cmd: 'update', id: dr.row.id });
 											}}
 										/>
-										<s.ActionButton
+										<dt.ActionButton
 											label={t('delete')}
 											icon="ri-delete-bin-line"
 											class="text-error-500!"
@@ -129,7 +133,7 @@
 												}
 											}}
 										/>
-										<s.ActionButton
+										<dt.ActionButton
 											label={t('view')}
 											icon="ri-eye-line"
 											onclick={() => {
@@ -137,50 +141,32 @@
 											}}
 										/>
 									</div>
-								</s.DataCell>
+								</dt.DataCell>
 							{:else}
-								<s.DataCell {dr} {dc}>
+								<dt.DataCell {dr} {dc}>
 									{dc.value}
-								</s.DataCell>
+								</dt.DataCell>
 							{/if}
 						{/snippet}
-					</s.DataRow>
+					</dt.DataRow>
 				{/snippet}
 				{#snippet footerRow(fr)}
-					<s.FooterRow {fr}>
+					<dt.FooterRow {fr}>
 						{#snippet footerCell(fc)}
-							<s.FooterCell {fr} {fc}>
+							<dt.FooterCell {fr} {fc}>
 								{fc.value}
-							</s.FooterCell>
+							</dt.FooterCell>
 						{/snippet}
-					</s.FooterRow>
+					</dt.FooterRow>
 				{/snippet}
-			</s.DataTable>
+			</dt.DataTable>
 		</Page.Main.Table>
 	</Page.Main>
+	<!-- 
 	<Page.Footer>
-		<div>
-			<Button
-				label={t('view')}
-				onclick={() => {
-					setParams({ cmd: 'view', id: 'rjqbi24vn3f3k59' });
-				}}
-			/>
-			<Button
-				label={t('create')}
-				onclick={() => {
-					setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' });
-				}}
-			/>
-			<Button
-				label={t('update')}
-				onclick={() => {
-					setParams({ cmd: 'update', id: 'ydmi70g2ghqx2nb' });
-				}}
-			/>
-			<Button label={t('delete')} onclick={() => setParams({ cmd: 'delete', id: `${Math.round(Math.random() * 1000)}` })} />
-		</div>
-	</Page.Footer>
+		<p>Page.Footer</p>
+	</Page.Footer> 
+	-->
 	<!-- Page Hidden Drawer Area -->
 	<Page.Drawer>
 		<Drawer
@@ -215,7 +201,7 @@
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`Update ID: ${drawerCommand.id}`}>
-						<Button
+						<input.Button
 							label=" X "
 							onclick={() => {
 								drawer?.close();
@@ -272,27 +258,27 @@
 							})}
 						>
 							{#snippet inputs({ inputData })}
-								<Hidden field={updateForm.fields.id} value={inputData.id} />
-								<Text label="Title" field={updateForm.fields.title} value={inputData.title} />
-								<Number label="Quantity" field={updateForm.fields.quantity} value={inputData.quantity} />
-								<Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={inputData.purchase_date} />
-								<Email label="Email" field={updateForm.fields.email} value={inputData.email} />
-								<Url label="Url" field={updateForm.fields.url} value={inputData.url} />
-								<Textarea label="Textarea" field={updateForm.fields.textarea} value={inputData.textarea} />
-								<Relation
+								<input.Hidden field={updateForm.fields.id} value={inputData.id} />
+								<input.Text label="Title" field={updateForm.fields.title} value={inputData.title} />
+								<input.Number label="Quantity" field={updateForm.fields.quantity} value={inputData.quantity} />
+								<input.Datetime label="Purchase Date" field={updateForm.fields.purchase_date} value={inputData.purchase_date} />
+								<input.Email label="Email" field={updateForm.fields.email} value={inputData.email} />
+								<input.Url label="Url" field={updateForm.fields.url} value={inputData.url} />
+								<input.Textarea label="Textarea" field={updateForm.fields.textarea} value={inputData.textarea} />
+								<input.Relation
 									label="Relation Single"
 									collection="crud_relation_single"
 									field={updateForm.fields.relation_single}
 									value={inputData.relation_single}
 								/>
-								<Relation
+								<input.Relation
 									multiple
 									label="Relation Multiple"
 									collection="crud_relation_multiple"
 									field={updateForm.fields.relation_multiple}
 									value={inputData.relation_multiple}
 								/>
-								<Select
+								<input.Select
 									label="Select Single"
 									field={updateForm.fields.select_single}
 									value={inputData.select_single}
@@ -301,7 +287,7 @@
 										label: value.charAt(0).toUpperCase() + value.slice(1)
 									}))}
 								/>
-								<Select
+								<input.Select
 									multiple
 									label="Select Multiple"
 									field={updateForm.fields.select_multiple}
@@ -311,14 +297,14 @@
 										label: value.toUpperCase()
 									}))}
 								/>
-								<File label="Single File" field={updateForm.fields.single_file} value={inputData.single_file} />
-								<File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={inputData.multiple_files} />
-								<Bool label="Boolean" field={updateForm.fields.bool} value={inputData.bool} />
+								<input.File label="Single File" field={updateForm.fields.single_file} value={inputData.single_file} />
+								<input.File multiple label="Multiple Files" field={updateForm.fields.multiple_files} value={inputData.multiple_files} />
+								<input.Bool label="Boolean" field={updateForm.fields.bool} value={inputData.bool} />
 							{/snippet}
 
 							{#snippet buttons()}
-								<Button label={t('close')} onclick={() => drawer?.close(true)} />
-								<Submit label={t('update')} disabled={Boolean(updateForm.pending)} />
+								<input.Button label={t('close')} onclick={() => drawer?.close(true)} />
+								<input.Submit label={t('update')} disabled={Boolean(updateForm.pending)} />
 							{/snippet}
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
