@@ -5,7 +5,7 @@
 	import { isHttpError } from '@sveltejs/kit';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { t, type TranslationKeys } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization.svelte';
 	import { watchUrlHash } from '$lib/attachments';
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
@@ -96,7 +96,7 @@
 					<dt.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
 							<dt.HeaderCell {hr} {hc}>
-								{t(('dt_' + hc.label) as TranslationKeys)}
+								{t('dt_' + hc.label)}
 							</dt.HeaderCell>
 						{/snippet}
 					</dt.HeaderRow>
@@ -109,14 +109,14 @@
 									<div class="flex h-full w-full items-center justify-center gap-1">
 										<dt.ActionButton
 											label={t('update')}
-											icon="ri-pencil-line"
+											icon="update"
 											onclick={() => {
 												setParams({ cmd: 'update', id: dr.row.id });
 											}}
 										/>
 										<dt.ActionButton
 											label={t('delete')}
-											icon="ri-delete-bin-line"
+											icon="delete"
 											class="text-error-500!"
 											onclick={async () => {
 												const shouldDelete = await confirm({
@@ -135,7 +135,7 @@
 										/>
 										<dt.ActionButton
 											label={t('view')}
-											icon="ri-eye-line"
+											icon="view"
 											onclick={() => {
 												setParams({ cmd: 'view', id: dr.row.id });
 											}}

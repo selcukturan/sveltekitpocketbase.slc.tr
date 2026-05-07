@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		PageLayout,
-		type PageSidebarDataType,
-		type ChildrenPropsType
-	} from '$lib/components/layouts/page';
+	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '$lib/components/layouts/page';
 
 	let { children }: ChildrenPropsType = $props();
 
@@ -14,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/developments`,
-					icon: 'ri-file-line',
+					icon: 'file-symlink',
 					root: true
 				}
 			]
@@ -23,67 +19,67 @@
 			title: 'Components',
 			child: [
 				{
-					title: 'Introduction',
+					title: 'Icons',
 					href: `/developments/components`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
-					title: 'Form Validation with Superforms',
+					title: 'X',
 					href: `/developments/components/form`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
-					title: 'Form Validation with SLC',
+					title: 'X',
 					href: `/developments/components/form-slc`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 
 				{
 					title: 'Tooltip',
 					href: `/developments/components/tooltip`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
 					title: 'Toast',
 					href: `/developments/components/toast`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
 					title: 'Confirmation',
 					href: `/developments/components/confirmation`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
 					title: 'Drawer Panel',
 					href: `/developments/components/drawer`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 
 				{
-					title: 'Select',
+					title: 'X',
 					href: `/developments/components/select`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 
 				{
-					title: 'Remote Functions',
+					title: 'X',
 					href: `/developments/components/remote-functions`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
-					title: 'Link Routing',
+					title: 'Pagination',
 					href: `/developments/components/link-routing`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
-					title: 'Empty',
+					title: 'Toggler',
 					href: `/developments/components/empty`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				},
 				{
 					title: 'Tree (Draft)',
 					href: `/developments/components/tree`,
-					icon: 'ri-file-line'
+					icon: 'file-symlink'
 				}
 			]
 		}

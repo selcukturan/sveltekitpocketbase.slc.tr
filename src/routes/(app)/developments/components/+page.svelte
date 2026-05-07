@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Page, Head } from '$lib/components/templates';
+	import { AllIcons } from '$lib/components/icons';
 </script>
 
 <Head>
@@ -13,7 +14,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
-			<div>Components Introduction</div>
+			<AllIcons />
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>

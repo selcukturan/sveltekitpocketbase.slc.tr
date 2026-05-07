@@ -73,10 +73,7 @@ export function createPocketBaseInstance(event: RequestEvent): { pb: TypedPocket
 
 	pb.beforeSend = (url, options) => {
 		const userIp =
-			event.request.headers.get('cf-connecting-ip') ||
-			event.request.headers.get('x-forwarded-for') ||
-			event.request.headers.get('x-real-ip') ||
-			null;
+			event.request.headers.get('cf-connecting-ip') || event.request.headers.get('x-forwarded-for') || event.request.headers.get('x-real-ip') || null;
 
 		const userAgent = event.request.headers.get('user-agent');
 		const newHeaders = { ...options.headers };

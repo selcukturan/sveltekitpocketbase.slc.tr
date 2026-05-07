@@ -3,9 +3,10 @@
 	import { LangToggle } from '$lib/components/ui/lang-toggle';
 	import { config } from '$lib/app/config';
 	import { Toasts, createToaster } from '$lib/components/ui/toast';
-	import { getUser, login } from '$lib/remotes/guarded.remote';
+	import { login } from '$lib/remotes/guarded.remote';
 	import { loginSchema } from '$lib/app/schemas/login';
-	import { t, type TranslationKeys } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization.svelte';
+	import { resolve } from '$app/paths';
 
 	const loginPageToaster = createToaster({
 		name: 'login-page-toaster',
@@ -23,7 +24,7 @@
 <Toasts toasterName="login-page-toaster" />
 
 <main class="flex min-h-dvh flex-row">
-	<a href="/" class="contents">
+	<a href={resolve('/')} class="contents">
 		<div class="absolute top-0 left-0 z-10 m-4 inline-flex h-10 w-10 items-center md:m-10">
 			<img class="h-full w-full select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</div>
@@ -97,8 +98,11 @@
 				isLoading = true;
 
 				try {
-					if (await submit().updates(getUser())) {
-						// giriş başarılı
+					if (await submit()) {
+						// giriş başarılı olduktan sonra,
+						// `.updates(getUser())` kullanılmadığı için tam sayfa yenileme olur.
+						// bu da `(auth)/+layout.server.ts`i çalıştırır.
+						// orada da artık oturum açık olduğu için redirect "/" fırlatılır.
 						isLoading = false;
 					} else {
 						loginPageToaster.add({
@@ -127,8 +131,8 @@
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
 
-					{#each login.fields.email.issues() ?? [] as issue}
-						<p class="text-error-500">{t(issue.message as TranslationKeys)}</p>
+					{#each login.fields.email.issues() ?? [] as issue, index (index)}
+						<p class="text-error-500">{t(issue.message)}</p>
 					{/each}
 				</label>
 
@@ -139,8 +143,8 @@
 						{...login.fields._password.as('password', 'SLc1234567')}
 						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
 					/>
-					{#each login.fields._password.issues() ?? [] as issue}
-						<p class="text-error-500">{t(issue.message as TranslationKeys)}</p>
+					{#each login.fields._password.issues() ?? [] as issue, index (index)}
+						<p class="text-error-500">{t(issue.message)}</p>
 					{/each}
 				</label>
 

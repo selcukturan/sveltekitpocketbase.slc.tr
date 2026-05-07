@@ -3,12 +3,13 @@
 	import { Page, Head } from '$lib/components/templates';
 	import { getUser } from '$lib/remotes/guarded.remote';
 
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 
 	let user = getUser();
 
 	function onclick() {
-		goto('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9');
+		goto(resolve('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9'));
 	}
 </script>
 
@@ -37,14 +38,11 @@
 
 				<h1>1 - FancyInput'ların içinde orjinal input değerlerini değiştirirken `field?.set('new value');` kullan.</h1>
 				<!-- <pre>{JSON.stringify(user, null, 2)}</pre> -->
-				<button
-					{onclick}
-					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
-				>
+				<button {onclick} class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center">
 					BUTTON: Go DataTable with filter and recordId in hash
 				</button>
 				<a
-					href="/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9"
+					href={resolve('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9')}
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
 					target="_blank"
 					rel="noopener noreferrer"
@@ -53,7 +51,7 @@
 				</a>
 
 				<a
-					href="/login"
+					href={resolve('/login')}
 					class="bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
 					rel="noopener noreferrer"
 				>

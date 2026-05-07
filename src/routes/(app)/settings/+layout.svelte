@@ -10,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/settings`,
-					icon: 'ri-file-line',
+					icon: 'file-symlink',
 					root: true
 				}
 			]
@@ -21,13 +21,13 @@
 				{
 					title: 'Introduction',
 					href: `/settings/system`,
-					icon: 'ri-file-line',
+					icon: 'file-symlink',
 					root: true
 				},
 				{
-					title: 'application',
+					title: 'Application',
 					href: `/settings/system/application`,
-					icon: 'ri-file-line',
+					icon: 'file-symlink',
 					root: true
 				}
 			]

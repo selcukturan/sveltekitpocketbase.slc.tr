@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { t, getSelectedLang, setSelectedLang } from '$lib/app/localization.svelte';
 	import { tooltip } from '$lib/attachments';
+
+	const tooltipText = $derived(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'));
 </script>
 
 <button
 	onclick={() => setSelectedLang(getSelectedLang() === 'tr' ? 'en' : 'tr')}
 	class="cursor-pointer"
-	{@attach tooltip(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'))}
+	{@attach tooltip({ text: tooltipText, hideOnClick: false })}
 >
 	<div class="flag-container">
 		{#if getSelectedLang() === 'tr'}

@@ -18,6 +18,10 @@ const trTranslations = {
 	search: 'Ara',
 	view: 'Görüntüle',
 	update: 'Güncelle',
+	show_menu: 'Menüyü Göster',
+	hide_menu: 'Menüyü Gizle',
+	show_panel: 'Paneli Göster',
+	hide_panel: 'Paneli Gizle',
 	change_language_turkish: "Türkçe'ye geç",
 	change_language_english: 'Switch to English',
 	login_page_title: 'Giriş Sayfası',
@@ -72,6 +76,10 @@ const translations: Translations = {
 		search: 'Search',
 		view: 'View',
 		update: 'Update',
+		show_menu: 'Show Menu',
+		hide_menu: 'Hide Menu',
+		show_panel: 'Show Panel',
+		hide_panel: 'Hide Panel',
 		change_language_turkish: "Türkçe'ye geç",
 		change_language_english: 'Switch to English',
 		login_page_title: 'Login Page',
@@ -170,8 +178,9 @@ export function setSelectedLang(lang: SupportedLangs) {
 
 export type TranslationParams = Record<string, string | number>;
 
-export function t(key: TranslationKeys, params?: TranslationParams): string {
-	const text = translations[selected][key] || `"${key}" not found in "${selected}"`;
+export function t(key: TranslationKeys | (string & {}), params?: TranslationParams): string {
+	const text = translations[selected][key as TranslationKeys] || `"${key}" not found in "${selected}"`;
+
 	if (!params) return text;
 	return text.replace(/\{(\w+)\}/g, (_, k) => (k in params ? String(params[k]) : `{${k}}`));
 }

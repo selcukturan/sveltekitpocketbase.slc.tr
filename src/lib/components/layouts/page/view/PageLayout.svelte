@@ -5,6 +5,9 @@
 	import { getGlobalContext } from '$lib/app/global.svelte';
 
 	import type { PageLayoutPropsType } from '../types';
+	import { Icon } from '$lib/components/icons';
+	import { t } from '$lib/app/localization.svelte';
+	import { tooltip } from '$lib/attachments';
 
 	let { pageSidebardata, children }: PageLayoutPropsType = $props();
 
@@ -26,9 +29,9 @@
 
 	let icon = $derived.by(() => {
 		if (global.isMobileBreakpoint) {
-			return global.hidePageSidebar ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line';
+			return global.hidePageSidebar ? 'chevron-down' : 'chevron-up';
 		} else {
-			return global.hidePageSidebar ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line';
+			return global.hidePageSidebar ? 'chevron-right' : 'chevron-left';
 		}
 	});
 </script>
@@ -63,27 +66,16 @@
 			<button
 				type="button"
 				onclick={handleClick}
-				style:display={global.hideSidebar ? 'none' : 'flex'}
-				class="bg-surface-50
-				text-surface-600
-				hover:bg-quaternary-50/90
-				absolute
-				z-52
-				h-7
-				w-7
-				cursor-pointer
-				items-center
-				justify-center
-				rounded-full
-				border
-				select-none
-				sm:h-5 sm:w-5"
+				style:display={global.hideSidebar ? 'none' : 'inline-flex'}
+				class="bg-surface-50 text-surface-600 hover:bg-quaternary-50/90 absolute z-52 h-7 w-7 cursor-pointer items-center justify-center rounded-full border p-0.25 select-none sm:h-6 sm:w-6"
+				class:pt-3={global.hidePageSidebar && global.isMobileBreakpoint}
+				class:pl-2={global.hidePageSidebar && !global.isMobileBreakpoint}
 				class:mobile-position={global.isMobileBreakpoint}
 				class:desktop-position={!global.isMobileBreakpoint}
-				aria-label={global.hidePageSidebar ? 'Show sidebar' : 'Hide sidebar'}
+				aria-label={global.hidePageSidebar ? t('show_menu') : t('hide_menu')}
+				{@attach tooltip({ text: global.hidePageSidebar ? t('show_menu') : t('hide_menu') })}
 			>
-				<i class={`${icon} text-base! leading-px! ${global.hidePageSidebar ? (global.isMobileBreakpoint ? 'mt-3' : 'ml-2') : ''}`}
-				></i>
+				<Icon name={icon} size="16px" />
 			</button>
 			<PageSidebar {pageSidebardata} />
 		</section>
@@ -106,11 +98,15 @@
 	{/snippet}
 </SplitPane>
 
-<style lang="postcss">
+<style>
 	.mobile-position {
-		@apply top-(--pos) left-1/2 -translate-x-1/2 -translate-y-1/2;
+		top: var(--pos);
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 	.desktop-position {
-		@apply top-1/2 left-(--pos) -translate-x-1/2 -translate-y-1/2;
+		top: 50%;
+		left: var(--pos);
+		transform: translate(-50%, -50%);
 	}
 </style>

@@ -13,10 +13,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// ⌛🔒 Token kontrolü ve yenileme ################################################################################################
 	try {
-		event.locals.auth.isValid && (await event.locals.pb.collection(Collections.SysUsers).authRefresh());
+		if (event.locals.auth.isValid) {
+			await event.locals.pb.collection(Collections.SysUsers).authRefresh();
+		} else {
+			event.locals.auth.clear();
+		}
 	} catch (_) {
 		event.locals.auth.clear();
 	}
+
 	event.locals.user = structuredClone(event.locals.auth.record);
 
 	// 📡 before resolving the request ################################################################################################

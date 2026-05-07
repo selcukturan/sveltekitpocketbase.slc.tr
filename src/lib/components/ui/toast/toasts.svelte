@@ -3,6 +3,7 @@
 	import { getToaster } from './toaster.svelte';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+	import { Icon } from '$lib/components/icons';
 
 	const { toasterName = 'app-toaster' }: ToastsProps = $props();
 
@@ -38,7 +39,7 @@
 	};
 
 	const closeButtonClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'inline-flex items-center justify-center h-5 w-5 rounded-full cursor-pointer select-none',
+		base: 'inline-flex items-center justify-center h-5 w-5 rounded-full cursor-pointer select-none p-0.5',
 		info: 'bg-info-500 text-info-50 hover:bg-info-700 active:bg-info-600',
 		success: 'bg-success-500 text-success-50 hover:bg-success-700 active:bg-success-600',
 		warning: 'bg-warning-500 text-warning-50 hover:bg-warning-700 active:bg-warning-600',
@@ -63,19 +64,19 @@
 		>
 			<div class="pr-2">
 				{#if toastType === 'info'}
-					<i class={`ri-information-line text-2xl!`}></i>
+					<Icon name="info" />
 				{:else if toastType === 'error'}
-					<i class={`ri-error-warning-line text-2xl!`}></i>
+					<Icon name="circle-x" />
 				{:else if toastType === 'success'}
-					<i class={`ri-check-line text-2xl!`}></i>
+					<Icon name="circle-check" />
 				{:else if toastType === 'warning'}
-					<i class={`ri-alert-line text-2xl!`}></i>
+					<Icon name="circle-alert" />
 				{:else if toastType === 'loading'}
 					<div class="animate-spin">
-						<i class={`ri-loader-4-line text-2xl!`}></i>
+						<Icon name="loader" />
 					</div>
 				{:else}
-					<i class={`ri-circle-line text-2xl!`}></i>
+					<Icon name="circle" />
 				{/if}
 			</div>
 			<div class="flex-1">
@@ -84,10 +85,7 @@
 			</div>
 			{#if toastId && toast.action}
 				<div>
-					<button
-						class={`${actionButtonClasses.base} ${actionButtonClasses[toastType]}`}
-						onclick={() => toast.action?.onClick(toastId)}
-					>
+					<button class={`${actionButtonClasses.base} ${actionButtonClasses[toastType]}`} onclick={() => toast.action?.onClick(toastId)}>
 						{toast.action.label}
 					</button>
 				</div>
@@ -100,7 +98,7 @@
 						onclick={() => toaster.remove(toastId)}
 						aria-label="Close"
 					>
-						<i class={`ri-close-line text-base! leading-0!`}></i>
+						<Icon name="close" size="100%" />
 					</button>
 				</div>
 			{/if}
