@@ -30,7 +30,7 @@
 				onclick={handleClick}
 				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 items-center justify-center rounded-md p-0.5 text-center select-none`}
 				aria-label={tooltipText}
-				{@attach tooltip({ text: tooltipText, hideOnClick: false })}
+				{@attach tooltip(tooltipText)}
 			>
 				<Icon name={global.hideSidebar ? 'panel-right-close' : 'panel-right-open'} />
 			</button>

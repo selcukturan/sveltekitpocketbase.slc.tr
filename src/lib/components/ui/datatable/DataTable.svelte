@@ -14,23 +14,23 @@
 	// Parent kullanımı: {tableRef?.states.loading}
 	export const states = {
 		get loading() {
-			return context.propsQuery?.loading ?? false;
+			return context.query?.loading ?? false;
 		},
 		get headerRowHeight() {
-			return context.propsHeaderRowHeight;
+			return context.headerRowHeight;
 		}
 	};
 </script>
 
-<div class:slc-table-main={true} class={context.propsMainClass} style:width="100%" style:height="100%">
-	{@render context.propsToolbar?.()}
-	<div class:slc-table-container={true} class={context.propsContainerClass}>
-		{#if context.propsQuery?.loading === true}
-			<div class="slc-table-message">Loading...</div>
-		{:else if context.propsQuery?.error !== undefined}
-			<div class="slc-table-message">{context.propsQuery?.error.body.message ?? 'Error occurred'}</div>
+<div class:slc-table-main={true} class={context.mainClass} style:width="100%" style:height="100%">
+	{@render context.toolbar?.()}
+	<div class:slc-table-container={true} class={context.containerClass}>
+		{#if context.query?.loading === true}
+			<div class="slc-table-message"><p>Loading...</p></div>
+		{:else if context.query?.error !== undefined}
+			<div class="slc-table-message"><p>{context.query?.error.body.message ?? 'Error occurred'}</p></div>
 		{:else if context.dataLength === 0}
-			<div class="slc-table-message">No data to display</div>
+			<div class="slc-table-message"><p>No data to display</p></div>
 		{/if}
 		<div
 			role="grid"
@@ -42,19 +42,19 @@
 			{@attach context.watchItemsChanged}
 			{@attach context.trackTableScroll}
 			{@attach context.trackTableRaf}
-			class={context.propsTableClass}
+			class={context.tableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>
 			{#if context.headerLength > 0}
-				{@render context.propsHeaderRow?.({
+				{@render context.headerRow?.({
 					test: 'test'
 				})}
 			{/if}
 
 			{#if context.dataLength > 0}
 				{#each context.virtualData as row, virtualIndex (row.data.id)}
-					{@render context.propsDataRow?.({
+					{@render context.dataRow?.({
 						row: row.data,
 						rowVirtualIndex: virtualIndex,
 						rowOriginalIndex: row.originalIndex
@@ -63,8 +63,8 @@
 			{/if}
 
 			{#if context.dataLength > 0 && context.footerLength > 0}
-				{#each context.propsFooters as row, footerIndex (footerIndex)}
-					{@render context.propsFooterRow?.({
+				{#each context.footers as row, footerIndex (footerIndex)}
+					{@render context.footerRow?.({
 						footerRow: row,
 						footerIndex
 					})}
@@ -72,18 +72,20 @@
 			{/if}
 		</div>
 	</div>
-	<div>
-		<Pagination
-			totalItems={context.totalItems}
-			page={context.page}
-			perPage={context.perPage}
-			totalPages={context.totalPages}
-			onChange={(data) => {
-				context.propsOnPagination?.(data);
-			}}
-		/>
-	</div>
-	{@render context.propsStatusbar?.()}
+	{#if context.paginable}
+		<div>
+			<Pagination
+				totalItems={context.totalItems}
+				page={context.page}
+				perPage={context.perPage}
+				totalPages={context.totalPages}
+				onChange={(data) => {
+					context.onPagination?.(data);
+				}}
+			/>
+		</div>
+	{/if}
+	{@render context.statusbar?.()}
 </div>
 
 <style>

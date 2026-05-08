@@ -5,7 +5,7 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
 export interface MainProps<TData extends Row> {
-	query?: RemoteQuery<ListResult<TData>>;
+	query?: RemoteQuery<ListResult<TData>> | RemoteQuery<TData[]> | RemoteQuery<TData>;
 	columns: Column<TData>[]; // required
 	footers?: Footer<TData>[];
 	// Snippets (Render Fonksiyonları)
@@ -32,85 +32,71 @@ class TableContext<TData extends Row> {
 	// initialProps zaten bir Proxy olduğu için reaktivitesi kopmaz
 	#props = $state() as MainProps<TData>;
 
+	paginable = $state<boolean>(false);
+
 	// Current Data
 	#currentData = $state<ListResult<TData> | undefined>(undefined);
-	get propsQuery() {
-		return this.#props.query;
-	}
+	readonly query = $derived(this.#props.query);
+
 	watchCurrentChanged = () => {
-		if (this.propsQuery?.ready) this.#currentData = this.propsQuery?.current;
+		const query = this.query;
+
+		if (query && query.ready) {
+			const current = query.current;
+
+			if (current && typeof current === 'object' && 'items' in current) {
+				this.paginable = true;
+				this.#currentData = current as ListResult<TData>;
+			} else if (Array.isArray(current)) {
+				this.paginable = false;
+				this.#currentData = {
+					items: current,
+					page: 1,
+					perPage: current.length,
+					totalItems: current.length,
+					totalPages: 1
+				};
+			} else if (current) {
+				this.paginable = false;
+				this.#currentData = {
+					items: [current as TData],
+					page: 1,
+					perPage: 1,
+					totalItems: 1,
+					totalPages: 1
+				};
+			} else {
+				this.paginable = false;
+				this.#currentData = undefined;
+			}
+		}
 	};
 
 	// Data structure
-	get propsCurrent() {
-		return this.#currentData;
-	}
-	get items() {
-		return this.#currentData?.items ?? [];
-	}
-	get totalItems() {
-		return this.#currentData?.totalItems ?? 0;
-	}
-	get page() {
-		return this.#currentData?.page ?? 1;
-	}
-	get perPage() {
-		return this.#currentData?.perPage ?? 30;
-	}
-	get totalPages() {
-		return this.#currentData?.totalPages ?? 0;
-	}
-
+	readonly items = $derived(this.#currentData?.items ?? []);
+	readonly totalItems = $derived(this.#currentData?.totalItems ?? 0);
+	readonly page = $derived(this.#currentData?.page ?? 1);
+	readonly perPage = $derived(this.#currentData?.perPage ?? 30);
+	readonly totalPages = $derived(this.#currentData?.totalPages ?? 0);
 	// Table structure
-	get propsColumns() {
-		return this.#props.columns; // required
-	}
-	get propsFooters() {
-		return this.#props.footers ?? [];
-	}
-
+	readonly columns = $derived(this.#props.columns); // required
+	readonly footers = $derived(this.#props.footers ?? []);
 	// Snippets (Render Fonksiyonları)
-	get propsToolbar() {
-		return this.#props.toolbar;
-	}
-	get propsHeaderRow() {
-		return this.#props.headerRow; // required
-	}
-	get propsDataRow() {
-		return this.#props.dataRow; // required
-	}
-	get propsFooterRow() {
-		return this.#props.footerRow;
-	}
-	get propsStatusbar() {
-		return this.#props.statusbar;
-	}
-
+	readonly toolbar = $derived(this.#props.toolbar);
+	readonly headerRow = $derived(this.#props.headerRow); // required
+	readonly dataRow = $derived(this.#props.dataRow); // required
+	readonly footerRow = $derived(this.#props.footerRow);
+	readonly statusbar = $derived(this.#props.statusbar);
 	// UI State & Styling
-	get propsHeaderRowHeight() {
-		return this.#props.headerRowHeight ?? 35;
-	}
-	get propsDataRowHeight() {
-		return this.#props.dataRowHeight ?? 35;
-	}
-	get propsFooterRowHeight() {
-		return this.#props.footerRowHeight ?? 35;
-	}
-
+	readonly headerRowHeight = $derived(this.#props.headerRowHeight ?? 35);
+	readonly dataRowHeight = $derived(this.#props.dataRowHeight ?? 35);
+	readonly footerRowHeight = $derived(this.#props.footerRowHeight ?? 35);
 	// Özel Class Tanımları
-	get propsTableClass() {
-		return this.#props.tableClass;
-	}
-	get propsContainerClass() {
-		return this.#props.containerClass;
-	}
-	get propsMainClass() {
-		return this.#props.mainClass;
-	}
+	readonly tableClass = $derived(this.#props.tableClass);
+	readonly containerClass = $derived(this.#props.containerClass);
+	readonly mainClass = $derived(this.#props.mainClass);
 	// Events
-	get propsOnPagination() {
-		return this.#props.onPagination;
-	}
+	readonly onPagination = $derived(this.#props.onPagination);
 	// ############### END PROPS ###############
 
 	constructor(initialProps: MainProps<TData>) {
@@ -122,7 +108,7 @@ class TableContext<TData extends Row> {
 	// base variables
 	headerLength = $state(1);
 	dataLength = $derived(this.items.length);
-	footerLength = $derived(this.propsFooters.length);
+	footerLength = $derived(this.footers.length);
 
 	// virtual scroll variables
 	#currentScrollY = 0; // scroll event'inde güncellenir
@@ -136,7 +122,7 @@ class TableContext<TData extends Row> {
 	// Manuel çalıştırılır. rowIndices güncellenir.
 	updateVisibleIndexes = (force: boolean = false) => {
 		const overscan = 10;
-		const rowHeight = this.propsDataRowHeight;
+		const rowHeight = this.dataRowHeight;
 
 		const start = Math.max(0, Math.floor(this.#rafY / rowHeight) - overscan);
 		const end = Math.min(this.dataLength - 1, Math.floor((this.#rafY + this.clientHeight) / rowHeight) + overscan);
@@ -171,8 +157,8 @@ class TableContext<TData extends Row> {
 	visibleColumns = $derived.by(() => {
 		const processedColumns: { data: Column<TData>; originalIndex: number }[] = [];
 
-		for (let i = 0; i <= this.propsColumns.length; i++) {
-			const col = this.propsColumns[i];
+		for (let i = 0; i <= this.columns.length; i++) {
+			const col = this.columns[i];
 			if (col && col.hidden !== true) {
 				processedColumns.push({ data: col, originalIndex: i });
 			}
@@ -183,9 +169,9 @@ class TableContext<TData extends Row> {
 
 	gridTemplateRows = $derived.by(() => {
 		const headerLength = this.headerLength;
-		const headerRowHeight = this.propsHeaderRowHeight;
-		const dataRowHeight = this.propsDataRowHeight;
-		const footerRowHeight = this.propsFooterRowHeight;
+		const headerRowHeight = this.headerRowHeight;
+		const dataRowHeight = this.dataRowHeight;
+		const footerRowHeight = this.footerRowHeight;
 		const footerLength = this.footerLength;
 		const itemLength = this.dataLength;
 
@@ -206,7 +192,7 @@ class TableContext<TData extends Row> {
 			console.log('Mevcut veri:', this.items);
 		},
 		testHelper2: (index: number) => {
-			console.log('Satır yüksekliği:' + index, this.propsDataRowHeight);
+			console.log('Satır yüksekliği:' + index, this.dataRowHeight);
 		}
 	};
 

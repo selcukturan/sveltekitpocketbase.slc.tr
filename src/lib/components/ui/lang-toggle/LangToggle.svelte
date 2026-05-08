@@ -5,11 +5,7 @@
 	const tooltipText = $derived(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'));
 </script>
 
-<button
-	onclick={() => setSelectedLang(getSelectedLang() === 'tr' ? 'en' : 'tr')}
-	class="cursor-pointer"
-	{@attach tooltip({ text: tooltipText, hideOnClick: false })}
->
+<button onclick={() => setSelectedLang(getSelectedLang() === 'tr' ? 'en' : 'tr')} class="cursor-pointer" {@attach tooltip(tooltipText)}>
 	<div class="flag-container">
 		{#if getSelectedLang() === 'tr'}
 			<!-- Türkiye (TR) -->

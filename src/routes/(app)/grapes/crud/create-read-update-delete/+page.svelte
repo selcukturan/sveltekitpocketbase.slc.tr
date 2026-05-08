@@ -29,7 +29,7 @@
 
 	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
 	const listParamsSchemaDefaults: ListParamsSchemaType = getDefaults(listParamsSchema);
-	let params = $state.raw(listParamsSchemaDefaults); // initial
+	let params = $state(listParamsSchemaDefaults); // initial
 	let filterData = $state(listParamsSchemaDefaults.filterData); // initial
 
 	const query = $derived(getList(params));
@@ -70,28 +70,21 @@
 <Page>
 	<Page.Header>
 		<input.Button label={t('create')} onclick={() => setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' })} />
+		<div class="flex gap-2 p-2">
+			<input.Text id="filter_title" bind:value={filterData.title} placeholder="Search - Title contains..." onkeydown={(e) => e.key === 'Enter' && search()} />
+			<input.Number
+				id="filter_quantity"
+				bind:value={filterData.quantity}
+				placeholder="Search - Quantity equals..."
+				onkeydown={(e) => e.key === 'Enter' && search()}
+			/>
+			<input.Button label={t('search')} onclick={search} disabled={query.loading} />
+			<input.Button label={t('refresh')} onclick={refresh} />
+		</div>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
 			<dt.DataTable bind:this={datatable} {query} {columns} {footers} onPagination={(p) => (params = { ...params, ...p })}>
-				{#snippet toolbar()}
-					<div class="flex gap-2 p-2">
-						<input.Text
-							id="filter_title"
-							bind:value={filterData.title}
-							placeholder="Search - Title contains..."
-							onkeydown={(e) => e.key === 'Enter' && search()}
-						/>
-						<input.Number
-							id="filter_quantity"
-							bind:value={filterData.quantity}
-							placeholder="Search - Quantity equals..."
-							onkeydown={(e) => e.key === 'Enter' && search()}
-						/>
-						<input.Button label={t('search')} onclick={search} disabled={query.loading} />
-						<input.Button label={t('refresh')} onclick={refresh} />
-					</div>
-				{/snippet}
 				{#snippet headerRow(hr)}
 					<dt.HeaderRow {hr}>
 						{#snippet headerCell(hc)}
@@ -192,12 +185,7 @@
 			}}
 		>
 			{#if drawerCommand.cmd === 'create'}
-				<!-- <Boundary> -->
 				<p>This is a drawer for creating a new record.</p>
-				<pre>
-						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
-					</pre>
-				<!-- </Boundary> -->
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`Update ID: ${drawerCommand.id}`}>
@@ -310,18 +298,7 @@
 					</DrawerFormContent.Content>
 				</DrawerFormContent>
 			{:else if drawerCommand.cmd === 'view' && drawerCommand.id}
-				<!-- {@const oneResult = getOne({ ...oneParamsDefaults, id: drawerCommand.id }).current} -->
-				<!-- <Boundary> -->
 				<p>This is a drawer for creating a new record.</p>
-				<!-- <pre>
-					{JSON.stringify(derivedOneResult.current, null, 2)}
-				</pre> -->
-				<!-- <Boundary>
-					<p>This is a drawer for viewing the record with ID: {drawerCommand.id}</p>
-					<pre>
-						{JSON.stringify(await getOne({ ...oneParamsDefaults, id: drawerCommand.id }), null, 2)}
-					</pre>
-				</Boundary> -->
 			{/if}
 		</Drawer>
 	</Page.Drawer>
