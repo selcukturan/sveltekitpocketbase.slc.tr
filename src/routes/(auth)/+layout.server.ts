@@ -1,9 +1,8 @@
 import { redirect } from '@sveltejs/kit';
-import { resolve } from '$app/paths';
 
 export async function load({ locals }) {
 	if (locals.user?.id) {
-		throw redirect(302, resolve('/'));
+		throw redirect(302, '/');
 	}
 	return {};
 }

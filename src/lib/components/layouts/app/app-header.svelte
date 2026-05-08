@@ -47,10 +47,6 @@
 				{...logout.enhance(async ({ submit }) => {
 					try {
 						if (await submit()) {
-							// oturum kapama başarılı olduktan sonra,
-							// `.updates(getUser())` kullanılmadığı için tam sayfa yenileme olur.
-							// bu da `(app)/+layout.server.ts`i çalıştırır.
-							// orada da artık oturum kapalı olduğu için redirect "/login" fırlatılır.
 							console.log('Successfully logged out!');
 						} else {
 							console.log('Invalid data!');

@@ -1,5 +1,4 @@
-import { resolve } from '$app/paths';
-import { getRequestEvent, query, form, requested } from '$app/server';
+import { getRequestEvent, query, form, command } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { mapUnknownToError } from '$lib/server/error';
 import { Collections } from '$lib/types/pocketbase-types';
@@ -14,6 +13,7 @@ export const getUser = query(() => {
 	if (!locals.user?.id) {
 		return null;
 	}
+
 	return locals.user;
 });
 
@@ -22,7 +22,7 @@ export const checkAuthenticated = query(() => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) {
 		// error(401, 'Unauthorized');
-		throw redirect(302, resolve('/login'));
+		throw redirect(307, '/login?unauthorized');
 	}
 });
 
@@ -31,7 +31,7 @@ export const logout = form(() => {
 
 	locals.auth.clear();
 
-	// redirect "/login" için `(app)/+layout.server.ts` çalışır.
+	// throw redirect(307, '/login');
 	return { success: true };
 });
 
@@ -40,12 +40,10 @@ export const login = form(loginSchema, async ({ email, _password }) => {
 
 	const loginResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.SysUsers).authWithPassword(email, _password), mapUnknownToError);
 
-	// ERROR
 	if (loginResult.isErr()) {
 		return error(500, { type: 'pb', errorId: 'login-error', message: loginResult.error.message });
 	}
 
-	// SUCCESS
-	// redirect "/" için `(auth)/+layout.server.ts` çalışır.
+	//throw redirect(307, '/');
 	return { success: true };
 });

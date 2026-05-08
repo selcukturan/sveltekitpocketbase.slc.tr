@@ -28,7 +28,7 @@
 		{#if context.propsQuery?.loading === true}
 			<div class="slc-table-message">Loading...</div>
 		{:else if context.propsQuery?.error !== undefined}
-			<div class="slc-table-message">Error occurred</div>
+			<div class="slc-table-message">{context.propsQuery?.error.body.message ?? 'Error occurred'}</div>
 		{:else if context.dataLength === 0}
 			<div class="slc-table-message">No data to display</div>
 		{/if}

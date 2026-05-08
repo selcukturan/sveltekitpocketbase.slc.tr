@@ -61,25 +61,12 @@
 		</ProgressBar>
 	{:else}
 		<div class="flex h-screen w-screen flex-col items-center justify-center gap-3">
-			<p class="animate-color-change text-lg font-medium">Not Authenticated</p>
-			<a href={resolve('/login')} class="animate-color-change underline underline-offset-4 hover:opacity-80"> Go To Login Page </a>
+			<p class="slc-animate-color-change text-lg font-medium">Not Authenticated</p>
+			<a href={resolve('/login')} class="slc-animate-color-change underline underline-offset-4 hover:opacity-80"> Go To Login Page </a>
 		</div>
 	{/if}
 
 	{#snippet pending()}
-		<p>App initializing...</p>
+		<p>Home Page Initializing...</p>
 	{/snippet}
 </svelte:boundary>
-
-<style>
-	.animate-color-change {
-		color: var(--color-surface-50);
-		animation: colorChange 500ms ease 500ms forwards;
-	}
-
-	@keyframes colorChange {
-		to {
-			color: var(--color-surface-900);
-		}
-	}
-</style>

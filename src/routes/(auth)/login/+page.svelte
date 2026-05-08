@@ -99,10 +99,6 @@
 
 				try {
 					if (await submit()) {
-						// giriş başarılı olduktan sonra,
-						// `.updates(getUser())` kullanılmadığı için tam sayfa yenileme olur.
-						// bu da `(auth)/+layout.server.ts`i çalıştırır.
-						// orada da artık oturum açık olduğu için redirect "/" fırlatılır.
 						isLoading = false;
 					} else {
 						loginPageToaster.add({

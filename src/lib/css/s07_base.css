@@ -32,6 +32,17 @@
 		background-color: color-mix(in srgb, var(--color-primary-200) 50%, transparent);
 	}
 
+	.slc-animate-color-change {
+		color: var(--color-surface-50);
+		animation: slcColorChange 500ms ease 500ms forwards;
+	}
+
+	@keyframes slcColorChange {
+		to {
+			color: var(--color-surface-900);
+		}
+	}
+
 	/* States --- */
 
 	/*
