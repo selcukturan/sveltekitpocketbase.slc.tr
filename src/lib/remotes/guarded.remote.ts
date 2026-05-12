@@ -39,7 +39,7 @@ export const login = form(loginSchema, async ({ email, _password }) => {
 	const { locals } = getRequestEvent();
 
 	const loginResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.SysUsers).authWithPassword(email, _password), mapUnknownToError);
-	console.log('login result', loginResult);
+
 	if (loginResult.isErr()) {
 		return error(500, { type: 'pb', errorId: 'login-error', message: loginResult.error.message });
 	}
