@@ -3,7 +3,7 @@
 // kritik güvenlik ayarları burada tutulmaz.
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.2.0-alpha.44',
+	version: 'v0.2.0-alpha.45',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`
 } as const; // `as const` eklemek, objenin değerlerini readonly ve türlerini daha spesifik yapar.
 
