@@ -1,0 +1,19 @@
+{
+	"recommendations": [
+/* gerekli */
+		"svelte.svelte-vscode",
+		"bradlc.vscode-tailwindcss",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"ms-azuretools.vscode-docker",		
+/* ekstra */
+		"oderwat.indent-rainbow",
+		"chanzhaoyu.svelte-5-snippets",
+		"yoavbls.pretty-ts-errors",
+		"zhuangtongfa.material-theme",
+		"github.github-vscode-theme",
+		"vaste.packagepilot",
+		"wix.vscode-import-cost",
+		"codeandstuff.package-json-upgrade"
+	]
+}
