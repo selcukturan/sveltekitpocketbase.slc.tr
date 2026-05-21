@@ -1,14 +1,71 @@
 {
 	"files.associations": {
-		"*.css": "tailwindcss"
+		"*.css": "tailwindcss",
+		"*.svelte": "svelte"
 	},
 	"editor.quickSuggestions": {
 		"strings": true
 	},
-	"tailwindCSS.experimental.classRegex": [
-		[
-			"Classes\\s*=\\s*['\"`]([^'\"`]*)['\"`]",
-			"([\\w-/:\\[\\]]+)"
-		]
-	]
+	"tailwindCSS.experimental.classRegex": [["Classes\\s*=\\s*['\"`]([^'\"`]*)['\"`]", "([\\w-/:\\[\\]]+)"]],
+	"todo-tree.tree.scanAtStartup": false,
+	"todo-tree.highlights.enabled": true,
+	"todo-tree.tree.labelFormat": "${tag:uppercase} ${after} [${filename}]",
+	"todo-tree.tree.tooltipFormat": "${filename}:[${line}] in ${filepath}",
+	"todo-tree.general.tags": ["BUG", "FIXME", "[ ]", "[/]", "[x]", "TODO", "HACK", "MARK", "XXX"],
+	"todo-tree.highlights.customHighlight": {
+		"BUG": {
+			"icon": "bug",
+			"background": "#ff0000",
+			"foreground": "#4c2828",
+			"iconColour": "#ff0000"
+		},
+		"HACK": {
+			"icon": "tools",
+			"background": "#ff00d0",
+			"foreground": "#43223d",
+			"iconColour": "#ff00d0"
+		},
+		"FIXME": {
+			"icon": "flame",
+			"background": "#ffa600",
+			"foreground": "#3d331f",
+			"iconColour": "#ffa600"
+		},
+		"TODO": {
+			"icon": "checklist",
+			"background": "#3fd02c",
+			"foreground": "#1e321b",
+			"iconColour": "#3fd02c"
+		},
+		"MARK": {
+			"icon": "bookmark",
+			"background": "#338bff",
+			"foreground": "#1f2a39",
+			"iconColour": "#338bff"
+		},
+		"XXX": {
+			"icon": "x",
+			"background": "#808080",
+			"foreground": "#e2e2e2",
+			"iconColour": "#808080"
+		},
+		"[ ]": {
+			"icon": "circle",
+			"background": "#da2323",
+			"foreground": "#3d1f1f",
+			"iconColour": "#da2323"
+		},
+		"[x]": {
+			"icon": "x-circle",
+			"background": "#00c41a",
+			"foreground": "#213924",
+			"iconColour": "#00c41a"
+		},
+		"[/]": {
+			"icon": "circle-slash",
+			"background": "#ffbf00",
+			"foreground": "#302914",
+			"iconColour": "#ffbf00"
+		}
+	}
 }
