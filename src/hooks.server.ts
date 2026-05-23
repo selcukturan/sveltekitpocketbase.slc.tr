@@ -1,3 +1,4 @@
+import '$lib/server/eventSource'; // required for notifications remote and nodejs pocketbase subscribe SSE
 import type { Handle } from '@sveltejs/kit';
 import env from '$lib/server/env';
 import { Collections } from '$lib/types/pocketbase-types';

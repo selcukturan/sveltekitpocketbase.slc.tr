@@ -24,8 +24,8 @@
 					icon: 'file-symlink'
 				},
 				{
-					title: 'X',
-					href: `/developments/components/form`,
+					title: 'Notifications',
+					href: `/developments/components/notifications`,
 					icon: 'file-symlink'
 				},
 				{
