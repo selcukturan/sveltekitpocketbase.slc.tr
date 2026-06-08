@@ -17,7 +17,8 @@ services:
     ports:
       - ${PORT}:${PORT}
     depends_on:
-      - s_pocketbase
+      s_pocketbase:
+        condition: service_healthy
     networks:
       - network_0
     healthcheck:
