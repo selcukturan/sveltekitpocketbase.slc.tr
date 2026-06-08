@@ -16,7 +16,7 @@ export const notificationsRemote = query.live(async function* () {
 		return;
 	}
 
-	if (!locals.user) {
+	if (!locals.user?.id) {
 		console.warn('[notificationsRemote] Güvenlik Kontrolü BAŞARISIZ: locals.user bulunamadı. Boş liste dönülüyor.');
 		yield [];
 		return;
