@@ -7,6 +7,7 @@ migrate((app) => {
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -21,6 +22,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text455797646",
           "max": 0,
@@ -35,6 +37,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text127846527",
           "max": 0,
@@ -49,6 +52,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text1582905952",
           "max": 0,
@@ -99,6 +103,7 @@ migrate((app) => {
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -113,6 +118,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text455797646",
           "max": 0,
@@ -127,6 +133,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text127846527",
           "max": 0,
@@ -141,6 +148,7 @@ migrate((app) => {
         },
         {
           "cost": 8,
+          "help": "",
           "hidden": true,
           "id": "password901924565",
           "max": 0,
@@ -154,6 +162,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": true,
           "id": "text3866985172",
           "max": 0,
@@ -204,6 +213,7 @@ migrate((app) => {
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -218,6 +228,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text455797646",
           "max": 0,
@@ -232,6 +243,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text127846527",
           "max": 0,
@@ -246,6 +258,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text2462348188",
           "max": 0,
@@ -260,6 +273,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text1044722854",
           "max": 0,
@@ -311,6 +325,7 @@ migrate((app) => {
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -325,6 +340,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text455797646",
           "max": 0,
@@ -339,6 +355,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text127846527",
           "max": 0,
@@ -353,6 +370,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text4228609354",
           "max": 0,
@@ -421,6 +439,7 @@ migrate((app) => {
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -435,6 +454,7 @@ migrate((app) => {
         },
         {
           "cost": 0,
+          "help": "",
           "hidden": true,
           "id": "password901924565",
           "max": 0,
@@ -448,6 +468,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "[a-zA-Z0-9]{50}",
+          "help": "",
           "hidden": true,
           "id": "text2504183744",
           "max": 60,
@@ -462,6 +483,7 @@ migrate((app) => {
         },
         {
           "exceptDomains": null,
+          "help": "",
           "hidden": false,
           "id": "email3885137012",
           "name": "email",
@@ -472,6 +494,7 @@ migrate((app) => {
           "type": "email"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "bool1547992806",
           "name": "emailVisibility",
@@ -481,6 +504,7 @@ migrate((app) => {
           "type": "bool"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "bool256245529",
           "name": "verified",
@@ -585,14 +609,15 @@ migrate((app) => {
         "body": "<p>Hello,</p>\n<p>Click on the button below to confirm your new email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-email-change/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Confirm new email</a>\n</p>\n<p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>",
         "subject": "Confirm your {APP_NAME} new email address"
       },
-      "createRule": "id = @request.auth.id && \n(\n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
-      "deleteRule": "id = @request.auth.id && \n(\n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "createRule": "id = @request.auth.id && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
+      "deleteRule": "id = @request.auth.id && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "emailChangeToken": {
         "duration": 1800
       },
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -607,6 +632,7 @@ migrate((app) => {
         },
         {
           "cost": 0,
+          "help": "",
           "hidden": true,
           "id": "password901924565",
           "max": 0,
@@ -620,6 +646,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "[a-zA-Z0-9]{50}",
+          "help": "",
           "hidden": true,
           "id": "text2504183744",
           "max": 60,
@@ -634,6 +661,7 @@ migrate((app) => {
         },
         {
           "exceptDomains": null,
+          "help": "",
           "hidden": false,
           "id": "email3885137012",
           "name": "email",
@@ -644,6 +672,7 @@ migrate((app) => {
           "type": "email"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "bool1547992806",
           "name": "emailVisibility",
@@ -653,6 +682,7 @@ migrate((app) => {
           "type": "bool"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "bool256245529",
           "name": "verified",
@@ -664,6 +694,7 @@ migrate((app) => {
         {
           "cascadeDelete": false,
           "collectionId": "pbc_1452049888",
+          "help": "",
           "hidden": false,
           "id": "relation1466534506",
           "maxSelect": 999,
@@ -696,6 +727,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text1579384326",
           "max": 255,
@@ -709,6 +741,7 @@ migrate((app) => {
           "type": "text"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "file376926767",
           "maxSelect": 1,
@@ -737,7 +770,7 @@ migrate((app) => {
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `sys_users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `sys_users` (`email`) WHERE `email` != ''"
       ],
-      "listRule": "id = @request.auth.id && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "listRule": "id = @request.auth.id && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "manageRule": null,
       "mfa": {
         "duration": 1800,
@@ -778,7 +811,7 @@ migrate((app) => {
       },
       "system": false,
       "type": "auth",
-      "updateRule": "id = @request.auth.id && \n(\n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "updateRule": "id = @request.auth.id && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "verificationTemplate": {
         "body": "<p>Hello,</p>\n<p>Thank you for joining us at {APP_NAME}.</p>\n<p>Click on the button below to verify your email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/_/#/auth/confirm-verification/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Verify</a>\n</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>",
         "subject": "Verify your {APP_NAME} email"
@@ -786,20 +819,21 @@ migrate((app) => {
       "verificationToken": {
         "duration": 259200
       },
-      "viewRule": "id = @request.auth.id && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)"
+      "viewRule": "id = @request.auth.id && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
-      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "createRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "fields": [
         {
-          "autogeneratePattern": "",
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
-          "max": 56,
-          "min": 6,
+          "max": 15,
+          "min": 15,
           "name": "id",
-          "pattern": "^(demo|user|superuser|admin|superadmin|system|developer)[a-z0-9-]+$",
+          "pattern": "^[a-z0-9]+$",
           "presentable": false,
           "primaryKey": true,
           "required": true,
@@ -807,6 +841,7 @@ migrate((app) => {
           "type": "text"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "select2363381545",
           "maxSelect": 1,
@@ -827,6 +862,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text724990059",
           "max": 255,
@@ -841,6 +877,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text4135340389",
           "max": 255,
@@ -854,6 +891,7 @@ migrate((app) => {
           "type": "text"
         },
         {
+          "help": "",
           "hidden": false,
           "id": "select1542800728",
           "maxSelect": 1,
@@ -866,6 +904,19 @@ migrate((app) => {
             "active",
             "passive"
           ]
+        },
+        {
+          "help": "",
+          "hidden": false,
+          "id": "number4113142680",
+          "max": null,
+          "min": null,
+          "name": "order",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
         },
         {
           "hidden": false,
@@ -890,19 +941,20 @@ migrate((app) => {
       ],
       "id": "pbc_1452049888",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "listRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "name": "acl_roles",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
-      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)"
+      "updateRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)"
     },
     {
-      "createRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
-      "deleteRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "createRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
+      "deleteRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
+          "help": "",
           "hidden": false,
           "id": "text3208210256",
           "max": 15,
@@ -917,6 +969,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text1457072411",
           "max": 255,
@@ -931,6 +984,7 @@ migrate((app) => {
         },
         {
           "autogeneratePattern": "",
+          "help": "",
           "hidden": false,
           "id": "text733748550",
           "max": 255,
@@ -966,12 +1020,12 @@ migrate((app) => {
       ],
       "id": "pbc_3562506448",
       "indexes": [],
-      "listRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
+      "listRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
       "name": "demo_crud",
       "system": false,
       "type": "base",
-      "updateRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)",
-      "viewRule": "@request.auth.id != \"\" && \n(\n  @request.auth.role ?~ \"demo%\" || \n  @request.auth.role ?~ \"user%\" || \n  @request.auth.role ?~ \"superuser%\" || \n  @request.auth.role ?~ \"admin%\" || \n  @request.auth.role ?~ \"superadmin%\" || \n  @request.auth.role ?~ \"system%\" || \n  @request.auth.role ?~ \"developer%\"\n)"
+      "updateRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)",
+      "viewRule": "@request.auth.id != \"\" && \n@collection.acl_roles.id ?= @request.auth.role.id && \n@collection.acl_roles.status ?= \"active\" &&\n(\n  @collection.acl_roles.type ?= \"demo\" || \n  @collection.acl_roles.type ?= \"user\" || \n  @collection.acl_roles.type ?= \"superuser\" || \n  @collection.acl_roles.type ?= \"admin\" || \n  @collection.acl_roles.type ?= \"superadmin\" || \n  @collection.acl_roles.type ?= \"system\" || \n  @collection.acl_roles.type ?= \"developer\"\n)"
     }
   ];
 
