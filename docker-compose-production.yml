@@ -21,12 +21,6 @@ services:
         condition: service_healthy
     networks:
       - network_0
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:${PORT}/robots.txt"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
 
   # POCKETBASE SQLITE DB
   s_pocketbase:
@@ -41,12 +35,6 @@ services:
       - ${PB_PORT}:8097
     networks:
       - network_0
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8097/api/health"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
 
 networks:
   network_0:
