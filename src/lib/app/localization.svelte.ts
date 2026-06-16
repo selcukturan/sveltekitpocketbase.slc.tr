@@ -47,6 +47,8 @@ const trTranslations = {
 	dt_caption: 'Açıklama',
 	dt_quantity: 'Miktar',
 	dt_purchase_date: 'Satın Alma Tarihi',
+	dt_text_required: 'Metin (Gerekli)',
+	dt_text_optional: 'Metin (İsteğe Bağlı)',
 	// error messages
 	error_generic: 'Bir hata oluştu!',
 	error_unauthorized: 'Yetkisiz erişim!',
@@ -105,6 +107,8 @@ const translations: Translations = {
 		dt_caption: 'Caption',
 		dt_quantity: 'Quantity',
 		dt_purchase_date: 'Purchase Date',
+		dt_text_required: 'Text (Required)',
+		dt_text_optional: 'Text (Optional)',
 		// error messages
 		error_generic: 'An error occurred!',
 		error_unauthorized: 'Unauthorized access!',

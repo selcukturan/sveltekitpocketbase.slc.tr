@@ -24,6 +24,11 @@
 					icon: 'file-symlink'
 				},
 				{
+					title: 'Simple CRUD',
+					href: `/grapes/crud/simple`,
+					icon: 'file-symlink'
+				},
+				{
 					title: 'Create, Read, Update, Delete',
 					href: `/grapes/crud/create-read-update-delete`,
 					icon: 'file-symlink'

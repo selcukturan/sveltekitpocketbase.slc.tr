@@ -1,47 +1,54 @@
 /// <reference path="../pb_data/types.d.ts" />
 const recordsToCreate = [
   {
-    id: ":developer:ed819fd7-5558-4ace-ac79-021f93379fb8",
-    type: "developer",
-    title: "developer 1",
-    caption: "Developer 1",
-    status: "active",
-  },
-  {
-    id: ":superadmin:74f79357-4f28-4926-b5f3-adc8d982d1f3",
-    type: "superadmin",
-    title: "super admin 1",
-    caption: "Super Admin 1",
-    status: "active",
-  },
-  {
-    id: ":system:1d2d988b-551d-404a-ae54-900491b0d36a",
-    type: "system",
-    title: "system 1",
-    caption: "System 1",
-    status: "active",
-  },
-  {
-    id: ":demo:318fabb0-30c0-45c2-a8df-5ddf535f3207",
+    id: "9z4rjbonfkhbocq",
     type: "demo",
     title: "demo 1",
     caption: "Demo 1",
     status: "active",
   },
   {
-    id: ":admin:039b0952-9048-4c8c-8a68-8bc681e8f1aa",
+    id: "egyqpy647i5xghx",
+    type: "user",
+    title: "user 1",
+    caption: "User 1",
+    status: "active",
+  },
+  {
+    id: "l6otw8tisu9esz8",
+    type: "superuser",
+    title: "super user 1",
+    caption: "Super User 1",
+    status: "active",
+  },
+  {
+    id: "2lbuz6titbs3at2",
     type: "admin",
     title: "admin 1",
     caption: "Admin 1",
     status: "active",
   },
   {
-    id: ":user:ad960bad-b126-4167-9f27-9974d676121c",
-    type: "user",
-    title: "user 1",
-    caption: "User 1",
+    id: "pbssh1g4ag9pknq",
+    type: "superadmin",
+    title: "super admin 1",
+    caption: "Super Admin 1",
     status: "active",
   },
+  {
+    id: "1qa3aufipnp8g9b",
+    type: "system",
+    title: "system 1",
+    caption: "System 1",
+    status: "active",
+  },
+  {
+    id: "o74t5bpfdlav6zc",
+    type: "developer",
+    title: "developer 1",
+    caption: "Developer 1",
+    status: "active",
+  }
 ];
 migrate((app) => {
   // migrate up

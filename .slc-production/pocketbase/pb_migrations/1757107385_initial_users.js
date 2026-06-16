@@ -4,12 +4,13 @@ const recordsToCreate = [
     email: "demo@slc.tr",
     password: "SLc1234567",
     passwordConfirm: "SLc1234567",
-    role: ":demo:318fabb0-30c0-45c2-a8df-5ddf535f3207", // RELATION_RECORD_ID
+    name:"Demo",
+    role: [
+        "9z4rjbonfkhbocq", // demo role id
+        "egyqpy647i5xghx", // user role id
+    ],
     verified: true,
     emailVisibility: true,
-    default_company: "6olubwtwsvtstap", // RELATION_RECORD_ID
-    default_company_storage: "n3tskk8ax3m4g1j", // RELATION_RECORD_ID
-    default_company_year: "at2pfbnsptdwn4b" // RELATION_RECORD_ID
   }
 ];
 migrate((app) => {
@@ -19,7 +20,6 @@ migrate((app) => {
   for (const data of recordsToCreate) {
     let record = new Record(sys_users, data);
     app.save(record);
-    // logger.info(`Record with email ${data.email} created.`);
     console.log(`initial user created: [${data.email}]`);
   }
 }, (app) => {

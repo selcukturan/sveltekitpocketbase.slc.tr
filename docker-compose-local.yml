@@ -26,6 +26,7 @@ services:
       context: .
       dockerfile: Dockerfile.pb
     container_name: c_pocketbase_slcapplocal
+    user: "1001:1001"
     restart: unless-stopped
     volumes:
       - ./.slc-production/pocketbase/pb_data:/pb/pb_data
