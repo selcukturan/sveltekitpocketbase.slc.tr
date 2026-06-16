@@ -115,6 +115,7 @@ export type AclRolesRecord = {
 	caption: string
 	created: IsoAutoDateString
 	id: string
+	order?: number
 	status: AclRolesStatusOptions
 	title: string
 	type: AclRolesTypeOptions
