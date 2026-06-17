@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getGlobalContext } from '$lib/app/global.svelte';
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization/localization.svelte';
 	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
 	import { LangToggle } from '$lib/components/ui/lang-toggle';
 	import { PUBLIC_ENV_TEST } from '$env/static/public';

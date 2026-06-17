@@ -5,6 +5,7 @@ const recordsToCreate = [
     type: "demo",
     title: "demo 1",
     caption: "Demo 1",
+    order: 0,
     status: "active",
   },
   {
@@ -12,6 +13,7 @@ const recordsToCreate = [
     type: "user",
     title: "user 1",
     caption: "User 1",
+    order: 1,
     status: "active",
   },
   {
@@ -19,6 +21,7 @@ const recordsToCreate = [
     type: "superuser",
     title: "super user 1",
     caption: "Super User 1",
+    order: 2,
     status: "active",
   },
   {
@@ -26,6 +29,7 @@ const recordsToCreate = [
     type: "admin",
     title: "admin 1",
     caption: "Admin 1",
+    order: 3,
     status: "active",
   },
   {
@@ -33,6 +37,7 @@ const recordsToCreate = [
     type: "superadmin",
     title: "super admin 1",
     caption: "Super Admin 1",
+    order: 4,
     status: "active",
   },
   {
@@ -40,6 +45,7 @@ const recordsToCreate = [
     type: "system",
     title: "system 1",
     caption: "System 1",
+    order: 5,
     status: "active",
   },
   {
@@ -47,6 +53,7 @@ const recordsToCreate = [
     type: "developer",
     title: "developer 1",
     caption: "Developer 1",
+    order: 6,
     status: "active",
   }
 ];

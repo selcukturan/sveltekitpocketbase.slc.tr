@@ -9,11 +9,10 @@
 
 <body>
     <div id="app">
-        <h1>Welcome to SLC Web Application</h1>
+        <h1>Welcome to SLC Web Applications</h1>
         <p>Copyright © SLC Web Development 2010 - {{ new Date().getFullYear() }}</p>
     </div>
     <script>
-        // This script can be used to dynamically update the year in the copyright notice
         document.querySelector('p').textContent = `Copyright © SLC Web Development 2010 - ${new Date().getFullYear()}`;
     </script>
 </body>

@@ -5,7 +5,7 @@
 	import { isHttpError } from '@sveltejs/kit';
 	// Helper functions
 	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization';
 	import { watchUrlHash } from '$lib/attachments';
 	// Templates
 	import { Page, Head, DrawerFormContent } from '$lib/components/templates';

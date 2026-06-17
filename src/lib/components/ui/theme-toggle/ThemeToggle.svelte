@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization';
 	import { tooltip } from '$lib/attachments';
 	import { browser } from '$app/environment';
 	import { Icon } from '$lib/components/icons';

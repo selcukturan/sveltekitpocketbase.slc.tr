@@ -6,7 +6,7 @@
 
 	import type { PageLayoutPropsType } from '../types';
 	import { Icon } from '$lib/components/icons';
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization/localization.svelte';
 	import { tooltip } from '$lib/attachments';
 
 	let { pageSidebardata, children }: PageLayoutPropsType = $props();

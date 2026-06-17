@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t, getSelectedLang, setSelectedLang } from '$lib/app/localization.svelte';
+	import { t, getSelectedLang, setSelectedLang } from '$lib/app/localization';
 	import { tooltip } from '$lib/attachments';
 
 	const tooltipText = $derived(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'));

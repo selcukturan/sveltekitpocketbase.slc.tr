@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization';
 	import { Page, Head } from '$lib/components/templates';
 	import { getUser } from '$lib/remotes/guarded.remote';
 

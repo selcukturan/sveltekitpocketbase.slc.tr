@@ -5,7 +5,7 @@
 	import { Toasts, createToaster } from '$lib/components/ui/toast';
 	import { login } from '$lib/remotes/guarded.remote';
 	import { loginSchema } from '$lib/app/schemas/login';
-	import { t } from '$lib/app/localization.svelte';
+	import { t } from '$lib/app/localization';
 	import { resolve } from '$app/paths';
 
 	const loginPageToaster = createToaster({
