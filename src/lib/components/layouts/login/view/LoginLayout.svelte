@@ -65,7 +65,7 @@
 			xl:max-w-xl
 			2xl:max-w-2xl"
 			alt="auth"
-			src="{import.meta.env.BASE_URL}images/ui/illustrations/illustration_dashboard.png"
+			src="/images/ui/illustrations/illustration_dashboard.png"
 		/>
 		<div class="flex flex-row gap-4">
 			<div class="flex flex-col items-center justify-center gap-1">
