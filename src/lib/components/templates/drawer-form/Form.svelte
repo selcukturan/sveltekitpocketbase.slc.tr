@@ -1,48 +1,10 @@
-<script
-	lang="ts"
-	generics="TData extends Record<string, unknown>, TInput extends RemoteFormInput | void, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>"
->
-	import { type Snippet } from 'svelte';
-	import type { HTMLFormAttributes } from 'svelte/elements';
-	import { createFormInputsContext } from '$lib/components/ui/inputs/context.svelte';
-	import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
+<script lang="ts" generics="TInput extends RemoteFormInput, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>">
+	import type { MainProps } from '$lib/components/ui/form_inputs/context.svelte';
+	import { Form } from '$lib/components/ui/form_inputs';
+	import type { RemoteFormInput } from '@sveltejs/kit';
 	import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 
-	type Props = HTMLFormAttributes & {
-		form: RemoteForm<TInput, TOutput>;
-		inputData?: TData;
-		schema: TSchema;
-		inputs?: Snippet<[{ inputData: TData }]>;
-		children?: Snippet;
-		buttons?: Snippet;
-		class?: string;
-		initialValidate?: boolean;
-	};
-
-	let { children, class: classes, inputs, buttons, form, inputData, schema, initialValidate = false, ...attributes }: Props = $props();
-
-	// svelte-ignore state_referenced_locally
-	const context = createFormInputsContext<TInput, TOutput, TSchema>(form, schema, initialValidate); // init
-
-	// $inspect('Form - allIssues()', context.form.fields.allIssues());
-
-	const internalClasses = 'flex flex-1 flex-col overflow-hidden';
+	let props: MainProps<TInput, TOutput, TSchema> = $props();
 </script>
 
-{#if inputData}
-	{@render formSnippet(inputData)}
-{:else}
-	{@render formSnippet({} as TData)}
-{/if}
-
-{#snippet formSnippet(inputData: TData)}
-	<form class="{classes || ''} {internalClasses}" {...attributes}>
-		<div class="flex-1 overflow-x-hidden overflow-y-auto px-6 pb-6">
-			{@render inputs?.({ inputData })}
-		</div>
-		<div class="bg-surface-100/80 flex justify-end border-t p-4">
-			{@render buttons?.()}
-		</div>
-		{@render children?.()}
-	</form>
-{/snippet}
+<Form {...props} />

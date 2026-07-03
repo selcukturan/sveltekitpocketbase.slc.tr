@@ -3,7 +3,7 @@
 	import type { IconKey } from './icons.svelte';
 
 	// Bu yöntem, 'string' türünü kabul ederken IDE'lerde sabit türler için otomatik tamamlama özelliğini korur
-	type IconName = IconKey | (string & {});
+	export type IconName = IconKey | (string & {});
 
 	interface Props extends SVGAttributes<SVGElement> {
 		name: IconName;

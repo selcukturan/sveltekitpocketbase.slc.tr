@@ -9,10 +9,13 @@ export const focustrap: Attachment = (node) => {
 
 	function focusable() {
 		return Array.from(
-			node.querySelectorAll(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			node.querySelectorAll<HTMLElement>(
+				'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 			)
-		);
+		).filter((el) => {
+			const style = window.getComputedStyle(el);
+			return style.display !== 'none' && style.visibility !== 'hidden' && !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true';
+		});
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -24,11 +27,7 @@ export const focustrap: Attachment = (node) => {
 		const first = elements.at(0);
 		const last = elements.at(-1);
 
-		if (
-			!(current instanceof HTMLElement) ||
-			!(first instanceof HTMLElement) ||
-			!(last instanceof HTMLElement)
-		) {
+		if (!(current instanceof HTMLElement) || !(first instanceof HTMLElement) || !(last instanceof HTMLElement)) {
 			// event.preventDefault(); // No focusable elements
 			return; // No focusable elements
 		}

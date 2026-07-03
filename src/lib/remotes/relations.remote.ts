@@ -20,7 +20,7 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(params.collection).getList(1, 30, {
-			filter: `title ~ "${params.search}"`
+			filter: `search_label ~ "${params.search}"`
 		}),
 		mapUnknownToError
 	);
@@ -102,10 +102,7 @@ export const getRelationView = query(relationViewParamsSchema, async (params) =>
 
 	const { locals } = getRequestEvent();
 
-	const recordResult = await ResultAsync.fromPromise(
-		locals.pb.collection(params.collection).getOne(params.id),
-		mapUnknownToError
-	);
+	const recordResult = await ResultAsync.fromPromise(locals.pb.collection(params.collection).getOne(params.id), mapUnknownToError);
 
 	if (recordResult.isErr()) {
 		throwError(recordResult.error);

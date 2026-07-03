@@ -9,6 +9,7 @@
 	import { tooltip } from '$lib/attachments';
 	import { logout } from '$lib/remotes/guarded.remote';
 	import { Icon } from '$lib/components/icons';
+	import { getUser } from '$lib/remotes/guarded.remote';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();
@@ -46,7 +47,7 @@
 			<form
 				{...logout.enhance(async ({ submit }) => {
 					try {
-						if (await submit()) {
+						if (await submit().updates(getUser)) {
 							console.log('Successfully logged out!');
 						} else {
 							console.log('Invalid data!');

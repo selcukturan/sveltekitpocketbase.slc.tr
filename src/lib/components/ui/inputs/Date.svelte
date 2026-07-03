@@ -1,98 +1,69 @@
 <script lang="ts">
-	// ######################## IMPORTS #################################################################################################
-	import type { SvelteHTMLElements } from 'svelte/elements';
-	import type { RemoteFormField } from '@sveltejs/kit';
 	import { formatDateIsoToInput, parseDateInputToIso } from '$lib/utils/input-helper';
-	import Field from './Field.svelte';
-	import { getFormInputsContext } from './context.svelte';
-	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
-	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
-		id?: string;
-		value?: string;
-		name?: string;
-		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
-		field?: RemoteFormField<string>;
-		label?: string;
+	import { inputClasses } from './common';
+	import type { DateProps, DateValueChangeArgs } from './type';
+
+	let {
+		value = $bindable(''),
+		class: classes = '',
+		status = 'default',
+		size = 'md',
+		disabled = false,
+		dev = false,
+		onValueChange,
+		...rest
+	}: DateProps = $props();
+
+	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
+	const triggerChange = ({ value, beforeValue, initial }: DateValueChangeArgs) => {
+		onValueChange?.({ value, beforeValue, initial });
 	};
-	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(''), label, field, class: classes, id, name, 'aria-invalid': ariaInvalid, ...rest }: Props = $props();
-	const context = getFormInputsContext();
+	// ############################### END ONVALUECHANGE HANDLER ###############################
 
-	const attributes = $derived({ ...field?.as('date'), value: undefined });
-	const issues = $derived(field?.issues() ?? []);
-
-	const mainName = $derived(attributes.name || name);
-	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
-
-	const valueChanged = (value: string) => {
-		field?.set(value);
-	};
-
+	// ############################### BEGIN PROXY ###############################
 	let first = true;
+	let lastValue = value; // Son tetiklenen değeri takip eden değişken
 	const proxy = {
 		get value() {
-			const currentValue = formatDateIsoToInput(value);
+			const currentValue = value;
 			if (first) {
+				// İlk yüklemede çalışır
 				first = false;
-				valueChanged(currentValue);
+				const tempBefore = lastValue;
+				lastValue = currentValue;
+				triggerChange({ value: currentValue, beforeValue: tempBefore, initial: true });
+			} else if (currentValue !== lastValue) {
+				// Dışarıdan (örneğin shadow input veya buton ile) değer değiştiğinde yakalar
+				const tempBefore = lastValue;
+				lastValue = currentValue;
+				triggerChange({ value: currentValue, beforeValue: tempBefore, initial: false });
 			}
-			return currentValue;
+			return formatDateIsoToInput(currentValue);
 		},
 		set value(v) {
-			const currentValue = parseDateInputToIso(v);
-			value = currentValue;
-			valueChanged(currentValue);
+			if (v !== value) {
+				// Kullanıcı doğrudan bu input içine yazdığında tetiklenir
+				const tempBefore = lastValue;
+				value = parseDateInputToIso(v);
+				lastValue = value;
+				triggerChange({ value, beforeValue: tempBefore, initial: false });
+			}
 		}
 	};
-
-	let initialValidate = false;
-	const watch: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
-		proxy.value;
-
-		const cleanup = untrack(() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
-				return;
-			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-
-			return () => {
-				// cleanup code
-			};
-		});
-
-		return cleanup;
-	};
-	/* watch(
-		() => proxy.value,
-		() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
-				return;
-			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-		}
-	); */
+	// ############################### END PROXY ###############################
 </script>
 
-<Field {issues} {required} {label} id={mainName || id}>
-	{#snippet input(inputClass)}
-		<input
-			bind:value={proxy.value}
-			type={attributes.type || 'date'}
-			id={mainName || id}
-			name={mainName}
-			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
-			{...rest}
-			class="{classes} {inputClass}"
-			{@attach watch}
-		/>
-	{/snippet}
-</Field>
+<input
+	bind:value={proxy.value}
+	type="date"
+	{disabled}
+	class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"
+	{...rest}
+/>
+
+{#if dev}
+	<p class="text-xs text-surface-500">Component Value: {value}</p>
+{/if}
 
 <style>
 	input::-webkit-calendar-picker-indicator {

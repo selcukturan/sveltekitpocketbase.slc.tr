@@ -15,7 +15,7 @@ export type Column<TData> = {
 	label?: string;
 	hidden?: boolean;
 	resizeable?: boolean;
-	editable?: boolean;
+	sortable?: boolean;
 	align?: 'left' | 'center' | 'right';
 	alignHeader?: 'left' | 'center' | 'right';
 	alignFooter?: 'left' | 'center' | 'right';

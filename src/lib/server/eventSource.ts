@@ -14,7 +14,7 @@ class SimpleEventSource {
 		this.url = url;
 		this.controller = new AbortController();
 		this.readyState = 0;
-		console.log(`[SimpleEventSource] Yeni bağlantı başlatılıyor: ${url}`);
+		// console.log(`[SimpleEventSource] Yeni bağlantı başlatılıyor: ${url}`);
 		this.connect();
 	}
 
@@ -23,7 +23,8 @@ class SimpleEventSource {
 			const response = await fetch(this.url, {
 				headers: {
 					Accept: 'text/event-stream',
-					'Cache-Control': 'no-cache'
+					'Cache-Control': 'no-cache',
+					Connection: 'keep-alive'
 				},
 				signal: this.controller.signal
 			});
@@ -33,7 +34,7 @@ class SimpleEventSource {
 			}
 
 			this.readyState = 1; // OPEN
-			console.log(`[SimpleEventSource] SSE bağlantısı başarılı: ${this.url}`);
+			// console.log(`[SimpleEventSource] SSE bağlantısı başarılı: ${this.url}`);
 			const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 			let buffer = '';
 			let event = 'message';
@@ -55,7 +56,7 @@ class SimpleEventSource {
 					}
 					// Boş satır kontrolü (Bu mesaj bitti, artık istemciye teslim edebilirsin)
 					if (line === '') {
-						console.log(`[SimpleEventSource] Mesaj alındı - Event: ${event}, ID: ${id || 'yok'}`);
+						// console.log(`[SimpleEventSource] Mesaj alındı - Event: ${event}, ID: ${id || 'yok'}`);
 						const eventObj = {
 							type: event,
 							data: data,
@@ -78,7 +79,7 @@ class SimpleEventSource {
 						id = '';
 						continue;
 					}
-					
+
 					// Anahtar-Değer Ayrıştırma
 					const colonIndex = line.indexOf(':');
 					let field = line;
@@ -90,7 +91,7 @@ class SimpleEventSource {
 							val = val.slice(1);
 						}
 					}
-					
+
 					//  Verilerin Biriktirilmesi
 					if (field === 'event') {
 						event = val;
@@ -103,7 +104,7 @@ class SimpleEventSource {
 			}
 		} catch (err: unknown) {
 			if (err instanceof Error && err.name === 'AbortError') {
-				console.log(`[SimpleEventSource] SSE bağlantısı iptal edildi: ${this.url}`);
+				// console.log(`[SimpleEventSource] SSE bağlantısı iptal edildi: ${this.url}`);
 				return;
 			}
 			this.readyState = 2; // CLOSED
@@ -128,10 +129,10 @@ class SimpleEventSource {
 
 	close() {
 		this.readyState = 2; // CLOSED
-		console.log(`[SimpleEventSource] SSE bağlantısı kapatılıyor: ${this.url}`);
+		// console.log(`[SimpleEventSource] SSE bağlantısı kapatılıyor: ${this.url}`);
 		this.controller.abort();
 	}
 }
 
 globalThis.EventSource = SimpleEventSource as unknown as typeof globalThis.EventSource;
-console.log(`[SimpleEventSource] SimpleEventSource polyfill global olarak ZORLA enjekte edildi.`);
+// console.log(`[SimpleEventSource] SimpleEventSource polyfill global olarak ZORLA enjekte edildi.`);

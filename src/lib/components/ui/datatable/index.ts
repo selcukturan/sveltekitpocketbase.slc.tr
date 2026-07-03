@@ -9,3 +9,4 @@ export { default as HeaderRow } from './HeaderRow.svelte';
 export type { Column, Footer } from './types';
 
 export { default as ActionButton } from './parts/ActionButton.svelte';
+export { default as ColumnToggler } from './parts/ColumnToggler.svelte';

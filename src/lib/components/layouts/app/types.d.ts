@@ -1,4 +1,4 @@
-import { type Snippet } from 'svelte';
+import type { Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
 export type SidebarDataType = {
 	title: string;
@@ -9,7 +9,6 @@ export type SidebarDataType = {
 export type ChildrenPropsType = { children: Snippet };
 
 export type AppLayoutPropsType = SvelteHTMLElements['section'] & {
-	sidebarData: SidebarDataType[];
 	children: ChildrenPropsType['children'];
 };
 

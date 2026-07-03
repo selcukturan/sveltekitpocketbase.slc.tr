@@ -1,10 +1,11 @@
-import { getRequestEvent, query, form, command } from '$app/server';
+import { getRequestEvent, query, form, requested } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { mapUnknownToError } from '$lib/server/error';
 import { Collections } from '$lib/types/pocketbase-types';
 import { ResultAsync } from 'neverthrow';
-
 import { loginSchema } from '$lib/app/schemas/login';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Client side get user
 export const getUser = query(() => {
@@ -26,13 +27,16 @@ export const checkAuthenticated = query(() => {
 	}
 });
 
-export const logout = form(() => {
+export const logout = form(async () => {
 	const { locals } = getRequestEvent();
 
 	locals.auth.clear();
+	locals.user = null;
 
-	// throw redirect(307, '/login');
-	return { success: true };
+	await requested(getUser, 1).refreshAll();
+
+	throw redirect(307, '/');
+	// return { success: true };
 });
 
 export const login = form(loginSchema, async ({ email, _password }) => {
@@ -44,6 +48,10 @@ export const login = form(loginSchema, async ({ email, _password }) => {
 		return error(500, { type: 'pb', errorId: 'login-error', message: loginResult.error.message });
 	}
 
-	//throw redirect(307, '/');
-	return { success: true };
+	locals.user = structuredClone(locals.auth.record);
+
+	await requested(getUser, 1).refreshAll();
+
+	throw redirect(307, '/');
+	// return { success: true };
 });

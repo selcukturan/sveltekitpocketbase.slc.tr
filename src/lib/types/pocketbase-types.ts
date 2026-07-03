@@ -13,6 +13,8 @@ export const Collections = {
 	Superusers: "_superusers",
 	AclRoles: "acl_roles",
 	DemoCrud: "demo_crud",
+	DemoRelationInputMultiple: "demo_relation_input_multiple",
+	DemoRelationInputSingle: "demo_relation_input_single",
 	SysUsers: "sys_users",
 } as const
 export type Collections = typeof Collections[keyof typeof Collections]
@@ -112,21 +114,58 @@ export const AclRolesStatusOptions = {
 } as const
 export type AclRolesStatusOptions = typeof AclRolesStatusOptions[keyof typeof AclRolesStatusOptions]
 export type AclRolesRecord = {
-	caption: string
 	created: IsoAutoDateString
 	id: string
+	label: string
 	order?: number
+	search_label: string
 	status: AclRolesStatusOptions
-	title: string
 	type: AclRolesTypeOptions
 	updated: IsoAutoDateString
 }
 
+export const DemoCrudSelectOptionalMultipleOptions = {
+	"html": "html",
+	"css": "css",
+	"javascript": "javascript",
+} as const
+export type DemoCrudSelectOptionalMultipleOptions = typeof DemoCrudSelectOptionalMultipleOptions[keyof typeof DemoCrudSelectOptionalMultipleOptions]
+
+export const DemoCrudSelectOptionalSingleOptions = {
+	"linux": "linux",
+	"mac": "mac",
+	"windows": "windows",
+} as const
+export type DemoCrudSelectOptionalSingleOptions = typeof DemoCrudSelectOptionalSingleOptions[keyof typeof DemoCrudSelectOptionalSingleOptions]
 export type DemoCrudRecord = {
 	created: IsoAutoDateString
+	file_optional_multiple?: FileNameString[]
+	file_optional_single?: FileNameString
 	id: string
+	label?: string
+	relation_optional_multiple?: RecordIdString[]
+	relation_optional_single?: RecordIdString
+	search_label?: string
+	select_optional_multiple?: DemoCrudSelectOptionalMultipleOptions[]
+	select_optional_single?: DemoCrudSelectOptionalSingleOptions
 	text_optional?: string
 	text_required: string
+	updated: IsoAutoDateString
+}
+
+export type DemoRelationInputMultipleRecord = {
+	created: IsoAutoDateString
+	id: string
+	label?: string
+	search_label?: string
+	updated: IsoAutoDateString
+}
+
+export type DemoRelationInputSingleRecord = {
+	created: IsoAutoDateString
+	id: string
+	label?: string
+	search_label?: string
 	updated: IsoAutoDateString
 }
 
@@ -136,9 +175,12 @@ export type SysUsersRecord = {
 	email: string
 	emailVisibility?: boolean
 	id: string
+	label?: string
 	name?: string
 	password: string
 	role?: RecordIdString[]
+	search_label?: string
+	surname?: string
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
@@ -152,6 +194,8 @@ export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemF
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type AclRolesResponse<Texpand = unknown> = Required<AclRolesRecord> & BaseSystemFields<Texpand>
 export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & BaseSystemFields<Texpand>
+export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>
+export type DemoRelationInputSingleResponse<Texpand = unknown> = Required<DemoRelationInputSingleRecord> & BaseSystemFields<Texpand>
 export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -164,6 +208,8 @@ export type CollectionRecords = {
 	_superusers: SuperusersRecord
 	acl_roles: AclRolesRecord
 	demo_crud: DemoCrudRecord
+	demo_relation_input_multiple: DemoRelationInputMultipleRecord
+	demo_relation_input_single: DemoRelationInputSingleRecord
 	sys_users: SysUsersRecord
 }
 
@@ -175,6 +221,8 @@ export type CollectionResponses = {
 	_superusers: SuperusersResponse
 	acl_roles: AclRolesResponse
 	demo_crud: DemoCrudResponse
+	demo_relation_input_multiple: DemoRelationInputMultipleResponse
+	demo_relation_input_single: DemoRelationInputSingleResponse
 	sys_users: SysUsersResponse
 }
 

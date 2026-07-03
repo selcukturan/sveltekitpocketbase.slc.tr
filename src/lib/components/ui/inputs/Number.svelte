@@ -1,94 +1,135 @@
 <script lang="ts">
-	// ######################## IMPORTS #################################################################################################
-	import type { SvelteHTMLElements } from 'svelte/elements';
-	import type { RemoteFormField } from '@sveltejs/kit';
-	import Field from './Field.svelte';
-	import { getFormInputsContext } from './context.svelte';
-	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
-	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
-		id?: string;
-		value?: number;
-		name?: string;
-		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
-		field?: RemoteFormField<number>;
-		label?: string;
+	import { inputClasses } from './common';
+	import { on } from 'svelte/events';
+	import type { NumberProps, NumberValueChangeArgs } from './type';
+
+	let {
+		value = $bindable(0),
+		class: classes = '',
+		status = 'default',
+		size = 'md',
+		disabled = false,
+		dev = false,
+		autoChangeDecimalSeparator = true,
+		onValueChange,
+		...rest
+	}: NumberProps = $props();
+
+	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
+	const triggerChange = ({ value, beforeValue, initial }: NumberValueChangeArgs) => {
+		onValueChange?.({ value, beforeValue, initial });
 	};
-	// ######################## PROPS ###################################################################################################
-	let { value = $bindable(0), label, field, class: classes, id, name, 'aria-invalid': ariaInvalid, ...rest }: Props = $props();
-	const context = getFormInputsContext();
+	// ############################### END ONVALUECHANGE HANDLER ###############################
 
-	const attributes = $derived({ ...field?.as('number'), value: undefined });
-	const issues = $derived(field?.issues() ?? []);
-
-	const mainName = $derived(attributes.name || name || '');
-	const required = $derived(context?.getValibotMetadata(mainName.replace('n:', ''))?.slc_required === true ? true : false);
-
-	const valueChanged = (value: number) => {
-		field?.set(value);
-	};
-
+	// ############################### BEGIN PROXY ###############################
 	let first = true;
+	let lastValue = value; // Son tetiklenen değeri takip eden değişken
+	let isNull = false; // Girdinin boş olduğunu takip eden bayrak
+
 	const proxy = {
 		get value() {
-			const currentValue = value;
-			if (first) {
-				first = false;
-				valueChanged(currentValue);
+			// Dışarıdan null, undefined veya NaN atanırsa bunu 0'a çekiyoruz
+			if (value === null || value === undefined || Number.isNaN(value)) {
+				value = 0;
 			}
-			return currentValue;
+
+			let currentValue = value;
+
+			if (first) {
+				// İlk yüklemede çalışır
+				first = false;
+				const tempBefore = lastValue;
+				lastValue = currentValue;
+				triggerChange({ value: currentValue, beforeValue: tempBefore, initial: true });
+			} else if (currentValue !== lastValue) {
+				// Dışarıdan (örneğin shadow input veya buton ile) değer değiştiğinde yakalar
+				isNull = false;
+				const tempBefore = lastValue;
+				lastValue = currentValue;
+				triggerChange({ value: currentValue, beforeValue: tempBefore, initial: false });
+			}
+			return isNull ? null : currentValue;
 		},
 		set value(v) {
-			const currentValue = v;
-			value = currentValue;
-			valueChanged(currentValue);
+			const isInputEmpty = v === null || v === undefined || Number.isNaN(v);
+			isNull = isInputEmpty;
+			const newValue = isInputEmpty ? 0 : v;
+
+			if (newValue !== value) {
+				// Kullanıcı doğrudan bu input içine yazdığında tetiklenir
+				const tempBefore = lastValue;
+				value = newValue;
+				lastValue = value;
+				triggerChange({ value, beforeValue: tempBefore, initial: false });
+			}
 		}
 	};
+	// ############################### END PROXY ###############################
 
-	let initialValidate = false;
-	const watch: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
+	// ############################### BEGIN decimalSeparator ###############################
+	const universalDecimalSeparator = '.';
+	const localDecimalSeparator = (1.1).toLocaleString()[1];
+	const needToConvert = $derived(autoChangeDecimalSeparator && universalDecimalSeparator !== localDecimalSeparator);
 
-		proxy.value;
+	const decimalSeparator = (node: HTMLElement) => {
+		if (!needToConvert) return;
 
-		const cleanup = untrack(() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
-				return;
+		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
+			if (e.key === universalDecimalSeparator) {
+				e.preventDefault();
+				type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
+				(document as unknown as CustomDoc).execCommand('insertText', false, localDecimalSeparator);
 			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-
-			return () => {
-				// cleanup code
-			};
 		});
 
-		return cleanup;
-	};
-	/* watch(
-		() => proxy.value,
-		() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
-				return;
+		const destroyPaste = on(node, 'paste', (e: ClipboardEvent) => {
+			const clipboardData = e.clipboardData;
+			if (!clipboardData) return;
+
+			const pastedText = clipboardData.getData('text');
+
+			// Eğer yerel ayar nokta değilse (örn: virgülse) ve yapıştırılan metinde nokta varsa
+			if (pastedText.includes(universalDecimalSeparator)) {
+				e.preventDefault();
+				// Noktaları yerel ayraç (virgül) ile değiştirip yapıştırıyoruz
+				const formattedText = pastedText.replaceAll(universalDecimalSeparator, localDecimalSeparator);
+				type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
+				(document as unknown as CustomDoc).execCommand('insertText', false, formattedText);
 			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-		}
-	); */
+		});
+
+		return () => {
+			destroyKeydown();
+			destroyPaste();
+		};
+	};
+	// ############################### END decimalSeparator ###############################
 </script>
 
-<Field {issues} {required} {label} id={mainName || id}>
-	{#snippet input(inputClass)}
-		<input
-			bind:value={proxy.value}
-			type={attributes.type || 'number'}
-			id={mainName || id}
-			name={mainName}
-			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
-			{...rest}
-			class="{classes} {inputClass}"
-			{@attach watch}
-		/>
-	{/snippet}
-</Field>
+<input
+	bind:value={proxy.value}
+	type="number"
+	{disabled}
+	class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"
+	{@attach needToConvert && decimalSeparator}
+	{...rest}
+/>
+
+{#if dev}
+	<p class="text-xs text-surface-500">Component Value: {value}</p>
+{/if}
+
+<style>
+	/* WebKit tabanlı tarayıcılar (Chrome, Safari, Edge, Opera) için yukarı/aşağı okları gizler */
+	input[type='number']::-webkit-outer-spin-button,
+	input[type='number']::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox için yukarı/aşağı okları gizler */
+	input[type='number'] {
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
+</style>

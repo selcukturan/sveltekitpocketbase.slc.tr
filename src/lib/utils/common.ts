@@ -85,6 +85,24 @@ export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
 	return chunks;
 }
 
+/**
+ * İki değerin eşitliğini kontrol eder. Diziler için eleman bazlı karşılaştırma yapar.
+ * @param a - İlk değer
+ * @param b - İkinci değer
+ * @returns - Değerler eşitse true, değilse false
+ */
+export function areEqual(a: unknown, b: unknown): boolean {
+	if (a === b) return true;
+	if (Array.isArray(a) && Array.isArray(b)) {
+		if (a.length !== b.length) return false;
+		for (let i = 0; i < a.length; i++) {
+			if (a[i] !== b[i]) return false;
+		}
+		return true;
+	}
+	return false;
+}
+
 export function validTC(tc: string): boolean {
 	// olmali, string olmali, ilk rakam 0 olamaz, 11 karakter olmali
 	if (!tc || typeof tc !== 'string' || tc[0] === '0' || tc.length !== 11) return false;

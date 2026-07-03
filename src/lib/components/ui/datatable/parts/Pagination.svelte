@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Toggler from './Toggler.svelte';
+	import { Toggler } from '$lib/components/base/toggler';
 
 	type Props = {
 		totalItems: number;

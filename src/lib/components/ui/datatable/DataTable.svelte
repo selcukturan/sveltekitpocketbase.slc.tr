@@ -1,6 +1,7 @@
 <script lang="ts" generics="TData extends Row">
 	import type { Row } from './types.d';
 	import Pagination from './parts/Pagination.svelte';
+	import ColumnToggler from './parts/ColumnToggler.svelte';
 	import { createTableContext, type MainProps } from './context.svelte';
 
 	let props: MainProps<TData> = $props();
@@ -73,7 +74,7 @@
 		</div>
 	</div>
 	{#if context.paginable}
-		<div>
+		<div class="flex">
 			<Pagination
 				totalItems={context.totalItems}
 				page={context.page}
@@ -83,8 +84,17 @@
 					context.onPagination?.(data);
 				}}
 			/>
+
+			<ColumnToggler />
+
+			<button class="border border-primary-500 p-1 bg-success-400 hover:bg-success-500 cursor-pointer" onclick={context.setFreezeLeft}> +</button>
+			<button class="border border-primary-500 p-1 bg-error-400 hover:bg-error-500 cursor-pointer" onclick={context.unsetFreezeLeft}> -</button>
+
+			<button class="border border-primary-500 p-1 bg-success-400 hover:bg-success-500 cursor-pointer" onclick={context.setFreezeRight}> +</button>
+			<button class="border border-primary-500 p-1 bg-error-400 hover:bg-error-500 cursor-pointer" onclick={context.unsetFreezeRight}> -</button>
 		</div>
 	{/if}
+
 	{@render context.statusbar?.()}
 </div>
 
@@ -134,4 +144,15 @@
 		z-index: 5;
 	}
 	/******************************************************/
+	.slc-table-default-toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		padding: 8px 12px;
+		background-color: var(--color-surface-100, #f1f5f9);
+		border-bottom: 1px solid var(--color-surface-200, #e2e8f0);
+	}
+	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell]) {
+		background-color: var(--color-surface-100, #f1f5f9) !important;
+	}
 </style>

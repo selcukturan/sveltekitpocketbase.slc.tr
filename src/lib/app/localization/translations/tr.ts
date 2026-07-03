@@ -44,6 +44,8 @@ export const tr = {
 	dt_purchase_date: 'Satın Alma Tarihi',
 	dt_text_required: 'Metin (Gerekli)',
 	dt_text_optional: 'Metin (İsteğe Bağlı)',
+	//inputs
+	select_deselect: 'Seçiniz',
 	// error messages
 	error_generic: 'Bir hata oluştu!',
 	error_unauthorized: 'Yetkisiz erişim!',

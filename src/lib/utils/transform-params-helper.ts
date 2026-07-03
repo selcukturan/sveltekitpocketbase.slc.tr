@@ -3,8 +3,8 @@ type TransformKeys<T> = {
 	[K in keyof T as K extends `${infer Prefix}_Plus` ? `${Prefix}+` : K extends `${infer Prefix}_Minus` ? `${Prefix}-` : K]: T[K];
 };
 
-export function paramsFileKeyTransform<T extends Record<string, any>>(params: T): TransformKeys<T> {
-	const newObj: any = {};
+export function paramsFileKeyTransform<T extends Record<string, unknown>>(params: T): TransformKeys<T> {
+	const newObj: Record<string, unknown> = {};
 
 	for (const key in params) {
 		let newKey: string = key;

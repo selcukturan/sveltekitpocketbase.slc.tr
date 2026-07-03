@@ -1,76 +1,36 @@
-<script lang="ts">
-	import { tick } from 'svelte';
+<script lang="ts" generics="Tmultiple extends boolean = false">
+	import { tick, untrack } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import type { RemoteFormField } from '@sveltejs/kit';
-	import Field from './Field.svelte';
-	import { getFormInputsContext } from './context.svelte';
-	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
+	import { cubicOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
-
-	type PropsType = {
-		multiple?: boolean;
-		value: string | string[];
-		label?: string;
-		field?: RemoteFormField<string> | RemoteFormField<string[]>;
-		options: {
-			value: string;
-			label: string;
-		}[];
-		class?: string;
-		triggerClass?: string;
-		listboxClass?: string;
-		optionClass?: string;
-		disabled?: boolean;
-		readonly?: boolean;
-		escClose?: boolean;
-		deSelectText?: string;
-	};
+	import { areEqual } from '$lib/utils/common';
+	import { inputClasses } from './common';
+	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type';
 
 	let {
-		multiple = false,
-		value = $bindable(multiple ? ([] as string[]) : ('' as string)),
-		label,
-		field,
+		multiple = false as Tmultiple,
+		placement = 'bottom',
+		value = $bindable((multiple ? [] : '') as SelectValueTypeChoice<Tmultiple>),
+		required = false,
 		options,
+		id,
+		name,
 		class: classes = '',
 		triggerClass = '',
 		listboxClass = '',
 		optionClass = '',
-		disabled,
-		readonly,
+		disabled = false,
+		readonly = false,
 		escClose = true,
-		deSelectText = '-- Seçiniz --'
-	}: PropsType = $props();
+		deSelectText = '-- Seçiniz --',
+		onValueChange
+	}: SelectPropsType<Tmultiple> = $props();
 
-	const context = getFormInputsContext();
+	// ########################### BEGIN Variables ##################################################################################################################
 
-	const getSelectAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
-		if (!field) return { type: 'select' as const };
-		return (field as RemoteFormField<string>).as('select');
-	};
-	const getSelectMultipleAttributes = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
-		if (!field) return { type: 'select multiple' as const };
-		return (field as RemoteFormField<string[]>).as('select multiple');
-	};
+	const componentId = $props.id();
 
-	const getName = (field: RemoteFormField<string> | RemoteFormField<string[]> | undefined) => {
-		if (multiple) {
-			if (!field) return '';
-			return (field as RemoteFormField<string[]>).as('select multiple')?.name;
-		}
-		if (!field) return '';
-		return (field as RemoteFormField<string>).as('select')?.name;
-	};
-
-	const mainName = $derived(getName(field).replace('[]', ''));
-	const required = $derived(context?.getValibotMetadata(mainName)?.slc_required === true ? true : false);
-
-	const id = $props.id();
-
-	const issues = $derived(field?.issues() ?? []);
-
-	const baseId = `slc-select-${id}`;
+	const baseId = `slc-select-${componentId}`;
 	const triggerId = `${baseId}-trigger`;
 	const listboxId = `${baseId}-listbox`;
 	const optionId = `${baseId}-option`;
@@ -78,13 +38,15 @@
 	let container: HTMLDivElement | null = null;
 	let trigger: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
-	let selectInput: HTMLSelectElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $state(false);
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
-
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
 
+	const labelFor = $derived(`slc_${componentId}${name || ''}${id || ''}_select`);
+	// ########################### END Variables ##################################################################################################################
+
+	// ########################### BEGIN Derived ##################################################################################################################
 	let displayOptions = $derived.by(() => {
 		// Seçimi geri alma imkanı var mı? (Tekli seçim ve zorunlu değil)
 		if (canDeselect) {
@@ -153,16 +115,9 @@
 		return 0;
 	});
 
-	/* const clickListboxOutside = onClickOutside(
-		() => listbox,
-		() => {
-			// Eğer tıklanan öğe trigger ise veya trigger'ın bir parçasıysa, kapatma işlemini atla.
-			if (activeElement.current === trigger || trigger?.contains(activeElement.current)) return;
-			close();
-		},
-		{ immediate: false }
-	); */
+	// ########################### END Derived ##################################################################################################################
 
+	// ########################### BEGIN Open/Close ##################################################################################################################
 	const open = async () => {
 		if (disabled || readonly) return;
 
@@ -190,102 +145,11 @@
 	};
 
 	const toggle = () => (isOpenPopup ? close() : open());
+	// ########################### END Open/Close ##################################################################################################################
 
-	const handleTriggerKeyDown = (e: KeyboardEvent) => {
-		switch (e.code) {
-			case 'ArrowDown':
-			case 'ArrowUp': {
-				e.preventDefault();
-				toggle();
-				break;
-			}
-		}
-	};
-
-	let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
-	let searchString = '';
-	const handleListboxKeydown = (e: KeyboardEvent) => {
-		// 1. Arama (Typeahead) Mantığı
-		// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
-		if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-			e.preventDefault();
-
-			// Önceki zamanlayıcıyı temizle
-			clearTimeout(searchTimeout);
-
-			// Yeni basılan karakteri arama metnine ekle
-			searchString += e.key.toLocaleLowerCase('tr-TR'); // Türkçe'ye uygun küçük harf çevrimi
-
-			// Arama metnine uyan ilk opsiyonu bul
-			const matchIndex = displayOptions.findIndex(
-				(opt) => opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString) // findIndex() bulamazsa -1 döndürür.
-			);
-
-			// Eğer bir eşleşme bulunursa
-			if (matchIndex !== -1) {
-				activeIndex = matchIndex;
-				optionsLi[activeIndex]?.scrollIntoView({
-					behavior: 'auto',
-					block: 'nearest'
-				});
-			}
-
-			// Kullanıcı yazmayı bırakırsa arama metnini sıfırla
-			searchTimeout = setTimeout(() => {
-				searchString = '';
-			}, 500);
-
-			return; // Arama yapıldı, fonksiyonun geri kalanına gerek yok.
-		}
-
-		// 2. Navigasyon ve Seçim Mantığı
-		switch (e.code) {
-			case 'ArrowUp':
-			case 'ArrowDown':
-			case 'Home':
-			case 'End': {
-				e.preventDefault();
-				let nextIndex = activeIndex;
-
-				if (e.code === 'ArrowUp') {
-					nextIndex = (activeIndex - 1 + displayOptions.length) % displayOptions.length;
-				} else if (e.code === 'ArrowDown') {
-					nextIndex = (activeIndex + 1) % displayOptions.length;
-				} else if (e.code === 'Home') {
-					nextIndex = 0;
-				} else if (e.code === 'End') {
-					nextIndex = displayOptions.length - 1;
-				}
-
-				if (nextIndex !== activeIndex) {
-					activeIndex = nextIndex;
-					optionsLi[activeIndex]?.scrollIntoView({
-						behavior: 'auto',
-						block: 'nearest'
-					});
-				}
-				break;
-			}
-
-			case 'Enter':
-			case 'Space': {
-				e.preventDefault();
-				selectOption(activeIndex);
-				break;
-			}
-
-			case 'Escape':
-			case 'Tab': {
-				e.preventDefault();
-				close();
-				trigger?.focus();
-				break;
-			}
-
-			// Diğer tuşlar için bir şey yapma
-			default:
-				return;
-		}
+	// ########################### BEGIN Value Logic ##################################################################################################################
+	const triggerChange = (args: SelectValueChangeArgs<Tmultiple>) => {
+		onValueChange?.(args);
 	};
 
 	function selectOption(index: number) {
@@ -302,179 +166,268 @@
 
 			if (value.includes(newSelectedValue)) {
 				// REMOVE
-				value = value.filter((v) => v !== newSelectedValue);
+				value = value.filter((v) => v !== newSelectedValue) as SelectValueTypeChoice<Tmultiple>;
 			} else {
 				// ADD
-				value = [...value, newSelectedValue];
+				value = [...value, newSelectedValue] as SelectValueTypeChoice<Tmultiple>;
 			}
 		} else {
-			value = newSelectedValue;
+			value = newSelectedValue as SelectValueTypeChoice<Tmultiple>;
 			close();
 			trigger?.focus();
 		}
 	}
 
-	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
-	const internalContainerClasses = 'relative block max-w-full min-w-52 select-none mt-6';
-	const internalTriggerClasses =
-		'slc-input bg-surface-300 inline-flex w-full cursor-pointer touch-manipulation items-center justify-center px-4 py-1 text-start select-none rounded-md';
-	const internalListboxClasses =
-		'slc-input bg-warning-300 pointer-events-auto absolute isolate z-1 mt-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-2 select-none rounded-md';
-	const internalOptionClasses = 'hover:bg-success-100 flex cursor-pointer items-center px-2 py-1 touch-manipulation';
-	const internalInvalidTriggerClasses = ' !bg-error-400';
-
-	let initialValidate = false;
-	const watch = () => {
-		selectedIndexes;
-
+	// `value` her değiştiğinde `untrack` içindeki kod çalışır.
+	let initial = true;
+	let beforeValue = (Array.isArray(value) ? [...value] : value) as SelectValueTypeChoice<Tmultiple>;
+	const watchValueChange = () => {
+		void value;
 		return untrack(() => {
-			const currentValue = value;
-			if (field) {
-				if (multiple) {
-					(field as RemoteFormField<string[]>).set(currentValue as string[]);
-				} else {
-					(field as RemoteFormField<string>).set(currentValue as string);
-				}
-
-				if (!context?.initialValidate && !initialValidate) {
-					initialValidate = true;
-					return;
-				}
-				context?.form.validate({ preflightOnly: true, includeUntouched: true });
+			if (initial || !areEqual(value, beforeValue)) {
+				triggerChange({ value, beforeValue, initial }); // `onValueChange` eventini tetikler.
 			}
+			beforeValue = (Array.isArray(value) ? [...value] : value) as SelectValueTypeChoice<Tmultiple>; // `beforeValue`, `value`'nun bir önceki değerini tutar.
+			if (initial) initial = false; // `initial` sadece ilk renderda false yapılır.
 		});
 	};
 
+	// ########################### END Value Logic ##################################################################################################################
+
+	// ########################### BEGIN Events ##################################################################################################################
 	const outsideclick = () => {
 		return on(window, 'click', (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close());
 	};
+
+	const triggerEvents = (node: HTMLElement) => {
+		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			e.preventDefault();
+			toggle();
+		});
+
+		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
+			switch (e.code) {
+				case 'ArrowDown':
+				case 'ArrowUp': {
+					e.preventDefault();
+					toggle();
+					break;
+				}
+			}
+		});
+
+		return () => {
+			destroyClick();
+			destroyKeydown();
+		};
+	};
+
+	const listboxEvents = (node: HTMLElement) => {
+		let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+		let searchString = '';
+		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
+			// 1. Arama (Typeahead) Mantığı
+			// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
+			if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+				e.preventDefault();
+
+				// Önceki zamanlayıcıyı temizle
+				clearTimeout(searchTimeout);
+
+				// Yeni basılan karakteri arama metnine ekle
+				searchString += e.key.toLocaleLowerCase('tr-TR'); // Türkçe'ye uygun küçük harf çevrimi
+
+				// Arama metnine uyan ilk opsiyonu bul
+				const matchIndex = displayOptions.findIndex(
+					(opt) => opt.label.toLocaleLowerCase('tr-TR').startsWith(searchString) // findIndex() bulamazsa -1 döndürür.
+				);
+
+				// Eğer bir eşleşme bulunursa
+				if (matchIndex !== -1) {
+					activeIndex = matchIndex;
+					optionsLi[activeIndex]?.scrollIntoView({
+						behavior: 'auto',
+						block: 'nearest'
+					});
+				}
+
+				// Kullanıcı yazmayı bırakırsa arama metnini sıfırla
+				searchTimeout = setTimeout(() => {
+					searchString = '';
+				}, 500);
+
+				return; // Arama yapıldı, fonksiyonun geri kalanına gerek yok.
+			}
+
+			// 2. Navigasyon ve Seçim Mantığı
+			switch (e.code) {
+				case 'ArrowUp':
+				case 'ArrowDown':
+				case 'Home':
+				case 'End': {
+					e.preventDefault();
+					let nextIndex = activeIndex;
+
+					if (e.code === 'ArrowUp') {
+						nextIndex = (activeIndex - 1 + displayOptions.length) % displayOptions.length;
+					} else if (e.code === 'ArrowDown') {
+						nextIndex = (activeIndex + 1) % displayOptions.length;
+					} else if (e.code === 'Home') {
+						nextIndex = 0;
+					} else if (e.code === 'End') {
+						nextIndex = displayOptions.length - 1;
+					}
+
+					if (nextIndex !== activeIndex) {
+						activeIndex = nextIndex;
+						optionsLi[activeIndex]?.scrollIntoView({
+							behavior: 'auto',
+							block: 'nearest'
+						});
+					}
+					break;
+				}
+
+				case 'Enter':
+				case 'Space': {
+					e.preventDefault();
+					selectOption(activeIndex);
+					break;
+				}
+
+				case 'Tab': {
+					e.preventDefault();
+					close();
+					trigger?.focus();
+					break;
+				}
+
+				case 'Escape': {
+					if (!escClose) return;
+					e.preventDefault();
+					close();
+					trigger?.focus();
+					break;
+				}
+
+				// Diğer tuşlar için bir şey yapma
+				default:
+					return;
+			}
+		});
+		return () => {
+			destroyKeydown();
+		};
+	};
+
+	const optionEvents = (index: number) => {
+		return (node: HTMLElement) => {
+			const destroyClick = on(node, 'click', (e: MouseEvent) => {
+				e.preventDefault();
+				selectOption(index);
+			});
+			return () => {
+				destroyClick();
+			};
+		};
+	};
+
+	// ########################### END Events ##################################################################################################################
+
+	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
+	const internalContainerClasses = 'relative block max-w-full min-w-52 select-none';
+	const internalTriggerClasses = $derived(
+		`slc-input inline-flex w-full cursor-pointer touch-manipulation items-center justify-center text-start select-none disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants.default : inputClasses.variants.error} ${inputClasses.sizes.md}`
+	);
+	const internalListboxClasses =
+		'slc-input bg-surface-100 border border-surface-300 shadow-lg pointer-events-auto absolute isolate z-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-1.5 select-none rounded-md space-y-1';
+	const internalOptionClasses = 'hover:bg-surface-200 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
+
+	// Animasyon parametrelerini yöne göre hesapla
+	// Menü nereden açılıyorsa, o yönden hafifçe "süzülerek" gelmesini sağlar
+	let transitionParams = $derived.by(() => {
+		const base = { duration: 150, easing: cubicOut, start: 0.95 };
+		if (placement === 'bottom') return { ...base, y: -5 };
+		if (placement === 'top') return { ...base, y: 5 };
+		return base;
+	});
 </script>
 
-<Field {issues} {required} {label} id={triggerId}>
-	{#snippet input(inputClass)}
-		<!-- Select Container -->
-		<div bind:this={container} class="{internalContainerClasses} {classes}" {@attach watch} {@attach outsideclick}>
-			<!-- Select Trigger -->
-			<button
-				bind:this={trigger}
-				id={triggerId}
-				role="combobox"
-				type="button"
-				aria-controls={listboxId}
-				aria-expanded={isOpenPopup}
-				aria-haspopup="listbox"
-				aria-labelledby={triggerId}
-				aria-activedescendant={activeOptionId}
-				aria-invalid={!isValid}
-				class="{internalTriggerClasses} {triggerClass} {!isValid ? internalInvalidTriggerClasses : ''}"
-				onclick={() => toggle()}
-				onkeydown={handleTriggerKeyDown}
-				tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
-				disabled={disabled || displayOptions.length === 0}
-			>
-				<span class="flex-1 p-1 {textEllipsisClasses}">{selectedLabels}</span>
-				<svg
-					stroke="currentColor"
-					fill="currentColor"
-					stroke-width="0"
-					viewBox="0 0 1024 1024"
-					height="1em"
-					width="1em"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"
-					></path>
-				</svg>
-			</button>
-			<!-- Select Listbox -->
-			{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
-				<ul
-					bind:this={listbox}
-					id={listboxId}
-					role="listbox"
-					aria-labelledby={triggerId}
+<div bind:this={container} class="{internalContainerClasses} {classes}" {@attach outsideclick} {@attach watchValueChange}>
+	<button
+		bind:this={trigger}
+		id={triggerId}
+		role="combobox"
+		type="button"
+		aria-controls={listboxId}
+		aria-expanded={isOpenPopup}
+		aria-haspopup="listbox"
+		aria-labelledby={triggerId}
+		aria-activedescendant={activeOptionId}
+		aria-invalid={!isValid}
+		class="{internalTriggerClasses} {triggerClass}"
+		{@attach triggerEvents}
+		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
+		disabled={disabled || displayOptions.length === 0}
+	>
+		<span class="flex-1 {textEllipsisClasses}">{selectedLabels}</span>
+		<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+			<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
+		</svg>
+	</button>
+	{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
+		<ul
+			bind:this={listbox}
+			id={listboxId}
+			role="listbox"
+			aria-labelledby={triggerId}
+			tabindex={-1}
+			{@attach listboxEvents}
+			class="{internalListboxClasses} {listboxClass} {placement}"
+			transition:fly={transitionParams}
+		>
+			{#each displayOptions as option, i (i)}
+				{@const isSelected = selectedIndexes.includes(i)}
+				{@const isActive = i === activeIndex}
+				<li
+					bind:this={optionsLi[i]}
+					id="{optionId}-{i}"
+					role="option"
 					tabindex={-1}
-					onkeydown={handleListboxKeydown}
-					class="{internalListboxClasses} {listboxClass}"
-					transition:fly={{ y: 5, duration: 300 }}
+					aria-selected={isSelected}
+					class:bg-secondary-100={isSelected}
+					class:outline-2={isActive}
+					class:outline-primary-400={isActive}
+					class="{internalOptionClasses} {optionClass}"
+					{@attach optionEvents(i)}
 				>
-					<!-- Select Options -->
-					{#each displayOptions as option, i (i)}
-						{@const isSelected = selectedIndexes.includes(i)}
-						{@const isActive = i === activeIndex}
-						<!-- svelte-ignore a11y_click_events_have_key_events -->
-						<li
-							bind:this={optionsLi[i]}
-							id="{optionId}-{i}"
-							role="option"
-							tabindex={-1}
-							aria-selected={isSelected}
-							class:bg-success-200={isSelected}
-							class:outline-2={isActive}
-							class="{internalOptionClasses} {optionClass}"
-							onclick={() => selectOption(i)}
-						>
-							<span class="flex-1 {textEllipsisClasses}">
-								{option.label}
-							</span>
-							<span aria-hidden={!isSelected} hidden={!isSelected}>
-								<svg
-									stroke="currentColor"
-									fill="currentColor"
-									stroke-width="0"
-									viewBox="0 0 24 24"
-									height="1em"
-									width="1em"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path fill="none" d="M0 0h24v24H0z"></path>
-									<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
-								</svg>
-							</span>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-
-			{#if multiple}
-				{@const selectMultipleAttributes = getSelectMultipleAttributes(field)}
-				<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectMultipleAttributes} bind:this={selectInput}>
-					{#each displayOptions as option, i (i)}
-						<option>{option.value}</option>
-					{/each}
-				</select>
-			{:else}
-				{@const selectAttributes = getSelectAttributes(field)}
-				<select class="sr-only" tabindex={-1} aria-hidden={true} {...selectAttributes} bind:this={selectInput}>
-					{#each displayOptions as option, i (i)}
-						<option>{option.value}</option>
-					{/each}
-				</select>
-			{/if}
-		</div>
-	{/snippet}
-</Field>
+					<span class="flex-1 {textEllipsisClasses}">
+						{option.label}
+					</span>
+					<span aria-hidden={!isSelected} hidden={!isSelected}>
+						<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+							<path fill="none" d="M0 0h24v24H0z"></path>
+							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+						</svg>
+					</span>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</div>
 
 <style>
-	.sr-only {
-		/* Görünmezliği sağla (Modern yöntem) */
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px; /* Yer kaplamaması için (Tavsiye edilen eski yöntemden kalma) */
-		overflow: hidden;
-		clip-path: inset(50%); /* Yeni, standartlaştırılmış kırpma yöntemi */
-
-		/* Kesinlikle görünmezliği garanti et */
-		opacity: 0;
-
-		/* Etkileşimi tamamen kes */
-		pointer-events: none; /* Üzerine tıklanmasını kesinlikle engeller */
-
-		/* Ekstra temizlik */
-		white-space: nowrap;
-		border: 0;
+	/* --- Transform Origin & Konumlandırma Ayarları --- */
+	.bottom {
+		transform-origin: top;
+		top: 100%;
+		left: 0;
+		margin-top: 5px;
+	}
+	.top {
+		transform-origin: bottom;
+		bottom: 100%;
+		left: 0;
+		margin-bottom: 5px;
 	}
 </style>

@@ -1,105 +1,100 @@
 <script lang="ts">
-	// ######################## IMPORTS #################################################################################################
-	import type { SvelteHTMLElements } from 'svelte/elements';
-	import type { RemoteFormField } from '@sveltejs/kit';
-	import { getFormInputsContext } from './context.svelte';
-	import Field from './Field.svelte';
 	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
+	import { on } from 'svelte/events';
+	import type { BoolProps, BoolValueChangeArgs } from './type';
 
-	// ######################## PROPS TYPE ##############################################################################################
-	type Props = Omit<SvelteHTMLElements['input'], 'type' | 'id' | 'value' | 'name' | 'aria-invalid'> & {
-		id?: string;
-		value?: boolean;
-		name?: string;
-		'aria-invalid'?: SvelteHTMLElements['input']['aria-invalid'];
-		field?: RemoteFormField<boolean>;
-		label?: string;
+	let { value = $bindable(false), text, id, name, disabled = false, readonly = false, onValueChange, class: classes = '', ...rest }: BoolProps = $props();
+
+	const componentId = $props.id();
+
+	const labelFor = $derived(`slc_${componentId}${name || ''}${id || ''}_bool`);
+
+	let button = $state<HTMLButtonElement>();
+
+	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
+	const triggerChange = ({ value, beforeValue, initial }: BoolValueChangeArgs) => {
+		onValueChange?.({ value, beforeValue, initial });
 	};
-	// ######################## PROPS ###################################################################################################
-	let {
-		value = $bindable(false),
-		label,
-		field,
-		class: classes,
-		id,
-		name,
-		'aria-invalid': ariaInvalid,
-		...rest
-	}: Props = $props();
-	const context = getFormInputsContext();
+	// ############################### END ONVALUECHANGE HANDLER ###############################
 
-	const attributes = $derived({ ...field?.as('checkbox'), value: undefined, checked: undefined });
-	const issues = $derived(field?.issues() ?? []);
-
-	const mainName = $derived(attributes.name || name || '');
-	const nonfalsey = $derived(context?.getValibotMetadata(mainName.replace('b:', ''))?.slc_nonfalsey === true ? true : false);
-
-	const valueChanged = (value: boolean) => {
-		field?.set(value);
-	};
-
-	let first = true;
-	const proxy = {
-		get value() {
-			const currentValue = value;
-			if (first) {
-				first = false;
-				valueChanged(currentValue);
-			}
-			return currentValue;
-		},
-		set value(v) {
-			const currentValue = v;
-			value = currentValue;
-			valueChanged(currentValue);
-		}
-	};
-
-	let initialValidate = false;
-	const watch: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
-		proxy.value;
-
-		const cleanup = untrack(() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
-				return;
-			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-
-			return () => {
-				// cleanup code
-			};
+	// ############################### BEGIN PROXY ###############################
+	let initial = true;
+	let beforeValue = value;
+	const watchValueChange = () => {
+		void value;
+		return untrack(() => {
+			triggerChange({ value, beforeValue, initial });
+			beforeValue = value;
+			if (initial) initial = false;
 		});
-
-		return cleanup;
 	};
+	// ############################### END PROXY ###############################
 
-	/* watch(
-		() => proxy.value,
-		() => {
-			if (!context?.initialValidate && !initialValidate) {
-				initialValidate = true;
+	// ############################### BEGIN TOGGLE ###############################
+	const divClick = (node: HTMLElement) => {
+		return on(node, 'click', (e: MouseEvent) => {
+			if (disabled || readonly) return;
+			const target = e.target as HTMLElement;
+			// Tıklama doğrudan buton üzerindeyse, butonun kendi click handler'ı çalışsın.
+			if (target.closest('button')) {
 				return;
 			}
-			context?.form.validate({ preflightOnly: true, includeUntouched: true });
-		}
-	); */
+			// Eğer bu bileşen dışarıdan bir <label> içine sarılmışsa, tarayıcı metne/div'e
+			// tıklandığında otomatik olarak butona da tık olayı gönderecektir (synthetic click).
+			// Çift tetiklemeyi önlemek için bu durumda div düzeyindeki tıklamayı görmezden geliyoruz.
+			if ((e.currentTarget as HTMLElement).closest('label')) {
+				return;
+			}
+			// Label içinde değilsek, metne/div'e tıklandığında butonu tetikliyoruz.
+			button?.click();
+		});
+	};
+	const buttonClick = (node: HTMLElement) => {
+		return on(node, 'click', (e: MouseEvent) => {
+			e.stopPropagation();
+			if (disabled || readonly) return;
+			value = !value;
+			node.focus();
+		});
+	};
+	// ############################### END TOGGLE ###############################
 </script>
 
-<Field {issues} required={nonfalsey} {label} id={mainName || id}>
-	{#snippet input(inputClass)}
-		<input
-			bind:checked={proxy.value}
-			type="checkbox"
-			id={mainName || id}
-			name={mainName}
-			aria-invalid={attributes['aria-invalid'] || ariaInvalid}
-			{...rest}
-			class="{classes} {inputClass}"
-			{@attach watch}
-		/>
-	{/snippet}
-</Field>
+<div
+	{@attach divClick}
+	{@attach watchValueChange}
+	class="inline-flex items-center gap-3 select-none group {classes} {disabled
+		? 'cursor-not-allowed opacity-50'
+		: readonly
+			? 'cursor-default'
+			: 'cursor-pointer'}"
+>
+	<button
+		bind:this={button}
+		type="button"
+		role="switch"
+		aria-checked={value}
+		aria-label={text || 'Boolean toggle button'}
+		disabled={disabled || readonly}
+		class="{value ? 'bg-success-400 border-success-600' : 'bg-surface-200 border-surface-400'}
+			{!disabled && !readonly
+			? value
+				? 'group-hover:bg-success-500 group-hover:border-success-700'
+				: 'group-hover:bg-surface-300 group-hover:border-surface-500'
+			: ''}
+			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
+			{readonly ? 'cursor-default' : 'cursor-pointer'}
+			relative h-6 w-11 rounded-md border overflow-hidden py-1 px-0.5"
+		{@attach buttonClick}
+		{...rest}
+	>
+		<span
+			class="bg-surface-800 pointer-events-none flex h-full w-1/2 items-center justify-center overflow-hidden rounded-md shadow transition-transform"
+			class:translate-x-full={value}
+		></span>
+	</button>
+
+	{#if text}
+		<span class="text-sm font-medium text-surface-900">{text}</span>
+	{/if}
+</div>
