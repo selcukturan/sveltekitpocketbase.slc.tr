@@ -5,33 +5,30 @@
 
 	let pageSidebardata: PageSidebarDataType[] = [
 		{
-			title: 'Grapes',
+			title: 'Settings',
 			child: [
 				{
 					title: 'Introduction',
-					href: `/grapes`,
+					href: `/app/settings`,
 					icon: 'file-symlink',
 					root: true
 				}
 			]
 		},
 		{
-			title: 'CRUD',
+			title: 'System',
 			child: [
 				{
 					title: 'Introduction',
-					href: `/grapes/crud`,
-					icon: 'file-symlink'
+					href: `/app/settings/system`,
+					icon: 'file-symlink',
+					root: true
 				},
 				{
-					title: 'Simple CRUD',
-					href: `/grapes/crud/simple`,
-					icon: 'file-symlink'
-				},
-				{
-					title: 'Create, Read, Update, Delete',
-					href: `/grapes/crud/create-read-update-delete`,
-					icon: 'file-symlink'
+					title: 'Application',
+					href: `/app/settings/system/application`,
+					icon: 'file-symlink',
+					root: true
 				}
 			]
 		}

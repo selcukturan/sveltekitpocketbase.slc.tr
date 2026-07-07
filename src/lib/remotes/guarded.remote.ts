@@ -23,7 +23,7 @@ export const checkAuthenticated = query(() => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) {
 		// error(401, 'Unauthorized');
-		throw redirect(307, '/login?unauthorized');
+		throw redirect(307, '/login');
 	}
 });
 
@@ -35,7 +35,7 @@ export const logout = form(async () => {
 
 	await requested(getUser, 1).refreshAll();
 
-	throw redirect(307, '/');
+	throw redirect(307, '/login');
 	// return { success: true };
 });
 
@@ -52,6 +52,6 @@ export const login = form(loginSchema, async ({ email, _password }) => {
 
 	await requested(getUser, 1).refreshAll();
 
-	throw redirect(307, '/');
+	throw redirect(307, '/app');
 	// return { success: true };
 });

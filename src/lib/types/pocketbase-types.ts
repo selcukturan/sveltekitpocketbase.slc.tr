@@ -13,6 +13,7 @@ export const Collections = {
 	Superusers: "_superusers",
 	AclRoles: "acl_roles",
 	DemoCrud: "demo_crud",
+	DemoNotification: "demo_notification",
 	DemoRelationInputMultiple: "demo_relation_input_multiple",
 	DemoRelationInputSingle: "demo_relation_input_single",
 	SysUsers: "sys_users",
@@ -153,6 +154,24 @@ export type DemoCrudRecord = {
 	updated: IsoAutoDateString
 }
 
+export const DemoNotificationSelectOptions = {
+	"info": "info",
+	"success": "success",
+	"warning": "warning",
+	"error": "error",
+} as const
+export type DemoNotificationSelectOptions = typeof DemoNotificationSelectOptions[keyof typeof DemoNotificationSelectOptions]
+export type DemoNotificationRecord = {
+	created: IsoAutoDateString
+	id: string
+	message: HTMLString
+	read_by?: RecordIdString[]
+	select: DemoNotificationSelectOptions
+	title: string
+	updated: IsoAutoDateString
+	user?: RecordIdString[]
+}
+
 export type DemoRelationInputMultipleRecord = {
 	created: IsoAutoDateString
 	id: string
@@ -194,6 +213,7 @@ export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemF
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type AclRolesResponse<Texpand = unknown> = Required<AclRolesRecord> & BaseSystemFields<Texpand>
 export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & BaseSystemFields<Texpand>
+export type DemoNotificationResponse<Texpand = unknown> = Required<DemoNotificationRecord> & BaseSystemFields<Texpand>
 export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>
 export type DemoRelationInputSingleResponse<Texpand = unknown> = Required<DemoRelationInputSingleRecord> & BaseSystemFields<Texpand>
 export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
@@ -208,6 +228,7 @@ export type CollectionRecords = {
 	_superusers: SuperusersRecord
 	acl_roles: AclRolesRecord
 	demo_crud: DemoCrudRecord
+	demo_notification: DemoNotificationRecord
 	demo_relation_input_multiple: DemoRelationInputMultipleRecord
 	demo_relation_input_single: DemoRelationInputSingleRecord
 	sys_users: SysUsersRecord
@@ -221,6 +242,7 @@ export type CollectionResponses = {
 	_superusers: SuperusersResponse
 	acl_roles: AclRolesResponse
 	demo_crud: DemoCrudResponse
+	demo_notification: DemoNotificationResponse
 	demo_relation_input_multiple: DemoRelationInputMultipleResponse
 	demo_relation_input_single: DemoRelationInputSingleResponse
 	sys_users: SysUsersResponse

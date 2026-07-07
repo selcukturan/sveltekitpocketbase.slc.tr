@@ -14,7 +14,7 @@
 
 <section class="{classes} flex h-full w-full flex-row overflow-hidden sm:flex-col" {...attributes}>
 	<header class="flex items-center justify-center px-2 sm:py-2">
-		<a href={resolve('/')} class="flex h-10 w-10 items-center justify-center select-none">
+		<a href={resolve('/app')} class="flex h-10 w-10 items-center justify-center select-none">
 			<img class="h-10 w-10 select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</a>
 	</header>
@@ -41,7 +41,11 @@
 					text: d.title,
 					position: global.isMobileBreakpoint ? 'bottom' : 'right'
 				})}
-				aria-current={d.href === '/' && page.url.pathname === '/' ? 'page' : d.href !== '/' && page.url.pathname.startsWith(`${d.href}`) ? 'page' : undefined}
+				aria-current={d.href === '/app' && page.url.pathname === '/app'
+					? 'page'
+					: d.href !== '/app' && page.url.pathname.startsWith(`${d.href}`)
+						? 'page'
+						: undefined}
 				class="hover:bg-surface-200
 					active:bg-surface-300
 					aria-[current]:border-primary-900

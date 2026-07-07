@@ -10,32 +10,32 @@
 	let sidebarData: SidebarDataType[] = $state([
 		{
 			title: 'Home',
-			href: '/',
+			href: '/app',
 			icon: 'home'
 		},
 		{
 			title: 'Grapes',
-			href: '/grapes',
+			href: '/app/grapes',
 			icon: 'grape'
 		},
 		{
 			title: 'Data Table',
-			href: '/data-table',
+			href: '/app/data-table',
 			icon: 'data-table'
 		},
 		{
 			title: 'Logs',
-			href: '/logs',
+			href: '/app/logs',
 			icon: 'chart-spline'
 		},
 		{
 			title: 'Developments',
-			href: '/developments',
+			href: '/app/developments',
 			icon: 'square-code'
 		},
 		{
 			title: 'Settings',
-			href: '/settings',
+			href: '/app/settings',
 			icon: 'settings'
 		}
 	]);

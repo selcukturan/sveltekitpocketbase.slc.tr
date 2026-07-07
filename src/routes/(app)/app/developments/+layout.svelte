@@ -9,7 +9,7 @@
 			child: [
 				{
 					title: 'Introduction',
-					href: `/developments`,
+					href: `/app/developments`,
 					icon: 'file-symlink',
 					root: true
 				}
@@ -20,65 +20,65 @@
 			child: [
 				{
 					title: 'Icons',
-					href: `/developments/components`,
+					href: `/app/developments/components`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Notifications',
-					href: `/developments/components/notifications`,
+					href: `/app/developments/components/notifications`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'X',
-					href: `/developments/components/form-slc`,
+					href: `/app/developments/components/form-slc`,
 					icon: 'file-symlink'
 				},
 
 				{
 					title: 'Tooltip',
-					href: `/developments/components/tooltip`,
+					href: `/app/developments/components/tooltip`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Toast',
-					href: `/developments/components/toast`,
+					href: `/app/developments/components/toast`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Confirmation',
-					href: `/developments/components/confirmation`,
+					href: `/app/developments/components/confirmation`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Drawer Panel',
-					href: `/developments/components/drawer`,
+					href: `/app/developments/components/drawer`,
 					icon: 'file-symlink'
 				},
 
 				{
 					title: 'Inputs',
-					href: `/developments/components/select`,
+					href: `/app/developments/components/select`,
 					icon: 'file-symlink'
 				},
 
 				{
 					title: 'X',
-					href: `/developments/components/remote-functions`,
+					href: `/app/developments/components/remote-functions`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Pagination',
-					href: `/developments/components/link-routing`,
+					href: `/app/developments/components/link-routing`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Toggler',
-					href: `/developments/components/empty`,
+					href: `/app/developments/components/empty`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Tree (Draft)',
-					href: `/developments/components/tree`,
+					href: `/app/developments/components/tree`,
 					icon: 'file-symlink'
 				}
 			]

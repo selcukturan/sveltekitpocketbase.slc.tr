@@ -9,7 +9,7 @@
 			child: [
 				{
 					title: 'Introduction',
-					href: `/data-table`,
+					href: `/app/data-table`,
 					icon: 'file-symlink',
 					root: true
 				}
@@ -20,12 +20,12 @@
 			child: [
 				{
 					title: 'Introduction',
-					href: `/data-table/demos`,
+					href: `/app/data-table/demos`,
 					icon: 'file-symlink'
 				},
 				{
 					title: 'Common Features',
-					href: `/data-table/demos/common-features`,
+					href: `/app/data-table/demos/common-features`,
 					icon: 'file-symlink'
 				}
 			]

@@ -73,5 +73,6 @@
 			"foreground": "#302914",
 			"iconColour": "#ffbf00"
 		}
-	}
+	},
+	"explorer.compactFolders": false
 }

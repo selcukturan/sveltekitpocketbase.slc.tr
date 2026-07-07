@@ -9,7 +9,7 @@
 	let user = getUser();
 
 	function onclick() {
-		goto(resolve('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9'));
+		goto(resolve('/app/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9'));
 	}
 </script>
 
@@ -42,7 +42,7 @@
 					BUTTON: Go DataTable with filter and recordId in hash
 				</button>
 				<a
-					href={resolve('/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9')}
+					href={resolve('/app/grapes/crud/create-read-update-delete#cmd=create&id=ogakwsw3aeym0u9')}
 					class=" bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center"
 					target="_blank"
 					rel="noopener noreferrer"

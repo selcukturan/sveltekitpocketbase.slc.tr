@@ -3,7 +3,7 @@
 	let { children, class: classes, ...attributes }: ChildrenPropsType = $props();
 </script>
 
-<main class="{classes} {'relative flex-1 overflow-hidden'}" {...attributes}>
+<main class="{classes} relative flex-1 overflow-hidden" {...attributes}>
 	{#if children}
 		{@render children()}
 	{/if}

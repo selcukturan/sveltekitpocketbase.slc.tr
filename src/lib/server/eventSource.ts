@@ -23,7 +23,7 @@ class SimpleEventSource {
 			const response = await fetch(this.url, {
 				headers: {
 					Accept: 'text/event-stream',
-					'Cache-Control': 'no-cache',
+					'Cache-Control': 'no-cache, no-transform',
 					Connection: 'keep-alive'
 				},
 				signal: this.controller.signal
