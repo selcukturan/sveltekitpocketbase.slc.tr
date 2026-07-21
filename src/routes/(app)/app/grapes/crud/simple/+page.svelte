@@ -30,12 +30,14 @@
 
 	// ----------- Begin Data Table Filter Logic -----------------------------------------------------------------------------------------------------
 	const listParamsSchemaDefaults: ListParamsSchemaType = getDefaults(listParamsSchema);
-	let params = $state(listParamsSchemaDefaults); // initial
+	let params = $state({ ...listParamsSchemaDefaults, timestamp: new Date().getTime() }); // initial
 	let filterData = $state(listParamsSchemaDefaults.filterData); // initial
 
 	const query = $derived(getList(params));
 
-	const search = () => (params = { ...params, filterData: { ...filterData } });
+	const search = () => {
+		params = { ...params, filterData: { ...filterData }, timestamp: new Date().getTime() };
+	};
 	const refresh = () => query.refresh();
 	// ----------- End Data Table Filter Logic -------------------------------------------------------------------------------------------------------
 
@@ -96,9 +98,13 @@
 				{footers}
 				freezeLeft={1}
 				freezeRight={0}
-				onPagination={(p) => (params = { ...params, ...p })}
+				onPagination={(p) => {
+					params = { ...params, ...p, timestamp: new Date().getTime() };
+				}}
 				sort={params.options.sort}
-				onSort={(s) => (params = { ...params, options: { ...params.options, sort: s } })}
+				onSort={(s) => {
+					params = { ...params, options: { ...params.options, sort: s }, timestamp: new Date().getTime() };
+				}}
 				onRowClick={(row) => setParams({ cmd: 'update', id: row.id })}
 			>
 				{#snippet headerRow(hr)}
@@ -199,7 +205,8 @@
 						<input.Button label=" X " onclick={() => drawerRef?.close()} />
 					</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
-						{@const dbData = await getOne({ ...oneParamsDefaults, id: drawerCommand.id })}
+						{@const timestamp = new Date().getTime()}
+						{@const dbData = await getOne({ ...oneParamsDefaults, id: drawerCommand.id, timestamp })}
 						<DrawerFormContent.Content.Form
 							enctype="multipart/form-data"
 							schema={updateFormSchema}

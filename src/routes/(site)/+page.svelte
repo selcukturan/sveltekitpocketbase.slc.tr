@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import { goto } from '$app/navigation';
+	/* import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation'; */
 
-	$effect(() => {
+	/* $effect(() => {
 		goto(resolve('/login'), { replaceState: true });
-	});
+	}); */
 </script>
 
-<!-- <p>Landing Page</p> -->
+<p>Landing Page</p>

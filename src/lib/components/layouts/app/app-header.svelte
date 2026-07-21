@@ -10,6 +10,7 @@
 	import { logout } from '$lib/remotes/guarded.remote';
 	import { Icon } from '$lib/components/icons';
 	import { getUser } from '$lib/remotes/guarded.remote';
+	import { goto } from '$app/navigation';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();
@@ -49,6 +50,7 @@
 					try {
 						if (await submit().updates(getUser)) {
 							console.log('Successfully logged out!');
+							// window.location.href = '/login';
 						} else {
 							console.log('Invalid data!');
 						}

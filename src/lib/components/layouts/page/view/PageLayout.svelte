@@ -67,7 +67,7 @@
 				type="button"
 				onclick={handleClick}
 				style:display={global.hideSidebar ? 'none' : 'inline-flex'}
-				class="bg-surface-50 text-surface-600 hover:bg-quaternary-50/90 absolute z-52 h-7 w-7 cursor-pointer items-center justify-center rounded-full border p-0.25 select-none sm:h-6 sm:w-6"
+				class="bg-surface-50 text-surface-600 hover:bg-quaternary-50/90 absolute z-52 h-7 w-7 cursor-pointer items-center justify-center rounded-full border p-px select-none sm:h-6 sm:w-6"
 				class:pt-3={global.hidePageSidebar && global.isMobileBreakpoint}
 				class:pl-2={global.hidePageSidebar && !global.isMobileBreakpoint}
 				class:mobile-position={global.isMobileBreakpoint}

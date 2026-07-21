@@ -5,7 +5,7 @@ import { Collections } from '$lib/types/pocketbase-types';
 import { createPocketBaseInstance } from '$lib/server/pb';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	console.log(new Date().getTime() + ' - hook.server.ts');
+	console.log(new Date().getTime() + ' - hook.server.ts - ' + event.request.url);
 	const isProduction = env.NODE_ENV === 'production';
 
 	// 🚀 PB ve AuthStore örneği oluştur ##############################################################################################

@@ -14,7 +14,7 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	// await sleep(300);
+	await sleep(300);
 
 	const filterString = locals.pb.filter('(text_required ~ {:text_required} && text_optional ~ {:text_optional})', { ...params.filterData });
 
@@ -38,7 +38,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 
 	const { locals } = getRequestEvent();
 
-	// await sleep(1000);
+	await sleep(300);
 
 	const oneResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.DemoCrud).getOne(params.id, {

@@ -98,7 +98,7 @@ export const notificationsRemote = query.live(async function* () {
 				filter: locals.pb.filter('user.id ?= {:id} || user:length = 0', { id: userId }),
 				sort: '-created'
 			});
-			console.log('[notificationsRemote] Veritabanından en güncel log listesi çekildi:', result);
+			console.log('[notificationsRemote] Veritabanından en güncel log listesi çekildi:');
 			return result;
 		} catch (err) {
 			console.error('[notificationsRemote] Veritabanından log listesi çekilirken hata oluştu:', err);

@@ -17,7 +17,8 @@ export const listParamsSchema = v.object({
 	filterData: v.object({
 		...input.Text('text_required', { required: false }),
 		...input.Text('text_optional', { required: false })
-	})
+	}),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,7 +27,8 @@ export const oneParamsSchema = v.object({
 	options: v.object({
 		expand: v.optional(v.string()),
 		fields: v.optional(v.string())
-	})
+	}),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 // --------------------------------------------------------------------------------------------------------------------------------------------
