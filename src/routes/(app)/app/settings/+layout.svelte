@@ -10,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/app/settings`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				}
 			]
@@ -21,13 +21,13 @@
 				{
 					title: 'Introduction',
 					href: `/app/settings/system`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				},
 				{
 					title: 'Application',
 					href: `/app/settings/system/application`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				}
 			]

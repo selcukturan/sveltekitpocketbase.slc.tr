@@ -10,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/app/developments`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				}
 			]
@@ -21,65 +21,65 @@
 				{
 					title: 'Icons',
 					href: `/app/developments/components`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Notifications',
 					href: `/app/developments/components/notifications`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'X',
 					href: `/app/developments/components/form-slc`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 
 				{
 					title: 'Tooltip',
 					href: `/app/developments/components/tooltip`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Toast',
 					href: `/app/developments/components/toast`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Confirmation',
 					href: `/app/developments/components/confirmation`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Drawer Panel',
 					href: `/app/developments/components/drawer`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 
 				{
 					title: 'Inputs',
 					href: `/app/developments/components/select`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 
 				{
 					title: 'X',
 					href: `/app/developments/components/remote-functions`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Pagination',
 					href: `/app/developments/components/link-routing`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Toggler',
 					href: `/app/developments/components/empty`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Tree (Draft)',
 					href: `/app/developments/components/tree`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				}
 			]
 		}

@@ -21,17 +21,17 @@
 		{
 			title: 'Data Table',
 			href: '/app/data-table',
-			icon: 'data-table'
+			icon: 'data_table'
 		},
 		{
 			title: 'Logs',
 			href: '/app/logs',
-			icon: 'chart-spline'
+			icon: 'chart_spline'
 		},
 		{
 			title: 'Developments',
 			href: '/app/developments',
-			icon: 'square-code'
+			icon: 'square_code'
 		},
 		{
 			title: 'Settings',

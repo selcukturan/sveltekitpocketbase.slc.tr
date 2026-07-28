@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { tooltip } from '$lib/attachments';
-	import { Icon } from '$lib/components/icons';
+	import { Icon, type IconKey } from '$lib/components/icons';
 
 	type Props = HTMLButtonAttributes & {
 		label?: string;
-		icon?: string;
+		icon?: IconKey;
 		size?: string;
 		iconSize?: string;
 	};
 
-	let { label = 'Action', icon = 'edit', size = '28px', iconSize = '16px', ...attributes }: Props = $props();
+	let { label = 'Action', icon = 'lucide', size = '28px', iconSize = '16px', ...attributes }: Props = $props();
 </script>
 
 <button

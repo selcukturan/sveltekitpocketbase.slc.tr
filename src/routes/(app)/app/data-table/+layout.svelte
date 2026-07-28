@@ -10,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/app/data-table`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				}
 			]
@@ -21,12 +21,12 @@
 				{
 					title: 'Introduction',
 					href: `/app/data-table/demos`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Common Features',
 					href: `/app/data-table/demos/common-features`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				}
 			]
 		}

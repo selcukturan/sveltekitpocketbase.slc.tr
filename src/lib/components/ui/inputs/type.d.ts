@@ -188,8 +188,8 @@ export type ButtonProps = Omit<SvelteHTMLElements['button'], 'type'> & {
 	color?: ButtonColor;
 	size?: ButtonSize;
 	label?: string;
-	startIcon?: string;
-	endIcon?: string;
+	startIcon?: IconName;
+	endIcon?: IconName;
 	icon?: IconName;
 	iconOnly?: boolean;
 	type?: 'button' | 'submit' | 'reset';

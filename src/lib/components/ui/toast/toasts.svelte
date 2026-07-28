@@ -66,11 +66,11 @@
 				{#if toastType === 'info'}
 					<Icon name="info" />
 				{:else if toastType === 'error'}
-					<Icon name="circle-x" />
+					<Icon name="circle_x" />
 				{:else if toastType === 'success'}
-					<Icon name="circle-check" />
+					<Icon name="circle_check" />
 				{:else if toastType === 'warning'}
-					<Icon name="circle-alert" />
+					<Icon name="circle_alert" />
 				{:else if toastType === 'loading'}
 					<div class="animate-spin">
 						<Icon name="loader" />

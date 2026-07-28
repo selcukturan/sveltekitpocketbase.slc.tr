@@ -1,10 +1,11 @@
 import { type Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
+import type { IconKey } from '$lib/components/icons';
 
 type PageSidebarChildType = {
 	title: string;
 	href: string;
-	icon: string;
+	icon: IconKey;
 	root?: boolean;
 };
 

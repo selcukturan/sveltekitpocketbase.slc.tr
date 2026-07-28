@@ -1,9 +1,10 @@
 import type { Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
+import type { IconKey } from '$lib/components/icons';
 export type SidebarDataType = {
 	title: string;
 	href: string;
-	icon: string;
+	icon: IconKey;
 };
 
 export type ChildrenPropsType = { children: Snippet };

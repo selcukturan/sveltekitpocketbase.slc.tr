@@ -8,10 +8,12 @@
 	import { t } from '$lib/app/localization';
 	import { resolve } from '$app/paths';
 	import { getUser } from '$lib/remotes/guarded.remote';
+	import Button from '$lib/components/ui/inputs/Button.svelte';
+	import { Icon } from '$lib/components/icons';
 
 	const loginPageToaster = getToaster('app-toaster');
 
-	let isLoading = false;
+	let isLoading = $state('init');
 </script>
 
 <svelte:head>
@@ -89,20 +91,22 @@
 		dark:bg-transparent"
 	>
 		<form
+			class="flex flex-col gap-5"
 			{...login.preflight(loginSchema).enhance(async ({ submit }) => {
-				if (isLoading) return;
-				isLoading = true;
+				if (isLoading === 'loading') return;
+				isLoading = 'loading';
 
 				try {
 					if (await submit().updates(getUser)) {
-						isLoading = false;
+						// user is logged in, do nothing.
+						isLoading = 'success';
 					} else {
 						loginPageToaster.add({
 							type: 'error',
 							title: t('error'),
 							description: t('invalid_data')
 						});
-						isLoading = false;
+						isLoading = 'fail';
 					}
 				} catch (e) {
 					loginPageToaster.add({
@@ -110,42 +114,53 @@
 						title: t('error'),
 						description: t('error_user_or_password_incorrect')
 					});
-					isLoading = false;
+					isLoading = 'error';
 				}
 			})}
 		>
-			<div class="flex flex-col gap-5">
-				<label class="grid gap-1">
-					<span class="select-none">{t('login_page_email_label')}</span>
+			<label>
+				<span class="select-none">{t('login_page_email_label')}</span>
 
-					<input
-						{...login.fields.email.as('text', 'demo@slc.tr')}
-						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
-					/>
+				<input
+					{...login.fields.email.as('text', 'demo@slc.tr')}
+					class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
+				/>
 
-					{#each login.fields.email.issues() ?? [] as issue, index (index)}
-						<p class="text-error-500">{t(issue.message)}</p>
-					{/each}
-				</label>
+				{#each login.fields.email.issues() ?? [] as issue, index (index)}
+					<p class="text-error-500">{t(issue.message)}</p>
+				{/each}
+			</label>
 
-				<label class="grid gap-1">
-					<span class="select-none">{t('login_page_password_label')}</span>
+			<label>
+				<span class="select-none">{t('login_page_password_label')}</span>
 
-					<input
-						{...login.fields._password.as('password', 'SLc1234567')}
-						class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
-					/>
-					{#each login.fields._password.issues() ?? [] as issue, index (index)}
-						<p class="text-error-500">{t(issue.message)}</p>
-					{/each}
-				</label>
+				<input
+					{...login.fields._password.as('password', 'SLc1234567')}
+					class="border-surface-300 bg-surface-100 h-10 w-full rounded-sm border pr-2 pl-2 text-base sm:text-sm"
+				/>
+				{#each login.fields._password.issues() ?? [] as issue, index (index)}
+					<p class="text-error-500">{t(issue.message)}</p>
+				{/each}
+			</label>
 
-				<button
+			<Button type="submit">
+				{#if isLoading === 'loading'}
+					<Icon name="loader" class="animate-spin" />
+				{:else if isLoading === 'success'}
+					<Icon name="circle_check" />
+				{:else if isLoading === 'error'}
+					<Icon name="circle_x" />
+				{:else}
+					<Icon name="user" />
+				{/if}
+				{t('login_page_submit_button')}
+			</Button>
+
+			<!-- <button
 					class="bg-primary-400 hover:bg-primary-400/80 focus:ring-primary-500/50 text-surface-token-900 flex h-10 w-full cursor-pointer items-center justify-center rounded-sm text-base font-bold shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none *:disabled:opacity-50"
 				>
 					{t('login_page_submit_button')}
-				</button>
-			</div>
+				</button> -->
 		</form>
 	</div>
 </main>

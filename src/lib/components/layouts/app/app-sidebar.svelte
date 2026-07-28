@@ -53,8 +53,8 @@
 					aria-[current]:text-primary-900
 					relative
 					inline-flex
-					min-h-[45px]
-					min-w-[45px]
+					min-h-11.25
+					min-w-11.25
 					cursor-pointer
 					items-center
 					justify-center

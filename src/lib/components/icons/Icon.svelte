@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { SVGAttributes } from 'svelte/elements';
 	import type { IconKey } from './icons.svelte';
+	import { icons } from './icons.svelte';
 
-	// Bu yöntem, 'string' türünü kabul ederken IDE'lerde sabit türler için otomatik tamamlama özelliğini korur
-	export type IconName = IconKey | (string & {});
+	export type IconName = IconKey;
 
 	interface Props extends SVGAttributes<SVGElement> {
 		name: IconName;
@@ -27,7 +27,7 @@
 	aria-hidden="true"
 	{...restProps}
 >
-	<use href="#{name}" />
+	<use href="#{icons[name]}" />
 </svg>
 
 <style>

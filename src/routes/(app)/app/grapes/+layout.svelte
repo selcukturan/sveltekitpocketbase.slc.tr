@@ -10,7 +10,7 @@
 				{
 					title: 'Introduction',
 					href: `/app/grapes`,
-					icon: 'file-symlink',
+					icon: 'file_symlink',
 					root: true
 				}
 			]
@@ -21,17 +21,17 @@
 				{
 					title: 'Introduction',
 					href: `/app/grapes/crud`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Simple CRUD',
 					href: `/app/grapes/crud/simple`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				},
 				{
 					title: 'Create, Read, Update, Delete',
 					href: `/app/grapes/crud/create-read-update-delete`,
-					icon: 'file-symlink'
+					icon: 'file_symlink'
 				}
 			]
 		}

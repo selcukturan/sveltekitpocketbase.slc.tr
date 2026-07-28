@@ -34,7 +34,7 @@
 				aria-label={tooltipText}
 				{@attach tooltip(tooltipText)}
 			>
-				<Icon name={global.hideSidebar ? 'panel-right-close' : 'panel-right-open'} />
+				<Icon name={global.hideSidebar ? 'panel_right_close' : 'panel_right_open'} />
 			</button>
 		</div>
 		<div class="flex flex-1 items-center justify-center gap-4">

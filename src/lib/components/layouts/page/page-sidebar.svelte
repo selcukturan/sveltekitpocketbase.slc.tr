@@ -42,7 +42,7 @@
 					mx-0
 					my-1
 					flex
-					min-h-[40px]
+					min-h-10
 					w-full
 					min-w-0
 					cursor-pointer

@@ -5,7 +5,7 @@
 	import { getGlobalContext } from '$lib/app/global.svelte';
 
 	import type { PageLayoutPropsType } from '../types';
-	import { Icon } from '$lib/components/icons';
+	import { Icon, type IconKey } from '$lib/components/icons';
 	import { t } from '$lib/app/localization/localization.svelte';
 	import { tooltip } from '$lib/attachments';
 
@@ -27,13 +27,9 @@
 		}
 	});
 
-	let icon = $derived.by(() => {
-		if (global.isMobileBreakpoint) {
-			return global.hidePageSidebar ? 'chevron-down' : 'chevron-up';
-		} else {
-			return global.hidePageSidebar ? 'chevron-right' : 'chevron-left';
-		}
-	});
+	let icon: IconKey = $derived(
+		global.isMobileBreakpoint ? (global.hidePageSidebar ? 'chevron_down' : 'chevron_up') : global.hidePageSidebar ? 'chevron_right' : 'chevron_left'
+	);
 </script>
 
 <SplitPane
