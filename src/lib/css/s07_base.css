@@ -13,6 +13,8 @@
 
 	* {
 		@apply border-surface-200;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-surface-300) transparent;
 	}
 
 	html {
