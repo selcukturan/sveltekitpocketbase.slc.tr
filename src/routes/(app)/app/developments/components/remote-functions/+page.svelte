@@ -19,7 +19,6 @@
 	] as const;
 
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
-	let pointerType = $state('init');
 </script>
 
 <Head>
@@ -117,21 +116,27 @@
 								<button
 									class="btn btn-secondary"
 									onpointerdown={(e: PointerEvent) => {
-										pointerType = e.pointerType; // 'touch', 'mouse', 'pen'
+										const target = e.currentTarget as HTMLButtonElement;
+										target.dataset.pointer = e.pointerType; // 'touch', 'mouse', 'pen'
 									}}
 									onclick={(e: MouseEvent) => {
-										if (e.detail === 0) pointerType = 'keyboard';
+										const target = e.currentTarget as HTMLButtonElement;
+										if (e.detail === 0) {
+											target.dataset.pointer = 'keyboard';
+										}
+										const pointerType = target.dataset.pointer ?? 'mouse';
 
-										if (pointerType === 'mouse' && toggl?.states.active) return;
-										if (pointerType === 'touch' && toggl?.states.active) return;
-										toggl?.toggle();
+										if ((pointerType === 'mouse' || pointerType === 'touch') && !toggl?.states.active) {
+											toggl?.toggle();
+										} else if (pointerType === 'keyboard') {
+											toggl?.toggle();
+										}
 									}}
 								>
 									{toggl?.states.active ? 'Dışarıdan Kapat' : 'Dışarıdan Aç'}
 								</button>
 								<div class="flex gap-2 py-2">
 									<span class="badge">State: {toggl?.states.active ? 'AÇIK' : 'KAPALI'}</span>
-									<span class="badge">Pointer Type: {pointerType}</span>
 								</div>
 							</div>
 
