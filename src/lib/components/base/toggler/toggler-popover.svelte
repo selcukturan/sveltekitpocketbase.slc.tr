@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import { on } from 'svelte/events';
 
 	type Placement = `${'top' | 'bottom'}-${'start' | 'center' | 'end'}` | `${'left' | 'right'}-${'start' | 'center' | 'end'}`;
 
@@ -44,10 +45,6 @@
 		'aria-haspopup': 'true' as const
 	});
 
-	const handleToggle = (e: Event) => {
-		const toggleEvent = e as ToggleEvent;
-		active = toggleEvent.newState === 'open';
-	};
 	export const toggle = () => popoverEl?.togglePopover();
 	export const open = () => !active && popoverEl?.showPopover();
 	export const close = () => active && popoverEl?.hidePopover();
@@ -55,6 +52,16 @@
 		get active() {
 			return active;
 		}
+	};
+
+	const popoverEvents = (node: HTMLElement) => {
+		const destroyToggle = on(node, 'toggle', (e: ToggleEvent) => {
+			active = e.newState === 'open';
+		});
+
+		return () => {
+			destroyToggle();
+		};
 	};
 </script>
 
@@ -67,7 +74,7 @@
 		bind:this={popoverEl}
 		id={popovertarget}
 		popover="auto"
-		ontoggle={handleToggle}
+		{@attach popoverEvents}
 		class="popover {placement}"
 		class:match-width={matchTriggerWidth}
 		{...rest}
