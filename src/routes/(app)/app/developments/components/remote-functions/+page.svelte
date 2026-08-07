@@ -118,17 +118,18 @@
 									onpointerdown={(e: PointerEvent) => {
 										const target = e.currentTarget as HTMLButtonElement;
 										target.dataset.pointer = e.pointerType; // 'touch', 'mouse', 'pen'
+										target.dataset.active = toggl?.states.active ? 'active' : 'inactive';
 									}}
 									onclick={(e: MouseEvent) => {
 										const target = e.currentTarget as HTMLButtonElement;
 										if (e.detail === 0) target.dataset.pointer = 'keyboard';
 										const pointerType = target.dataset.pointer ?? 'mouse';
+										const active = target.dataset.active === 'active';
 
-										if ((pointerType === 'mouse' || pointerType === 'touch') && !toggl?.states.active) {
-											toggl?.toggle();
-										} else if (pointerType === 'keyboard') {
-											toggl?.toggle();
+										if ((pointerType === 'mouse' || pointerType === 'touch') && active) {
+											return;
 										}
+										toggl?.toggle();
 									}}
 								>
 									{toggl?.states.active ? 'Dışarıdan Kapat' : 'Dışarıdan Aç'}
