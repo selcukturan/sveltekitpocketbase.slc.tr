@@ -19,6 +19,7 @@
 	] as const;
 
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
+	let pointerType = $state('init');
 </script>
 
 <Head>
@@ -118,20 +119,26 @@
 									onclick={(e: MouseEvent) => {
 										const pe = e as PointerEvent;
 										if (pe.pointerType === 'mouse') {
+											pointerType = 'mouse';
 											if (toggl?.states.active) return;
 										} else if (pe.pointerType === 'touch') {
+											pointerType = 'touch';
 											if (toggl?.states.active) return;
 										} else if (pe.pointerType === 'pen') {
+											pointerType = 'pen';
 											if (toggl?.states.active) return;
 										} else if (!pe.pointerType || e.detail === 0) {
-											// keyboard
+											pointerType = 'keyboard';
 										}
 										toggl?.toggle();
 									}}
 								>
 									{toggl?.states.active ? 'Dışarıdan Kapat' : 'Dışarıdan Aç'}
 								</button>
-								<span class="badge">State: {toggl?.states.active ? 'AÇIK' : 'KAPALI'}</span>
+								<div class="flex gap-2 py-2">
+									<span class="badge">State: {toggl?.states.active ? 'AÇIK' : 'KAPALI'}</span>
+									<span class="badge">Pointer Type: {pointerType}</span>
+								</div>
 							</div>
 
 							<Toggler bind:this={toggl} placement="bottom-end">

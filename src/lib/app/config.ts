@@ -4,7 +4,7 @@
 
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.2.0-alpha.84',
+	version: 'v0.2.0-alpha.85',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`
 } as const; // `as const` eklemek, objenin değerlerini readonly ve türlerini daha spesifik yapar.
 
