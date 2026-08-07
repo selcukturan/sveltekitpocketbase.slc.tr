@@ -116,8 +116,16 @@
 								<button
 									class="btn btn-secondary"
 									onclick={(e: MouseEvent) => {
-										// if active and mouse click, return
-										if (e.detail > 0 && toggl?.states.active) return;
+										const pe = e as PointerEvent;
+										if (pe.pointerType === 'mouse') {
+											if (toggl?.states.active) return;
+										} else if (pe.pointerType === 'touch') {
+											if (toggl?.states.active) return;
+										} else if (pe.pointerType === 'pen') {
+											if (toggl?.states.active) return;
+										} else if (!pe.pointerType || e.detail === 0) {
+											// keyboard
+										}
 										toggl?.toggle();
 									}}
 								>
