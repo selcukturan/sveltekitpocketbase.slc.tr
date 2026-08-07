@@ -116,20 +116,12 @@
 							<div style="margin-bottom: 1rem;">
 								<button
 									class="btn btn-secondary"
+									onpointerdown={(e: PointerEvent) => {
+										pointerType = e.pointerType; // 'touch', 'mouse', 'pen'
+									}}
 									onclick={(e: MouseEvent) => {
-										const pe = e as PointerEvent;
-										if (pe.pointerType === 'mouse') {
-											pointerType = 'mouse';
-											if (toggl?.states.active) return;
-										} else if (pe.pointerType === 'touch') {
-											pointerType = 'touch';
-											if (toggl?.states.active) return;
-										} else if (pe.pointerType === 'pen') {
-											pointerType = 'pen';
-											if (toggl?.states.active) return;
-										} else if (!pe.pointerType || e.detail === 0) {
-											pointerType = 'keyboard';
-										}
+										if (pointerType === 'mouse' && toggl?.states.active) return;
+										if (pointerType === 'touch' && toggl?.states.active) return;
 										toggl?.toggle();
 									}}
 								>
