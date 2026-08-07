@@ -155,13 +155,8 @@
 		margin: 0;
 		padding: 4px;
 		list-style: none;
-		overflow-y: auto;
-		scrollbar-gutter: stable;
-
-		border: 1px solid #d4d4d8;
-		border-radius: 10px;
-		background: #fff;
-		box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+		/* overflow-y: auto;
+		scrollbar-gutter: stable; */
 	}
 	.my-select-menu li button {
 		width: 100%;

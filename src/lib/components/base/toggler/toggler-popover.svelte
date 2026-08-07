@@ -104,8 +104,14 @@
 		max-height: min(calc(100% - var(--gutter, 5px) * 2), var(--max-height, 100dvh));
 
 		/* İçeriğin taşmasını engeller ve ekran sınırını çocuğa iletir */
-		overflow: clip;
-		overflow-clip-margin: 24px;
+		/* overflow: clip;
+		overflow-clip-margin: 24px; */
+		overflow: auto;
+
+		border: 1px solid #d4d4d8;
+		border-radius: 10px;
+		background: #fff;
+		box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
 	}
 
 	.popover:popover-open {
