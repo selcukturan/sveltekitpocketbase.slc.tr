@@ -19,6 +19,7 @@
 	] as const;
 
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
+	const baseClasses = 'shadow-surface-600/20 border-surface-300! bg-surface-50! rounded-xl border! shadow-md';
 </script>
 
 <Head>
@@ -42,7 +43,7 @@
 					<div class="grid-layout">
 						{#each placements as placement, i (i)}
 							<div class="test-item">
-								<Toggler {placement} --min-height="200px" --max-height="400px" --min-width="320px" --max-width="600px">
+								<Toggler {placement} class={baseClasses} --min-height="200px" --max-height="400px" --min-width="320px" --max-width="600px">
 									{#snippet trigger({ active, attr })}
 										<button {...attr} class="btn" class:active>
 											{placement}
@@ -93,7 +94,7 @@
 							<h3>Match Trigger Width</h3>
 							<p>Popover genişliği, tetikleyici butonun genişliği ile birebir eşleşmeli.</p>
 
-							<Toggler placement="bottom-start" matchTriggerWidth={true}>
+							<Toggler class={baseClasses} placement="bottom-start" matchTriggerWidth={true}>
 								{#snippet trigger({ toggle, attr })}
 									<button {...attr} class="btn btn-wide"> Geniş Tetikleyici Buton (matchTriggerWidth=true) </button>
 								{/snippet}
@@ -136,7 +137,7 @@
 								</div>
 							</div>
 
-							<Toggler bind:this={toggl} placement="bottom-end">
+							<Toggler bind:this={toggl} class={baseClasses} placement="bottom-end">
 								{#snippet trigger({ active, toggle, attr })}
 									<button {...attr} class="btn" class:active>
 										Menü ({active ? 'Açık' : 'Kapalı'})
@@ -178,7 +179,7 @@
 		cursor: pointer;
 	}
 	.my-select-menu li button:hover {
-		background: #f1f5f9;
+		background: var(--color-surface-50);
 	}
 
 	.test-container {
@@ -193,13 +194,11 @@
 	}
 
 	.subtitle {
-		color: #64748b;
 		margin-bottom: 2rem;
 	}
 
 	.card {
-		background: white;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--color-surface-200);
 		border-radius: 12px;
 		padding: 1.5rem;
 		margin-bottom: 2rem;
@@ -210,7 +209,7 @@
 		font-size: 1.25rem;
 		margin-top: 0;
 		margin-bottom: 1.5rem;
-		border-bottom: 1px solid #f1f5f9;
+		border-bottom: 1px solid var(--color-surface-200);
 		padding-bottom: 0.75rem;
 	}
 
@@ -238,10 +237,10 @@
 	.test-box {
 		flex: 1;
 		min-width: 300px;
-		background: #f8fafc;
+		background: var(--color-surface-50);
 		padding: 1.25rem;
 		border-radius: 8px;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--color-surface-200);
 	}
 
 	.test-box h3 {
@@ -251,13 +250,11 @@
 
 	.test-box p {
 		font-size: 0.875rem;
-		color: #64748b;
 	}
 
 	/* Buton Stilleri */
 	.btn {
-		background: #0284c7;
-		color: white;
+		background: var(--color-info-500);
 		border: none;
 		padding: 0.6rem 1rem;
 		font-weight: 500;
@@ -267,11 +264,11 @@
 	}
 
 	.btn:hover {
-		background: #0369a1;
+		background: var(--color-info-400);
 	}
 
 	.btn.active {
-		background: #0f172a;
+		background: var(--color-info-700);
 	}
 
 	.btn-wide {
@@ -279,16 +276,15 @@
 	}
 
 	.btn-secondary {
-		background: #64748b;
+		background: var(--color-surface-500);
 	}
 
 	.btn-secondary:hover {
-		background: #475569;
+		background: var(--color-surface-600);
 	}
 
 	.btn-sm {
-		background: #ef4444;
-		color: white;
+		background: var(--color-error-500);
 		border: none;
 		padding: 0.3rem 0.6rem;
 		font-size: 0.75rem;
@@ -298,12 +294,11 @@
 	}
 
 	.btn-sm:hover {
-		background: #dc2626;
+		background: var(--color-error-600);
 	}
 
 	/* Popover İçeriği Görsel Stili */
 	.popover-body {
-		background: red;
 		padding: 0.875rem;
 		font-size: 0.875rem;
 	}
@@ -314,7 +309,17 @@
 		font-size: 0.75rem;
 		font-weight: 600;
 		padding: 0.2rem 0.5rem;
-		background: #e2e8f0;
+		background: var(--color-surface-100);
 		border-radius: 4px;
+	}
+
+	/* --- OKLCH SWATCH DEMO STYLES (Ekrandaki Tasarım) --- */
+	.demo {
+		margin-top: 2rem;
+	}
+
+	.intro {
+		margin-bottom: 1.5rem;
+		font-size: 0.9rem;
 	}
 </style>
