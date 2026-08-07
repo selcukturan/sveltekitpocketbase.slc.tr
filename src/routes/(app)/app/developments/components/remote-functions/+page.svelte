@@ -19,7 +19,7 @@
 	] as const;
 
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
-	const baseClasses = 'shadow-surface-600/20 border-surface-300! bg-surface-50! rounded-xl border! shadow-md';
+	const baseClasses = 'shadow-surface-600/20 border-surface-300! bg-surface-50! rounded-xl border! shadow-sm';
 </script>
 
 <Head>
@@ -43,7 +43,17 @@
 					<div class="grid-layout">
 						{#each placements as placement, i (i)}
 							<div class="test-item">
-								<Toggler {placement} class={baseClasses} --min-height="200px" --max-height="400px" --min-width="320px" --max-width="600px">
+								<Toggler
+									{placement}
+									--border="1px solid var(--color-surface-300)"
+									--border-radius="10px"
+									--background-color="var(--color-surface-50)"
+									--box-shadow="0 8px 24px var(--color-surface-250)"
+									--min-height="200px"
+									--max-height="400px"
+									--min-width="320px"
+									--max-width="600px"
+								>
 									{#snippet trigger({ active, attr })}
 										<button {...attr} class="btn" class:active>
 											{placement}
@@ -179,7 +189,7 @@
 		cursor: pointer;
 	}
 	.my-select-menu li button:hover {
-		background: var(--color-surface-50);
+		background: var(--color-info-200);
 	}
 
 	.test-container {

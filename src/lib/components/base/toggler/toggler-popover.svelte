@@ -111,6 +111,11 @@
 		max-height: min(calc(100% - var(--gutter, 5px) * 2), var(--max-height, 100dvh));
 
 		overflow: auto;
+
+		border: var(--border, solid 1px color-mix(in srgb, currentColor 80%, white 20%));
+		border-radius: var(--border-radius, 10px);
+		background-color: var(--background-color, color-mix(in srgb, currentColor 1%, white 99%));
+		box-shadow: var(--box-shadow, 0 8px 24px rgb(0 0 0 / 0.12));
 	}
 
 	/* .popover:popover-open {
