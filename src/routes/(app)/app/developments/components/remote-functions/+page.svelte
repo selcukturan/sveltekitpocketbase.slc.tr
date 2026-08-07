@@ -42,7 +42,7 @@
 					<div class="grid-layout">
 						{#each placements as placement, i (i)}
 							<div class="test-item">
-								<Toggler {placement} --max-height="400px" --max-width="320px" --min-height="100px" --min-width="320px">
+								<Toggler {placement} --min-height="200px" --max-height="400px" --min-width="320px" --max-width="600px">
 									{#snippet trigger({ active, attr })}
 										<button {...attr} class="btn" class:active>
 											{placement}
@@ -115,8 +115,9 @@
 							<div style="margin-bottom: 1rem;">
 								<button
 									class="btn btn-secondary"
-									onclick={() => {
-										console.log('click');
+									onclick={(e: MouseEvent) => {
+										// if active and mouse click, return
+										if (e.detail > 0 && toggl?.states.active) return;
 										toggl?.toggle();
 									}}
 								>

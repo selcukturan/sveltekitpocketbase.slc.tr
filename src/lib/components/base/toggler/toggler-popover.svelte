@@ -48,9 +48,9 @@
 		const toggleEvent = e as ToggleEvent;
 		active = toggleEvent.newState === 'open';
 	};
-	export const toggle = () => (active ? close() : open());
-	export const open = () => popoverEl?.showPopover();
-	export const close = () => popoverEl?.hidePopover();
+	export const toggle = () => popoverEl?.togglePopover();
+	export const open = () => !active && popoverEl?.showPopover();
+	export const close = () => active && popoverEl?.hidePopover();
 	export const states = {
 		get active() {
 			return active;
@@ -114,10 +114,10 @@
 		box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
 	}
 
-	.popover:popover-open {
+	/* .popover:popover-open {
 		display: grid;
 		grid-template-rows: minmax(0, 1fr);
-	}
+	} */
 
 	.popover.match-width {
 		width: min(anchor-size(width), 100%);
@@ -136,7 +136,7 @@
 		position-try-fallbacks:
 			flip-block,
 			flip-block flip-inline;
-		position-try-order: most-block-size;
+		/* position-try-order: most-block-size; */
 	}
 
 	/* Sol/sağ yönler — bunlarda flip-inline gerekir */
@@ -149,7 +149,7 @@
 		position-try-fallbacks:
 			flip-inline,
 			flip-inline flip-block;
-		position-try-order: most-inline-size;
+		/* position-try-order: most-inline-size; */
 	}
 
 	/* Alt yönler: anchor'ın altında, üstünde boşluk */
