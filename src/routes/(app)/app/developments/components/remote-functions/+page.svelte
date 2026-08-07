@@ -121,9 +121,7 @@
 									}}
 									onclick={(e: MouseEvent) => {
 										const target = e.currentTarget as HTMLButtonElement;
-										if (e.detail === 0) {
-											target.dataset.pointer = 'keyboard';
-										}
+										if (e.detail === 0) target.dataset.pointer = 'keyboard';
 										const pointerType = target.dataset.pointer ?? 'mouse';
 
 										if ((pointerType === 'mouse' || pointerType === 'touch') && !toggl?.states.active) {
