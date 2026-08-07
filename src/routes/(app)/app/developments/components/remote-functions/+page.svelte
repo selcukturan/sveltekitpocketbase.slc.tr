@@ -120,6 +120,8 @@
 										pointerType = e.pointerType; // 'touch', 'mouse', 'pen'
 									}}
 									onclick={(e: MouseEvent) => {
+										if (e.detail === 0) pointerType = 'keyboard';
+
 										if (pointerType === 'mouse' && toggl?.states.active) return;
 										if (pointerType === 'touch' && toggl?.states.active) return;
 										toggl?.toggle();
