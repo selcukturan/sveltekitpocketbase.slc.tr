@@ -1,6 +1,6 @@
 import type { SvelteHTMLElements } from 'svelte/elements';
-import { Collections } from '$lib/types/pocketbase-types';
-import type { IconName } from '$lib/components/icons/Icon.svelte';
+import { Collections } from '#lib/types/pocketbase-types.js';
+import type { IconName } from '#lib/components/icons/Icon.svelte';
 import type { Snippet } from 'svelte';
 
 // ################# BEGIN Text.svelte Props ###############################

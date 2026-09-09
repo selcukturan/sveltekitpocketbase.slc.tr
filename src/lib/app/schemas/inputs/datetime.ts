@@ -22,10 +22,7 @@ type DatetimeRequired = ReturnType<typeof _DatetimeRequired>;
 
 type DatetimeTypeChoice<Required extends boolean> = Required extends true ? DatetimeRequired : DatetimeOptional;
 
-export function Datetime<Key extends string, Required extends boolean = true>(
-	key: Key,
-	options: { required?: Required; message?: string } = {}
-) {
+export function Datetime<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
 	const { required = true, message } = options;
 
 	const main = required ? _DatetimeRequired(message) : _DatetimeOptional();

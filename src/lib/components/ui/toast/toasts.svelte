@@ -3,7 +3,7 @@
 	import { getToaster } from './toaster.svelte';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
-	import { Icon } from '$lib/components/icons';
+	import { Icon } from '#lib/components/icons/index.js';
 
 	const { toasterName = 'app-toaster' }: ToastsProps = $props();
 

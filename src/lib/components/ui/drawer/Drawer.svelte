@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { focustrap } from '$lib/attachments';
-	import { isInput } from '$lib/utils/common';
+	import { focustrap } from '#lib/attachments/index.js';
+	import { isInput } from '#lib/utils/common.js';
 	import { tick, type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { Toasts, createToaster } from '$lib/components/ui/toast';
-	import type { Toast } from '$lib/components/ui/toast/types';
+	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
+	import type { Toast } from '#lib/components/ui/toast/types';
 
 	/**
 	 * KISIT TARAYICI UYUMLULUĞU:

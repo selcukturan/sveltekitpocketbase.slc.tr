@@ -3,7 +3,7 @@
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
-	import { areEqual } from '$lib/utils/common';
+	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from './common';
 	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type';
 

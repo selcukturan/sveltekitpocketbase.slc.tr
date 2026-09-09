@@ -1,12 +1,12 @@
-import '$lib/server/eventSource'; // required for notifications remote and nodejs pocketbase subscribe SSE
-import type { Handle } from '@sveltejs/kit';
-import env from '$lib/server/env';
-import { Collections } from '$lib/types/pocketbase-types';
-import { createPocketBaseInstance } from '$lib/server/pb';
+import type { Handle } from '@sveltejs/kit/hooks';
+import '#lib/server/eventSource.js'; // required for notifications remote and nodejs pocketbase subscribe SSE
+import { NODE_ENV } from '$app/env/private';
+import { Collections } from '#lib/types/pocketbase-types.js';
+import { createPocketBaseInstance } from '#lib/server/pb.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	console.log(new Date().getTime() + ' - hook.server.ts - ' + event.request.url);
-	const isProduction = env.NODE_ENV === 'production';
+	console.log(new Date().getTime() + ' - hook.server.ts - ' + event.request.url + ' - NODE_ENV:' + NODE_ENV);
+	const isProduction = NODE_ENV === 'production';
 
 	// 🚀 PB ve AuthStore örneği oluştur ##############################################################################################
 	const { pb, auth } = createPocketBaseInstance(event);
@@ -38,8 +38,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.auth.exportToCookie({
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'strict', // lax | strict - strict olduğunda bazı tarayıcılarda sorun çıkabilir mi?
-			priority: 'High'
+			sameSite: 'lax', // lax | strict - strict olduğunda bazı tarayıcılarda sorun çıkabilir mi?
+			priority: 'high'
 		})
 	);
 

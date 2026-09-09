@@ -87,11 +87,11 @@
 
 			<ColumnToggler />
 
-			<button class="border border-primary-500 p-1 bg-success-400 hover:bg-success-500 cursor-pointer" onclick={context.setFreezeLeft}> +</button>
-			<button class="border border-primary-500 p-1 bg-error-400 hover:bg-error-500 cursor-pointer" onclick={context.unsetFreezeLeft}> -</button>
+			<button class="border-primary-500 bg-success-400 hover:bg-success-500 cursor-pointer border p-1" onclick={context.setFreezeLeft}> +</button>
+			<button class="border-primary-500 bg-error-400 hover:bg-error-500 cursor-pointer border p-1" onclick={context.unsetFreezeLeft}> -</button>
 
-			<button class="border border-primary-500 p-1 bg-success-400 hover:bg-success-500 cursor-pointer" onclick={context.setFreezeRight}> +</button>
-			<button class="border border-primary-500 p-1 bg-error-400 hover:bg-error-500 cursor-pointer" onclick={context.unsetFreezeRight}> -</button>
+			<button class="border-primary-500 bg-success-400 hover:bg-success-500 cursor-pointer border p-1" onclick={context.setFreezeRight}> +</button>
+			<button class="border-primary-500 bg-error-400 hover:bg-error-500 cursor-pointer border p-1" onclick={context.unsetFreezeRight}> -</button>
 		</div>
 	{/if}
 

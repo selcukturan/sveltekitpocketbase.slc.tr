@@ -1,7 +1,7 @@
 import * as v from 'valibot';
-import * as input from '$lib/app/schemas/inputs';
-import { Collections } from '$lib/types/pocketbase-types';
-import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '$lib/types/pocketbase-types';
+import * as input from '#lib/app/schemas/inputs/index.js';
+import { Collections } from '#lib/types/pocketbase-types.js';
+import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const listParamsSchema = v.object({

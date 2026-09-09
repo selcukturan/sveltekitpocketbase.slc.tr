@@ -1,6 +1,6 @@
-import type { TypedPocketBase } from '$lib/types/pocketbase-types';
+import type { TypedPocketBase } from '#lib/types/pocketbase-types.js';
 import type { AuthRecord } from 'pocketbase';
-import { CustomAuthStore } from '$lib/server/pb';
+import { CustomAuthStore } from '#lib/server/pb.js';
 
 declare global {
 	namespace App {

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
-	import { Pagination } from '$lib/components/base/pagination';
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Pagination } from '#lib/components/base/pagination/index.js';
 
 	// Örnek veri seti
 	const allItems = Array.from({ length: 50 }, (_, i) => `Ürün #${i + 1}`);

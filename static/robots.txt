@@ -1,4 +1,4 @@
 # https://www.robotstxt.org/robotstxt.html
-# `/` robotlari engeller. `` robotlari engellemez.
+# `Disallow: /` robotlari engeller. `Disallow: ` robotlari engellemez.
 User-agent: *
 Disallow: /

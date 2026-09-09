@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Hidden } from '$lib/components/ui/inputs';
-	import type { HiddenProps, HiddenValueChangeArgs } from '$lib/components/ui/inputs/type';
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import { Hidden } from '#lib/components/ui/inputs/index.js';
+	import type { HiddenProps, HiddenValueChangeArgs } from '#lib/components/ui/inputs/type';
 
 	type Props = HiddenProps & {
 		field: RemoteFormField<string>;

@@ -417,7 +417,7 @@
 	<button
 		{id}
 		type="button"
-		class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center select-none w-full
+		class="relative flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center select-none
 			{isDragging ? 'border-primary-500 bg-primary-100/30' : inputClasses.variants.default}
 			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
 			{readonly ? 'opacity-80' : ''}
@@ -432,7 +432,7 @@
 			viewBox="0 0 24 24"
 			stroke-width="1.5"
 			stroke="currentColor"
-			class="h-10 w-10 text-surface-400 mb-3 transition-colors duration-200 {isDragging ? 'text-primary-500' : ''}"
+			class="text-surface-400 mb-3 h-10 w-10 transition-colors duration-200 {isDragging ? 'text-primary-500' : ''}"
 		>
 			<path
 				stroke-linecap="round"
@@ -441,7 +441,7 @@
 			/>
 		</svg>
 
-		<span class="block text-sm font-medium text-surface-700">
+		<span class="text-surface-700 block text-sm font-medium">
 			{#if multiple}
 				Dosyaları buraya sürükleyin veya <span class="text-primary-500 font-semibold underline">Gözatın</span>
 			{:else}
@@ -450,9 +450,9 @@
 		</span>
 
 		<!-- Açıklayıcı Alt Bilgiler -->
-		<span class="mt-1.5 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-xs text-surface-500">
+		<span class="text-surface-500 mt-1.5 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-xs">
 			{#if accept && accept !== '*'}
-				<span>Format: <code class="bg-surface-100 rounded px-1 text-[11px] font-semibold text-surface-700">{accept}</code></span>
+				<span>Format: <code class="bg-surface-100 text-surface-700 rounded px-1 text-[11px] font-semibold">{accept}</code></span>
 			{/if}
 			{#if maxSize !== Infinity}
 				<span>• Maksimum: <span class="font-medium">{formatBytes(maxSize)}</span></span>
@@ -470,7 +470,7 @@
 	{#if errorText}
 		<div
 			transition:slide={{ duration: 200 }}
-			class="flex items-center gap-2 rounded-lg bg-error-50 px-3 py-2 text-xs font-semibold text-error-700 border border-error-100"
+			class="bg-error-50 text-error-700 border-error-100 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
 		>
 			<!-- Warning SVG -->
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
@@ -486,10 +486,10 @@
 			{#each displayFiles as file (file.name)}
 				<div
 					transition:slide={{ duration: 150 }}
-					class="group relative flex items-center justify-between gap-3 rounded-lg border border-surface-200 bg-white p-2.5 transition-all duration-150 hover:bg-surface-50/50
-						{file.deleted ? 'opacity-40 line-through bg-surface-50 border-surface-150' : ''}"
+					class="group border-surface-200 hover:bg-surface-50/50 relative flex items-center justify-between gap-3 rounded-lg border bg-white p-2.5 transition-all duration-150
+						{file.deleted ? 'bg-surface-50 border-surface-150 line-through opacity-40' : ''}"
 				>
-					<div class="flex flex-1 items-center gap-2.5 min-w-0">
+					<div class="flex min-w-0 flex-1 items-center gap-2.5">
 						<!-- File Icon SVG -->
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -497,7 +497,7 @@
 							viewBox="0 0 24 24"
 							stroke-width="1.5"
 							stroke="currentColor"
-							class="h-5 w-5 shrink-0 text-surface-400 group-hover:text-primary-500 transition-colors"
+							class="text-surface-400 group-hover:text-primary-500 h-5 w-5 shrink-0 transition-colors"
 						>
 							<path
 								stroke-linecap="round"
@@ -506,19 +506,19 @@
 							/>
 						</svg>
 
-						<div class="flex flex-col min-w-0">
-							<p class="text-sm font-medium text-surface-800 truncate leading-tight">{file.name}</p>
+						<div class="flex min-w-0 flex-col">
+							<p class="text-surface-800 truncate text-sm leading-tight font-medium">{file.name}</p>
 							{#if file.size !== undefined}
-								<span class="text-[11px] text-surface-500 font-normal mt-0.5 leading-none">{formatBytes(file.size)}</span>
+								<span class="text-surface-500 mt-0.5 text-[11px] leading-none font-normal">{formatBytes(file.size)}</span>
 							{/if}
 						</div>
 					</div>
 
-					<div class="flex items-center gap-2 shrink-0">
+					<div class="flex shrink-0 items-center gap-2">
 						<!-- Durum Rozetleri -->
 						{#if !file.deleted}
 							<span
-								class="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase leading-normal border
+								class="rounded-full border px-2 py-0.5 text-[10px] leading-normal font-bold tracking-wide uppercase
 									{file.uploaded ? 'bg-surface-100 border-surface-200 text-surface-600' : 'bg-primary-50 border-primary-100 text-primary-600'}"
 							>
 								{file.uploaded ? 'Kayıtlı' : 'Yeni'}
@@ -530,7 +530,7 @@
 							{#if file.deleted}
 								<button
 									type="button"
-									class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-500 hover:text-primary-600 px-2 py-1 transition-colors"
+									class="text-primary-500 hover:text-primary-600 inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold transition-colors"
 									onclick={() => restoreFile(file.name)}
 								>
 									<!-- Undo SVG -->
@@ -542,7 +542,7 @@
 							{:else}
 								<button
 									type="button"
-									class="rounded-md p-1.5 text-surface-400 hover:bg-error-50 hover:text-error-600 transition-colors"
+									class="text-surface-400 hover:bg-error-50 hover:text-error-600 rounded-md p-1.5 transition-colors"
 									onclick={() => removeFile(file.name)}
 									aria-label="Dosyayı kaldır"
 								>

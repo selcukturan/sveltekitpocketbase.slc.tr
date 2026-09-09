@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/app/localization';
-	import { tooltip } from '$lib/attachments';
-	import { browser } from '$app/environment';
-	import { Icon } from '$lib/components/icons';
+	import { t } from '#lib/app/localization/index.js';
+	import { tooltip } from '#lib/attachments/index.js';
+	import { browser } from '$app/env';
+	import { Icon } from '#lib/components/icons/index.js';
 
 	type ThemeStateType = {
 		preference: string;

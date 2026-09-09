@@ -1,8 +1,8 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { File as FileInput } from '$lib/components/ui/inputs';
-	import type { FileValueChangeArgs, FilePropsType, FileValueTypeChoice } from '$lib/components/ui/inputs/type';
+	import { File as FileInput } from '#lib/components/ui/inputs/index.js';
+	import type { FileValueChangeArgs, FilePropsType, FileValueTypeChoice } from '#lib/components/ui/inputs/type';
 	import Field from './Field.svelte';
 
 	type Props = FilePropsType<Tmultiple> & {

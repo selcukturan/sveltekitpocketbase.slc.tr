@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
-	import { AllIcons } from '$lib/components/icons';
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import { AllIcons } from '#lib/components/icons/index.js';
 </script>
 
 <Head>

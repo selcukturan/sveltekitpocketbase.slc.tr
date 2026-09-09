@@ -1,7 +1,6 @@
-import type { TypedPocketBase } from '$lib/types/pocketbase-types';
+import type { TypedPocketBase } from '#lib/types/pocketbase-types.js';
 import { type RequestEvent } from '@sveltejs/kit';
-
-import env from '$lib/server/env';
+import { PB_BACKEND_URL } from '$app/env/private';
 import PocketBase, { LocalAuthStore, type AuthRecord, type SerializeOptions, ClientResponseError } from 'pocketbase';
 
 export class CustomAuthStore extends LocalAuthStore {
@@ -66,7 +65,7 @@ export function createPocketBaseInstance(event: RequestEvent): { pb: TypedPocket
 
 	auth.loadFromCookie(event.request.headers.get('cookie') || '');
 
-	const pb = new PocketBase(env.PB_BACKEND_URL, auth, 'tr-TR') as TypedPocketBase;
+	const pb = new PocketBase(PB_BACKEND_URL, auth, 'tr-TR') as TypedPocketBase;
 
 	// Store sınıfı içinde 'this.pb' kullanılabilir hale gelir.
 	auth.init(pb);

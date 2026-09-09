@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Drawer } from '$lib/components/ui/drawer';
-	import { confirm } from '$lib/components/ui/confirm';
-	import { Page, Head } from '$lib/components/templates';
+	import { Drawer } from '#lib/components/ui/drawer/index.js';
+	import { confirm } from '#lib/components/ui/confirm/index.js';
+	import { Page, Head } from '#lib/components/templates/index.js';
 
 	let drawer1: Drawer;
 	let drawer2: Drawer;

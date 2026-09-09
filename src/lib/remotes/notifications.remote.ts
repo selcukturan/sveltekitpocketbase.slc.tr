@@ -1,6 +1,6 @@
 import { query, command, form, getRequestEvent } from '$app/server';
-import type { DemoNotificationResponse } from '$lib/types/pocketbase-types';
-import { AsyncQueue } from '$lib/utils/asyncQueue';
+import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
+import { AsyncQueue } from '#lib/utils/asyncQueue.js';
 import * as v from 'valibot';
 
 export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;

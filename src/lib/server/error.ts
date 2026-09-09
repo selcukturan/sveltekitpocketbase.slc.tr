@@ -18,28 +18,25 @@ export function throwError(err: unknown): never {
 
 		// SvelteKit'in error fonksiyonunu çağırarak hata fırlat.
 		// Bu, işlemi durdurur ve en yakın +error.svelte dosyasını render eder.
-		throw error(statusCode, {
+		throw error(statusCode, message, {
 			type: 'pb',
-			errorId: '',
-			message: message
+			errorId: ''
 		});
 	}
 
 	if (err instanceof Error) {
 		console.error('Genel Hata:', err.message);
-		throw error(500, {
+		throw error(500, err.message || 'Sunucuya bağlanırken bir sorun oluştu. Lütfen tekrar deneyin.', {
 			type: 'general',
-			errorId: '',
-			message: err.message || 'Sunucuya bağlanırken bir sorun oluştu. Lütfen tekrar deneyin.'
+			errorId: ''
 		});
 	}
 
 	console.error('Beklenmedik Hata:', 'Beklenmedik bir hata oluştu.');
 	// Yakalanamayan diğer tüm durumlar için
-	throw error(500, {
+	throw error(500, 'Beklenmedik bir hata oluştu.', {
 		type: 'general',
-		errorId: '',
-		message: 'Beklenmedik bir hata oluştu.'
+		errorId: ''
 	});
 }
 

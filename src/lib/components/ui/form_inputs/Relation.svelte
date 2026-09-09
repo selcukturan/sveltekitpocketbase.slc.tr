@@ -1,9 +1,9 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Relation as RelationInput } from '$lib/components/ui/inputs';
+	import { Relation as RelationInput } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { RelationValueChangeArgs, RelationPropsType } from '$lib/components/ui/inputs/type';
+	import type { RelationValueChangeArgs, RelationPropsType } from '#lib/components/ui/inputs/type';
 
 	type Props = RelationPropsType<Tmultiple> & {
 		field: RemoteFormField<Tmultiple extends true ? string[] : string>;

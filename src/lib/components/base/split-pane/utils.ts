@@ -1,13 +1,6 @@
 import type { Length } from './types';
 
-export function constrain(
-	element: HTMLElement,
-	size: number,
-	min: Length,
-	max: Length,
-	pos: Length,
-	priority: 'min' | 'max'
-): Length {
+export function constrain(element: HTMLElement, size: number, min: Length, max: Length, pos: Length, priority: 'min' | 'max'): Length {
 	let min_px = normalize(min, element, size);
 	let max_px = normalize(max, element, size);
 	let pos_px = normalize(pos, element, size);
@@ -15,16 +8,9 @@ export function constrain(
 	if (min_px < 0) min_px += size;
 	if (max_px < 0) max_px += size;
 
-	pos_px =
-		priority === 'min'
-			? Math.max(min_px, Math.min(max_px, pos_px))
-			: Math.min(max_px, Math.max(min_px, pos_px));
+	pos_px = priority === 'min' ? Math.max(min_px, Math.min(max_px, pos_px)) : Math.min(max_px, Math.max(min_px, pos_px));
 
-	const position: Length = pos.endsWith('%')
-		? size
-			? `${(100 * pos_px) / size}%`
-			: '0%'
-		: `${pos_px}px`;
+	const position: Length = pos.endsWith('%') ? (size ? `${(100 * pos_px) / size}%` : '0%') : `${pos_px}px`;
 
 	return position;
 }

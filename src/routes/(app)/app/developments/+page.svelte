@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
-	import { getGlobalContext } from '$lib/app/global.svelte';
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	const global = getGlobalContext();
 </script>
 

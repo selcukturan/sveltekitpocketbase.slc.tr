@@ -21,11 +21,7 @@ export function parseDateInputToIso(localDateTime: string) {
 	const month = parseInt(localDateTime.substring(5, 7), 10);
 	const day = parseInt(localDateTime.substring(8, 10), 10);
 
-	if (
-		dateCandidate.getUTCFullYear() !== year ||
-		dateCandidate.getUTCMonth() + 1 !== month ||
-		dateCandidate.getUTCDate() !== day
-	) {
+	if (dateCandidate.getUTCFullYear() !== year || dateCandidate.getUTCMonth() + 1 !== month || dateCandidate.getUTCDate() !== day) {
 		return '';
 	}
 

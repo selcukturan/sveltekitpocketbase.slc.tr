@@ -27,5 +27,5 @@ export function setParams(params: Record<string, string>) {
 	}
 	const pageUrlHashString = pageUrlHash.toString();
 
-	goto(pageUrlHashString ? `#${pageUrlHashString}` : '', { replaceState: true, noScroll: true, keepFocus: true });
+	goto(pageUrlHashString ? `#${pageUrlHashString}` : '', { replaceState: true, reset: false });
 }

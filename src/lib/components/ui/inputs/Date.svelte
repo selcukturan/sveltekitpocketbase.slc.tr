@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatDateIsoToInput, parseDateInputToIso } from '$lib/utils/input-helper';
+	import { formatDateIsoToInput, parseDateInputToIso } from '#lib/utils/input-helper.js';
 	import { inputClasses } from './common';
 	import type { DateProps, DateValueChangeArgs } from './type';
 
@@ -62,7 +62,7 @@
 />
 
 {#if dev}
-	<p class="text-xs text-surface-500">Component Value: {value}</p>
+	<p class="text-surface-500 text-xs">Component Value: {value}</p>
 {/if}
 
 <style>

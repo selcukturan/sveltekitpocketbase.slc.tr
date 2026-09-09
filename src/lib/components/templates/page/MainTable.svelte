@@ -7,12 +7,7 @@
 		boundary?: boolean;
 	};
 
-	let {
-		children,
-		class: classes,
-		boundary = false,
-		...attributes
-	}: Props = $props();
+	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
 </script>
 
 <div class={classes} style:display="contents" {...attributes}>

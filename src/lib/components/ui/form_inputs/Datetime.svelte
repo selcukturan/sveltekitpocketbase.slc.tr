@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Datetime as DatetimeInput } from '$lib/components/ui/inputs';
+	import { Datetime as DatetimeInput } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { DatetimeValueChangeArgs, DatetimeProps } from '$lib/components/ui/inputs/type';
+	import type { DatetimeValueChangeArgs, DatetimeProps } from '#lib/components/ui/inputs/type';
 
 	type Props = DatetimeProps & {
 		field: RemoteFormField<string>;

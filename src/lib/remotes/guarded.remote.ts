@@ -1,9 +1,9 @@
 import { getRequestEvent, query, form, requested } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
-import { mapUnknownToError } from '$lib/server/error';
-import { Collections } from '$lib/types/pocketbase-types';
+import { mapUnknownToError } from '#lib/server/error.js';
+import { Collections } from '#lib/types/pocketbase-types.js';
 import { ResultAsync } from 'neverthrow';
-import { loginSchema } from '$lib/app/schemas/login';
+import { loginSchema } from '#lib/app/schemas/login.js';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -45,7 +45,7 @@ export const login = form(loginSchema, async ({ email, _password }) => {
 	const loginResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.SysUsers).authWithPassword(email, _password), mapUnknownToError);
 
 	if (loginResult.isErr()) {
-		return error(500, { type: 'pb', errorId: 'login-error', message: loginResult.error.message });
+		return error(500, loginResult.error.message, { type: 'pb', errorId: 'login-error' });
 	}
 
 	locals.user = structuredClone(locals.auth.record);

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { getGlobalContext } from '$lib/app/global.svelte';
-	import { t } from '$lib/app/localization/localization.svelte';
-	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
-	import { LangToggle } from '$lib/components/ui/lang-toggle';
-	import { PUBLIC_ENV_TEST } from '$env/static/public';
-	import { config } from '$lib/app/config';
+	import { getGlobalContext } from '#lib/app/global.svelte.js';
+	import { t } from '#lib/app/localization/localization.svelte.js';
+	import { ThemeToggle } from '#lib/components/ui/theme-toggle/index.js';
+	import { LangToggle } from '#lib/components/ui/lang-toggle/index.js';
+	import { PUBLIC_ENV_TEST } from '$app/env/public';
+	import { config } from '#lib/app/config.js';
 	import type { SvelteHTMLElements } from 'svelte/elements';
-	import { tooltip } from '$lib/attachments';
-	import { logout } from '$lib/remotes/guarded.remote';
-	import { Icon } from '$lib/components/icons';
-	import { getUser } from '$lib/remotes/guarded.remote';
+	import { tooltip } from '#lib/attachments/index.js';
+	import { logout } from '#lib/remotes/guarded.remote.js';
+	import { Icon } from '#lib/components/icons/index.js';
+	import { getUser } from '#lib/remotes/guarded.remote.js';
 	import { goto } from '$app/navigation';
 
 	type Props = SvelteHTMLElements['header'];

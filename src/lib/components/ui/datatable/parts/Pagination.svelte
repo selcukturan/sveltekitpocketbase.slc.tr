@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toggler } from '$lib/components/base/toggler';
+	import { Toggler } from '#lib/components/base/toggler/index.js';
 
 	type Props = {
 		totalItems: number;

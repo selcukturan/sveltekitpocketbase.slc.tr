@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { AppLayout } from '$lib/components/layouts/app';
-	import { LoginLayout } from '$lib/components/layouts/login';
+	import { AppLayout } from '#lib/components/layouts/app/index.js';
+	import { LoginLayout } from '#lib/components/layouts/login';
 	import { navigating } from '$app/state';
-	import { ProgressBar } from '$lib/components/base/app-progress-bar';
-	import { getUser } from '$lib/remotes/guarded.remote';
+	import { ProgressBar } from '#lib/components/base/app-progress-bar/index.js';
+	import { getUser } from '#lib/remotes/guarded.remote.js';
 
 	let { children }: { children: Snippet } = $props();
 </script>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Page, Head } from '$lib/components/templates';
-	import { notificationsRemote, updateNotificationReadStatus, createNotification, deleteNotification } from '$lib/remotes/notifications.remote';
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import { notificationsRemote, updateNotificationReadStatus, createNotification, deleteNotification } from '#lib/remotes/notifications.remote.js';
 
 	const notifications = notificationsRemote();
 	// void notifications.then;
@@ -88,20 +88,20 @@
 
 <Page>
 	<Page.Header>
-		<div class="flex items-center justify-between w-full">
+		<div class="flex w-full items-center justify-between">
 			<div class="space-y-1">
 				<h1 class="text-2xl font-bold tracking-tight text-white">Sistem Bildirimleri</h1>
 				<p class="text-sm text-zinc-400">PocketBase demo_notification koleksiyonundan anlık reaktif veri akışı</p>
 			</div>
 			<div class="flex items-center space-x-3">
 				<!-- Bağlantı Durumu -->
-				<div class="flex items-center px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 space-x-2 text-xs font-medium">
+				<div class="flex items-center space-x-2 rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium">
 					<span class="relative flex h-2 w-2">
 						{#if notifications.connected}
-							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-							<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+							<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
 						{:else}
-							<span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+							<span class="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
 						{/if}
 					</span>
 					<span class={notifications.connected ? 'text-emerald-400' : 'text-rose-400'}>
@@ -113,7 +113,7 @@
 				<button
 					disabled={!notifications.connected}
 					onclick={() => notifications.reconnect()}
-					class="cursor-pointer inline-flex items-center justify-center px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-95 transition-all duration-200"
+					class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 px-3.5 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:bg-zinc-700 active:scale-95"
 				>
 					Bağlantıyı Yenile
 				</button>
@@ -132,9 +132,9 @@
 							onAddSuccess();
 						}
 					})}
-					class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-4"
+					class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5"
 				>
-					<div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800 pb-3 gap-3">
+					<div class="flex flex-col justify-between gap-3 border-b border-zinc-800 pb-3 sm:flex-row sm:items-center">
 						<div>
 							<h2 class="text-md font-bold text-white">Test Bildirimi Gönder</h2>
 							<p class="text-xs text-zinc-500">PocketBase veritabanına test bildirimi kaydı ekleyin.</p>
@@ -142,16 +142,16 @@
 
 						<!-- Limit Göstergeleri -->
 						<div class="flex items-center gap-3">
-							<div class="px-3 py-1.5 rounded-lg bg-zinc-850 border border-zinc-800 text-xs text-zinc-300">
-								Günlük Ekleme: <span class="font-bold font-mono text-indigo-400">{5 - addCount}/5</span>
+							<div class="bg-zinc-850 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300">
+								Günlük Ekleme: <span class="font-mono font-bold text-indigo-400">{5 - addCount}/5</span>
 							</div>
-							<div class="px-3 py-1.5 rounded-lg bg-zinc-850 border border-zinc-800 text-xs text-zinc-300">
-								Kalan Silme Hakkı: <span class="font-bold font-mono text-rose-400">{addCount - deleteCount}</span>
+							<div class="bg-zinc-850 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300">
+								Kalan Silme Hakkı: <span class="font-mono font-bold text-rose-400">{addCount - deleteCount}</span>
 							</div>
 						</div>
 					</div>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div class="space-y-1">
 							<label for="notif-title" class="text-xs font-semibold text-zinc-400">Bildirim Başlığı</label>
 							<input
@@ -160,7 +160,7 @@
 								name="title"
 								bind:value={titleInput}
 								placeholder="Örn: Yeni Sipariş Bildirimi"
-								class="w-full px-3.5 py-2 text-sm bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-hidden focus:border-zinc-700 transition-colors"
+								class="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-sm text-white placeholder-zinc-600 transition-colors focus:border-zinc-700 focus:outline-hidden"
 							/>
 						</div>
 						<div class="space-y-1">
@@ -171,7 +171,7 @@
 								name="message"
 								bind:value={messageInput}
 								placeholder="Örn: 1092 nolu siparişiniz oluşturuldu."
-								class="w-full px-3.5 py-2 text-sm bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-hidden focus:border-zinc-700 transition-colors"
+								class="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-sm text-white placeholder-zinc-600 transition-colors focus:border-zinc-700 focus:outline-hidden"
 							/>
 						</div>
 					</div>
@@ -180,9 +180,9 @@
 						<button
 							type="submit"
 							disabled={addCount >= 5}
-							class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed rounded-lg active:scale-95 transition-all duration-200"
+							class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-600"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 							</svg>
 							Bildirim Ekle ({5 - addCount} Kalan)
@@ -191,13 +191,13 @@
 				</form>
 
 				{#if notifications.ready}
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<!-- Okunmamış Bildirimler Kolonu -->
 						<div class="space-y-4">
-							<div class="flex items-center justify-between border-b border-zinc-850 pb-2">
-								<h2 class="text-lg font-bold text-white flex items-center gap-2">
+							<div class="border-zinc-850 flex items-center justify-between border-b pb-2">
+								<h2 class="flex items-center gap-2 text-lg font-bold text-white">
 									Okunmamış Bildirimler
-									<span class="px-2 py-0.5 text-xs bg-indigo-500/20 text-indigo-400 rounded-full font-mono font-bold">
+									<span class="rounded-full bg-indigo-500/20 px-2 py-0.5 font-mono text-xs font-bold text-indigo-400">
 										{notifications.current.unread.length}
 									</span>
 								</h2>
@@ -206,25 +206,25 @@
 							<div class="grid gap-3">
 								{#each notifications.current.unread as item (item.id)}
 									<div
-										class="group relative overflow-hidden p-4 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 shadow-md hover:shadow-xl transition-all duration-300"
+										class="group relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-md transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900 hover:shadow-xl"
 									>
 										<!-- Log Sol Süs Çizgisi -->
 										<div
-											class="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-indigo-500 to-violet-600 rounded-l-xl opacity-80 group-hover:opacity-100 transition-opacity"
+											class="absolute top-0 bottom-0 left-0 w-1 rounded-l-xl bg-linear-to-b from-indigo-500 to-violet-600 opacity-80 transition-opacity group-hover:opacity-100"
 										></div>
 
 										<div class="pl-2">
-											<div class="flex items-start justify-between gap-4 mb-2">
-												<h3 class="text-base font-semibold text-zinc-100 group-hover:text-white transition-colors">
+											<div class="mb-2 flex items-start justify-between gap-4">
+												<h3 class="text-base font-semibold text-zinc-100 transition-colors group-hover:text-white">
 													{item.title || 'Sistem Bildirimi'}
 												</h3>
-												<span class="text-xs text-zinc-500 font-mono whitespace-nowrap bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700">
+												<span class="rounded border border-zinc-700 bg-zinc-800/80 px-2 py-0.5 font-mono text-xs whitespace-nowrap text-zinc-500">
 													{new Date(item.created).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
 												</span>
 											</div>
 
 											{#if item.message}
-												<p class="text-sm text-zinc-400 mb-4">{item.message}</p>
+												<p class="mb-4 text-sm text-zinc-400">{item.message}</p>
 											{/if}
 
 											<div class="flex items-center justify-between gap-2">
@@ -259,9 +259,9 @@
 												<!-- Okundu Butonu -->
 												<button
 													onclick={() => toggleRead(item.id, false)}
-													class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-xs font-semibold active:scale-95 transition-all duration-200"
+													class="inline-flex cursor-pointer items-center gap-1.5 rounded border border-indigo-500/20 bg-indigo-600/10 px-2.5 py-1.5 text-xs font-semibold text-indigo-400 transition-all duration-200 hover:bg-indigo-600/20 active:scale-95"
 												>
-													<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 													</svg>
 													Okundu İşaretle
@@ -270,12 +270,12 @@
 										</div>
 									</div>
 								{:else}
-									<div class="flex flex-col items-center justify-center p-12 text-center rounded-xl bg-zinc-900/30 border border-dashed border-zinc-800">
-										<svg class="w-10 h-10 text-zinc-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 p-12 text-center">
+										<svg class="mb-3 h-10 w-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 										</svg>
-										<h3 class="text-sm font-semibold text-zinc-300 mb-1">Yeni Bildirim Yok</h3>
-										<p class="text-xs text-zinc-500 max-w-xs">Harika! Tüm bildirimleri okudunuz.</p>
+										<h3 class="mb-1 text-sm font-semibold text-zinc-300">Yeni Bildirim Yok</h3>
+										<p class="max-w-xs text-xs text-zinc-500">Harika! Tüm bildirimleri okudunuz.</p>
 									</div>
 								{/each}
 							</div>
@@ -283,10 +283,10 @@
 
 						<!-- Okunmuş Bildirimler Kolonu -->
 						<div class="space-y-4">
-							<div class="flex items-center justify-between border-b border-zinc-850 pb-2">
-								<h2 class="text-lg font-bold text-zinc-400 flex items-center gap-2">
+							<div class="border-zinc-850 flex items-center justify-between border-b pb-2">
+								<h2 class="flex items-center gap-2 text-lg font-bold text-zinc-400">
 									Okunmuş Bildirimler
-									<span class="px-2 py-0.5 text-xs bg-zinc-850 text-zinc-500 rounded-full font-mono font-bold">
+									<span class="bg-zinc-850 rounded-full px-2 py-0.5 font-mono text-xs font-bold text-zinc-500">
 										{notifications.current.read.length}
 									</span>
 								</h2>
@@ -295,23 +295,23 @@
 							<div class="grid gap-3">
 								{#each notifications.current.read as item (item.id)}
 									<div
-										class="group relative overflow-hidden p-4 rounded-xl bg-zinc-950/40 opacity-70 hover:opacity-100 hover:bg-zinc-900 border border-zinc-900 hover:border-zinc-850 shadow-sm transition-all duration-300"
+										class="group hover:border-zinc-850 relative overflow-hidden rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 opacity-70 shadow-sm transition-all duration-300 hover:bg-zinc-900 hover:opacity-100"
 									>
 										<!-- Log Sol Süs Çizgisi -->
-										<div class="absolute left-0 top-0 bottom-0 w-1 bg-zinc-700 rounded-l-xl opacity-60 group-hover:opacity-100 transition-opacity"></div>
+										<div class="absolute top-0 bottom-0 left-0 w-1 rounded-l-xl bg-zinc-700 opacity-60 transition-opacity group-hover:opacity-100"></div>
 
 										<div class="pl-2">
-											<div class="flex items-start justify-between gap-4 mb-2">
-												<h3 class="text-base font-medium text-zinc-300 group-hover:text-zinc-200 transition-colors line-through decoration-zinc-700">
+											<div class="mb-2 flex items-start justify-between gap-4">
+												<h3 class="text-base font-medium text-zinc-300 line-through decoration-zinc-700 transition-colors group-hover:text-zinc-200">
 													{item.title || 'Sistem Bildirimi'}
 												</h3>
-												<span class="text-xs text-zinc-600 font-mono whitespace-nowrap bg-zinc-900/60 px-2 py-0.5 rounded border border-zinc-800">
+												<span class="rounded border border-zinc-800 bg-zinc-900/60 px-2 py-0.5 font-mono text-xs whitespace-nowrap text-zinc-600">
 													{new Date(item.created).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
 												</span>
 											</div>
 
 											{#if item.message}
-												<p class="text-sm text-zinc-500 line-through decoration-zinc-800 mb-4">{item.message}</p>
+												<p class="mb-4 text-sm text-zinc-500 line-through decoration-zinc-800">{item.message}</p>
 											{/if}
 
 											<div class="flex items-center justify-between gap-2">
@@ -346,9 +346,9 @@
 												<!-- Okunmadı Butonu -->
 												<button
 													onclick={() => toggleRead(item.id, true)}
-													class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-zinc-800/60 hover:bg-zinc-800 text-zinc-400 border border-zinc-750 text-xs font-semibold active:scale-95 transition-all duration-200"
+													class="border-zinc-750 inline-flex cursor-pointer items-center gap-1.5 rounded border bg-zinc-800/60 px-2.5 py-1.5 text-xs font-semibold text-zinc-400 transition-all duration-200 hover:bg-zinc-800 active:scale-95"
 												>
-													<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
 													</svg>
 													Okunmadı İşaretle
@@ -357,7 +357,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="flex flex-col items-center justify-center p-12 text-center rounded-xl bg-zinc-950/20 border border-dashed border-zinc-900">
+									<div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/20 p-12 text-center">
 										<h3 class="text-sm font-medium text-zinc-500">Okunmuş Bildirim Bulunmuyor</h3>
 									</div>
 								{/each}
@@ -366,30 +366,30 @@
 					</div>
 				{:else}
 					<!-- Yükleniyor İskeleti -->
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-pulse">
+					<div class="grid animate-pulse grid-cols-1 gap-8 lg:grid-cols-2">
 						<div class="space-y-4">
-							<div class="h-6 bg-zinc-800 rounded w-1/3"></div>
+							<div class="h-6 w-1/3 rounded bg-zinc-800"></div>
 							<div class="grid gap-3">
 								{#each Array(3) as _, i (i)}
-									<div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 flex items-start gap-4">
-										<div class="w-1 h-12 bg-zinc-800 rounded"></div>
+									<div class="flex items-start gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+										<div class="h-12 w-1 rounded bg-zinc-800"></div>
 										<div class="flex-1 space-y-2">
-											<div class="h-4 bg-zinc-800 rounded w-1/3"></div>
-											<div class="h-3 bg-zinc-800 rounded w-2/3"></div>
+											<div class="h-4 w-1/3 rounded bg-zinc-800"></div>
+											<div class="h-3 w-2/3 rounded bg-zinc-800"></div>
 										</div>
 									</div>
 								{/each}
 							</div>
 						</div>
 						<div class="space-y-4">
-							<div class="h-6 bg-zinc-800 rounded w-1/3"></div>
+							<div class="h-6 w-1/3 rounded bg-zinc-800"></div>
 							<div class="grid gap-3">
 								{#each Array(2) as _, i (i)}
-									<div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 flex items-start gap-4">
-										<div class="w-1 h-12 bg-zinc-800 rounded"></div>
+									<div class="flex items-start gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+										<div class="h-12 w-1 rounded bg-zinc-800"></div>
 										<div class="flex-1 space-y-2">
-											<div class="h-4 bg-zinc-800 rounded w-1/3"></div>
-											<div class="h-3 bg-zinc-800 rounded w-2/3"></div>
+											<div class="h-4 w-1/3 rounded bg-zinc-800"></div>
+											<div class="h-3 w-2/3 rounded bg-zinc-800"></div>
 										</div>
 									</div>
 								{/each}
@@ -401,7 +401,7 @@
 		</Page.Main.Panel>
 	</Page.Main>
 	<Page.Footer>
-		<p class="text-zinc-500 text-xs">SLC Web Applications • Real-time Notification Engine</p>
+		<p class="text-xs text-zinc-500">SLC Web Applications • Real-time Notification Engine</p>
 	</Page.Footer>
 </Page>
 

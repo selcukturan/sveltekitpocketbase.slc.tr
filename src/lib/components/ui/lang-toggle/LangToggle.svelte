@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { t, getSelectedLang, setSelectedLang } from '$lib/app/localization';
-	import { tooltip } from '$lib/attachments';
+	import { t, getSelectedLang, setSelectedLang } from '#lib/app/localization/index.js';
+	import { tooltip } from '#lib/attachments/index.js';
 
 	const tooltipText = $derived(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'));
 </script>

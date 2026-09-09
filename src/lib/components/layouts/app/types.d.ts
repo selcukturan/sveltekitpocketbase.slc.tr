@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
-import type { IconKey } from '$lib/components/icons';
+import type { IconKey } from '#lib/components/icons/index.js';
 export type SidebarDataType = {
 	title: string;
 	href: string;

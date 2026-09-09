@@ -22,10 +22,7 @@ type TextRequired = ReturnType<typeof _TextRequired>;
 
 type TextTypeChoice<Required extends boolean> = Required extends true ? TextRequired : TextOptional;
 
-export function Text<Key extends string, Required extends boolean = true>(
-	key: Key,
-	options: { required?: Required; message?: string } = {}
-) {
+export function Text<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
 	const { required = true, message } = options;
 
 	const main = required ? _TextRequired(message) : _TextOptional();

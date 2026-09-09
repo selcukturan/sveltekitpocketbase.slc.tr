@@ -4,21 +4,21 @@
 	// SvelteKit
 	import { isHttpError } from '@sveltejs/kit';
 	// Helper functions
-	import { setParams, getParam } from '$lib/utils/hash-url-helper';
-	import { t } from '$lib/app/localization';
-	import { watchUrlHash } from '$lib/attachments';
+	import { setParams, getParam } from '#lib/utils/hash-url-helper.js';
+	import { t } from '#lib/app/localization/index.js';
+	import { watchUrlHash } from '#lib/attachments/index.js';
 	// Templates
-	import { Page, Head, DrawerFormContent } from '$lib/components/templates';
+	import { Page, Head, DrawerFormContent } from '#lib/components/templates/index.js';
 	// All Input Components
-	import * as input from '$lib/components/ui/inputs';
+	import * as input from '#lib/components/ui/inputs/index.js';
 	// All Form Input Components
-	import * as formInput from '$lib/components/ui/form_inputs';
+	import * as formInput from '#lib/components/ui/form_inputs/index.js';
 	// All Datatable Components
-	import * as dt from '$lib/components/ui/datatable';
+	import * as dt from '#lib/components/ui/datatable/index.js';
 	// Components
-	import { Drawer } from '$lib/components/ui/drawer';
-	import { confirm } from '$lib/components/ui/confirm';
-	import { Toasts, createToaster } from '$lib/components/ui/toast';
+	import { Drawer } from '#lib/components/ui/drawer/index.js';
+	import { confirm } from '#lib/components/ui/confirm/index.js';
+	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	// Types and Schemas
 	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType, type OneParamsSchemaType } from './page.shared';
 	// Remote functions

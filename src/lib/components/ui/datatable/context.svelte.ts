@@ -1,5 +1,7 @@
+import type { RemoteQuery } from '$app/server';
+
 import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width } from './types';
-import type { RemoteQuery } from '@sveltejs/kit';
+
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
@@ -81,6 +83,7 @@ class TableContext<TData extends Row> {
 			sort: undefined,
 			// Genişlik ve gizlilik vb. mutasyonların reaktif çalışabilmesi için klonluyoruz:
 			columns: $state.snapshot(initialProps.columns) as unknown as Column<TData>[],
+
 			footers: initialProps.footers ? ($state.snapshot(initialProps.footers) as unknown as Footer<TData>[]) : undefined
 		});
 
@@ -224,10 +227,7 @@ class TableContext<TData extends Row> {
 		const indicesChanged = start !== this.#rowIndices.start || end !== this.#rowIndices.end;
 
 		if (force || indicesChanged) {
-			this.#rowIndices = {
-				start: start >= end ? 0 : start,
-				end: end
-			};
+			this.#rowIndices = { start: start >= end ? 0 : start, end };
 		}
 	};
 

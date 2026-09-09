@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Bool } from '$lib/components/ui/inputs';
+	import { Bool } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { BoolValueChangeArgs, BoolProps } from '$lib/components/ui/inputs/type';
+	import type { BoolValueChangeArgs, BoolProps } from '#lib/components/ui/inputs/type';
 
 	type Props = BoolProps & {
 		field: RemoteFormField<boolean>;
@@ -50,6 +50,6 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} required={required} {label}>
+<Field {issues} {required} {label}>
 	<Bool id={restProps.id || attrName} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
 </Field>

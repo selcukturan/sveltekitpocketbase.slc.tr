@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '$lib/components/layouts/page';
+	import { PageLayout, type PageSidebarDataType, type ChildrenPropsType } from '#lib/components/layouts/page/index.js';
 
 	let { children }: ChildrenPropsType = $props();
 

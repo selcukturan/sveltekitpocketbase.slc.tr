@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { parseDateInputToIso, parseDatetimeInputToIso, isValidIsoDate } from '$lib/utils/input-helper';
+import { parseDateInputToIso, parseDatetimeInputToIso, isValidIsoDate } from '#lib/utils/input-helper.js';
 
 // BU SAYFADA DEFAULT DEĞER BELİRLENMEZ.
 

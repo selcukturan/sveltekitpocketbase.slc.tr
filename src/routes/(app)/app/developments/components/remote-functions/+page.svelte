@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
-	import { TogglerPopover as Toggler } from '$lib/components/base/toggler'; // Bileşeninizi import ettiğiniz yer
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import { TogglerPopover as Toggler } from '#lib/components/base/toggler/index.js'; // Bileşeninizi import ettiğiniz yer
 
 	// Test edilecek tüm placement kombinasyonları
 	const placements = [

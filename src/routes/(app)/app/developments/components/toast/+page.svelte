@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
+	import { Page, Head } from '#lib/components/templates/index.js';
 
-	import { Toasts, createToaster, getToaster } from '$lib/components/ui/toast';
+	import { Toasts, createToaster, getToaster } from '#lib/components/ui/toast/index.js';
 
 	const appToaster = getToaster('app-toaster');
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });

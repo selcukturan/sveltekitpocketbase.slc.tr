@@ -1,8 +1,8 @@
 import { getRequestEvent, query } from '$app/server';
-import { Collections } from '$lib/types/pocketbase-types';
-import { checkAuthenticated } from '$lib/remotes/guarded.remote';
+import { Collections } from '#lib/types/pocketbase-types.js';
+import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
 import { ResultAsync } from 'neverthrow';
-import { throwError, mapUnknownToError } from '$lib/server/error';
+import { throwError, mapUnknownToError } from '#lib/server/error.js';
 import * as v from 'valibot';
 
 const filteredCollectionValues = Object.values(Collections).filter((value) => !value.startsWith('_')) as [string, ...string[]];

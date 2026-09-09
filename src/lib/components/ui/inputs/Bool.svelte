@@ -63,7 +63,7 @@
 <div
 	{@attach divClick}
 	{@attach watchValueChange}
-	class="inline-flex items-center gap-3 select-none group {classes} {disabled
+	class="group inline-flex items-center gap-3 select-none {classes} {disabled
 		? 'cursor-not-allowed opacity-50'
 		: readonly
 			? 'cursor-default'
@@ -84,7 +84,7 @@
 			: ''}
 			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
 			{readonly ? 'cursor-default' : 'cursor-pointer'}
-			relative h-6 w-11 rounded-md border overflow-hidden py-1 px-0.5"
+			relative h-6 w-11 overflow-hidden rounded-md border px-0.5 py-1"
 		{@attach buttonClick}
 		{...rest}
 	>
@@ -95,6 +95,6 @@
 	</button>
 
 	{#if text}
-		<span class="text-sm font-medium text-surface-900">{text}</span>
+		<span class="text-surface-900 text-sm font-medium">{text}</span>
 	{/if}
 </div>

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
-	import { LangToggle } from '$lib/components/ui/lang-toggle';
-	import { config } from '$lib/app/config';
-	import { getToaster } from '$lib/components/ui/toast';
-	import { login } from '$lib/remotes/guarded.remote';
-	import { loginSchema } from '$lib/app/schemas/login';
-	import { t } from '$lib/app/localization';
+	import { ThemeToggle } from '#lib/components/ui/theme-toggle/index.js';
+	import { LangToggle } from '#lib/components/ui/lang-toggle/index.js';
+	import { config } from '#lib/app/config.js';
+	import { getToaster } from '#lib/components/ui/toast/index.js';
+	import { login } from '#lib/remotes/guarded.remote.js';
+	import { loginSchema } from '#lib/app/schemas/login.js';
+	import { t } from '#lib/app/localization/index.js';
 	import { resolve } from '$app/paths';
-	import { getUser } from '$lib/remotes/guarded.remote';
-	import Button from '$lib/components/ui/inputs/Button.svelte';
-	import { Icon } from '$lib/components/icons';
+	import { getUser } from '#lib/remotes/guarded.remote.js';
+	import Button from '#lib/components/ui/inputs/Button.svelte';
+	import { Icon } from '#lib/components/icons/index.js';
 
 	const loginPageToaster = getToaster('app-toaster');
 
@@ -22,7 +22,7 @@
 </svelte:head>
 
 <main class="flex min-h-dvh flex-row">
-	<a href={resolve('/')} class="contents">
+	<a href={resolve('/(login)/login')} class="contents">
 		<div class="absolute top-0 left-0 z-10 m-4 inline-flex h-10 w-10 items-center md:m-10">
 			<img class="h-full w-full select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</div>

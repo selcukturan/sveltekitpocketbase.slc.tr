@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { focustrap } from '$lib/attachments';
+	import { focustrap } from '#lib/attachments/index.js';
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 

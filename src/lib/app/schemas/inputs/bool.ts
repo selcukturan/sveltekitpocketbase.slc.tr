@@ -14,10 +14,7 @@ type BoolNonfalsey = ReturnType<typeof _BoolNonfalsey>;
 
 type BoolTypeChoice<Nonfalsey extends boolean> = Nonfalsey extends true ? BoolNonfalsey : BoolOptional;
 
-export function Bool<Key extends string, Nonfalsey extends boolean = false>(
-	key: Key,
-	options: { nonfalsey?: Nonfalsey; message?: string } = {}
-) {
+export function Bool<Key extends string, Nonfalsey extends boolean = false>(key: Key, options: { nonfalsey?: Nonfalsey; message?: string } = {}) {
 	const { nonfalsey = false, message } = options;
 
 	const main = nonfalsey ? _BoolNonfalsey(message) : _BoolOptional();

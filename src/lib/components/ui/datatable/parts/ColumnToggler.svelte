@@ -1,5 +1,5 @@
 <script lang="ts" generics="TData extends Row">
-	import { Toggler } from '$lib/components/base/toggler';
+	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { getTableContext } from '../context.svelte';
 	import type { Row } from '../types';
 

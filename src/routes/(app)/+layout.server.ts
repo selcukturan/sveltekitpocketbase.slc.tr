@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
 
-export async function load({ locals }) {
+export const load: LayoutServerLoad = async ({ locals }) => {
 	console.log(new Date().getTime() + ' routes - (app) layout.server.ts');
 
 	if (!locals.user?.id) {
@@ -9,4 +10,4 @@ export async function load({ locals }) {
 	}
 
 	return {};
-}
+};

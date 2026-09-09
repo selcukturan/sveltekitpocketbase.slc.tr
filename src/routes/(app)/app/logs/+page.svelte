@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
+	import { Page, Head } from '#lib/components/templates/index.js';
 	import type { PageProps } from './$types';
 	const props: PageProps = $props();
 </script>

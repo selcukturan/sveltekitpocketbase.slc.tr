@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { confirm } from '$lib/components/ui/confirm';
-	import { Page, Head } from '$lib/components/templates';
+	import { confirm } from '#lib/components/ui/confirm/index.js';
+	import { Page, Head } from '#lib/components/templates/index.js';
 
 	let answer = $state('init');
 </script>

@@ -18,13 +18,7 @@ const _MultipleSelectOptional = ({ selectOptions = [] }: { selectOptions: string
 	);
 
 // Required
-const _SingleSelectRequired = ({
-	selectOptions = [],
-	message = 'Bu alan gereklidir.'
-}: {
-	selectOptions: string[];
-	message?: string;
-}) =>
+const _SingleSelectRequired = ({ selectOptions = [], message = 'Bu alan gereklidir.' }: { selectOptions: string[]; message?: string }) =>
 	v.pipe(
 		v.optional(v.picklist([...selectOptions, '']), ''),
 		v.nonEmpty(message),

@@ -1,9 +1,9 @@
 import { getRequestEvent, query, form, requested } from '$app/server';
-import { Collections } from '$lib/types/pocketbase-types';
-import { checkAuthenticated } from '$lib/remotes/guarded.remote';
+import { Collections } from '#lib/types/pocketbase-types.js';
+import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
 import { ResultAsync } from 'neverthrow';
-import { throwError, mapUnknownToError } from '$lib/server/error';
-import { paramsFileKeyTransform } from '$lib/utils/transform-params-helper';
+import { throwError, mapUnknownToError } from '#lib/server/error.js';
+import { paramsFileKeyTransform } from '#lib/utils/transform-params-helper.js';
 
 import { listParamsSchema, oneParamsSchema, updateFormSchema } from './page.shared';
 

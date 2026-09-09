@@ -56,5 +56,5 @@
 ></textarea>
 
 {#if dev}
-	<p class="text-xs text-surface-500">Component Value: {value}</p>
+	<p class="text-surface-500 text-xs">Component Value: {value}</p>
 {/if}

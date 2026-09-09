@@ -1,315 +1,301 @@
 /**
-* This file was @generated using pocketbase-typegen
-*/
+ * This file was @generated using pocketbase-typegen
+ */
 
-import type PocketBase from 'pocketbase'
-import type { RecordService } from 'pocketbase'
+import type PocketBase from 'pocketbase';
+import type { RecordService } from 'pocketbase';
 
 export const Collections = {
-	Authorigins: "_authOrigins",
-	Externalauths: "_externalAuths",
-	Mfas: "_mfas",
-	Otps: "_otps",
-	Superusers: "_superusers",
-	AclRoles: "acl_roles",
-	DemoCrud: "demo_crud",
-	DemoNotification: "demo_notification",
-	DemoRelationInputMultiple: "demo_relation_input_multiple",
-	DemoRelationInputSingle: "demo_relation_input_single",
-	SysUsers: "sys_users",
-} as const
-export type Collections = typeof Collections[keyof typeof Collections]
+	Authorigins: '_authOrigins',
+	Externalauths: '_externalAuths',
+	Mfas: '_mfas',
+	Otps: '_otps',
+	Superusers: '_superusers',
+	AclRoles: 'acl_roles',
+	DemoCrud: 'demo_crud',
+	DemoNotification: 'demo_notification',
+	DemoRelationInputMultiple: 'demo_relation_input_multiple',
+	DemoRelationInputSingle: 'demo_relation_input_single',
+	SysUsers: 'sys_users'
+} as const;
+export type Collections = (typeof Collections)[keyof typeof Collections];
 
 // Alias types for improved usability
-export type IsoDateString = string
-export type IsoAutoDateString = string & { readonly autodate: unique symbol }
-export type RecordIdString = string
-export type FileNameString = string & { readonly filename: unique symbol }
-export type HTMLString = string
+export type IsoDateString = string;
+export type IsoAutoDateString = string & { readonly autodate: unique symbol };
+export type RecordIdString = string;
+export type FileNameString = string & { readonly filename: unique symbol };
+export type HTMLString = string;
 
-type ExpandType<T> = unknown extends T
-	? T extends unknown
-		? { expand?: unknown }
-		: { expand: T }
-	: { expand: T }
+type ExpandType<T> = unknown extends T ? (T extends unknown ? { expand?: unknown } : { expand: T }) : { expand: T };
 
 // System fields
 export type BaseSystemFields<T = unknown> = {
-	id: RecordIdString
-	collectionId: string
-	collectionName: Collections
-} & ExpandType<T>
+	id: RecordIdString;
+	collectionId: string;
+	collectionName: Collections;
+} & ExpandType<T>;
 
 export type AuthSystemFields<T = unknown> = {
-	email: string
-	emailVisibility: boolean
-	username: string
-	verified: boolean
-} & BaseSystemFields<T>
+	email: string;
+	emailVisibility: boolean;
+	username: string;
+	verified: boolean;
+} & BaseSystemFields<T>;
 
 // Record types for each collection
 
 export type AuthoriginsRecord = {
-	collectionRef: string
-	created: IsoAutoDateString
-	fingerprint: string
-	id: string
-	recordRef: string
-	updated: IsoAutoDateString
-}
+	collectionRef: string;
+	created: IsoAutoDateString;
+	fingerprint: string;
+	id: string;
+	recordRef: string;
+	updated: IsoAutoDateString;
+};
 
 export type ExternalauthsRecord = {
-	collectionRef: string
-	created: IsoAutoDateString
-	id: string
-	provider: string
-	providerId: string
-	recordRef: string
-	updated: IsoAutoDateString
-}
+	collectionRef: string;
+	created: IsoAutoDateString;
+	id: string;
+	provider: string;
+	providerId: string;
+	recordRef: string;
+	updated: IsoAutoDateString;
+};
 
 export type MfasRecord = {
-	collectionRef: string
-	created: IsoAutoDateString
-	id: string
-	method: string
-	recordRef: string
-	updated: IsoAutoDateString
-}
+	collectionRef: string;
+	created: IsoAutoDateString;
+	id: string;
+	method: string;
+	recordRef: string;
+	updated: IsoAutoDateString;
+};
 
 export type OtpsRecord = {
-	collectionRef: string
-	created: IsoAutoDateString
-	id: string
-	password: string
-	recordRef: string
-	sentTo?: string
-	updated: IsoAutoDateString
-}
+	collectionRef: string;
+	created: IsoAutoDateString;
+	id: string;
+	password: string;
+	recordRef: string;
+	sentTo?: string;
+	updated: IsoAutoDateString;
+};
 
 export type SuperusersRecord = {
-	created: IsoAutoDateString
-	email: string
-	emailVisibility?: boolean
-	id: string
-	password: string
-	tokenKey: string
-	updated: IsoAutoDateString
-	verified?: boolean
-}
+	created: IsoAutoDateString;
+	email: string;
+	emailVisibility?: boolean;
+	id: string;
+	password: string;
+	tokenKey: string;
+	updated: IsoAutoDateString;
+	verified?: boolean;
+};
 
 export const AclRolesTypeOptions = {
-	"demo": "demo",
-	"user": "user",
-	"superuser": "superuser",
-	"admin": "admin",
-	"superadmin": "superadmin",
-	"system": "system",
-	"developer": "developer",
-} as const
-export type AclRolesTypeOptions = typeof AclRolesTypeOptions[keyof typeof AclRolesTypeOptions]
+	demo: 'demo',
+	user: 'user',
+	superuser: 'superuser',
+	admin: 'admin',
+	superadmin: 'superadmin',
+	system: 'system',
+	developer: 'developer'
+} as const;
+export type AclRolesTypeOptions = (typeof AclRolesTypeOptions)[keyof typeof AclRolesTypeOptions];
 
 export const AclRolesStatusOptions = {
-	"active": "active",
-	"passive": "passive",
-} as const
-export type AclRolesStatusOptions = typeof AclRolesStatusOptions[keyof typeof AclRolesStatusOptions]
+	active: 'active',
+	passive: 'passive'
+} as const;
+export type AclRolesStatusOptions = (typeof AclRolesStatusOptions)[keyof typeof AclRolesStatusOptions];
 export type AclRolesRecord = {
-	created: IsoAutoDateString
-	id: string
-	label: string
-	order?: number
-	search_label: string
-	status: AclRolesStatusOptions
-	type: AclRolesTypeOptions
-	updated: IsoAutoDateString
-}
+	created: IsoAutoDateString;
+	id: string;
+	label: string;
+	order?: number;
+	search_label: string;
+	status: AclRolesStatusOptions;
+	type: AclRolesTypeOptions;
+	updated: IsoAutoDateString;
+};
 
 export const DemoCrudSelectOptionalMultipleOptions = {
-	"html": "html",
-	"css": "css",
-	"javascript": "javascript",
-} as const
-export type DemoCrudSelectOptionalMultipleOptions = typeof DemoCrudSelectOptionalMultipleOptions[keyof typeof DemoCrudSelectOptionalMultipleOptions]
+	html: 'html',
+	css: 'css',
+	javascript: 'javascript'
+} as const;
+export type DemoCrudSelectOptionalMultipleOptions = (typeof DemoCrudSelectOptionalMultipleOptions)[keyof typeof DemoCrudSelectOptionalMultipleOptions];
 
 export const DemoCrudSelectOptionalSingleOptions = {
-	"linux": "linux",
-	"mac": "mac",
-	"windows": "windows",
-} as const
-export type DemoCrudSelectOptionalSingleOptions = typeof DemoCrudSelectOptionalSingleOptions[keyof typeof DemoCrudSelectOptionalSingleOptions]
+	linux: 'linux',
+	mac: 'mac',
+	windows: 'windows'
+} as const;
+export type DemoCrudSelectOptionalSingleOptions = (typeof DemoCrudSelectOptionalSingleOptions)[keyof typeof DemoCrudSelectOptionalSingleOptions];
 export type DemoCrudRecord = {
-	created: IsoAutoDateString
-	file_optional_multiple?: FileNameString[]
-	file_optional_single?: FileNameString
-	id: string
-	label?: string
-	relation_optional_multiple?: RecordIdString[]
-	relation_optional_single?: RecordIdString
-	search_label?: string
-	select_optional_multiple?: DemoCrudSelectOptionalMultipleOptions[]
-	select_optional_single?: DemoCrudSelectOptionalSingleOptions
-	text_optional?: string
-	text_required: string
-	updated: IsoAutoDateString
-}
+	created: IsoAutoDateString;
+	file_optional_multiple?: FileNameString[];
+	file_optional_single?: FileNameString;
+	id: string;
+	label?: string;
+	relation_optional_multiple?: RecordIdString[];
+	relation_optional_single?: RecordIdString;
+	search_label?: string;
+	select_optional_multiple?: DemoCrudSelectOptionalMultipleOptions[];
+	select_optional_single?: DemoCrudSelectOptionalSingleOptions;
+	text_optional?: string;
+	text_required: string;
+	updated: IsoAutoDateString;
+};
 
 export const DemoNotificationSelectOptions = {
-	"info": "info",
-	"success": "success",
-	"warning": "warning",
-	"error": "error",
-} as const
-export type DemoNotificationSelectOptions = typeof DemoNotificationSelectOptions[keyof typeof DemoNotificationSelectOptions]
+	info: 'info',
+	success: 'success',
+	warning: 'warning',
+	error: 'error'
+} as const;
+export type DemoNotificationSelectOptions = (typeof DemoNotificationSelectOptions)[keyof typeof DemoNotificationSelectOptions];
 export type DemoNotificationRecord = {
-	created: IsoAutoDateString
-	id: string
-	message: HTMLString
-	read_by?: RecordIdString[]
-	select: DemoNotificationSelectOptions
-	title: string
-	updated: IsoAutoDateString
-	user?: RecordIdString[]
-}
+	created: IsoAutoDateString;
+	id: string;
+	message: HTMLString;
+	read_by?: RecordIdString[];
+	select: DemoNotificationSelectOptions;
+	title: string;
+	updated: IsoAutoDateString;
+	user?: RecordIdString[];
+};
 
 export type DemoRelationInputMultipleRecord = {
-	created: IsoAutoDateString
-	id: string
-	label?: string
-	search_label?: string
-	updated: IsoAutoDateString
-}
+	created: IsoAutoDateString;
+	id: string;
+	label?: string;
+	search_label?: string;
+	updated: IsoAutoDateString;
+};
 
 export type DemoRelationInputSingleRecord = {
-	created: IsoAutoDateString
-	id: string
-	label?: string
-	search_label?: string
-	updated: IsoAutoDateString
-}
+	created: IsoAutoDateString;
+	id: string;
+	label?: string;
+	search_label?: string;
+	updated: IsoAutoDateString;
+};
 
 export type SysUsersRecord = {
-	avatar?: FileNameString
-	created: IsoAutoDateString
-	email: string
-	emailVisibility?: boolean
-	id: string
-	label?: string
-	name?: string
-	password: string
-	role?: RecordIdString[]
-	search_label?: string
-	surname?: string
-	tokenKey: string
-	updated: IsoAutoDateString
-	verified?: boolean
-}
+	avatar?: FileNameString;
+	created: IsoAutoDateString;
+	email: string;
+	emailVisibility?: boolean;
+	id: string;
+	label?: string;
+	name?: string;
+	password: string;
+	role?: RecordIdString[];
+	search_label?: string;
+	surname?: string;
+	tokenKey: string;
+	updated: IsoAutoDateString;
+	verified?: boolean;
+};
 
 // Response types include system fields and match responses from the PocketBase API
-export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>
-export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRecord> & BaseSystemFields<Texpand>
-export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
-export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
-export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type AclRolesResponse<Texpand = unknown> = Required<AclRolesRecord> & BaseSystemFields<Texpand>
-export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & BaseSystemFields<Texpand>
-export type DemoNotificationResponse<Texpand = unknown> = Required<DemoNotificationRecord> & BaseSystemFields<Texpand>
-export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>
-export type DemoRelationInputSingleResponse<Texpand = unknown> = Required<DemoRelationInputSingleRecord> & BaseSystemFields<Texpand>
-export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
+export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>;
+export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRecord> & BaseSystemFields<Texpand>;
+export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>;
+export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>;
+export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>;
+export type AclRolesResponse<Texpand = unknown> = Required<AclRolesRecord> & BaseSystemFields<Texpand>;
+export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & BaseSystemFields<Texpand>;
+export type DemoNotificationResponse<Texpand = unknown> = Required<DemoNotificationRecord> & BaseSystemFields<Texpand>;
+export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>;
+export type DemoRelationInputSingleResponse<Texpand = unknown> = Required<DemoRelationInputSingleRecord> & BaseSystemFields<Texpand>;
+export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>;
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
 export type CollectionRecords = {
-	_authOrigins: AuthoriginsRecord
-	_externalAuths: ExternalauthsRecord
-	_mfas: MfasRecord
-	_otps: OtpsRecord
-	_superusers: SuperusersRecord
-	acl_roles: AclRolesRecord
-	demo_crud: DemoCrudRecord
-	demo_notification: DemoNotificationRecord
-	demo_relation_input_multiple: DemoRelationInputMultipleRecord
-	demo_relation_input_single: DemoRelationInputSingleRecord
-	sys_users: SysUsersRecord
-}
+	_authOrigins: AuthoriginsRecord;
+	_externalAuths: ExternalauthsRecord;
+	_mfas: MfasRecord;
+	_otps: OtpsRecord;
+	_superusers: SuperusersRecord;
+	acl_roles: AclRolesRecord;
+	demo_crud: DemoCrudRecord;
+	demo_notification: DemoNotificationRecord;
+	demo_relation_input_multiple: DemoRelationInputMultipleRecord;
+	demo_relation_input_single: DemoRelationInputSingleRecord;
+	sys_users: SysUsersRecord;
+};
 
 export type CollectionResponses = {
-	_authOrigins: AuthoriginsResponse
-	_externalAuths: ExternalauthsResponse
-	_mfas: MfasResponse
-	_otps: OtpsResponse
-	_superusers: SuperusersResponse
-	acl_roles: AclRolesResponse
-	demo_crud: DemoCrudResponse
-	demo_notification: DemoNotificationResponse
-	demo_relation_input_multiple: DemoRelationInputMultipleResponse
-	demo_relation_input_single: DemoRelationInputSingleResponse
-	sys_users: SysUsersResponse
-}
+	_authOrigins: AuthoriginsResponse;
+	_externalAuths: ExternalauthsResponse;
+	_mfas: MfasResponse;
+	_otps: OtpsResponse;
+	_superusers: SuperusersResponse;
+	acl_roles: AclRolesResponse;
+	demo_crud: DemoCrudResponse;
+	demo_notification: DemoNotificationResponse;
+	demo_relation_input_multiple: DemoRelationInputMultipleResponse;
+	demo_relation_input_single: DemoRelationInputSingleResponse;
+	sys_users: SysUsersResponse;
+};
 
 // Utility types for create/update operations
 
-type ProcessCreateAndUpdateFields<T> = Omit<{
-	// Omit AutoDate fields
-	[K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: 
-		// Convert FileNameString to File
-		T[K] extends infer U ? 
-			U extends (FileNameString | FileNameString[]) ? 
-				U extends any[] ? File[] : File 
-			: U
-		: never
-}, 'id'>
+type ProcessCreateAndUpdateFields<T> = Omit<
+	{
+		// Omit AutoDate fields
+		[K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: // Convert FileNameString to File
+		T[K] extends infer U ? (U extends FileNameString | FileNameString[] ? (U extends any[] ? File[] : File) : U) : never;
+	},
+	'id'
+>;
 
 // Create type for Auth collections
 export type CreateAuth<T> = {
-	id?: RecordIdString
-	email: string
-	emailVisibility?: boolean
-	password: string
-	passwordConfirm: string
-	verified?: boolean
-} & ProcessCreateAndUpdateFields<T>
+	id?: RecordIdString;
+	email: string;
+	emailVisibility?: boolean;
+	password: string;
+	passwordConfirm: string;
+	verified?: boolean;
+} & ProcessCreateAndUpdateFields<T>;
 
 // Create type for Base collections
 export type CreateBase<T> = {
-	id?: RecordIdString
-} & ProcessCreateAndUpdateFields<T>
+	id?: RecordIdString;
+} & ProcessCreateAndUpdateFields<T>;
 
 // Update type for Auth collections
-export type UpdateAuth<T> = Partial<
-	Omit<ProcessCreateAndUpdateFields<T>, keyof AuthSystemFields>
-> & {
-	email?: string
-	emailVisibility?: boolean
-	oldPassword?: string
-	password?: string
-	passwordConfirm?: string
-	verified?: boolean
-}
+export type UpdateAuth<T> = Partial<Omit<ProcessCreateAndUpdateFields<T>, keyof AuthSystemFields>> & {
+	email?: string;
+	emailVisibility?: boolean;
+	oldPassword?: string;
+	password?: string;
+	passwordConfirm?: string;
+	verified?: boolean;
+};
 
 // Update type for Base collections
-export type UpdateBase<T> = Partial<
-	Omit<ProcessCreateAndUpdateFields<T>, keyof BaseSystemFields>
->
+export type UpdateBase<T> = Partial<Omit<ProcessCreateAndUpdateFields<T>, keyof BaseSystemFields>>;
 
 // Get the correct create type for any collection
-export type Create<T extends keyof CollectionResponses> =
-	CollectionResponses[T] extends AuthSystemFields
-		? CreateAuth<CollectionRecords[T]>
-		: CreateBase<CollectionRecords[T]>
+export type Create<T extends keyof CollectionResponses> = CollectionResponses[T] extends AuthSystemFields
+	? CreateAuth<CollectionRecords[T]>
+	: CreateBase<CollectionRecords[T]>;
 
 // Get the correct update type for any collection
-export type Update<T extends keyof CollectionResponses> =
-	CollectionResponses[T] extends AuthSystemFields
-		? UpdateAuth<CollectionRecords[T]>
-		: UpdateBase<CollectionRecords[T]>
+export type Update<T extends keyof CollectionResponses> = CollectionResponses[T] extends AuthSystemFields
+	? UpdateAuth<CollectionRecords[T]>
+	: UpdateBase<CollectionRecords[T]>;
 
 // Type for usage with type asserted PocketBase instance
 // https://github.com/pocketbase/js-sdk#specify-typescript-definitions
 
 export type TypedPocketBase = {
-	collection<T extends keyof CollectionResponses>(
-		idOrName: T
-	): RecordService<CollectionResponses[T]>
-} & PocketBase
+	collection<T extends keyof CollectionResponses>(idOrName: T): RecordService<CollectionResponses[T]>;
+} & PocketBase;

@@ -10,7 +10,10 @@ type Language = { readonly code: SupportedLangs; readonly name: string };
 // ------------------------------ END Types -------------------------------------------------------
 
 // ------------------------------ BEGIN Readonly Supported Languages ------------------------------
-const supported: Language[] = [{ code: 'tr', name: 'Türkçe' }, { code: 'en', name: 'English' }];
+const supported: Language[] = [
+	{ code: 'tr', name: 'Türkçe' },
+	{ code: 'en', name: 'English' }
+];
 supported.forEach(Object.freeze);
 Object.freeze(supported);
 export const supportedLanguages: readonly Language[] = supported;

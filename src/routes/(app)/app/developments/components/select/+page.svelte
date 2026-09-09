@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/app/localization';
-	import { Page, Head } from '$lib/components/templates';
-	import * as input from '$lib/components/ui/inputs';
-	import { inputClasses } from '$lib/components/ui/inputs/common';
+	import { t } from '#lib/app/localization/index.js';
+	import { Page, Head } from '#lib/components/templates/index.js';
+	import * as input from '#lib/components/ui/inputs/index.js';
+	import { inputClasses } from '#lib/components/ui/inputs/common.js';
 
 	let textInput = $state('initial value');
 	let textInputOnChangeValue = $state('');

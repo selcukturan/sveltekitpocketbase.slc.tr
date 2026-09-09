@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { RemoteFormIssue } from '$app/server';
 	import type { Snippet } from 'svelte';
-	import type { RemoteFormIssue } from '@sveltejs/kit';
 
 	type Props = {
 		children: Snippet;
@@ -12,8 +12,8 @@
 	let { children, label, required = false, issues }: Props = $props();
 </script>
 
-<label class="select-none flex flex-col gap-1.5 w-full mt-4">
-	<div class="flex items-center gap-0.5 text-xs font-semibold text-surface-600" class:required>
+<label class="mt-4 flex w-full flex-col gap-1.5 select-none">
+	<div class="text-surface-600 flex items-center gap-0.5 text-xs font-semibold" class:required>
 		{label}
 	</div>
 
@@ -24,7 +24,7 @@
 	{/if}
 
 	{#each issues as issue, i (i)}
-		<p class="text-xs text-error-600 mt-1 font-medium">{issue.message}</p>
+		<p class="text-error-600 mt-1 text-xs font-medium">{issue.message}</p>
 	{/each}
 </label>
 

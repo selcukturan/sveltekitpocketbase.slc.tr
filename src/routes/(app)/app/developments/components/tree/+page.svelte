@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '$lib/components/templates';
+	import { Page, Head } from '#lib/components/templates/index.js';
 </script>
 
 <Head>

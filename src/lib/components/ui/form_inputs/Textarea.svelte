@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Textarea as TextareaInput } from '$lib/components/ui/inputs';
+	import { Textarea as TextareaInput } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { TextareaValueChangeArgs, TextareaProps } from '$lib/components/ui/inputs/type';
+	import type { TextareaValueChangeArgs, TextareaProps } from '#lib/components/ui/inputs/type';
 
 	type Props = TextareaProps & {
 		field: RemoteFormField<string>;

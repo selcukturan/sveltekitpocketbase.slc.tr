@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { SplitPane } from '$lib/components/base/split-pane';
-	import type { Length } from '$lib/components/base/split-pane/types';
+	import { SplitPane } from '#lib/components/base/split-pane/index.js';
+	import type { Length } from '#lib/components/base/split-pane/types';
 	import { PageSidebar, PageContainer } from '../';
-	import { getGlobalContext } from '$lib/app/global.svelte';
+	import { getGlobalContext } from '#lib/app/global.svelte.js';
 
 	import type { PageLayoutPropsType } from '../types';
-	import { Icon, type IconKey } from '$lib/components/icons';
-	import { t } from '$lib/app/localization/localization.svelte';
-	import { tooltip } from '$lib/attachments';
+	import { Icon, type IconKey } from '#lib/components/icons/index.js';
+	import { t } from '#lib/app/localization/localization.svelte.js';
+	import { tooltip } from '#lib/attachments/index.js';
 
 	let { pageSidebardata, children }: PageLayoutPropsType = $props();
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { page } from '$app/state';
-	import { getGlobalContext } from '$lib/app/global.svelte';
+	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	import type { PropsAppSidebarType } from './types';
-	import { tooltip } from '$lib/attachments';
+	import { tooltip } from '#lib/attachments/index.js';
 	import { resolve } from '$app/paths';
-	import { Icon } from '$lib/components/icons';
+	import { Icon } from '#lib/components/icons/index.js';
 
 	let { sidebarData, class: classes, ...attributes }: PropsAppSidebarType = $props();
 
@@ -14,7 +14,7 @@
 
 <section class="{classes} flex h-full w-full flex-row overflow-hidden sm:flex-col" {...attributes}>
 	<header class="flex items-center justify-center px-2 sm:py-2">
-		<a href={resolve('/app')} class="flex h-10 w-10 items-center justify-center select-none">
+		<a href={resolve('app')} class="flex h-10 w-10 items-center justify-center select-none">
 			<img class="h-10 w-10 select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
 		</a>
 	</header>

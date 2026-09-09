@@ -7,16 +7,9 @@
 		boundary?: boolean;
 	};
 
-	let {
-		children,
-		class: classes,
-		style,
-		boundary = false,
-		...attributes
-	}: Props = $props();
+	let { children, class: classes, style, boundary = false, ...attributes }: Props = $props();
 
-	const internalStyle =
-		'display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;';
+	const internalStyle = 'display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;';
 </script>
 
 <section class={classes} style="{internalStyle} {style}" {...attributes}>

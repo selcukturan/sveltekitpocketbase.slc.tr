@@ -1,9 +1,9 @@
+import type { RemoteForm, RemoteFormInput } from '$app/server';
 import type { SvelteHTMLElements } from 'svelte/elements';
 import { getContext, setContext, type Snippet } from 'svelte';
 import { untrack } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 import * as v from 'valibot';
-import type { RemoteForm, RemoteFormInput } from '@sveltejs/kit';
 import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 
 type SnippetArgs = { isChanged?: boolean };

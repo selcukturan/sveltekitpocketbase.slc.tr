@@ -1,7 +1,7 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { page } from '$app/state';
-	import { Icon } from '$lib/components/icons';
+	import { Icon } from '#lib/components/icons/index.js';
 	import type { PageSidebarPropsType } from './types';
 
 	let { pageSidebardata, class: classes, ...attributes }: PageSidebarPropsType = $props();

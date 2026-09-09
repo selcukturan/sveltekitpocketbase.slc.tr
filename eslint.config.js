@@ -5,7 +5,9 @@ import svelte from 'eslint-plugin-svelte';
 import { defineConfig, includeIgnoreFile } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import svelteConfig from './svelte.config.js';
+import { loadConfig } from '@sveltejs/load-config';
+
+const svelteConfig = (await loadConfig('./', { traverse: false }))?.config;
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
@@ -50,7 +52,7 @@ export default defineConfig(
 		files: ['**/.slc-development/pocketbase/**/*.js', '**/.slc-local/pocketbase/**/*.js', '**/.slc-production/pocketbase/**/*.js'],
 		languageOptions: {
 			ecmaVersion: 5,
-			sourceType: 'script',
+			sourceType: 'script'
 		},
 		rules: {
 			'no-var': 'off',
@@ -61,5 +63,4 @@ export default defineConfig(
 			'no-undef': 'off'
 		}
 	}
-
 );

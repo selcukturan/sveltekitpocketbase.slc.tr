@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { RemoteFormField } from '@sveltejs/kit';
+	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Number as NumberInput } from '$lib/components/ui/inputs';
+	import { Number as NumberInput } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { NumberValueChangeArgs, NumberProps } from '$lib/components/ui/inputs/type';
+	import type { NumberValueChangeArgs, NumberProps } from '#lib/components/ui/inputs/type';
 
 	type Props = NumberProps & {
 		field: RemoteFormField<number>;
