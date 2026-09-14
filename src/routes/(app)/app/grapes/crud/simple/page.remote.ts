@@ -16,7 +16,7 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	await sleep(300);
 
-	const filterString = locals.pb.filter('(text_required ~ {:text_required} && text_optional ~ {:text_optional})', { ...params.filterData });
+	const filterString = locals.pb.filter('(text_required ~ {:filter_text_required} && text_optional ~ {:filter_text_optional})', { ...params.filterData });
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.DemoCrud).getList(params.page, params.perPage, {
@@ -63,6 +63,8 @@ export const updateForm = form(updateFormSchema, async (params) => {
 
 	const id = transformedParams.id;
 	const values = { ...transformedParams, id: undefined };
+
+	console.log('server-values', values);
 
 	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(id, values), mapUnknownToError);
 

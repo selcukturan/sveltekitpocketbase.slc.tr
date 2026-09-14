@@ -132,6 +132,8 @@ Kullanıcı → Cloudflare → Traefik (Coolify Proxy) → SvelteKit Uygulaması
 
 **Tavsiye:** Modern JavaScript'te, varsayılan değer atamak için neredeyse her zaman daha güvenli olan `??` operatörünü kullanın.
 
-# "Install from VSIX..." ile yüklenen eklentiler
+### Nodejs sunucusu tarafında, her istekte yeni bir PocketBase JS SDK örneği başlatıp, yanıt sunulduktan sonra bu işlemi sonlandıran bir mekanizma kullanılır. Daha fazla ilerlemeden önce aşağıdaki linke göz atınız.
 
-- **Package Pilot** → An extension for managing your Node.js projects packages.
+## JS SSR - PocketBase ile etkileşimde bulunurken karşılaşılan sorunlar ve öneriler #5313
+
+https://github.com/pocketbase/pocketbase/discussions/5313

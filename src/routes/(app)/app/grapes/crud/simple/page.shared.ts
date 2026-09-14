@@ -15,8 +15,8 @@ export const listParamsSchema = v.object({
 		skipTotal: v.optional(v.fallback(v.boolean(), false), false)
 	}),
 	filterData: v.object({
-		...input.Text('text_required', { required: false }),
-		...input.Text('text_optional', { required: false })
+		...input.Text('filter_text_required', { required: false }),
+		...input.Text('filter_text_optional', { required: false })
 	}),
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });

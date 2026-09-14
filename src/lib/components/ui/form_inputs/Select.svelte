@@ -3,7 +3,8 @@
 	import { getFormInputsContext } from './context.svelte';
 	import { Select as SelectInput } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { SelectValueChangeArgs, SelectPropsType } from '#lib/components/ui/inputs/type';
+	import type { SelectValueChangeArgs, SelectPropsType } from '#lib/components/ui/inputs/type.js';
+	import { parseNamePath } from './utils.js';
 
 	type Props = SelectPropsType<Tmultiple> & {
 		field: RemoteFormField<Tmultiple extends true ? string[] : string>;
@@ -15,35 +16,37 @@
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
-	const attributes = $derived.by(() => {
+	let attributes = $derived.by(() => {
 		if (restProps.multiple) {
 			return (field as RemoteFormField<string[]>).as('select multiple');
 		} else {
 			return (field as RemoteFormField<string>).as('select');
 		}
 	});
-	const attrName = $derived(attributes.name || restProps.name);
+	let { pathFieldName } = $derived(parseNamePath(attributes.name));
+
+	let attrName = $derived(attributes.name || restProps.name);
 	// ######### END: Remote Form `field` attributes ###########
 
 	// ######### BEGIN: Remote Form `field.issues()` ###########
-	const issues = $derived(field.issues() ?? []);
+	let issues = $derived(field.issues() ?? []);
 	// ######### END: Remote Form `field.issues()` #############
 
 	// ######### BEGIN: Valibot metadata ######################
-	const cleanAttrName = $derived(attrName ? attrName.replace('[]', '') : '');
-	const metadata = $derived(context?.getValibotMetadata(cleanAttrName));
-	const required = $derived(metadata?.slc_required === true ? true : false);
+	let cleanAttrName = $derived(pathFieldName ? pathFieldName.replace('[]', '') : '');
+	let metadata = $derived(context?.getValibotMetadata(cleanAttrName));
+	let required = $derived(metadata?.slc_required === true ? true : false);
 	// ######### END: Valibot metadata ########################
 
 	// ######### BEGIN: custom props variables #################
-	const label = $derived(componentLabel || cleanAttrName || 'no_label');
+	let label = $derived(componentLabel || cleanAttrName || 'no_label');
 	// ######### END: custom props variables ###################
 
 	// ######### BEGIN: handle value change ###################
 	const onValueChange = (args: SelectValueChangeArgs<Tmultiple>) => {
 		// Set Context Data
-		if (args.initial && attrName) context.initialData.set(cleanAttrName, args.value);
-		if (attrName) context.currentData.set(cleanAttrName, args.value);
+		if (args.initial && cleanAttrName) context.initialData.set(cleanAttrName, args.value);
+		if (cleanAttrName) context.currentData.set(cleanAttrName, args.value);
 
 		// Value Change Callback
 		if (restProps.multiple) {
@@ -54,7 +57,7 @@
 		restProps?.onValueChange?.(args);
 
 		// Validate Form
-		context?.props.form.validate({ preflightOnly: true, includeUntouched: false });
+		context?.props.form.validate({ preflightOnly: true, all: false });
 	};
 	// ######### END: handle value change #####################
 </script>

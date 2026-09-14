@@ -75,13 +75,13 @@
 		<div class="flex gap-2 p-2">
 			<input.Text
 				id="filter_text_required"
-				bind:value={filterData.text_required}
+				bind:value={filterData.filter_text_required}
 				placeholder="Search - text_required contains..."
 				onkeydown={(e) => e.key === 'Enter' && search()}
 			/>
 			<input.Text
 				id="filter_text_optional"
-				bind:value={filterData.text_optional}
+				bind:value={filterData.filter_text_optional}
 				placeholder="Search - text_optional contains..."
 				onkeydown={(e) => e.key === 'Enter' && search()}
 			/>

@@ -2,8 +2,9 @@
 	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
 	import { File as FileInput } from '#lib/components/ui/inputs/index.js';
-	import type { FileValueChangeArgs, FilePropsType, FileValueTypeChoice } from '#lib/components/ui/inputs/type';
+	import type { FileValueChangeArgs, FilePropsType, FileValueTypeChoice } from '#lib/components/ui/inputs/type.js';
 	import Field from './Field.svelte';
+	import { parseNamePath } from './utils.js';
 
 	type Props = FilePropsType<Tmultiple> & {
 		field: RemoteFormField<Tmultiple extends true ? string[] : string>;
@@ -25,31 +26,34 @@
 			return (field as RemoteFormField<string>).as('select');
 		}
 	});
-	const attrName = $derived(attributes.name || restProps.name);
-	const cleanName = $derived(attrName ? attrName.replace('[]', '') : '');
-	const plusName = $derived(multiple ? cleanName + '_Plus[]' : cleanName + '_Plus');
-	const minusName = $derived(multiple ? cleanName + '_Minus[]' : cleanName + '_Minus');
+
+	let { pathFieldName, pathRemoteId, pathFormFunction } = $derived(parseNamePath(attributes.name));
+
+	let attrName = $derived(pathFieldName || restProps.name);
+	let cleanAttrName = $derived(attrName ? attrName.replace('[]', '') : '');
+	let plusName = $derived((multiple ? cleanAttrName + '_Plus[]' : cleanAttrName + '_Plus') + '/' + pathRemoteId + '/' + pathFormFunction);
+	let minusName = $derived((multiple ? cleanAttrName + '_Minus[]' : cleanAttrName + '_Minus') + '/' + pathRemoteId + '/' + pathFormFunction);
 	// ######### END: Remote Form `field` attributes ###########
 
 	// ######### BEGIN: Remote Form `field.issues()` ###########
-	const issues = $derived(field.issues() ?? []);
+	let issues = $derived(field.issues() ?? []);
 	// ######### END: Remote Form `field.issues()` #############
 
 	// ######### BEGIN: Valibot metadata ######################
 
-	const metadata = $derived(context?.getValibotMetadata(cleanName));
-	const required = $derived(metadata?.slc_required === true ? true : false);
+	let metadata = $derived(context?.getValibotMetadata(cleanAttrName));
+	let required = $derived(metadata?.slc_required === true ? true : false);
 	// ######### END: Valibot metadata ########################
 
 	// ######### BEGIN: custom props variables #################
-	const label = $derived(componentLabel || attrName || 'no_label');
+	let label = $derived(componentLabel || attrName || 'no_label');
 	// ######### END: custom props variables ###################
 
 	// ######### BEGIN: handle value change ###################
 	const onValueChange = (args: FileValueChangeArgs<Tmultiple>) => {
 		// Set Context Data
-		if (args.initial && attrName) context.initialData.set(cleanName, args.value);
-		if (attrName) context.currentData.set(cleanName, args.value);
+		if (args.initial && cleanAttrName) context.initialData.set(cleanAttrName, args.value);
+		if (cleanAttrName) context.currentData.set(cleanAttrName, args.value);
 
 		// Value Change Callback
 		deletedFileNames = args.deletedFileNames;
@@ -61,7 +65,7 @@
 		restProps?.onValueChange?.(args);
 
 		// Validate Form
-		context?.props.form.validate({ preflightOnly: true, includeUntouched: false });
+		context?.props.form.validate({ preflightOnly: true, all: false });
 	};
 	// ######### END: handle value change #####################
 </script>
