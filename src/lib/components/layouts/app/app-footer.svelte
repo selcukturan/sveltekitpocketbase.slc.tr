@@ -9,7 +9,7 @@
 	let { children, class: classes, style, ...attributes }: Props = $props();
 </script>
 
-<footer class="{classes} {'border-t'}" {...attributes}>
+<footer class="{classes} border-t" {...attributes}>
 	{#if children}
 		{@render children()}
 	{:else}

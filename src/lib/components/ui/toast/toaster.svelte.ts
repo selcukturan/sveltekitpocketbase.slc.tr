@@ -2,7 +2,7 @@
 
 import type { Attachment } from 'svelte/attachments';
 import { getContext, onDestroy, setContext } from 'svelte';
-import type { Toast, ToastTimerData, ToasterOptions } from './types';
+import type { Toast, ToastTimerData, ToasterOptions } from './types.js';
 
 class Toaster {
 	options: Required<ToasterOptions>;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { HiddenProps, HiddenValueChangeArgs } from './type';
+	import type { HiddenProps, HiddenValueChangeArgs } from './type.js';
 
 	let { value = $bindable(''), onValueChange, ...rest }: HiddenProps = $props();
 

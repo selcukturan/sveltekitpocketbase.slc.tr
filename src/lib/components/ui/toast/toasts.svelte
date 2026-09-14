@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ToasterOptions, Toast, ToastsProps } from './types';
-	import { getToaster } from './toaster.svelte';
+	import type { ToasterOptions, Toast, ToastsProps } from './types.js';
+	import { getToaster } from './toaster.svelte.js';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { Icon } from '#lib/components/icons/index.js';

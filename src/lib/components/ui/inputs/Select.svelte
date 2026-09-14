@@ -4,8 +4,8 @@
 	import { cubicOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
-	import { inputClasses } from './common';
-	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type';
+	import { inputClasses } from './common.js';
+	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type.js';
 
 	let {
 		multiple = false as Tmultiple,

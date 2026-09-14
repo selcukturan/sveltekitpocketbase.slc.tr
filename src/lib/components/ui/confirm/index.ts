@@ -1,1 +1,1 @@
-export { confirm } from './confirm';
+export { confirm } from './confirm.js';

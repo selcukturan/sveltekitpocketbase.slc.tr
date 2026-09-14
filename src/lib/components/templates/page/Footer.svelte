@@ -10,7 +10,7 @@
 	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
 </script>
 
-<footer class="{classes} {`bg-surface-100/80`}" style:border-bottom="0px" style:border-left="0px" {...attributes}>
+<footer class="{classes} bg-surface-100/80" style:border-bottom="0px" style:border-left="0px" {...attributes}>
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}

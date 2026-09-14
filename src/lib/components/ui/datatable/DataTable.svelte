@@ -1,5 +1,5 @@
 <script lang="ts" generics="TData extends Row">
-	import type { Row } from './types.d';
+	import type { Row } from './types.js';
 	import Pagination from './parts/Pagination.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
 	import { createTableContext, type MainProps } from './context.svelte';
@@ -29,7 +29,7 @@
 		{#if context.query?.loading === true}
 			<div class="slc-table-message"><p>Loading...</p></div>
 		{:else if context.query?.error !== undefined}
-			<div class="slc-table-message"><p>{context.query?.error.body.message ?? 'Error occurred'}</p></div>
+			<div class="slc-table-message"><p>{context.query?.error.message ?? 'Error occurred'}</p></div>
 		{:else if context.dataLength === 0}
 			<div class="slc-table-message"><p>No data to display</p></div>
 		{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type Props = SvelteHTMLElements['div'] & {
@@ -11,7 +11,7 @@
 </script>
 
 <!-- wrapper -->
-<div class="{classes} {`relative mx-auto w-4xl max-w-full p-6`}" {...attributes}>
+<div class="{classes} relative mx-auto w-4xl max-w-full p-6" {...attributes}>
 	<!-- panel -->
 	<div class="bg-surface-50 shadow-surface-400/40 rounded-xl p-6 shadow-xl/30">
 		{#if boundary}

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { inputClasses } from './common';
+	import { inputClasses } from './common.js';
 	import { on } from 'svelte/events';
-	import type { NumberProps, NumberValueChangeArgs } from './type';
+	import type { NumberProps, NumberValueChangeArgs } from './type.js';
 
 	let {
 		value = $bindable(0),

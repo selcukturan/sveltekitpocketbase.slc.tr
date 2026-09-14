@@ -1,1 +1,1 @@
-export { default as LangToggle } from './LangToggle.svelte';
+export { default as LangToggle } from './lang-toggle.svelte';

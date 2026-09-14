@@ -10,7 +10,6 @@
 	import { logout } from '#lib/remotes/guarded.remote.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import { getUser } from '#lib/remotes/guarded.remote.js';
-	import { goto } from '$app/navigation';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();

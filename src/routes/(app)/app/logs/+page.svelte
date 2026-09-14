@@ -17,12 +17,6 @@
 		<Page.Main.Panel>
 			<div class="flex h-full w-full flex-col overflow-hidden">
 				<h6>LOGS PAGE PROPS</h6>
-				<p>######## USER ########</p>
-				<pre>{JSON.stringify(props.data.user, null, 2)}</pre>
-				<p>######## acl_roles_menus ########</p>
-				<pre>{JSON.stringify(props.data.acl_roles_menus, null, 2)}</pre>
-				######## envTest ########
-				<pre>{JSON.stringify(props.data.envTest, null, 2)}</pre>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>

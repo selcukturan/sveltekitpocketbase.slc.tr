@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import type { Row, HeaderRowType, HeaderCellType } from './types';
-	import { getTableContext } from './context.svelte';
+	import type { Row, HeaderRowType, HeaderCellType } from './types.js';
+	import { getTableContext } from './context.svelte.js';
 	import { on } from 'svelte/events';
 </script>
 

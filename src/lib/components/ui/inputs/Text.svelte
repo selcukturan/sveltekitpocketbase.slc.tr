@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { inputClasses } from './common';
-	import type { TextProps, TextValueChangeArgs } from './type';
+	import { inputClasses } from './common.js';
+	import type { TextProps, TextValueChangeArgs } from './type.js';
 
 	let {
 		type = 'text',

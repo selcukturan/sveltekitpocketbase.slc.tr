@@ -27,8 +27,8 @@
 				<h1>Ürün Listesi</h1>
 
 				<ul>
-					{#each paginatedItems as item}
-						<li>{item}</li>
+					{#each paginatedItems as item, i (i)}
+						<li>{item} - {i}</li>
 					{/each}
 				</ul>
 

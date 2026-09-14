@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AppSidebar, AppHeader } from '../';
+	import { AppSidebar, AppHeader } from '..';
 	import type { AppLayoutPropsType, SidebarDataType } from '../types';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
 

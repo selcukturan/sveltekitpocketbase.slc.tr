@@ -3,11 +3,11 @@
 	import { onMount, tick, untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
-	import { inputClasses } from './common';
+	import { inputClasses } from './common.js';
 
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
 	import { SvelteMap } from 'svelte/reactivity';
-	import type { RelationValueTypeChoice, RelationResolveData, RelationPropsType, RelationValueChangeArgs } from './type';
+	import type { RelationValueTypeChoice, RelationResolveData, RelationPropsType, RelationValueChangeArgs } from './type.js';
 
 	let {
 		collection,

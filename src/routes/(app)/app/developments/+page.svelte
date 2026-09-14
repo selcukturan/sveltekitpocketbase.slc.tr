@@ -24,7 +24,7 @@
 			</div> -->
 						<div class="p-4">
 							<span class="slc-screen-test bg-error-500 sm:bg-info-500 md:bg-success-500 lg:bg-warning-500 h-3 w-3"></span>
-							<span>{@html `< ====== >`}</span>
+							<span> ====== </span>
 							<span class="bg-error-500 h-3 w-3">mobile</span>
 							<span class="bg-info-500 h-3 w-3">sm</span>
 							<span class="bg-success-500 h-3 w-3">md</span>

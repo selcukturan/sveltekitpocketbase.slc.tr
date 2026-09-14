@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { tooltip } from '#lib/attachments/index.js';
-	import { Icon, type IconKey } from '#lib/components/icons/index.js';
+	import { Icon } from '#lib/components/icons/index.js';
+	import type { IconKey } from '#lib/components/icons/index.js';
 
 	type Props = HTMLButtonAttributes & {
 		label?: string;

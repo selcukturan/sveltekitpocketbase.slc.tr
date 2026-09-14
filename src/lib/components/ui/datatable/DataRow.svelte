@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import type { Row, DataRowType, DataCellType } from './types';
-	import { getTableContext } from './context.svelte';
+	import type { Row, DataRowType, DataCellType } from './types.js';
+	import { getTableContext } from './context.svelte.js';
 </script>
 
 <script lang="ts" generics="TData extends Row">

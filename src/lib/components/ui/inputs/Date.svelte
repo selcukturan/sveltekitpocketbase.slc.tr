@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formatDateIsoToInput, parseDateInputToIso } from '#lib/utils/input-helper.js';
-	import { inputClasses } from './common';
-	import type { DateProps, DateValueChangeArgs } from './type';
+	import { inputClasses } from './common.js';
+	import type { DateProps, DateValueChangeArgs } from './type.js';
 
 	let {
 		value = $bindable(''),

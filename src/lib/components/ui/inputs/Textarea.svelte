@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { inputClasses } from './common';
-	import type { TextareaProps, TextareaValueChangeArgs } from './type';
+	import { inputClasses } from './common.js';
+	import type { TextareaProps, TextareaValueChangeArgs } from './type.js';
 
 	let {
 		value = $bindable(''),

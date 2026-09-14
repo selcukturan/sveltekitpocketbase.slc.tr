@@ -1,6 +1,6 @@
 import type { RemoteQuery } from '$app/server';
 
-import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width } from './types';
+import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width } from './types.js';
 
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';

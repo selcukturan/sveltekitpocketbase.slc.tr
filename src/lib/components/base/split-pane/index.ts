@@ -1,1 +1,1 @@
-export { default as SplitPane } from './SplitPane.svelte';
+export { default as SplitPane } from './split-pane.svelte';

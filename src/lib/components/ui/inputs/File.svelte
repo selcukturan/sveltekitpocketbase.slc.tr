@@ -2,8 +2,8 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { fade, slide } from 'svelte/transition';
 	import { on } from 'svelte/events';
-	import { inputClasses } from './common';
-	import type { FilePropsType, FileDisplayType, FileFileTypeChoice, FileValueTypeChoice } from './type';
+	import { inputClasses } from './common.js';
+	import type { FilePropsType, FileDisplayType, FileFileTypeChoice, FileValueTypeChoice } from './type.js';
 
 	let {
 		multiple = false as Tmultiple,

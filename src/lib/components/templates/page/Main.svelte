@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type Props = SvelteHTMLElements['main'] & {
@@ -13,7 +13,7 @@
 </script>
 
 <!-- position:relative; -->
-<main class="{classes} {`bg-surface-100/80`}" style="{internalStyles} {style} " {...attributes}>
+<main class="{classes} bg-surface-100/80" style="{internalStyles} {style} " {...attributes}>
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}

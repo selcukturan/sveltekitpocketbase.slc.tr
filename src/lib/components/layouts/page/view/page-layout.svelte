@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { SplitPane } from '#lib/components/base/split-pane/index.js';
-	import type { Length } from '#lib/components/base/split-pane/types';
-	import { PageSidebar, PageContainer } from '../';
+	import type { Length } from '#lib/components/base/split-pane/types.js';
+	import { PageSidebar, PageContainer } from '..';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
 
 	import type { PageLayoutPropsType } from '../types';

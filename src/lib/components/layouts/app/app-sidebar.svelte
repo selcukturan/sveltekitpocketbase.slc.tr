@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { page } from '$app/state';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	import type { PropsAppSidebarType } from './types';
