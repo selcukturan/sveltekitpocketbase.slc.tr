@@ -327,10 +327,10 @@
 <Toggler
 	bind:this={toggl}
 	--border="1px solid var(--color-surface-300)"
-	--background-color="var(--color-surface-50)"
+	--background-color="var(--color-surface-100)"
 	--box-shadow="0px 0px 16px -1px var(--color-surface-50)"
 	--min-height="100px"
-	--max-height="400px"
+	--max-height="320px"
 	--border-radius="6px"
 	class="{internalListboxClasses} {listboxClass}"
 	placement="bottom-start"

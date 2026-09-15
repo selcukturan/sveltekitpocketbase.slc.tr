@@ -122,28 +122,28 @@
 		box-shadow: var(--box-shadow, var(--default-box-shadow));
 
 		/* Animasyon başlangıç ve kapanış geçiş ayarları */
-		opacity: 0;
+		/* opacity: 0;
 		transform: translateY(2px);
 		transition:
 			opacity 0.15s ease-out,
 			transform 0.15s ease-out,
 			overlay 0.15s allow-discrete,
-			display 0.15s allow-discrete;
+			display 0.15s allow-discrete; */
 	}
 
 	/* Animasyon Bitiş Durumu (Açık) */
-	.popover:popover-open {
+	/* .popover:popover-open {
 		opacity: 1;
 		transform: scale(1);
-	}
+	} */
 
 	/* Animasyon Başlangıç Durumu (Açık) */
-	@starting-style {
+	/* @starting-style {
 		.popover:popover-open {
 			opacity: 0;
 			transform: translateY(2px);
 		}
-	}
+	} */
 
 	.popover.match-width {
 		width: min(anchor-size(width), 100%);
