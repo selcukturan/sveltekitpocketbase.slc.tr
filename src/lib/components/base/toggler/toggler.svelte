@@ -25,7 +25,7 @@
 				}
 			]
 		>;
-		children?: Snippet<[{ close: () => void }]>;
+		children?: Snippet<[{ close: () => void; triggerId: string }]>;
 	};
 
 	const uid = $props.id();
@@ -79,7 +79,7 @@
 		class:match-width={matchTriggerWidth}
 		{...rest}
 	>
-		{@render children?.({ close })}
+		{@render children?.({ close, triggerId: id })}
 	</div>
 </div>
 

@@ -3,6 +3,7 @@
 	import { Page, Head } from '#lib/components/templates/index.js';
 	import * as input from '#lib/components/ui/inputs/index.js';
 	import { inputClasses } from '#lib/components/ui/inputs/common.js';
+	import SelectPopover from '#lib/components/ui/inputs/SelectPopover.svelte';
 
 	let textInput = $state('initial value');
 	let textInputOnChangeValue = $state('');
@@ -33,6 +34,12 @@
 	let dateInputOnChangeBeforeValue = $state('');
 	let dateInputOnChangeValueCount = $state(0);
 	let dateInputIsInitial = $state(true);
+
+	let selectPopoverSingleValue: string = $state('s');
+	let selectPopoverSingleOnChangeValue: string | string[] = $state('');
+	let selectPopoverSingleOnChangeBeforeValue: string | string[] = $state('');
+	let selectPopoverSingleOnChangeValueCount = $state(0);
+	let selectPopoverSingleIsInitial = $state(true);
 
 	let selectSingleValue: string = $state('b');
 	let selectSingleOnChangeValue: string | string[] = $state('');
@@ -378,6 +385,88 @@
 								class="bg-surface-200 text-surface-700 hover:bg-surface-300 cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors"
 								onclick={() => {
 									numberInput = 0;
+								}}
+							>
+								Temizle
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr class="border-surface-200 my-8" />
+
+			<div class="flex flex-col gap-4">
+				<h4 class="text-lg font-semibold">
+					<span class="text-primary-400">SelectPopover.svelte</span>
+					<span class="text-secondary-600">[Single]</span>
+					Component Test
+				</h4>
+				<div class="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
+					<div class="flex flex-col gap-2">
+						<span class="text-surface-700 text-sm font-medium">Component Input</span>
+						<SelectPopover
+							deSelectText={`-- ${t('select_deselect')} --`}
+							options={selectOptions}
+							bind:value={selectPopoverSingleValue}
+							onValueChange={(data) => {
+								selectPopoverSingleOnChangeValue = data.value;
+								selectPopoverSingleOnChangeBeforeValue = data.beforeValue;
+								selectPopoverSingleIsInitial = data.initial;
+								selectPopoverSingleOnChangeValueCount += 1;
+							}}
+						/>
+					</div>
+
+					<div class="border-surface-200 bg-surface-50/50 space-y-3 rounded-xl border p-4 text-xs">
+						<h5 class="text-surface-700 text-[10px] font-bold tracking-wider uppercase">Bağlı State ve Detaylar</h5>
+
+						<div class="text-surface-600 grid grid-cols-1 gap-2">
+							<p>
+								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
+								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
+									>{JSON.stringify(selectPopoverSingleValue)}</code
+								>
+							</p>
+							<p>
+								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
+								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
+									>{JSON.stringify(selectPopoverSingleOnChangeBeforeValue)}</code
+								>
+							</p>
+							<p>
+								<span class="font-semibold">İlk Yükleme mi (initial):</span>
+								<span class="text-surface-800 font-bold">{selectPopoverSingleIsInitial}</span>
+							</p>
+							<p>
+								<span class="font-semibold">Değişim Sayısı (onChangeCount):</span>
+								<span class="text-surface-800 font-bold">{selectPopoverSingleOnChangeValueCount}</span>
+							</p>
+						</div>
+
+						<div class="flex flex-col gap-2 border-t pt-2">
+							<select bind:value={selectPopoverSingleValue} class="border-surface-300 rounded border p-2">
+								<option value="">{`-- ${t('select_deselect')} --`}</option>
+								{#each selectOptions as option, i (i)}
+									<option value={option.value}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
+
+						<div class="border-surface-200 flex gap-2 border-t pt-2">
+							<button
+								type="button"
+								class="bg-primary-50 text-primary-600 hover:bg-primary-100 cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors"
+								onclick={() => {
+									selectPopoverSingleValue = random_value('single_select');
+								}}
+							>
+								Rastgele Değer
+							</button>
+							<button
+								type="button"
+								class="bg-surface-200 text-surface-700 hover:bg-surface-300 cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors"
+								onclick={() => {
+									selectPopoverSingleValue = '';
 								}}
 							>
 								Temizle
