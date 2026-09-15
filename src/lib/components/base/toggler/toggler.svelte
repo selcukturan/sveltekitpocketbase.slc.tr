@@ -1,219 +1,236 @@
 <script lang="ts">
+	import type { SvelteHTMLElements } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import { on } from 'svelte/events';
-	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 
-	type TogglerProps = {
-		active?: boolean;
-		placement?: string;
+	type Placement = `${'top' | 'bottom'}-${'start' | 'center' | 'end'}` | `${'left' | 'right'}-${'start' | 'center' | 'end'}`;
 
-		minWidth?: string;
-		maxWidth?: string;
-		maxHeight?: string;
+	type Props = Omit<SvelteHTMLElements['div'], 'children'> & {
+		id?: string;
+		placement?: Placement;
 		matchTriggerWidth?: boolean;
-
-		class?: string;
-		contentClasses?: string;
-		trigger: Snippet<[{ active: boolean; toggle: () => void; close: () => void }]>; // trigger fonksiyonuna toggle ve close fonksiyonlarını içeren bir parametre veriyoruz
-		children: Snippet<[{ close: () => void }]>;
+		trigger?: Snippet<
+			[
+				{
+					active: boolean;
+					toggle: () => void;
+					open: () => void;
+					close: () => void;
+					attr: {
+						type: 'button';
+						id: string;
+						popovertarget: string;
+						style: string;
+					};
+				}
+			]
+		>;
+		children?: Snippet<[{ close: () => void }]>;
 	};
 
-	let {
-		active = $bindable(false),
-		placement = 'bottom-start',
-		minWidth = '100%', // Varsayılan: En az buton kadar geniş
-		maxWidth = '300px',
-		maxHeight = '400px',
-		matchTriggerWidth = false, // Buton genişliğiyle birebir aynı olsun mu?
-		class: className = '',
-		contentClasses = '',
-		trigger,
-		children,
-		...rest
-	}: TogglerProps = $props();
+	const uid = $props.id();
 
-	let container: HTMLDivElement | null = $state(null);
-	let triggerWidth = $state(0); // Tetikleyicinin genişliğini takip edeceğiz
+	let { id = uid, placement = 'bottom-start', matchTriggerWidth = false, class: classes = '', trigger, children, ...rest }: Props = $props();
 
-	const toggle = () => (active = !active);
-	const close = () => (active = false);
+	let active = $state(false);
+	let popoverEl = $state<HTMLDivElement | null>(null);
+	const popovertarget = $derived(`${id}-popover`);
+	const anchorname = $derived(`--${id}-anchor`);
+	const attr = $derived({
+		type: 'button' as const,
+		style: 'anchor-name:var(--anchor)',
+		id,
+		popovertarget,
+		'aria-expanded': active,
+		'aria-haspopup': 'true' as const
+	});
 
-	// Dinamik Stil Hesaplama
-	let contentStyle = $derived.by(() => {
-		let styles = [];
-
-		// Genişlik ayarları
-		if (matchTriggerWidth) {
-			styles.push(`width: ${triggerWidth}px`);
-		} else {
-			styles.push(`min-width: ${minWidth}`);
-			styles.push(`max-width: ${maxWidth}`);
+	export const toggle = () => popoverEl?.togglePopover();
+	export const open = () => !active && popoverEl?.showPopover();
+	export const close = () => active && popoverEl?.hidePopover();
+	export const states = {
+		get active() {
+			return active;
 		}
+	};
 
-		// Yükseklik ayarları
-		styles.push(`max-height: ${maxHeight}`);
+	const popoverEvents = (node: HTMLElement) => {
+		const destroyToggle = on(node, 'toggle', (e: ToggleEvent) => {
+			active = e.newState === 'open';
+		});
 
-		return styles.join('; ');
-	});
-
-	// Animasyon parametrelerini yöne göre hesapla
-	// Menü nereden açılıyorsa, o yönden hafifçe "süzülerek" gelmesini sağlar
-	let transitionParams = $derived.by(() => {
-		const base = { duration: 150, easing: cubicOut, start: 0.95 };
-		if (placement.startsWith('bottom')) return { ...base, y: -8 };
-		if (placement.startsWith('top')) return { ...base, y: 8 };
-		if (placement.startsWith('left')) return { ...base, x: 8 };
-		if (placement.startsWith('right')) return { ...base, x: -8 };
-		return base;
-	});
-
-	// outside click ve esc key event
-	const out = () => on(window, 'click', (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close());
-	const esc = () => on(window, 'keydown', (e: KeyboardEvent) => e.key === 'Escape' && close());
+		return () => {
+			destroyToggle();
+		};
+	};
 </script>
 
-<div bind:this={container} bind:clientWidth={triggerWidth} class="toggler {className}" {@attach out} {@attach esc} {...rest}>
-	<div class="trigger-wrapper">
-		{@render trigger?.({ active, toggle, close })}
-	</div>
+<div class="container" style:--anchor={anchorname}>
+	<!-- Trigger -->
+	{@render trigger?.({ active, toggle, open, close, attr })}
 
-	{#if active}
-		<!-- 
-			transition:fly ile hem opaklık hem hareket ekliyoruz.
-			Aynı zamanda CSS ile transform-origin belirleyerek 
-			büyüme efektinin tetikleyiciden dışarı doğru olmasını sağlıyoruz.
-			{@attach myAttachment}
-			use:myaction
-		-->
-		<div transition:fly={transitionParams} class="toggler-content {placement} {contentClasses}" style={contentStyle}>
-			<div class="scroll-container">
-				{@render children?.({ close })}
-			</div>
-		</div>
-	{/if}
+	<!-- Popover -->
+	<div
+		bind:this={popoverEl}
+		id={popovertarget}
+		popover="auto"
+		{@attach popoverEvents}
+		class="popover {placement} {classes}"
+		class:match-width={matchTriggerWidth}
+		{...rest}
+	>
+		{@render children?.({ close })}
+	</div>
 </div>
 
 <style>
-	.toggler {
-		position: relative;
+	.container {
+		--default-background-color: var(--slc-system-bg-surface);
+		--default-box-shadow: 0px 0px 16px -1px var(--slc-system-color-shadow);
+		--default-border: solid 1px var(--slc-system-border);
+		--default-border-radius: 10px;
 		display: inline-block;
 	}
 
-	.trigger-wrapper {
-		display: inline-block;
+	.popover {
+		position-anchor: var(--anchor);
+
+		/* reset */
+		inset: auto;
+		position: fixed;
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		background: transparent;
+		border: none;
+		outline: none;
+
+		/* size */
+		min-width: min(var(--min-width, anchor-size(width)), 100%);
+		width: max-content;
+		max-width: min(calc(100% - var(--gutter, 5px) * 2), var(--max-width, 100vw));
+
+		min-height: var(--min-height, auto);
+		height: max-content;
+		max-height: min(calc(100% - var(--gutter, 5px) * 2), var(--max-height, 100dvh));
+
+		overflow: auto;
+
+		border: var(--border, var(--default-border));
+		border-radius: var(--border-radius, var(--default-border-radius));
+		background-color: var(--background-color, var(--default-background-color));
+		box-shadow: var(--box-shadow, var(--default-box-shadow));
+
+		/* Animasyon başlangıç ve kapanış geçiş ayarları */
+		opacity: 0;
+		transform: translateY(2px);
+		transition:
+			opacity 0.15s ease-out,
+			transform 0.15s ease-out,
+			overlay 0.15s allow-discrete,
+			display 0.15s allow-discrete;
 	}
 
-	.toggler-content {
-		/* filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)); */
-		position: absolute;
-		/* z-index: 100; */
-		display: flex;
-		flex-direction: column;
-		overflow: hidden; /* Köşelerin taşmasını engeller */
+	/* Animasyon Bitiş Durumu (Açık) */
+	.popover:popover-open {
+		opacity: 1;
+		transform: scale(1);
 	}
 
-	.scroll-container {
-		overflow-y: auto; /* İçerik max-height'ı aşarsa scroll çıkar */
-		overflow-x: hidden;
-		width: 100%;
-		height: 100%;
+	/* Animasyon Başlangıç Durumu (Açık) */
+	@starting-style {
+		.popover:popover-open {
+			opacity: 0;
+			transform: translateY(2px);
+		}
 	}
 
-	/* --- Transform Origin Ayarları --- */
-	/* Bu ayar, animasyonun (scale) hangi noktadan başlayacağını belirler */
+	.popover.match-width {
+		width: min(anchor-size(width), 100%);
+		min-width: 0;
+	}
+
+	/* --- CSS Anchor Positioning --- */
+
+	/* Alt/üst yönler */
 	.bottom-start,
 	.bottom-center,
-	.bottom-end {
-		transform-origin: top;
-	}
+	.bottom-end,
 	.top-start,
 	.top-center,
 	.top-end {
-		transform-origin: bottom;
+		position-try-fallbacks:
+			flip-block,
+			flip-block flip-inline;
+		/* position-try-order: most-block-size; */
 	}
+
+	/* Sol/sağ yönler — bunlarda flip-inline gerekir */
 	.left-start,
 	.left-center,
-	.left-end {
-		transform-origin: right;
-	}
+	.left-end,
 	.right-start,
 	.right-center,
 	.right-end {
-		transform-origin: left;
+		position-try-fallbacks:
+			flip-inline,
+			flip-inline flip-block;
+		/* position-try-order: most-inline-size; */
 	}
 
-	/* --- YÖNLENDİRME MANTIĞI (CSS) --- */
-
-	/* Alt Yönler */
+	/* Alt yönler: anchor'ın altında, üstünde boşluk */
 	.bottom-start {
-		top: 100%;
-		left: 0;
-		margin-top: 5px;
+		position-area: block-end span-inline-end;
+		margin-block: var(--gutter, 5px);
 	}
 	.bottom-center {
-		top: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-top: 5px;
+		position-area: block-end span-all;
+		margin-block: var(--gutter, 5px);
 	}
 	.bottom-end {
-		top: 100%;
-		right: 0;
-		margin-top: 5px;
+		position-area: block-end span-inline-start;
+		margin-block: var(--gutter, 5px);
 	}
 
-	/* Üst Yönler */
+	/* Üst yönler: anchor'ın üstünde, altında boşluk */
 	.top-start {
-		bottom: 100%;
-		left: 0;
-		margin-bottom: 5px;
+		position-area: block-start span-inline-end;
+		margin-block: var(--gutter, 5px);
 	}
 	.top-center {
-		bottom: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-bottom: 5px;
+		position-area: block-start span-all;
+		margin-block: var(--gutter, 5px);
 	}
 	.top-end {
-		bottom: 100%;
-		right: 0;
-		margin-bottom: 5px;
+		position-area: block-start span-inline-start;
+		margin-block: var(--gutter, 5px);
 	}
 
-	/* Sol Yönler */
+	/* Sol yönler: anchor'ın solunda, sağında boşluk */
 	.left-start {
-		right: 100%;
-		top: 0;
-		margin-right: 5px;
+		position-area: inline-start span-block-end;
+		margin-inline: var(--gutter, 5px);
 	}
 	.left-center {
-		right: 100%;
-		top: 50%;
-		transform: translateY(-50%);
-		margin-right: 5px;
+		position-area: inline-start span-all;
+		margin-inline: var(--gutter, 5px);
 	}
 	.left-end {
-		right: 100%;
-		bottom: 0;
-		margin-right: 5px;
+		position-area: inline-start span-block-start;
+		margin-inline: var(--gutter, 5px);
 	}
 
-	/* Sağ Yönler */
+	/* Sağ yönler: anchor'ın sağında, solunda boşluk */
 	.right-start {
-		left: 100%;
-		top: 0;
-		margin-left: 5px;
+		position-area: inline-end span-block-end;
+		margin-inline: var(--gutter, 5px);
 	}
 	.right-center {
-		left: 100%;
-		top: 50%;
-		transform: translateY(-50%);
-		margin-left: 5px;
+		position-area: inline-end span-all;
+		margin-inline: var(--gutter, 5px);
 	}
 	.right-end {
-		left: 100%;
-		bottom: 0;
-		margin-left: 5px;
+		position-area: inline-end span-block-start;
+		margin-inline: var(--gutter, 5px);
 	}
 </style>

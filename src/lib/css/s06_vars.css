@@ -1,3 +1,12 @@
 :root {
 	--slc-test-color: #1a1a24;
+
+	/* System Colors */
+	--slc-system-color: color-mix(in srgb, CanvasText 100%, transparent);
+	--slc-system-border: color-mix(in srgb, GrayText 30%, transparent);
+	--slc-system-bg-surface: color-mix(in srgb, Canvas 95%, GrayText 5%);
+	--slc-system-bg-selected: color-mix(in srgb, GrayText 60%, Canvas 40%);
+	--slc-system-bg-hover: color-mix(in srgb, Highlight 40%, transparent);
+	--slc-system-color-muted: color-mix(in srgb, CanvasText 55%, Canvas 45%);
+	--slc-system-color-shadow: color-mix(in srgb, GrayText 15%, transparent);
 }

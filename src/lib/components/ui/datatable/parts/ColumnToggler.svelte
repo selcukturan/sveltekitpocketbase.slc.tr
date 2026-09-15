@@ -6,9 +6,14 @@
 	const context = getTableContext<TData>();
 </script>
 
-<Toggler placement="top-end" minWidth="200px">
-	{#snippet trigger({ active, toggle })}
-		<button type="button" class="slc-btn-toggler" class:active onclick={toggle} aria-label="Kolon Görünürlüğünü Değiştir">
+<Toggler
+	placement="top-end"
+	--border="1px solid var(--color-surface-300)"
+	--background-color="var(--color-surface-50)"
+	--box-shadow="0px 0px 16px -1px var(--color-surface-100)"
+>
+	{#snippet trigger({ active, toggle, attr })}
+		<button {...attr} class="slc-btn-toggler" class:active aria-label="Kolon Görünürlüğünü Değiştir">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="16"
@@ -26,14 +31,16 @@
 		</button>
 	{/snippet}
 
-	<div class="slc-column-toggler-menu">
-		{#each context.columns as col, originalIndex (originalIndex)}
-			<label class="slc-column-toggler-item">
-				<input type="checkbox" checked={col.hidden !== true} onchange={() => context.toggleColumnVisibility(originalIndex)} />
-				<span>{col.label || String(col.field)}</span>
-			</label>
-		{/each}
-	</div>
+	{#snippet children({ close })}
+		<div class="slc-column-toggler-menu">
+			{#each context.columns as col, originalIndex (originalIndex)}
+				<label class="slc-column-toggler-item">
+					<input type="checkbox" checked={col.hidden !== true} onchange={() => context.toggleColumnVisibility(originalIndex)} />
+					<span>{col.label || String(col.field)}</span>
+				</label>
+			{/each}
+		</div>
+	{/snippet}
 </Toggler>
 
 <style>

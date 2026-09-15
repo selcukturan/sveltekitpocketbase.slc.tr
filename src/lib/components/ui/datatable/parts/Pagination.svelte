@@ -67,10 +67,22 @@
 	}
 </script>
 
-<Toggler placement="top-start" contentClasses="border border-red-500 bg-warning-100 shadow-lg z-50">
-	{#snippet trigger({ toggle })}
-		<button onclick={toggle}>{perPage}</button>
+<Toggler
+	placement="top-start"
+	--border="1px solid var(--color-surface-300)"
+	--background-color="var(--color-surface-50)"
+	--box-shadow="0px 0px 16px -1px var(--color-surface-100)"
+	--min-height="200px"
+	--max-height="400px"
+	--min-width="320px"
+	--max-width="600px"
+>
+	{#snippet trigger({ active, toggle, attr })}
+		<button {...attr} class="btn" class:active>
+			Menü ({active ? 'Açık' : 'Kapalı'})
+		</button>
 	{/snippet}
+
 	{#snippet children({ close })}
 		<div class="menu">
 			<button
