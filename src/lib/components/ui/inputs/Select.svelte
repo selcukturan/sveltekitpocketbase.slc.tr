@@ -1,27 +1,24 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
-	import { tick, untrack } from 'svelte';
-	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from './common.js';
 	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type.js';
+	import { Toggler } from '#lib/components/base/toggler/index.js';
 
 	let {
 		multiple = false as Tmultiple,
-		placement = 'bottom',
+		placement = 'bottom-start',
 		value = $bindable((multiple ? [] : '') as SelectValueTypeChoice<Tmultiple>),
 		required = false,
+		matchTriggerWidth = true,
 		options,
-		id,
-		name,
-		class: classes = '',
 		triggerClass = '',
 		listboxClass = '',
 		optionClass = '',
+		escClose = true,
 		disabled = false,
 		readonly = false,
-		escClose = true,
 		deSelectText = '-- Seçiniz --',
 		onValueChange
 	}: SelectPropsType<Tmultiple> = $props();
@@ -31,19 +28,17 @@
 	const componentId = $props.id();
 
 	const baseId = `slc-select-${componentId}`;
-	const triggerId = `${baseId}-trigger`;
 	const listboxId = `${baseId}-listbox`;
 	const optionId = `${baseId}-option`;
 
-	let container: HTMLDivElement | null = null;
-	let trigger: HTMLButtonElement | null = null;
+	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
+	let triggerButtonElement: HTMLButtonElement | null = null;
 	let listbox: HTMLUListElement | null = $state(null);
 	let optionsLi: HTMLLIElement[] = $state([]);
-	let isOpenPopup = $state(false);
+	let isOpenPopup = $derived(toggl?.states.active === true ? true : false);
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
-
-	const labelFor = $derived(`slc_${componentId}${name || ''}${id || ''}_select`);
+	let canInteract = $derived(!disabled && !readonly);
 	// ########################### END Variables ##################################################################################################################
 
 	// ########################### BEGIN Derived ##################################################################################################################
@@ -118,33 +113,25 @@
 	// ########################### END Derived ##################################################################################################################
 
 	// ########################### BEGIN Open/Close ##################################################################################################################
-	const open = async () => {
-		if (disabled || readonly) return;
+	const watchIsOpenPopup = () => {
+		void isOpenPopup;
+		return untrack(() => {
+			if (isOpenPopup) {
+				// onOpenEvent Simulation
 
-		// Açıldığında klavye navigasyonunu seçili olanla senkronize edilir.
-		activeIndex = initialFocusIndex;
+				activeIndex = initialFocusIndex; // Açıldığında klavye navigasyonunu seçili olanla senkronize edilir.
 
-		isOpenPopup = true;
+				listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
 
-		await tick(); // Bekle, DOM güncelleniyor.
-
-		// clickListboxOutside.start();
-
-		listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
-
-		optionsLi[activeIndex]?.scrollIntoView({
-			behavior: 'auto', // 'smooth' yerine 'auto' kullanıldı, çünkü 'smooth' bazen performans sorunlarına yol açabilir.
-			block: 'nearest'
+				optionsLi[activeIndex]?.scrollIntoView({
+					behavior: 'auto', // 'smooth' yerine 'auto' kullanıldı, çünkü 'smooth' bazen performans sorunlarına yol açabilir.
+					block: 'nearest'
+				});
+			} else {
+				// onCloseEvent Simulation
+			}
 		});
 	};
-
-	const close = async () => {
-		isOpenPopup = false;
-		// await tick(); // Bekle, DOM güncelleniyor.
-		// clickListboxOutside.stop();
-	};
-
-	const toggle = () => (isOpenPopup ? close() : open());
 	// ########################### END Open/Close ##################################################################################################################
 
 	// ########################### BEGIN Value Logic ##################################################################################################################
@@ -153,6 +140,8 @@
 	};
 
 	function selectOption(index: number) {
+		if (!canInteract) return;
+
 		activeIndex = index;
 
 		const newSelectedValue = displayOptions[activeIndex].value;
@@ -173,8 +162,8 @@
 			}
 		} else {
 			value = newSelectedValue as SelectValueTypeChoice<Tmultiple>;
-			close();
-			trigger?.focus();
+			toggl?.close();
+			triggerButtonElement?.focus();
 		}
 	}
 
@@ -195,30 +184,31 @@
 	// ########################### END Value Logic ##################################################################################################################
 
 	// ########################### BEGIN Events ##################################################################################################################
-	const outsideclick = () => {
-		return on(window, 'click', (e: MouseEvent) => container && !container.contains(e.target as HTMLElement) && close());
-	};
-
 	const triggerEvents = (node: HTMLElement) => {
-		const destroyClick = on(node, 'click', (e: MouseEvent) => {
-			e.preventDefault();
-			toggle();
-		});
-
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
+			if (!canInteract) return;
+
 			switch (e.code) {
 				case 'ArrowDown':
 				case 'ArrowUp': {
 					e.preventDefault();
-					toggle();
+					toggl?.toggle();
 					break;
 				}
 			}
 		});
 
+		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			if (!canInteract) {
+				e.preventDefault();
+				e.stopPropagation();
+				return;
+			}
+		});
+
 		return () => {
-			destroyClick();
 			destroyKeydown();
+			destroyClick();
 		};
 	};
 
@@ -226,6 +216,8 @@
 		let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 		let searchString = '';
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
+			if (!canInteract) return;
+
 			// 1. Arama (Typeahead) Mantığı
 			// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
 			if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -297,16 +289,16 @@
 
 				case 'Tab': {
 					e.preventDefault();
-					close();
-					trigger?.focus();
+					toggl?.close();
+					triggerButtonElement?.focus();
 					break;
 				}
 
 				case 'Escape': {
 					if (!escClose) return;
 					e.preventDefault();
-					close();
-					trigger?.focus();
+					toggl?.close();
+					triggerButtonElement?.focus();
 					break;
 				}
 
@@ -335,56 +327,68 @@
 	// ########################### END Events ##################################################################################################################
 
 	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
-	const internalContainerClasses = 'relative block max-w-full min-w-52 select-none';
 	const internalTriggerClasses = $derived(
-		`slc-input inline-flex w-full cursor-pointer touch-manipulation items-center justify-center text-start select-none disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants.default : inputClasses.variants.error} ${inputClasses.sizes.md}`
+		`slc-input inline-flex w-full touch-manipulation items-center justify-center text-start select-none ${canInteract ? 'cursor-pointer' : 'cursor-default'} disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants.default : inputClasses.variants.error} ${inputClasses.sizes.md}`
 	);
-	const internalListboxClasses =
-		'slc-input bg-surface-100 border border-surface-300 shadow-lg pointer-events-auto absolute isolate z-1 max-h-80 w-full min-w-52 scroll-py-2 list-none overflow-y-auto p-1.5 select-none rounded-md space-y-1';
+	const internalListboxClasses = 'slc-input pointer-events-auto scroll-py-2 p-1.5! select-none';
 	const internalOptionClasses = 'hover:bg-surface-200 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
-
-	// Animasyon parametrelerini yöne göre hesapla
-	// Menü nereden açılıyorsa, o yönden hafifçe "süzülerek" gelmesini sağlar
-	let transitionParams = $derived.by(() => {
-		const base = { duration: 150, easing: cubicOut, start: 0.95 };
-		if (placement === 'bottom') return { ...base, y: -5 };
-		if (placement === 'top') return { ...base, y: 5 };
-		return base;
-	});
 </script>
 
-<div bind:this={container} class="{internalContainerClasses} {classes}" {@attach outsideclick} {@attach watchValueChange}>
-	<button
-		bind:this={trigger}
-		id={triggerId}
-		role="combobox"
-		type="button"
-		aria-controls={listboxId}
-		aria-expanded={isOpenPopup}
-		aria-haspopup="listbox"
-		aria-labelledby={triggerId}
-		aria-activedescendant={activeOptionId}
-		aria-invalid={!isValid}
-		class="{internalTriggerClasses} {triggerClass}"
-		{@attach triggerEvents}
-		tabindex={disabled || readonly || displayOptions.length === 0 ? -1 : 0}
-		disabled={disabled || displayOptions.length === 0}
-	>
-		<span class="flex-1 {textEllipsisClasses}">{selectedLabels}</span>
-		<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-			<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
-		</svg>
-	</button>
-	{#if isOpenPopup && displayOptions.length > 0 && !disabled && !readonly}
+<Toggler
+	bind:this={toggl}
+	{placement}
+	{matchTriggerWidth}
+	--border="1px solid var(--color-surface-300)"
+	--background-color="var(--color-surface-100)"
+	--box-shadow="0px 0px 16px -1px var(--color-surface-50)"
+	--min-height="100px"
+	--max-height="320px"
+	--border-radius="6px"
+	class="{internalListboxClasses} {listboxClass}"
+	escClose={false}
+>
+	{#snippet trigger({ active, attr })}
+		<button
+			bind:this={triggerButtonElement}
+			{@attach watchValueChange}
+			{@attach watchIsOpenPopup}
+			id={attr.id}
+			type={attr.type}
+			style={attr.style}
+			popovertarget={readonly ? undefined : attr.popovertarget}
+			class:active
+			role="combobox"
+			aria-controls={listboxId}
+			aria-expanded={isOpenPopup}
+			aria-haspopup="listbox"
+			aria-labelledby={attr.id}
+			aria-activedescendant={activeOptionId}
+			aria-invalid={!isValid}
+			aria-readonly={readonly}
+			aria-disabled={disabled || displayOptions.length === 0}
+			class="{internalTriggerClasses} {triggerClass}"
+			{@attach triggerEvents}
+			tabindex={disabled || displayOptions.length === 0 ? -1 : 0}
+			disabled={disabled || displayOptions.length === 0}
+		>
+			<span class="flex-1 {textEllipsisClasses}">{selectedLabels}</span>
+			<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+				<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
+			</svg>
+		</button>
+	{/snippet}
+
+	{#snippet children({ triggerId })}
 		<ul
 			bind:this={listbox}
 			id={listboxId}
 			role="listbox"
 			aria-labelledby={triggerId}
 			tabindex={-1}
+			style:outline="none"
+			style:list-style-type="none"
+			class="slc-input space-y-1"
 			{@attach listboxEvents}
-			class="{internalListboxClasses} {listboxClass} {placement}"
-			transition:fly={transitionParams}
 		>
 			{#each displayOptions as option, i (i)}
 				{@const isSelected = selectedIndexes.includes(i)}
@@ -413,21 +417,5 @@
 				</li>
 			{/each}
 		</ul>
-	{/if}
-</div>
-
-<style>
-	/* --- Transform Origin & Konumlandırma Ayarları --- */
-	.bottom {
-		transform-origin: top;
-		top: 100%;
-		left: 0;
-		margin-top: 5px;
-	}
-	.top {
-		transform-origin: bottom;
-		bottom: 100%;
-		left: 0;
-		margin-bottom: 5px;
-	}
-</style>
+	{/snippet}
+</Toggler>

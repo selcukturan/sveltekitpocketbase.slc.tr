@@ -6,9 +6,9 @@
 	type Placement = `${'top' | 'bottom'}-${'start' | 'center' | 'end'}` | `${'left' | 'right'}-${'start' | 'center' | 'end'}`;
 
 	type Props = Omit<SvelteHTMLElements['div'], 'children'> & {
-		id?: string;
 		placement?: Placement;
 		matchTriggerWidth?: boolean;
+		escClose?: boolean;
 		trigger?: Snippet<
 			[
 				{
@@ -28,9 +28,9 @@
 		children?: Snippet<[{ close: () => void; triggerId: string }]>;
 	};
 
-	const uid = $props.id();
+	let { placement = 'bottom-start', matchTriggerWidth = false, escClose = true, class: classes = '', trigger, children, ...rest }: Props = $props();
 
-	let { id = uid, placement = 'bottom-start', matchTriggerWidth = false, class: classes = '', trigger, children, ...rest }: Props = $props();
+	const id = $props.id();
 
 	let active = $state(false);
 	let popoverEl = $state<HTMLDivElement | null>(null);
@@ -55,11 +55,19 @@
 	};
 
 	const popoverEvents = (node: HTMLElement) => {
+		// ESC tuşunu yakalayıp tarayıcı davranışını engelliyoruz
+		const destroyKeydown = on(document, 'keydown', (e: KeyboardEvent) => {
+			if (!escClose && active && e.key === 'Escape') {
+				e.preventDefault(); // Tarayıcının otomatik kapatma tetiklemesini engeller.
+			}
+		});
+
 		const destroyToggle = on(node, 'toggle', (e: ToggleEvent) => {
 			active = e.newState === 'open';
 		});
 
 		return () => {
+			destroyKeydown();
 			destroyToggle();
 		};
 	};

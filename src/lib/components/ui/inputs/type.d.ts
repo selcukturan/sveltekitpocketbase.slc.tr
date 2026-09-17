@@ -29,22 +29,22 @@ export type TextareaProps = Omit<SvelteHTMLElements['textarea'], 'value' | 'size
 // ################# END Textarea.svelte Props ###############################
 
 // ################# BEGIN Select.svelte Props ###############################
+type Placement = `${'top' | 'bottom'}-${'start' | 'center' | 'end'}` | `${'left' | 'right'}-${'start' | 'center' | 'end'}`;
+
 type SelectBasePropsType = {
-	placement?: 'top' | 'bottom';
+	placement?: Placement;
 	required?: boolean;
+	matchTriggerWidth?: boolean;
 	options: {
 		value: string;
 		label: string;
 	}[];
-	id?: string;
-	name?: string;
-	class?: string;
 	triggerClass?: string;
 	listboxClass?: string;
 	optionClass?: string;
+	escClose?: boolean;
 	disabled?: boolean;
 	readonly?: boolean;
-	escClose?: boolean;
 	deSelectText?: string;
 };
 
