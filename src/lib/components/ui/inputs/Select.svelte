@@ -12,6 +12,8 @@
 		value = $bindable((multiple ? [] : '') as SelectValueTypeChoice<Tmultiple>),
 		required = false,
 		matchTriggerWidth = true,
+		status = 'default',
+		size = 'md',
 		options,
 		triggerClass = '',
 		listboxClass = '',
@@ -19,6 +21,7 @@
 		escClose = true,
 		disabled = false,
 		readonly = false,
+		inform = false,
 		deSelectText = '-- Seçiniz --',
 		onValueChange
 	}: SelectPropsType<Tmultiple> = $props();
@@ -40,6 +43,29 @@
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
 	let canInteract = $derived(!disabled && !readonly);
 	// ########################### END Variables ##################################################################################################################
+
+	// ########################### BEGIN Export ##############################
+	const toggler_id = $derived(toggl?.data.id || 'no_id');
+
+	export const data = {
+		get toggler_id() {
+			return toggler_id;
+		}
+	};
+
+	export const toggle = () => {
+		if (!canInteract) return;
+		toggl?.toggle();
+	};
+	export const open = () => {
+		if (!canInteract) return;
+		toggl?.open();
+	};
+	export const close = () => {
+		if (!canInteract) return;
+		toggl?.close();
+	};
+	// ########################### END Export ##############################
 
 	// ########################### BEGIN Derived ##################################################################################################################
 	let displayOptions = $derived.by(() => {
@@ -89,7 +115,7 @@
 		return isOpenPopup ? `${optionId}-${activeIndex}` : undefined;
 	});
 
-	let initialFocusIndex = $derived.by(() => {
+	let focusIndex = $derived.by(() => {
 		const firstIndex = selectedIndexes.at(0);
 
 		// 1. Önce en özel durumu kontrol et: "-- Seçiniz --" mi seçili?
@@ -116,12 +142,12 @@
 	const watchIsOpenPopup = () => {
 		void isOpenPopup;
 		return untrack(() => {
+			activeIndex = focusIndex; // Açıldığında ve kapandığında klavye navigasyonu seçili olanla senkronize edilir.
 			if (isOpenPopup) {
 				// onOpenEvent Simulation
 
-				activeIndex = initialFocusIndex; // Açıldığında klavye navigasyonunu seçili olanla senkronize edilir.
-
-				listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
+				// listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
+				triggerButtonElement?.focus();
 
 				optionsLi[activeIndex]?.scrollIntoView({
 					behavior: 'auto', // 'smooth' yerine 'auto' kullanıldı, çünkü 'smooth' bazen performans sorunlarına yol açabilir.
@@ -142,13 +168,11 @@
 	function selectOption(index: number) {
 		if (!canInteract) return;
 
-		activeIndex = index;
-
-		const newSelectedValue = displayOptions[activeIndex].value;
+		const newSelectedValue = displayOptions[index].value;
 
 		if (multiple && Array.isArray(value)) {
-			listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
-			optionsLi[activeIndex]?.scrollIntoView({
+			// listbox?.focus({ preventScroll: true }); // focus scroll yapmasın, scroll işini scrollIntoView halleder.
+			optionsLi[index]?.scrollIntoView({
 				behavior: 'auto',
 				block: 'nearest'
 			});
@@ -185,34 +209,6 @@
 
 	// ########################### BEGIN Events ##################################################################################################################
 	const triggerEvents = (node: HTMLElement) => {
-		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
-			if (!canInteract) return;
-
-			switch (e.code) {
-				case 'ArrowDown':
-				case 'ArrowUp': {
-					e.preventDefault();
-					toggl?.toggle();
-					break;
-				}
-			}
-		});
-
-		const destroyClick = on(node, 'click', (e: MouseEvent) => {
-			if (!canInteract) {
-				e.preventDefault();
-				e.stopPropagation();
-				return;
-			}
-		});
-
-		return () => {
-			destroyKeydown();
-			destroyClick();
-		};
-	};
-
-	const listboxEvents = (node: HTMLElement) => {
 		let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 		let searchString = '';
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
@@ -220,7 +216,7 @@
 
 			// 1. Arama (Typeahead) Mantığı
 			// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
-			if (e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+			if (isOpenPopup && e.key !== ' ' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
 				e.preventDefault();
 
 				// Önceki zamanlayıcıyı temizle
@@ -261,9 +257,17 @@
 					let nextIndex = activeIndex;
 
 					if (e.code === 'ArrowUp') {
-						nextIndex = (activeIndex - 1 + displayOptions.length) % displayOptions.length;
+						if (isOpenPopup) {
+							nextIndex = (activeIndex - 1 + displayOptions.length) % displayOptions.length;
+						} else {
+							toggl?.open();
+						}
 					} else if (e.code === 'ArrowDown') {
-						nextIndex = (activeIndex + 1) % displayOptions.length;
+						if (isOpenPopup) {
+							nextIndex = (activeIndex + 1) % displayOptions.length;
+						} else {
+							toggl?.open();
+						}
 					} else if (e.code === 'Home') {
 						nextIndex = 0;
 					} else if (e.code === 'End') {
@@ -283,14 +287,21 @@
 				case 'Enter':
 				case 'Space': {
 					e.preventDefault();
-					selectOption(activeIndex);
+					if (isOpenPopup) {
+						selectOption(activeIndex);
+					} else {
+						toggl?.open();
+					}
+
 					break;
 				}
 
 				case 'Tab': {
-					e.preventDefault();
-					toggl?.close();
-					triggerButtonElement?.focus();
+					if (isOpenPopup) {
+						e.preventDefault();
+						toggl?.close();
+						triggerButtonElement?.focus();
+					}
 					break;
 				}
 
@@ -307,8 +318,38 @@
 					return;
 			}
 		});
+
+		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			if (!canInteract) {
+				e.preventDefault();
+				e.stopPropagation();
+				return;
+			}
+		});
+
+		/* const popoverEl = toggl?.el?.popoverEl;
+		let destroyBlur: (() => void) | null = null;
+		let destroyPopoverBlur: (() => void) | null = null;
+
+		if (popoverEl) {
+			destroyBlur = on(node, 'blur', (e: FocusEvent) => {
+				if (!e.relatedTarget || !popoverEl.contains(e.relatedTarget as Node)) {
+					toggl?.close();
+				}
+			});
+
+			destroyPopoverBlur = on(popoverEl, 'blur', (e: FocusEvent) => {
+				if (!e.relatedTarget || !popoverEl.contains(e.relatedTarget as Node)) {
+					toggl?.close();
+				}
+			});
+		} */
+
 		return () => {
 			destroyKeydown();
+			/* if (destroyBlur) destroyBlur();
+			if (destroyPopoverBlur) destroyPopoverBlur(); */
+			destroyClick();
 		};
 	};
 
@@ -328,7 +369,8 @@
 
 	const textEllipsisClasses = 'overflow-hidden text-ellipsis whitespace-nowrap';
 	const internalTriggerClasses = $derived(
-		`slc-input inline-flex w-full touch-manipulation items-center justify-center text-start select-none ${canInteract ? 'cursor-pointer' : 'cursor-default'} disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants.default : inputClasses.variants.error} ${inputClasses.sizes.md}`
+		`slc-input inline-flex w-full touch-manipulation items-center justify-center text-start select-none ${canInteract ? 'cursor-pointer' : 'cursor-default'} 
+		disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants[status] : inputClasses.variants.error} ${inputClasses.sizes[size]}`
 	);
 	const internalListboxClasses = 'slc-input pointer-events-auto scroll-py-2 p-1.5! select-none';
 	const internalOptionClasses = 'hover:bg-surface-200 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
@@ -338,9 +380,10 @@
 	bind:this={toggl}
 	{placement}
 	{matchTriggerWidth}
-	--border="1px solid var(--color-surface-300)"
+	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-300)'} "
 	--background-color="var(--color-surface-100)"
-	--box-shadow="0px 0px 16px -1px var(--color-surface-50)"
+	--box-shadow="0px 8px 5px -5px var(--color-surface-50)"
+	--gutter={inform === true ? '-3px' : '5px'}
 	--min-height="100px"
 	--max-height="320px"
 	--border-radius="6px"
@@ -372,9 +415,31 @@
 			disabled={disabled || displayOptions.length === 0}
 		>
 			<span class="flex-1 {textEllipsisClasses}">{selectedLabels}</span>
-			<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-				<path d="M840.4 300H183.6c-19.7 0-30.7 20.8-18.5 35l328.4 380.8c9.4 10.9 27.5 10.9 37 0L858.9 335c12.2-14.2 1.2-35-18.5-35z"></path>
-			</svg>
+			{#if isOpenPopup}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg
+				>
+			{:else}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+				>
+			{/if}
 		</button>
 	{/snippet}
 
@@ -384,11 +449,10 @@
 			id={listboxId}
 			role="listbox"
 			aria-labelledby={triggerId}
-			tabindex={-1}
+			// tabindex={-1}
 			style:outline="none"
 			style:list-style-type="none"
 			class="slc-input space-y-1"
-			{@attach listboxEvents}
 		>
 			{#each displayOptions as option, i (i)}
 				{@const isSelected = selectedIndexes.includes(i)}
@@ -397,7 +461,7 @@
 					bind:this={optionsLi[i]}
 					id="{optionId}-{i}"
 					role="option"
-					tabindex={-1}
+					// tabindex={-1}
 					aria-selected={isSelected}
 					class:bg-secondary-100={isSelected}
 					class:outline-2={isActive}

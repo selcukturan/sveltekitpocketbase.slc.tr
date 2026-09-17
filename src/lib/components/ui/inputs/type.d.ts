@@ -8,7 +8,7 @@ export type TextValueChangeArgs = { value: string; beforeValue: string; initial:
 export type TextProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
 	type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url';
 	value?: string;
-	status?: 'default' | 'success' | 'error' | 'warning' | 'info';
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
@@ -20,7 +20,7 @@ export type TextProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'si
 export type TextareaValueChangeArgs = { value: string; beforeValue: string; initial: boolean };
 export type TextareaProps = Omit<SvelteHTMLElements['textarea'], 'value' | 'size'> & {
 	value?: string;
-	status?: 'default' | 'success' | 'error' | 'warning' | 'info';
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
@@ -35,6 +35,8 @@ type SelectBasePropsType = {
 	placement?: Placement;
 	required?: boolean;
 	matchTriggerWidth?: boolean;
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
+	size?: 'sm' | 'md' | 'lg';
 	options: {
 		value: string;
 		label: string;
@@ -45,6 +47,7 @@ type SelectBasePropsType = {
 	escClose?: boolean;
 	disabled?: boolean;
 	readonly?: boolean;
+	inform?: boolean;
 	deSelectText?: string;
 };
 
@@ -97,7 +100,7 @@ export type NumberValueChangeArgs = { value: number; beforeValue: number; initia
 
 export type NumberProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
 	value?: number;
-	status?: 'default' | 'success' | 'error' | 'warning' | 'info';
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
@@ -157,7 +160,7 @@ export type DatetimeValueChangeArgs = { value: string; beforeValue: string; init
 
 export type DatetimeProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
 	value?: string;
-	status?: 'default' | 'success' | 'error' | 'warning' | 'info';
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
@@ -170,7 +173,7 @@ export type DateValueChangeArgs = { value: string; beforeValue: string; initial:
 
 export type DateProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
 	value?: string;
-	status?: 'default' | 'success' | 'error' | 'warning' | 'info';
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;

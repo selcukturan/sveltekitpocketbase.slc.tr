@@ -13,6 +13,8 @@
 
 	let { label: componentLabel, field, ...restProps }: Props = $props();
 
+	const cid = $props.id();
+	const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
@@ -53,6 +55,10 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label}>
-	<Text name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
+<Field {issues} {required} {label} {id}>
+	<Text {id} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} status="with-field" size="sm" />
+
+	<!-- {#snippet addon()}
+		<button type="button" onclick={() => alert('Test')} class="bg-error-100 rounded-full p-1">x</button>
+	{/snippet} -->
 </Field>

@@ -1,7 +1,7 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
 	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Select as SelectInput } from '#lib/components/ui/inputs/index.js';
+	import { Select } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
 	import type { SelectValueChangeArgs, SelectPropsType } from '#lib/components/ui/inputs/type.js';
 	import { parseNamePath } from './utils.js';
@@ -25,7 +25,7 @@
 	});
 	let { pathFieldName } = $derived(parseNamePath(attributes.name));
 
-	let attrName = $derived(attributes.name || restProps.name);
+	let attrName = $derived(attributes.name);
 	// ######### END: Remote Form `field` attributes ###########
 
 	// ######### BEGIN: Remote Form `field.issues()` ###########
@@ -60,10 +60,30 @@
 		context?.props.form.validate({ preflightOnly: true, all: false });
 	};
 	// ######### END: handle value change #####################
+
+	let slct = $state<ReturnType<typeof Select> | null>(null);
+
+	const id = $derived(slct?.data.toggler_id || 'no_id');
 </script>
 
-<Field {issues} {required} {label}>
-	<SelectInput {onValueChange} {...restProps} {required} />
+<Field
+	{issues}
+	{required}
+	{label}
+	{id}
+	onclick={(e) => {
+		e.preventDefault();
+	}}
+	onpointerdown={(e) => {
+		e.preventDefault();
+		slct?.close();
+	}}
+	onpointerup={(e) => {
+		e.preventDefault();
+		slct?.open();
+	}}
+>
+	<Select bind:this={slct} {onValueChange} {...restProps} {required} status="with-field" size="sm" inform={true} />
 
 	<!--Hidden Area-->
 	<select {...attributes} class="sr-only" tabindex={-1} aria-hidden={true}>

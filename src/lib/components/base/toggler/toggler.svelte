@@ -34,6 +34,7 @@
 
 	let active = $state(false);
 	let popoverEl = $state<HTMLDivElement | null>(null);
+	let container = $state<HTMLDivElement | null>(null);
 	const popovertarget = $derived(`${id}-popover`);
 	const anchorname = $derived(`--${id}-anchor`);
 	const attr = $derived({
@@ -47,14 +48,39 @@
 
 	export const toggle = () => popoverEl?.togglePopover();
 	export const open = () => !active && popoverEl?.showPopover();
-	export const close = () => active && popoverEl?.hidePopover();
+	export const close = () => {
+		// active && popoverEl?.hidePopover()
+		if (active) {
+			console.log('close-hidePopover');
+			popoverEl?.hidePopover();
+		} else {
+			console.log('nothing');
+		}
+	};
 	export const states = {
 		get active() {
 			return active;
 		}
 	};
+	export const data = {
+		get id() {
+			return id;
+		}
+	};
+	export const el = {
+		get popoverEl() {
+			return popoverEl;
+		},
+		get container() {
+			return container;
+		}
+	};
 
 	const popoverEvents = (node: HTMLElement) => {
+		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			e.stopPropagation();
+		});
+
 		// ESC tuşunu yakalayıp tarayıcı davranışını engelliyoruz
 		const destroyKeydown = on(document, 'keydown', (e: KeyboardEvent) => {
 			if (!escClose && active && e.key === 'Escape') {
@@ -66,14 +92,32 @@
 			active = e.newState === 'open';
 		});
 
+		/* const destroyBlur = on(node, 'blur', (e: FocusEvent) => {
+			if (!e.relatedTarget || !popoverEl?.contains(e.relatedTarget as Node)) {
+				close();
+			}
+		}); */
+
 		return () => {
+			destroyClick();
 			destroyKeydown();
 			destroyToggle();
+			/* destroyBlur(); */
 		};
 	};
 </script>
 
-<div class="container" style:--anchor={anchorname}>
+<div
+	bind:this={container}
+	class="container"
+	style:--anchor={anchorname}
+	onfocusout={(e: FocusEvent) => {
+		if (!e.relatedTarget || !popoverEl?.contains(e.relatedTarget as Node)) {
+			console.log('onfocusout-close');
+			close();
+		}
+	}}
+>
 	<!-- Trigger -->
 	{@render trigger?.({ active, toggle, open, close, attr })}
 
@@ -81,6 +125,7 @@
 	<div
 		bind:this={popoverEl}
 		id={popovertarget}
+		tabindex="-1"
 		popover="auto"
 		{@attach popoverEvents}
 		class="popover {placement} {classes}"
