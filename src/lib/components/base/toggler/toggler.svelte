@@ -48,15 +48,7 @@
 
 	export const toggle = () => popoverEl?.togglePopover();
 	export const open = () => !active && popoverEl?.showPopover();
-	export const close = () => {
-		// active && popoverEl?.hidePopover()
-		if (active) {
-			console.log('close-hidePopover');
-			popoverEl?.hidePopover();
-		} else {
-			console.log('nothing');
-		}
-	};
+	export const close = () => active && popoverEl?.hidePopover();
 	export const states = {
 		get active() {
 			return active;
@@ -113,7 +105,7 @@
 	style:--anchor={anchorname}
 	onfocusout={(e: FocusEvent) => {
 		if (!e.relatedTarget || !popoverEl?.contains(e.relatedTarget as Node)) {
-			console.log('onfocusout-close');
+			// console.log('onfocusout-close');
 			close();
 		}
 	}}

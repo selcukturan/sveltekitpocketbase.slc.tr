@@ -66,23 +66,7 @@
 	const id = $derived(slct?.data.toggler_id || 'no_id');
 </script>
 
-<Field
-	{issues}
-	{required}
-	{label}
-	{id}
-	onclick={(e) => {
-		e.preventDefault();
-	}}
-	onpointerdown={(e) => {
-		e.preventDefault();
-		slct?.close();
-	}}
-	onpointerup={(e) => {
-		e.preventDefault();
-		slct?.open();
-	}}
->
+<Field {issues} {required} {label} {id}>
 	<Select bind:this={slct} {onValueChange} {...restProps} {required} status="with-field" size="sm" inform={true} />
 
 	<!--Hidden Area-->

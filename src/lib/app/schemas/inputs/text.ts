@@ -25,9 +25,9 @@ type TextTypeChoice<Required extends boolean> = Required extends true ? TextRequ
 export function Text<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
 	const { required = true, message } = options;
 
-	console.log('key', key);
+	/* console.log('key', key);
 	console.log('options', options);
-	console.log('required', required);
+	console.log('required', required); */
 
 	const main = required ? _TextRequired(message) : _TextOptional();
 

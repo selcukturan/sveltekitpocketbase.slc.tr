@@ -40,6 +40,7 @@
 	let optionsLi: HTMLLIElement[] = $state([]);
 	let isOpenPopup = $derived(toggl?.states.active === true ? true : false);
 	let activeIndex = $state(0); // Klavye ile gezinilen aktif opsiyonun indeksi.
+	let isKeyboardNav = $state(false); // true: kullanıcı klavye ile geziniyor, false: fare kullanılıyor. Outline sadece klavye modunda gösterilir.
 	let canDeselect = $derived(!multiple && !required); // -- Seçiniz -- gözükecek mi? Tekli seçim ve zorunlu değilse, kullanıcı seçimi geri sıfırlayabilir.
 	let canInteract = $derived(!disabled && !readonly);
 	// ########################### END Variables ##################################################################################################################
@@ -155,6 +156,7 @@
 				});
 			} else {
 				// onCloseEvent Simulation
+				isKeyboardNav = false;
 			}
 		});
 	};
@@ -208,11 +210,32 @@
 	// ########################### END Value Logic ##################################################################################################################
 
 	// ########################### BEGIN Events ##################################################################################################################
-	const triggerEvents = (node: HTMLElement) => {
+
+	// Trigger butonuna özel click davranışı (disabled/readonly iken popover açılmasını engeller).
+	const triggerClickEvents = (node: HTMLElement) => {
+		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			if (!canInteract) {
+				e.preventDefault();
+				e.stopPropagation();
+				return;
+			}
+		});
+
+		return () => {
+			destroyClick();
+		};
+	};
+
+	// Klavye navigasyonu, Toggler'ın hem trigger'ı hem popover'ı saran ortak `container` elemanına bağlanır.
+	// Böylece odak; trigger butonunda, listbox'ta veya bir option'da olsa da (örn. multiple seçimde bir
+	// option'a tıklandığında odak popoverEl'e kayar) klavye olayları her zaman yakalanır.
+	const keyboardNavEvents = (node: HTMLElement) => {
 		let searchTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 		let searchString = '';
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
 			if (!canInteract) return;
+
+			isKeyboardNav = true; // Klavye ile etkileşim başladı, outline gösterilebilir.
 
 			// 1. Arama (Typeahead) Mantığı
 			// Eğer basılan tuş boşluk hariç tek bir karakterse (Ctrl veya Alt basılı değilken)
@@ -319,38 +342,23 @@
 			}
 		});
 
-		const destroyClick = on(node, 'click', (e: MouseEvent) => {
-			if (!canInteract) {
-				e.preventDefault();
-				e.stopPropagation();
-				return;
-			}
+		// Fare (veya dokunma) ile herhangi bir etkileşim, klavye modunu kapatır.
+		const destroyPointerdown = on(node, 'pointerdown', () => {
+			isKeyboardNav = false;
 		});
-
-		/* const popoverEl = toggl?.el?.popoverEl;
-		let destroyBlur: (() => void) | null = null;
-		let destroyPopoverBlur: (() => void) | null = null;
-
-		if (popoverEl) {
-			destroyBlur = on(node, 'blur', (e: FocusEvent) => {
-				if (!e.relatedTarget || !popoverEl.contains(e.relatedTarget as Node)) {
-					toggl?.close();
-				}
-			});
-
-			destroyPopoverBlur = on(popoverEl, 'blur', (e: FocusEvent) => {
-				if (!e.relatedTarget || !popoverEl.contains(e.relatedTarget as Node)) {
-					toggl?.close();
-				}
-			});
-		} */
 
 		return () => {
 			destroyKeydown();
-			/* if (destroyBlur) destroyBlur();
-			if (destroyPopoverBlur) destroyPopoverBlur(); */
-			destroyClick();
+			destroyPointerdown();
 		};
+	};
+
+	const keyboard = () => {
+		const togglerContainerElement = toggl?.el.container;
+		return untrack(() => {
+			if (!togglerContainerElement) return;
+			return keyboardNavEvents(togglerContainerElement);
+		});
 	};
 
 	const optionEvents = (index: number) => {
@@ -395,6 +403,8 @@
 			bind:this={triggerButtonElement}
 			{@attach watchValueChange}
 			{@attach watchIsOpenPopup}
+			{@attach keyboard}
+			{@attach triggerClickEvents}
 			id={attr.id}
 			type={attr.type}
 			style={attr.style}
@@ -410,7 +420,6 @@
 			aria-readonly={readonly}
 			aria-disabled={disabled || displayOptions.length === 0}
 			class="{internalTriggerClasses} {triggerClass}"
-			{@attach triggerEvents}
 			tabindex={disabled || displayOptions.length === 0 ? -1 : 0}
 			disabled={disabled || displayOptions.length === 0}
 		>
@@ -464,8 +473,8 @@
 					// tabindex={-1}
 					aria-selected={isSelected}
 					class:bg-secondary-100={isSelected}
-					class:outline-2={isActive}
-					class:outline-primary-400={isActive}
+					class:outline-2={isActive && isKeyboardNav}
+					class:outline-primary-400={isActive && isKeyboardNav}
 					class="{internalOptionClasses} {optionClass}"
 					{@attach optionEvents(i)}
 				>
