@@ -104,11 +104,6 @@
 	class="container"
 	style:--anchor={anchorname}
 	onfocusout={(e: FocusEvent) => {
-		// `container`, hem trigger'ı hem popover'ı sarar. Kontrol sadece `popoverEl` ile yapılırsa,
-		// popover içindeki bir opsiyondan trigger'a odak kayması (örn. seçim yapıp trigger'a
-		// tıklamak) "widget'tan tamamen çıkıldı" sanılıp popover, trigger'ın kendi click/toggle
-		// mantığı çalışmadan ÖNCE kapatılıyor; bu da trigger'a ilk tıklamanın popover'ı kapatmak
-		// yerine (zaten kapanmış olanı) yeniden açması gibi görünen bir çift tetiklenmeye yol açıyordu.
 		if (!e.relatedTarget || !container?.contains(e.relatedTarget as Node)) {
 			close();
 		}
@@ -171,28 +166,33 @@
 		box-shadow: var(--box-shadow, var(--default-box-shadow));
 
 		/* Animasyon başlangıç ve kapanış geçiş ayarları */
-		/* opacity: 0;
-		transform: translateY(2px);
+		/*  */
+		opacity: 0;
+		transform: translateY(3px);
+		display: none;
 		transition:
 			opacity 0.15s ease-out,
 			transform 0.15s ease-out,
 			overlay 0.15s allow-discrete,
-			display 0.15s allow-discrete; */
+			display 0.15s allow-discrete;
 	}
 
 	/* Animasyon Bitiş Durumu (Açık) */
-	/* .popover:popover-open {
+	/*  */
+	.popover:popover-open {
 		opacity: 1;
-		transform: scale(1);
-	} */
+		display: block;
+		transform: translateY(0px);
+	}
 
 	/* Animasyon Başlangıç Durumu (Açık) */
-	/* @starting-style {
+	/*  */
+	@starting-style {
 		.popover:popover-open {
 			opacity: 0;
-			transform: translateY(2px);
+			transform: translateY(3px);
 		}
-	} */
+	}
 
 	.popover.match-width {
 		width: min(anchor-size(width), 100%);
