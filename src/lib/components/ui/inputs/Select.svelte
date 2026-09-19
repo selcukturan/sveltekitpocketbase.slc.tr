@@ -211,14 +211,26 @@
 
 	// ########################### BEGIN Events ##################################################################################################################
 
-	// Trigger butonuna özel click davranışı (disabled/readonly iken popover açılmasını engeller).
+	// Trigger butonuna özel click davranışı.
+	// Popover'ın açılıp kapanması bilinçli olarak `popovertarget`'ın native toggle davranışına
+	// bırakılmıyor; her tıklamada tek noktadan `toggl.toggle()` ile JS tarafından yönetiliyor.
+	// Sebep: dokunmatik ekranlarda native popover'ın "light-dismiss" davranışı `pointerdown`
+	// anında, invoker butonun native toggle'ı ise `click` anında (yani pointerup'tan sonra)
+	// tetikleniyor. Bu iki native mekanizmanın aynı dokunuşta farklı anlarda çakışması bazı
+	// tarayıcılarda popover'ın bir kapanıp native toggle ile hemen tekrar açılmasına, dolayısıyla
+	// trigger'a ilk dokunuşun popover'ı kapatmamış gibi görünmesine yol açıyordu (ikinci dokunuş
+	// gerçekten kapatıyordu). `preventDefault` ile native davranışı iptal edip tek bir JS çağrısı
+	// yapmak bu çakışmayı ortadan kaldırıyor.
 	const triggerClickEvents = (node: HTMLElement) => {
 		const destroyClick = on(node, 'click', (e: MouseEvent) => {
+			e.preventDefault();
+
 			if (!canInteract) {
-				e.preventDefault();
 				e.stopPropagation();
 				return;
 			}
+
+			toggl?.toggle();
 		});
 
 		return () => {
