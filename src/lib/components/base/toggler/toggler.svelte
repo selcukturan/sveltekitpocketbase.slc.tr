@@ -166,7 +166,7 @@
 		box-shadow: var(--box-shadow, var(--default-box-shadow));
 
 		/* Animasyon başlangıç ve kapanış geçiş ayarları */
-		/*  */
+		/* 
 		opacity: 0;
 		transform: translateY(3px);
 		display: none;
@@ -174,25 +174,25 @@
 			opacity 0.15s ease-out,
 			transform 0.15s ease-out,
 			overlay 0.15s allow-discrete,
-			display 0.15s allow-discrete;
+			display 0.15s allow-discrete; */
 	}
 
 	/* Animasyon Bitiş Durumu (Açık) */
-	/*  */
+	/* 
 	.popover:popover-open {
 		opacity: 1;
 		display: block;
 		transform: translateY(0px);
-	}
+	} */
 
 	/* Animasyon Başlangıç Durumu (Açık) */
-	/*  */
+	/* 
 	@starting-style {
 		.popover:popover-open {
 			opacity: 0;
 			transform: translateY(3px);
 		}
-	}
+	} */
 
 	.popover.match-width {
 		width: min(anchor-size(width), 100%);
