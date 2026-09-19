@@ -375,11 +375,23 @@
 
 	const optionEvents = (index: number) => {
 		return (node: HTMLElement) => {
+			// Opsiyonlar (li) odaklanabilir değil; bu yüzden tıklama/dokunma sırasında tarayıcı
+			// varsayılan olarak trigger'daki DOM focus'unu düşürüp `null`/body'ye kaydırıyor.
+			// Bu da Toggler'ın "focus widget'tan tamamen çıktı" sanıp popover'ı click olayından
+			// ÖNCE (mousedown/pointerdown anında) kapatmasına yol açıyordu — özellikle çoklu
+			// seçimde, seçim sonrası trigger'a ilk tıklamanın popover'ı kapatmak yerine (zaten
+			// kapanmış olanı) yeniden açması gibi görünüyordu. `mousedown`/`pointerdown` varsayılanını
+			// engelleyerek focus'un trigger'da kalmasını sağlıyoruz; kavramsal olarak seçim aslında
+			// hep trigger'a odaklıyken (combobox + aria-activedescendant deseni) yapılıyor.
+			const destroyPointerdown = on(node, 'pointerdown', (e: PointerEvent) => {
+				e.preventDefault();
+			});
 			const destroyClick = on(node, 'click', (e: MouseEvent) => {
 				e.preventDefault();
 				selectOption(index);
 			});
 			return () => {
+				destroyPointerdown();
 				destroyClick();
 			};
 		};

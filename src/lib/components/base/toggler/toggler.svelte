@@ -104,8 +104,12 @@
 	class="container"
 	style:--anchor={anchorname}
 	onfocusout={(e: FocusEvent) => {
-		if (!e.relatedTarget || !popoverEl?.contains(e.relatedTarget as Node)) {
-			// console.log('onfocusout-close');
+		// `container`, hem trigger'ı hem popover'ı sarar. Kontrol sadece `popoverEl` ile yapılırsa,
+		// popover içindeki bir opsiyondan trigger'a odak kayması (örn. seçim yapıp trigger'a
+		// tıklamak) "widget'tan tamamen çıkıldı" sanılıp popover, trigger'ın kendi click/toggle
+		// mantığı çalışmadan ÖNCE kapatılıyor; bu da trigger'a ilk tıklamanın popover'ı kapatmak
+		// yerine (zaten kapanmış olanı) yeniden açması gibi görünen bir çift tetiklenmeye yol açıyordu.
+		if (!e.relatedTarget || !container?.contains(e.relatedTarget as Node)) {
 			close();
 		}
 	}}
