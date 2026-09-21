@@ -13,6 +13,8 @@
 
 	let { label: componentLabel, field, ...restProps }: Props = $props();
 
+	const cid = $props.id();
+	// const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
@@ -52,6 +54,6 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label}>
-	<Bool id={restProps.id || attrName} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
+<Field {issues} {required} {label} id={restProps.id || attrName || cid}>
+	<Bool id={restProps.id || attrName || cid} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
 </Field>

@@ -13,6 +13,8 @@
 
 	let { label: componentLabel, field, multiple = false as Tmultiple, ...restProps }: Props = $props();
 
+	const cid = $props.id();
+	const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// svelte-ignore state_referenced_locally
@@ -70,8 +72,8 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label}>
-	<FileInput name={plusName} {onValueChange} {multiple} {...restProps} />
+<Field {issues} {required} {label} {id}>
+	<FileInput name={plusName} {id} {onValueChange} {multiple} {...restProps} />
 </Field>
 
 <!--Hidden Area-->

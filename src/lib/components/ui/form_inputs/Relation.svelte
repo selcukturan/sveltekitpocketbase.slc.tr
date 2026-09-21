@@ -13,6 +13,8 @@
 
 	let { label: componentLabel, field, ...restProps }: Props = $props();
 
+	const cid = $props.id();
+	const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
@@ -62,7 +64,7 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label}>
+<Field {issues} {required} {label} {id}>
 	<RelationInput {onValueChange} {...restProps} />
 
 	<!--Hidden Area-->

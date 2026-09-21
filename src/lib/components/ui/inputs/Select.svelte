@@ -397,16 +397,16 @@
 		disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants[status] : inputClasses.variants.error} ${inputClasses.sizes[size]}`
 	);
 	const internalListboxClasses = 'slc-input pointer-events-auto scroll-py-2 p-1.5! select-none';
-	const internalOptionClasses = 'hover:bg-surface-200 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
+	const internalOptionClasses = 'hover:bg-surface-300 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
 </script>
 
 <Toggler
 	bind:this={toggl}
 	{placement}
 	{matchTriggerWidth}
-	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-300)'} "
-	--background-color="var(--color-surface-100)"
-	--box-shadow="0px 8px 5px -5px var(--color-surface-50)"
+	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-400)'} "
+	--background-color="var(--color-surface-200)"
+	--box-shadow="0px 8px 5px -5px var(--color-surface-100)"
 	--gutter={inform === true ? '-3px' : '5px'}
 	--min-height="100px"
 	--max-height="320px"
@@ -486,7 +486,7 @@
 					id="{optionId}-{i}"
 					role="option"
 					aria-selected={isSelected}
-					class:bg-secondary-100={isSelected}
+					class:bg-secondary-300!={isSelected}
 					class:outline-2={isActive && isKeyboardNav}
 					class:outline-primary-400={isActive && isKeyboardNav}
 					class="{internalOptionClasses} {optionClass}"

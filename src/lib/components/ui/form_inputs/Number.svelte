@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Number as NumberInput } from '#lib/components/ui/inputs/index.js';
+	import { Number } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
 	import type { NumberValueChangeArgs, NumberProps } from '#lib/components/ui/inputs/type.js';
 	import { parseNamePath } from './utils.js';
@@ -13,6 +13,8 @@
 
 	let { label: componentLabel, field, ...restProps }: Props = $props();
 
+	const cid = $props.id();
+	const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
@@ -52,6 +54,6 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label}>
-	<NumberInput name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
+<Field {issues} {required} {label} {id}>
+	<Number {id} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} status="with-field" size="sm" />
 </Field>
