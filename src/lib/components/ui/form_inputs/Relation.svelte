@@ -1,7 +1,7 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
 	import type { RemoteFormField } from '$app/server';
 	import { getFormInputsContext } from './context.svelte';
-	import { Relation as RelationInput } from '#lib/components/ui/inputs/index.js';
+	import { Relation } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
 	import type { RelationValueChangeArgs, RelationPropsType } from '#lib/components/ui/inputs/type.js';
 	import { parseNamePath } from './utils.js';
@@ -64,8 +64,8 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} {id}>
-	<RelationInput {onValueChange} {...restProps} />
+<Field {issues} {required} {label} {id} fieldClass="group-focus-within:bg-surface-200!">
+	<Relation {onValueChange} {...restProps} {id} />
 
 	<!--Hidden Area-->
 	<select {...attributes} class="sr-only" tabindex={-1} aria-hidden={true}>

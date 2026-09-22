@@ -17,7 +17,7 @@
 		yes = 'Evet',
 		no = 'Hayır',
 		class: classes = '',
-		id,
+		id = '',
 		name,
 		label = '',
 		animationDuration = 150,
@@ -40,8 +40,6 @@
 	let resolvePromise: ((data: RelationResolveData) => void) | null = null;
 	let isClosing = $state(false);
 	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
-
-	const labelFor = $derived(`slc_${componentId}${name || ''}${id || ''}_relation_picker_button`);
 
 	const show = (): Promise<RelationResolveData> => {
 		return new Promise<RelationResolveData>((resolve) => {
@@ -163,77 +161,73 @@
 			e.stopPropagation();
 		});
 	};
+
+	/* const longTestRelationList = Array.from({ length: 15 }, (_, i) => ({
+		id: i.toString(),
+		label: `Row ${i}`
+	})); */
 	// ######### END: preventDefaultClick handlers #############
 </script>
 
-<div class="relative block w-full">
-	<button
-		type="button"
-		id={labelFor}
-		onclick={handlePickerOpen}
-		class="slc-input inline-flex w-full items-center justify-between text-start disabled:cursor-not-allowed disabled:opacity-50 {inputClasses.variants
-			.default} {inputClasses.sizes.md} {!disabled && !readonly ? 'cursor-pointer' : 'cursor-default'} {classes}"
-		{@attach watchValueChange}
-		{disabled}
-		tabindex={disabled || readonly ? -1 : 0}
-	>
-		<span>{label || 'Seçim Yapın'}</span>
-		<svg class="text-surface-500 h-4 w-4" stroke="currentColor" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-		</svg>
-	</button>
-</div>
+{#snippet list(items: Record<string, string>[])}
+	{@const isEmpty = items.length === 0}
+	<output class="mt-1 flex flex-col gap-0">
+		<div class="border-surface-300 max-h-80 overflow-y-auto border-t">
+			{#each items as item, idx (idx)}
+				<!-- list-item -->
+				<div
+					class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t p-2 wrap-break-word outline-none first:border-t-0"
+				>
+					<!-- content -->
+					<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
+						<!-- label -->
+						<span class="text-sm">{item.label}</span>
+					</div>
+					<!-- action -->
+					<div class="inline-flex shrink-0 items-center gap-2.5">
+						{#if !disabled && !readonly}
+							<button
+								type="button"
+								onclick={() => handleRemoveRelation(item.id)}
+								class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-2 outline-none"
+								aria-label="{item.label} kaldır"
+							>
+								<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+								</svg>
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/each}
+		</div>
+		<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>
+			<button
+				type="button"
+				{id}
+				onclick={handlePickerOpen}
+				class="slc-input group-hover/btn:bg-surface-400/50 focus:bg-surface-500/50 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md p-1 text-start text-sm font-bold outline-none"
+				{@attach watchValueChange}
+				{disabled}
+				tabindex={disabled || readonly ? -1 : 0}
+			>
+				<svg class="h-3.5 w-3.5" stroke="currentColor" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+				</svg>
+				<span>{label || 'Kayıt seçiciyi aç'}</span>
+			</button>
+		</div>
+	</output>
+{/snippet}
 
 {#if multiple && Array.isArray(value) && value.length > 0}
 	{@const relationList = await getMultipleRelationSelectedList({ ids: value, collection })}
-	<div class="mt-2 flex flex-wrap gap-1.5" {@attach preventDefaultClick}>
-		{#each relationList as item, idx (idx)}
-			<div
-				class="bg-surface-200 border-surface-300 text-surface-800 inline-flex items-center gap-1.5 rounded-md border py-1 text-sm {!disabled && !readonly
-					? 'pr-1 pl-2.5'
-					: 'px-2.5'}"
-			>
-				<span>{item.label}</span>
-				{#if !disabled && !readonly}
-					<button
-						type="button"
-						onclick={() => handleRemoveRelation(item.id)}
-						class="text-surface-500 hover:text-error-600 hover:bg-surface-300 rounded p-0.5 transition-colors"
-						aria-label="{item.label} kaldır"
-					>
-						<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-						</svg>
-					</button>
-				{/if}
-			</div>
-		{/each}
-	</div>
+	{@render list(relationList)}
 {:else if typeof value === 'string' && value && collection}
 	{@const relationList = await getSingleRelationSelectedList({ id: value, collection })}
-	<div class="mt-2 flex flex-wrap gap-1.5" {@attach preventDefaultClick}>
-		{#each relationList as item, idx (idx)}
-			<div
-				class="bg-surface-200 border-surface-300 text-surface-800 inline-flex items-center gap-1.5 rounded-md border py-1 text-sm {!disabled && !readonly
-					? 'pr-1 pl-2.5'
-					: 'px-2.5'}"
-			>
-				<span>{item.label}</span>
-				{#if !disabled && !readonly}
-					<button
-						type="button"
-						onclick={() => handleRemoveRelation(item.id)}
-						class="text-surface-500 hover:text-error-600 hover:bg-surface-300 rounded p-0.5 transition-colors"
-						aria-label="{item.label} kaldır"
-					>
-						<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-						</svg>
-					</button>
-				{/if}
-			</div>
-		{/each}
-	</div>
+	{@render list(relationList)}
+{:else}
+	{@render list([])}
 {/if}
 
 <dialog

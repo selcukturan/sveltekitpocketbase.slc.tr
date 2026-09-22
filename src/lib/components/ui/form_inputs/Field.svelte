@@ -9,15 +9,16 @@
 		id: string;
 		label: string;
 		required?: boolean;
+		fieldClass?: string;
 		issues?: RemoteFormIssue[];
 	};
 
-	let { children, addon, id, label, required = false, issues, ...rest }: Props = $props();
+	let { children, addon, id, label, required = false, fieldClass, issues, ...rest }: Props = $props();
 
 	const fieldInputClasses = 'py-2';
 	const fieldsClasses = 'group flex w-full items-stretch';
 
-	const fieldClasses = 'w-full min-w-0 relative block bg-surface-200 group-focus-within:bg-surface-300 outline-0';
+	const fieldInternalClasses = 'w-full min-w-0 relative block bg-surface-200 group-focus-within:bg-surface-300 outline-0';
 	const fieldClassesRounded = $derived(addon ? 'rounded-tl-sm rounded-bl-sm' : 'rounded-sm');
 	const labelClasses =
 		'flex rounded-tl-sm rounded-tr-sm w-full min-h-6 px-3 pt-2 pb-0.5 whitespace-normal font-bold text-sm font-semibold leading-4 self-center items-center gap-1';
@@ -31,7 +32,7 @@
 
 <div class={fieldInputClasses}>
 	<div class={fieldsClasses}>
-		<div class="{fieldClasses} {fieldClassesRounded}">
+		<div class="{fieldInternalClasses} {fieldClassesRounded} {fieldClass}">
 			<label class={labelClasses} for={id} {...rest}>
 				<span class={labelTxtClasses} class:required>
 					{label}
