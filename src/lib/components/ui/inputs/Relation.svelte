@@ -20,6 +20,9 @@
 		id = '',
 		name,
 		label = '',
+		status = 'default',
+		size = 'md',
+		inform = false,
 		animationDuration = 150,
 		defaultSearch = '',
 		disabled = false,
@@ -31,9 +34,8 @@
 
 	// svelte-ignore state_referenced_locally
 	let pickerSearchString = $state(defaultSearch);
-	let pickerAnswer = $state('init');
-	let pickerSelected = $state<string | string[]>(value);
-	const pickerSelectedItemCache = new SvelteMap<string, Record<string, string>>();
+	let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
+	let pickerSelected = $state(value);
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -89,23 +91,19 @@
 
 	function handleToggle(item: Record<string, string>) {
 		const isSelected = Array.isArray(pickerSelected) ? pickerSelected.includes(item.id) : pickerSelected === item.id;
-		if (!pickerSelectedItemCache.has(item.id)) pickerSelectedItemCache.set(item.id, { label: item.label });
+		/* if (!pickerSelectedItemCache.has(item.id)) {
+			pickerSelectedItemCache.set(item.id, item);
+		} else {
+			console.log('removing');
+			pickerSelectedItemCache.delete(item.id);
+		} */
 
 		if (Array.isArray(pickerSelected)) {
 			const newSelection = isSelected ? pickerSelected.filter((id) => id !== item.id) : [...pickerSelected, item.id];
-			pickerSelected = newSelection;
+			pickerSelected = newSelection as RelationValueTypeChoice<Tmultiple>;
 		} else {
 			const newSelection = isSelected ? '' : item.id;
-			pickerSelected = newSelection;
-		}
-	}
-
-	function handleRemoveRelation(idToRemove: string) {
-		if (disabled || readonly) return;
-		if (multiple && Array.isArray(value)) {
-			value = value.filter((id) => id !== idToRemove) as RelationValueTypeChoice<Tmultiple>;
-		} else if (!multiple && value === idToRemove) {
-			value = '' as RelationValueTypeChoice<Tmultiple>;
+			pickerSelected = newSelection as RelationValueTypeChoice<Tmultiple>;
 		}
 	}
 
@@ -114,6 +112,8 @@
 		pickerAnswer = 'waiting';
 		pickerSelected = value;
 		pickerSearchString = '';
+
+		// pickerTimestamp = new Date().getTime();
 
 		const { confirm } = await show();
 
@@ -150,29 +150,94 @@
 		});
 	};
 
-	onMount(() => {
-		pickerSelected = value;
-	});
-
 	// ######### BEGIN: preventDefaultClick handlers ###########
-	const preventDefaultClick = (node: HTMLElement) => {
-		return on(node, 'click', (e: MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
+	let inputSelectedItemCache = new SvelteMap<string, Record<string, string>>();
+	let inputSelectedItemCacheState = $state.raw<Array<Record<string, string>>>([]);
+
+	function handleRemoveRelation(idToRemove: string) {
+		if (disabled || readonly) return;
+		if (multiple && Array.isArray(value)) {
+			value = value.filter((id) => id !== idToRemove) as RelationValueTypeChoice<Tmultiple>;
+		} else if (!multiple && value === idToRemove) {
+			value = '' as RelationValueTypeChoice<Tmultiple>;
+		}
+
+		inputSelectedItemCache.delete(idToRemove);
+		inputSelectedItemCacheState = Array.from(inputSelectedItemCache.values());
+		//promiseTrigger++;
+	}
+
+	let selectedListPromiseTimestamp = $state(new Date().getTime());
+	let selectedListPromiseValue = $state.raw(value);
+	let selectedListPromise = $derived(
+		multiple
+			? getMultipleRelationSelectedList({
+					ids: selectedListPromiseValue as RelationValueTypeChoice<true>,
+					collection,
+					timestamp: selectedListPromiseTimestamp
+				})
+			: getSingleRelationSelectedList({
+					id: selectedListPromiseValue as RelationValueTypeChoice<false>,
+					collection,
+					timestamp: selectedListPromiseTimestamp
+				})
+	);
+
+	const watchSelectedListPromise = () => {
+		void selectedListPromise.current;
+		return untrack(() => {
+			selectedListPromise.current?.forEach((item) => {
+				if (!inputSelectedItemCache.has(item.id)) inputSelectedItemCache.set(item.id, item);
+			});
+			inputSelectedItemCacheState = Array.from(inputSelectedItemCache.values());
 		});
 	};
 
-	/* const longTestRelationList = Array.from({ length: 15 }, (_, i) => ({
-		id: i.toString(),
-		label: `Row ${i}`
-	})); */
 	// ######### END: preventDefaultClick handlers #############
+
+	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
+
+	let pickerTimestamp = $state(new Date().getTime());
+	let pickerData = $derived(getRelationList({ search: pickerSearchString, collection, timestamp: pickerTimestamp }));
 </script>
+
+<div style:display="none" {@attach watchSelectedListPromise}>relation-component-state-watcher</div>
+
+<svelte:boundary>
+	<!-- <ul>
+		{#each (await selectedListPromise) ?? [] as item, idx (idx)}
+			<li>{item.label}</li>
+		{/each}
+	</ul> -->
+
+	{@const awaitTrigger = (await selectedListPromise) ?? []}
+	{#if awaitTrigger.length > 0}
+		{@render list(inputSelectedItemCacheState)}
+	{:else}
+		<p>no data!</p>
+	{/if}
+
+	{#snippet pending()}
+		<p>loading...</p>
+	{/snippet}
+</svelte:boundary>
+
+<!-- {#if selectedListPromise.error}
+	<p>oops!</p>
+{:else if selectedListPromise.loading}
+	<p>loading...</p>
+{:else}
+	{#if selectedListPromise.current}
+		{@render list(inputSelectedItemCacheState)}
+	{:else}
+		<p>no data!</p>
+	{/if}
+{/if} -->
 
 {#snippet list(items: Record<string, string>[])}
 	{@const isEmpty = items.length === 0}
-	<output class="mt-1 flex flex-col gap-0">
-		<div class="border-surface-300 max-h-80 overflow-y-auto border-t">
+	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
+		<div class="border-surface-300 max-h-80 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
 			{#each items as item, idx (idx)}
 				<!-- list-item -->
 				<div
@@ -220,15 +285,13 @@
 	</output>
 {/snippet}
 
-{#if multiple && Array.isArray(value) && value.length > 0}
-	{@const relationList = await getMultipleRelationSelectedList({ ids: value, collection })}
-	{@render list(relationList)}
+<!-- {#if multiple && Array.isArray(value) && value.length > 0}
+	{@render list(inputSelectedItemCacheState)}
 {:else if typeof value === 'string' && value && collection}
-	{@const relationList = await getSingleRelationSelectedList({ id: value, collection })}
-	{@render list(relationList)}
+	{@render list(inputSelectedItemCacheState)}
 {:else}
 	{@render list([])}
-{/if}
+{/if} -->
 
 <dialog
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
@@ -261,8 +324,8 @@
 
 		<div class="bg-surface-100 border-surface-200 flex max-h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
 			{#if isOpen}
-				{@const pickerData = await getRelationList({ search: pickerSearchString, collection })}
-				{#each pickerData?.items ?? [] as item, idx (idx)}
+				<!-- {@const pickerData = await getRelationList({ search: pickerSearchString, collection, timestamp: new Date().getTime() })} -->
+				{#each (await pickerData)?.items ?? [] as item, idx (idx)}
 					{#if typeof item.id === 'string'}
 						{@const isMultiple = Array.isArray(pickerSelected)}
 						{@const isRadio = !isMultiple}
@@ -291,9 +354,10 @@
 		{#if isOpen}
 			<div class="border-surface-200 border-t pt-3">
 				<p class="text-surface-500 mb-2 text-xs font-semibold tracking-wider uppercase">Seçilen Kayıtlar</p>
-				<div class="flex min-h-8 flex-wrap items-center gap-1.5">
+				<p>{JSON.stringify((await pickerData)?.items, null, 2)}</p>
+				<!-- <div class="flex min-h-8 flex-wrap items-center gap-1.5">
 					{#if multiple && Array.isArray(pickerSelected) && collection}
-						{@const relationList = await getMultipleRelationSelectedList({ ids: pickerSelected, collection })}
+						{@const relationList = await getMultipleRelationSelectedList({ ids: pickerSelected, collection, timestamp: new Date().getTime() })}
 						{#each relationList as item, idx (idx)}
 							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
 								<span>{item.label}</span>
@@ -301,7 +365,7 @@
 							</div>
 						{/each}
 					{:else if typeof pickerSelected === 'string' && pickerSelected && collection}
-						{@const relationList = await getSingleRelationSelectedList({ id: pickerSelected, collection })}
+						{@const relationList = await getSingleRelationSelectedList({ id: pickerSelected, collection, timestamp: new Date().getTime() })}
 						{#each relationList as item, idx (idx)}
 							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
 								<span>{item.label}</span>
@@ -312,7 +376,7 @@
 					{#if pickerSelected === '' || (Array.isArray(pickerSelected) && pickerSelected.length === 0)}
 						<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
 					{/if}
-				</div>
+				</div> -->
 			</div>
 		{/if}
 

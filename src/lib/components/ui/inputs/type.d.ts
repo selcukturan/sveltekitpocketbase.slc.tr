@@ -85,6 +85,9 @@ export type RelationPropsType<Tmultiple extends boolean> = {
 	yes?: string;
 	no?: string;
 	class?: string;
+	inform?: boolean;
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
+	size?: 'sm' | 'md' | 'lg';
 	animationDuration?: number;
 	multiple?: Tmultiple;
 	value?: RelationValueTypeChoice<Tmultiple>;

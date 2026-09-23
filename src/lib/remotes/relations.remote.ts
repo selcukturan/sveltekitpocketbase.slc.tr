@@ -9,12 +9,17 @@ const filteredCollectionValues = Object.values(Collections).filter((value) => !v
 
 const relationListParamsSchema = v.object({
 	search: v.string(),
-	collection: v.picklist(filteredCollectionValues)
+	collection: v.picklist(filteredCollectionValues),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getRelationList = query(relationListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
+
+	await sleep(1000);
 
 	const { locals } = getRequestEvent();
 
@@ -34,11 +39,14 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 
 const relationMultipleSelectedListParamsSchema = v.object({
 	ids: v.array(v.string()),
-	collection: v.picklist(filteredCollectionValues)
+	collection: v.picklist(filteredCollectionValues),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export const getMultipleRelationSelectedList = query(relationMultipleSelectedListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
+
+	await sleep(1000);
 
 	const { locals } = getRequestEvent();
 
@@ -65,11 +73,14 @@ export const getMultipleRelationSelectedList = query(relationMultipleSelectedLis
 
 const relationSingleSelectedListParamsSchema = v.object({
 	id: v.string(),
-	collection: v.picklist(filteredCollectionValues)
+	collection: v.picklist(filteredCollectionValues),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export const getSingleRelationSelectedList = query(relationSingleSelectedListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
+
+	await sleep(1000);
 
 	const { locals } = getRequestEvent();
 

@@ -64,8 +64,8 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} {id} fieldClass="group-focus-within:bg-surface-200!">
-	<Relation {onValueChange} {...restProps} {id} />
+<Field {issues} {required} {label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+	<Relation {onValueChange} {...restProps} {id} inform />
 
 	<!--Hidden Area-->
 	<select {...attributes} class="sr-only" tabindex={-1} aria-hidden={true}>
