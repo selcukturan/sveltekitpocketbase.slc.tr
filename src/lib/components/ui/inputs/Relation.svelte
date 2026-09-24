@@ -1,6 +1,6 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
 	import { focustrap, portal } from '#lib/attachments/index.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from './common.js';
@@ -30,12 +30,14 @@
 		onValueChange
 	}: RelationPropsType<Tmultiple> = $props();
 
-	const componentId = $props.id();
+	let itemDetailCache = new SvelteMap<string, Record<string, string>>();
 
 	// svelte-ignore state_referenced_locally
 	let pickerSearchString = $state(defaultSearch);
 	let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
-	let pickerSelected = $state(value);
+	let pickerValue = $state(value);
+	let pickerDataTimestamp = $state(new Date().getTime());
+	let pickerData = $derived(getRelationList({ search: pickerSearchString, collection, timestamp: pickerDataTimestamp }));
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -90,40 +92,36 @@
 	};
 
 	function handleToggle(item: Record<string, string>) {
-		const isSelected = Array.isArray(pickerSelected) ? pickerSelected.includes(item.id) : pickerSelected === item.id;
-		/* if (!pickerSelectedItemCache.has(item.id)) {
-			pickerSelectedItemCache.set(item.id, item);
-		} else {
-			console.log('removing');
-			pickerSelectedItemCache.delete(item.id);
-		} */
+		const isSelected = Array.isArray(pickerValue) ? pickerValue.includes(item.id) : pickerValue === item.id;
 
-		if (Array.isArray(pickerSelected)) {
-			const newSelection = isSelected ? pickerSelected.filter((id) => id !== item.id) : [...pickerSelected, item.id];
-			pickerSelected = newSelection as RelationValueTypeChoice<Tmultiple>;
+		itemDetailCache.set(item.id, item);
+
+		if (Array.isArray(pickerValue)) {
+			const newSelection = isSelected ? pickerValue.filter((id) => id !== item.id) : [...pickerValue, item.id];
+			pickerValue = newSelection as RelationValueTypeChoice<Tmultiple>;
 		} else {
 			const newSelection = isSelected ? '' : item.id;
-			pickerSelected = newSelection as RelationValueTypeChoice<Tmultiple>;
+			pickerValue = newSelection as RelationValueTypeChoice<Tmultiple>;
 		}
 	}
 
-	async function handlePickerOpen() {
+	async function pickerOpen() {
 		if (disabled || readonly) return;
 		pickerAnswer = 'waiting';
-		pickerSelected = value;
+		pickerValue = value;
 		pickerSearchString = '';
 
-		// pickerTimestamp = new Date().getTime();
+		// pickerDataTimestamp = new Date().getTime();
 
 		const { confirm } = await show();
 
 		if (confirm) {
 			pickerAnswer = 'true';
-			if (multiple && Array.isArray(pickerSelected)) {
-				const newValue = pickerSelected as string[];
+			if (multiple && Array.isArray(pickerValue)) {
+				const newValue = pickerValue as string[];
 				value = newValue as RelationValueTypeChoice<Tmultiple>;
-			} else if (!multiple && typeof pickerSelected === 'string') {
-				const newValue = pickerSelected as string;
+			} else if (!multiple && typeof pickerValue === 'string') {
+				const newValue = pickerValue as string;
 				value = newValue as RelationValueTypeChoice<Tmultiple>;
 			}
 			await tick();
@@ -150,23 +148,25 @@
 		});
 	};
 
-	// ######### BEGIN: preventDefaultClick handlers ###########
-	let inputSelectedItemCache = new SvelteMap<string, Record<string, string>>();
-	let inputSelectedItemCacheState = $state.raw<Array<Record<string, string>>>([]);
-
-	function handleRemoveRelation(idToRemove: string) {
+	function removeInputSelectedItem(idToRemove: string) {
 		if (disabled || readonly) return;
 		if (multiple && Array.isArray(value)) {
 			value = value.filter((id) => id !== idToRemove) as RelationValueTypeChoice<Tmultiple>;
 		} else if (!multiple && value === idToRemove) {
 			value = '' as RelationValueTypeChoice<Tmultiple>;
 		}
-
-		inputSelectedItemCache.delete(idToRemove);
-		inputSelectedItemCacheState = Array.from(inputSelectedItemCache.values());
-		//promiseTrigger++;
 	}
 
+	function removePickerSelectedItem(idToRemove: string) {
+		if (disabled || readonly) return;
+		if (multiple && Array.isArray(pickerValue)) {
+			pickerValue = pickerValue.filter((id) => id !== idToRemove) as RelationValueTypeChoice<Tmultiple>;
+		} else if (!multiple && pickerValue === idToRemove) {
+			pickerValue = '' as RelationValueTypeChoice<Tmultiple>;
+		}
+	}
+
+	// ######### BEGIN: Initial Selected List ###########
 	let selectedListPromiseTimestamp = $state(new Date().getTime());
 	let selectedListPromiseValue = $state.raw(value);
 	let selectedListPromise = $derived(
@@ -182,116 +182,106 @@
 					timestamp: selectedListPromiseTimestamp
 				})
 	);
-
-	const watchSelectedListPromise = () => {
-		void selectedListPromise.current;
-		return untrack(() => {
-			selectedListPromise.current?.forEach((item) => {
-				if (!inputSelectedItemCache.has(item.id)) inputSelectedItemCache.set(item.id, item);
-			});
-			inputSelectedItemCacheState = Array.from(inputSelectedItemCache.values());
-		});
-	};
-
-	// ######### END: preventDefaultClick handlers #############
+	const watchSelectedListPromise = () => selectedListPromise.current?.forEach((item) => itemDetailCache.set(item.id, item));
+	// ######### END: Initial Selected List #############
 
 	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
-
-	let pickerTimestamp = $state(new Date().getTime());
-	let pickerData = $derived(getRelationList({ search: pickerSearchString, collection, timestamp: pickerTimestamp }));
 </script>
 
 <div style:display="none" {@attach watchSelectedListPromise}>relation-component-state-watcher</div>
 
-<svelte:boundary>
-	<!-- <ul>
-		{#each (await selectedListPromise) ?? [] as item, idx (idx)}
-			<li>{item.label}</li>
-		{/each}
-	</ul> -->
+{#snippet loadinSVG(sizeClasses: string = 'h-4 w-4')}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		class="animate-spin {sizeClasses}"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+	>
+{/snippet}
 
-	{@const awaitTrigger = (await selectedListPromise) ?? []}
-	{#if awaitTrigger.length > 0}
-		{@render list(inputSelectedItemCacheState)}
-	{:else}
-		<p>no data!</p>
-	{/if}
+{#snippet listItem({ id, label, isLoading }: { id: string; label: string; isLoading: boolean })}
+	<!-- list-item -->
+	<div
+		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t p-2 wrap-break-word outline-none first:border-t-0"
+	>
+		<!-- content -->
+		<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
+			{#if isLoading}
+				{@render loadinSVG()}
+			{/if}
+			<!-- label -->
+			<span class="text-sm">{label}</span>
+		</div>
+		<!-- action -->
+		<div class="inline-flex shrink-0 items-center gap-2.5">
+			{#if !disabled && !readonly}
+				<button
+					disabled={isLoading}
+					type="button"
+					onclick={() => removeInputSelectedItem(id)}
+					class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-2 outline-none"
+					aria-label="{label} kaldır"
+				>
+					{#if isLoading}
+						{@render loadinSVG()}
+					{:else}
+						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					{/if}
+				</button>
+			{/if}
+		</div>
+	</div>
+{/snippet}
 
-	{#snippet pending()}
-		<p>loading...</p>
-	{/snippet}
-</svelte:boundary>
-
-<!-- {#if selectedListPromise.error}
-	<p>oops!</p>
-{:else if selectedListPromise.loading}
-	<p>loading...</p>
-{:else}
-	{#if selectedListPromise.current}
-		{@render list(inputSelectedItemCacheState)}
-	{:else}
-		<p>no data!</p>
-	{/if}
-{/if} -->
-
-{#snippet list(items: Record<string, string>[])}
-	{@const isEmpty = items.length === 0}
+{#snippet list()}
+	{@const isLoading = selectedListPromise.loading}
+	{@const isEmpty = multiple ? value.length === 0 : value === ''}
+	{@const listItems = (multiple ? value : [value]) as string[]}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
 		<div class="border-surface-300 max-h-80 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
-			{#each items as item, idx (idx)}
-				<!-- list-item -->
-				<div
-					class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t p-2 wrap-break-word outline-none first:border-t-0"
-				>
-					<!-- content -->
-					<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
-						<!-- label -->
-						<span class="text-sm">{item.label}</span>
-					</div>
-					<!-- action -->
-					<div class="inline-flex shrink-0 items-center gap-2.5">
-						{#if !disabled && !readonly}
-							<button
-								type="button"
-								onclick={() => handleRemoveRelation(item.id)}
-								class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-2 outline-none"
-								aria-label="{item.label} kaldır"
-							>
-								<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-								</svg>
-							</button>
-						{/if}
-					</div>
-				</div>
-			{/each}
+			{#if !isEmpty}
+				{#if isLoading}
+					{#each listItems as item, i (i)}
+						{@render listItem({ id: item, label: item, isLoading })}
+					{/each}
+				{:else}
+					{#each listItems as item, i (i)}
+						{@render listItem({ id: item, label: itemDetailCache.get(item)?.label ?? 'no data', isLoading })}
+					{/each}
+				{/if}
+			{/if}
 		</div>
 		<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>
 			<button
+				disabled={isLoading || disabled}
 				type="button"
 				{id}
-				onclick={handlePickerOpen}
+				onclick={pickerOpen}
 				class="slc-input group-hover/btn:bg-surface-400/50 focus:bg-surface-500/50 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md p-1 text-start text-sm font-bold outline-none"
 				{@attach watchValueChange}
-				{disabled}
 				tabindex={disabled || readonly ? -1 : 0}
 			>
-				<svg class="h-3.5 w-3.5" stroke="currentColor" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-				</svg>
+				{#if isLoading}
+					{@render loadinSVG()}
+				{:else}
+					<svg class="h-4 w-4" stroke="currentColor" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+					</svg>
+				{/if}
+
 				<span>{label || 'Kayıt seçiciyi aç'}</span>
 			</button>
 		</div>
 	</output>
 {/snippet}
 
-<!-- {#if multiple && Array.isArray(value) && value.length > 0}
-	{@render list(inputSelectedItemCacheState)}
-{:else if typeof value === 'string' && value && collection}
-	{@render list(inputSelectedItemCacheState)}
-{:else}
-	{@render list([])}
-{/if} -->
+{@render list()}
 
 <dialog
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
@@ -324,12 +314,11 @@
 
 		<div class="bg-surface-100 border-surface-200 flex max-h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
 			{#if isOpen}
-				<!-- {@const pickerData = await getRelationList({ search: pickerSearchString, collection, timestamp: new Date().getTime() })} -->
 				{#each (await pickerData)?.items ?? [] as item, idx (idx)}
 					{#if typeof item.id === 'string'}
-						{@const isMultiple = Array.isArray(pickerSelected)}
+						{@const isMultiple = Array.isArray(pickerValue)}
 						{@const isRadio = !isMultiple}
-						{@const isSelected = isMultiple ? pickerSelected.includes(item.id) : pickerSelected === item.id}
+						{@const isSelected = isMultiple ? pickerValue.includes(item.id) : pickerValue === item.id}
 						<button
 							type="button"
 							aria-checked={isSelected}
@@ -352,32 +341,30 @@
 		</div>
 
 		{#if isOpen}
-			<div class="border-surface-200 border-t pt-3">
-				<p class="text-surface-500 mb-2 text-xs font-semibold tracking-wider uppercase">Seçilen Kayıtlar</p>
-				<p>{JSON.stringify((await pickerData)?.items, null, 2)}</p>
-				<!-- <div class="flex min-h-8 flex-wrap items-center gap-1.5">
-					{#if multiple && Array.isArray(pickerSelected) && collection}
-						{@const relationList = await getMultipleRelationSelectedList({ ids: pickerSelected, collection, timestamp: new Date().getTime() })}
-						{#each relationList as item, idx (idx)}
+			{@const isEmpty = multiple ? pickerValue.length === 0 : pickerValue === ''}
+			{@const listItems = (multiple ? pickerValue : [pickerValue]) as string[]}
+			{#if !isEmpty}
+				<div class="border-surface-200 border-t pt-3">
+					<p class="text-surface-500 mb-2 text-xs font-semibold tracking-wider uppercase">Seçilen Kayıtlar</p>
+					<div class="flex min-h-8 flex-wrap items-center gap-1.5">
+						{#each listItems as item, i (i)}
 							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
-								<span>{item.label}</span>
-								<button type="button" onclick={() => handleToggle(item)} class="text-primary-500 hover:text-primary-800 ml-1 font-bold outline-none">✕</button>
+								<span>{itemDetailCache.get(item)?.label ?? item}</span>
+								<button
+									type="button"
+									onclick={() => removePickerSelectedItem(item)}
+									class="text-primary-500 hover:text-primary-800 ml-1 font-bold outline-none"
+								>
+									✕
+								</button>
 							</div>
 						{/each}
-					{:else if typeof pickerSelected === 'string' && pickerSelected && collection}
-						{@const relationList = await getSingleRelationSelectedList({ id: pickerSelected, collection, timestamp: new Date().getTime() })}
-						{#each relationList as item, idx (idx)}
-							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
-								<span>{item.label}</span>
-								<button type="button" onclick={() => handleToggle(item)} class="text-primary-500 hover:text-primary-800 ml-1 font-bold outline-none">✕</button>
-							</div>
-						{/each}
-					{/if}
-					{#if pickerSelected === '' || (Array.isArray(pickerSelected) && pickerSelected.length === 0)}
-						<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
-					{/if}
-				</div> -->
-			</div>
+						{#if pickerValue === '' || (Array.isArray(pickerValue) && pickerValue.length === 0)}
+							<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		{/if}
 
 		<div class="border-surface-200 mt-2 flex justify-end gap-2 border-t pt-3">
