@@ -38,7 +38,6 @@
 	let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
 	let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
 	let pickerValue = $state(value);
-	let pickerData = $derived(getRelationList({ ...pickerSearch, collection }));
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -286,7 +285,7 @@
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	{@attach dialogEvents}
-	class="bg-surface-50 m-auto w-11/12 max-w-lg rounded-lg shadow-lg"
+	class="bg-surface-50 shadow-surface-400 m-auto w-11/12 max-w-lg rounded-md shadow-md"
 	bind:this={dialog}
 	class:closing={isClosing}
 	{@attach focustrap}
@@ -309,18 +308,28 @@
 				}}
 			/>
 		</div>
+		{#snippet loading()}
+			<div class="bg-surface-300/50 absolute inset-0 flex items-center justify-center">
+				{#if isOpen}
+					<div class="flex items-center gap-2">
+						{@render loadinSVG()}
+						<span>Lütfen bekleyin...</span>
+					</div>
+				{/if}
+			</div>
+		{/snippet}
 
 		<!-- all records -->
 		<div class="px-3">
 			<p class="mb-2 text-xs font-semibold tracking-wider">Kayıtlar</p>
-			<div class="bg-surface-200 border-surface-300 flex h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
+			<div class="bg-surface-200 border-surface-300 relative flex h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
 				{#if isOpen}
-					{#if pickerData.error}
-						<p>oops!</p>
-					{:else if pickerData.loading}
-						<p>loading...</p>
-					{:else}
-						{#each pickerData.current?.items ?? [] as item, idx (idx)}
+					<svelte:boundary>
+						{#if $effect.pending()}
+							{@render loading()}
+						{/if}
+
+						{#each (await getRelationList({ ...pickerSearch, collection })).items ?? [] as item, idx (idx)}
 							{#if typeof item.id === 'string'}
 								{@const isMultiple = Array.isArray(pickerValue)}
 								{@const isRadio = !isMultiple}
@@ -343,7 +352,11 @@
 								</button>
 							{/if}
 						{/each}
-					{/if}
+
+						{#snippet pending()}
+							{@render loading()}
+						{/snippet}
+					</svelte:boundary>
 				{/if}
 			</div>
 		</div>
