@@ -72,15 +72,15 @@
 				info: 'bg-info-200 hover:bg-info-300 active:bg-info-400 text-info-950 border-transparent'
 			},
 			ghost: {
-				primary: 'bg-transparent hover:bg-primary-100 active:bg-primary-200 text-primary-600 active:text-primary-700 border-transparent',
-				secondary: 'bg-transparent hover:bg-secondary-100 active:bg-secondary-200 text-secondary-600 active:text-secondary-700 border-transparent',
-				tertiary: 'bg-transparent hover:bg-tertiary-100 active:bg-tertiary-200 text-tertiary-600 active:text-tertiary-700 border-transparent',
-				quaternary: 'bg-transparent hover:bg-quaternary-100 active:bg-quaternary-200 text-quaternary-600 active:text-quaternary-700 border-transparent',
-				surface: 'bg-transparent hover:bg-surface-100 active:bg-surface-200 text-surface-700 active:text-surface-800 border-transparent',
-				success: 'bg-transparent hover:bg-success-100 active:bg-success-200 text-success-600 active:text-success-700 border-transparent',
-				warning: 'bg-transparent hover:bg-warning-100 active:bg-warning-200 text-warning-600 active:text-warning-700 border-transparent',
-				error: 'bg-transparent hover:bg-error-100 active:bg-error-200 text-error-600 active:text-error-700 border-transparent',
-				info: 'bg-transparent hover:bg-info-100 active:bg-info-200 text-info-600 active:text-info-700 border-transparent'
+				primary: 'bg-transparent hover:bg-primary-200 active:bg-primary-300 text-primary-600 active:text-primary-700 border-transparent',
+				secondary: 'bg-transparent hover:bg-secondary-200 active:bg-secondary-300 text-secondary-600 active:text-secondary-700 border-transparent',
+				tertiary: 'bg-transparent hover:bg-tertiary-200 active:bg-tertiary-300 text-tertiary-600 active:text-tertiary-700 border-transparent',
+				quaternary: 'bg-transparent hover:bg-quaternary-200 active:bg-quaternary-300 text-quaternary-600 active:text-quaternary-700 border-transparent',
+				surface: 'bg-transparent hover:bg-surface-200 active:bg-surface-300 text-surface-600 active:text-surface-700 border-transparent',
+				success: 'bg-transparent hover:bg-success-200 active:bg-success-300 text-success-600 active:text-success-700 border-transparent',
+				warning: 'bg-transparent hover:bg-warning-200 active:bg-warning-300 text-warning-600 active:text-warning-700 border-transparent',
+				error: 'bg-transparent hover:bg-error-200 active:bg-error-300 text-error-600 active:text-error-700 border-transparent',
+				info: 'bg-transparent hover:bg-info-200 active:bg-info-300 text-info-600 active:text-info-700 border-transparent'
 			}
 		}[variant][color]
 	);

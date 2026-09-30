@@ -4,6 +4,7 @@
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from './common.js';
+	import { Button } from '#lib/components/ui/inputs/index.js';
 
 	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -14,8 +15,8 @@
 		multiple = false as Tmultiple,
 		value = $bindable((multiple ? [] : '') as RelationValueTypeChoice<Tmultiple>),
 		message = 'Onaylıyor musunuz?',
-		yes = 'Evet',
-		no = 'Hayır',
+		yes = 'Seç',
+		no = 'İptal',
 		class: classes = '',
 		id = '',
 		name,
@@ -32,12 +33,12 @@
 
 	let itemDetailCache = new SvelteMap<string, Record<string, string>>();
 
+	// let pickerDataTimestamp = $state(new Date().getTime());
 	// svelte-ignore state_referenced_locally
-	let pickerSearchString = $state(defaultSearch);
+	let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
 	let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
 	let pickerValue = $state(value);
-	let pickerDataTimestamp = $state(new Date().getTime());
-	let pickerData = $derived(getRelationList({ search: pickerSearchString, collection, timestamp: pickerDataTimestamp }));
+	let pickerData = $derived(getRelationList({ ...pickerSearch, collection }));
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -109,9 +110,7 @@
 		if (disabled || readonly) return;
 		pickerAnswer = 'waiting';
 		pickerValue = value;
-		pickerSearchString = '';
-
-		// pickerDataTimestamp = new Date().getTime();
+		pickerSearch = { search: defaultSearch, timestamp: new Date().getTime() };
 
 		const { confirm } = await show();
 
@@ -206,7 +205,7 @@
 {#snippet listItem({ id, label, isLoading }: { id: string; label: string; isLoading: boolean })}
 	<!-- list-item -->
 	<div
-		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t p-2 wrap-break-word outline-none first:border-t-0"
+		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-2 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
 		<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
@@ -214,7 +213,7 @@
 				{@render loadinSVG()}
 			{/if}
 			<!-- label -->
-			<span class="text-sm">{label}</span>
+			<span class="bg-surface-300 border-surface-400 rounded-sm border px-1 py-0.5 text-sm shadow-sm">{label}</span>
 		</div>
 		<!-- action -->
 		<div class="inline-flex shrink-0 items-center gap-2.5">
@@ -287,18 +286,17 @@
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	{@attach dialogEvents}
-	class="bg-surface-300 border-surface-200 m-auto w-11/12 max-w-lg rounded-lg border p-0 shadow-lg"
+	class="bg-surface-50 m-auto w-11/12 max-w-lg rounded-lg shadow-lg"
 	bind:this={dialog}
 	class:closing={isClosing}
 	{@attach focustrap}
 	{@attach portal}
 >
-	<div class="dialog-content flex flex-col gap-4">
-		<p class="text-surface-900 text-lg font-semibold">{message}</p>
-
-		<div class="relative">
+	<div class="flex flex-col gap-3">
+		<!-- input -->
+		<div class="px-3 pt-3">
 			<input
-				value={pickerSearchString}
+				value={pickerSearch.search}
 				type="text"
 				placeholder="Ara..."
 				class="{inputClasses.base} {inputClasses.variants.default} {inputClasses.sizes.md}"
@@ -306,54 +304,67 @@
 					if (e.key === 'Enter') {
 						e.preventDefault();
 						const target = e.target as HTMLInputElement;
-						pickerSearchString = target.value;
+						pickerSearch = { search: target.value, timestamp: new Date().getTime() };
 					}
 				}}
 			/>
 		</div>
 
-		<div class="bg-surface-100 border-surface-200 flex max-h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
-			{#if isOpen}
-				{#each (await pickerData)?.items ?? [] as item, idx (idx)}
-					{#if typeof item.id === 'string'}
-						{@const isMultiple = Array.isArray(pickerValue)}
-						{@const isRadio = !isMultiple}
-						{@const isSelected = isMultiple ? pickerValue.includes(item.id) : pickerValue === item.id}
-						<button
-							type="button"
-							aria-checked={isSelected}
-							role={isRadio ? 'radio' : 'checkbox'}
-							onclick={() => handleToggle(item)}
-							class="focus:ring-primary-500/20 w-full rounded-md text-left outline-none focus:ring-2"
-						>
-							<div
-								class="flex items-center justify-between rounded-md border p-2.5 transition-all duration-150 {isSelected
-									? 'bg-primary-50 border-primary-500 text-primary-900'
-									: 'bg-surface-200 hover:bg-surface-300 text-surface-800 border-transparent'}"
-							>
-								<span>{item.label}</span>
-								<span class="indicator text-primary-600 font-bold">{isSelected ? '✓' : ''}</span>
-							</div>
-						</button>
+		<!-- all records -->
+		<div class="px-3">
+			<p class="mb-2 text-xs font-semibold tracking-wider">Kayıtlar</p>
+			<div class="bg-surface-200 border-surface-300 flex h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
+				{#if isOpen}
+					{#if pickerData.error}
+						<p>oops!</p>
+					{:else if pickerData.loading}
+						<p>loading...</p>
+					{:else}
+						{#each pickerData.current?.items ?? [] as item, idx (idx)}
+							{#if typeof item.id === 'string'}
+								{@const isMultiple = Array.isArray(pickerValue)}
+								{@const isRadio = !isMultiple}
+								{@const isSelected = isMultiple ? pickerValue.includes(item.id) : pickerValue === item.id}
+								<button
+									type="button"
+									aria-checked={isSelected}
+									role={isRadio ? 'radio' : 'checkbox'}
+									onclick={() => handleToggle(item)}
+									class="w-full rounded-md text-left"
+								>
+									<div
+										class="flex items-center justify-between rounded-md border p-2.5 transition-all duration-150 {isSelected
+											? 'bg-primary-50 border-primary-500 text-primary-900'
+											: 'bg-surface-200 hover:bg-surface-300 text-surface-800 border-transparent'}"
+									>
+										<span>{item.label}</span>
+										<span class="indicator text-primary-600 font-bold">{isSelected ? '✓' : ''}</span>
+									</div>
+								</button>
+							{/if}
+						{/each}
 					{/if}
-				{/each}
-			{/if}
+				{/if}
+			</div>
 		</div>
 
+		<!-- selected records -->
 		{#if isOpen}
 			{@const isEmpty = multiple ? pickerValue.length === 0 : pickerValue === ''}
 			{@const listItems = (multiple ? pickerValue : [pickerValue]) as string[]}
-			{#if !isEmpty}
-				<div class="border-surface-200 border-t pt-3">
-					<p class="text-surface-500 mb-2 text-xs font-semibold tracking-wider uppercase">Seçilen Kayıtlar</p>
-					<div class="flex min-h-8 flex-wrap items-center gap-1.5">
+
+			<div class="px-3">
+				<p class="mb-2 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
+				<div class="bg-surface-200 border-surface-300 flex h-10 flex-wrap items-center gap-1.5 rounded-md border p-1">
+					{#if !isEmpty}
 						{#each listItems as item, i (i)}
 							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
 								<span>{itemDetailCache.get(item)?.label ?? item}</span>
 								<button
 									type="button"
+									tabindex="-1"
 									onclick={() => removePickerSelectedItem(item)}
-									class="text-primary-500 hover:text-primary-800 ml-1 font-bold outline-none"
+									class="text-primary-500 hover:text-primary-800 ml-1 font-bold"
 								>
 									✕
 								</button>
@@ -362,26 +373,16 @@
 						{#if pickerValue === '' || (Array.isArray(pickerValue) && pickerValue.length === 0)}
 							<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
 						{/if}
-					</div>
+					{/if}
 				</div>
-			{/if}
+			</div>
 		{/if}
 
-		<div class="border-surface-200 mt-2 flex justify-end gap-2 border-t pt-3">
-			<button
-				type="button"
-				onclick={() => hide('no button clicked', false)}
-				class="border-surface-300 text-surface-700 hover:bg-surface-50 cursor-pointer rounded-md border bg-white px-4 py-2 transition-all duration-150 outline-none active:scale-[0.98]"
-			>
-				{no}
-			</button>
-			<button
-				type="button"
-				onclick={() => hide('yes button clicked', true)}
-				class="bg-primary-600 hover:bg-primary-700 cursor-pointer rounded-md px-4 py-2 font-medium text-white transition-all duration-150 outline-none active:scale-[0.98]"
-			>
-				{yes}
-			</button>
+		<!-- actions -->
+		<div class="bg-surface-100 border-surface-200 flex items-center justify-between gap-2 border-t p-3">
+			<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
+
+			<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
 		</div>
 	</div>
 </dialog>
@@ -460,8 +461,4 @@
 		}
 	}
 	/* END Base Dialog Style */
-
-	.dialog-content {
-		padding: 1.5rem;
-	}
 </style>
