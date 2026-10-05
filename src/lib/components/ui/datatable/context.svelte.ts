@@ -106,36 +106,37 @@ class TableContext<TData extends Row> {
 	// ################################## BEGIN Current/Query Data Watch ##################################################################################################################
 	watchCurrentChanged = () => {
 		const query = this.query;
+		const current = query?.current;
 
-		if (query && query.ready) {
-			const current = query.current;
-
-			if (current && typeof current === 'object' && 'items' in current) {
-				this.paginable = true;
-				this.#currentData = current as ListResult<TData>;
-			} else if (Array.isArray(current)) {
-				this.paginable = false;
-				this.#currentData = {
-					items: current,
-					page: 1,
-					perPage: current.length,
-					totalItems: current.length,
-					totalPages: 1
-				};
-			} else if (current) {
-				this.paginable = false;
-				this.#currentData = {
-					items: [current as TData],
-					page: 1,
-					perPage: 1,
-					totalItems: 1,
-					totalPages: 1
-				};
-			} else {
-				this.paginable = false;
-				this.#currentData = undefined;
+		return untrack(() => {
+			if (query && query.ready) {
+				if (current && typeof current === 'object' && 'items' in current) {
+					this.paginable = true;
+					this.#currentData = current as ListResult<TData>;
+				} else if (Array.isArray(current)) {
+					this.paginable = false;
+					this.#currentData = {
+						items: current,
+						page: 1,
+						perPage: current.length,
+						totalItems: current.length,
+						totalPages: 1
+					};
+				} else if (current) {
+					this.paginable = false;
+					this.#currentData = {
+						items: [current as TData],
+						page: 1,
+						perPage: 1,
+						totalItems: 1,
+						totalPages: 1
+					};
+				} else {
+					this.paginable = false;
+					this.#currentData = undefined;
+				}
 			}
-		}
+		});
 	};
 	// ################################## END Current/Query Data Watch ##################################################################################################################
 

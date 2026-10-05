@@ -12,6 +12,7 @@ const relationListParamsSchema = v.object({
 	collection: v.picklist(filteredCollectionValues),
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
+export type RelationListParamsType = v.InferOutput<typeof relationListParamsSchema>;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

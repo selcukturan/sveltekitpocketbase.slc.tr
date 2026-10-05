@@ -2,6 +2,7 @@ import type { SvelteHTMLElements } from 'svelte/elements';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import type { IconName } from '#lib/components/icons/Icon.svelte';
 import type { Snippet } from 'svelte';
+import type { SvelteMap } from 'svelte/reactivity';
 
 // ################# BEGIN Text.svelte Props ###############################
 export type TextValueChangeArgs = { value: string; beforeValue: string; initial: boolean };
@@ -69,6 +70,7 @@ export type SelectPropsType<Tmultiple extends boolean> = SelectBasePropsType & {
 // ################# BEGIN Relation.svelte Props ###############################
 export type RelationValueTypeChoice<T extends boolean> = T extends true ? string[] : string;
 export type RelationResolveData = { confirm: boolean };
+export type ItemDetailCacheType = SvelteMap<string, Record<string, string>>;
 
 export type RelationValueChangeArgs<T extends boolean> = {
 	value: RelationValueTypeChoice<T>;
@@ -76,8 +78,10 @@ export type RelationValueChangeArgs<T extends boolean> = {
 	initial: boolean;
 };
 
+export type CollectionName = Exclude<`${Collections}`, `_${string}`>;
+
 export type RelationPropsType<Tmultiple extends boolean> = {
-	collection: Exclude<`${Collections}`, `_${string}`>;
+	collection: CollectionName;
 	id?: string;
 	name?: string;
 	label?: string;
@@ -95,6 +99,15 @@ export type RelationPropsType<Tmultiple extends boolean> = {
 	disabled?: boolean;
 	readonly?: boolean;
 	onValueChange?: (args: RelationValueChangeArgs<Tmultiple>) => void;
+};
+
+export type HideFuncType = (message: string, confirm: boolean) => void;
+
+export type RelationDialogContentPropsType<Tmultiple extends boolean> = {
+	hide: HideFuncType;
+	yes?: string;
+	no?: string;
+	multiple?: Tmultiple;
 };
 // ################# END Relation.svelte Props ###############################
 

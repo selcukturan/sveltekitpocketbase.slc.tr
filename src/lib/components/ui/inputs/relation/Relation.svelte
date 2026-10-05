@@ -3,19 +3,20 @@
 	import { tick, untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
-	import { inputClasses } from './common.js';
-	import { Button } from '#lib/components/ui/inputs/index.js';
+	import { inputClasses } from '../common.js';
 
-	import { getRelationList, getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
-	import { SvelteMap } from 'svelte/reactivity';
-	import type { RelationValueTypeChoice, RelationResolveData, RelationPropsType, RelationValueChangeArgs } from './type.js';
+	import { getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
+	import type { RelationValueTypeChoice, RelationResolveData, RelationPropsType, RelationValueChangeArgs, HideFuncType } from '../type.js';
+	import RelationDialogContent from './dialog-content.svelte';
+	import { createRelationInputsContext } from './context.svelte.js';
+	import LoadingSvg from './loading-svg.svelte';
 
 	let {
 		collection,
 		multiple = false as Tmultiple,
 		value = $bindable((multiple ? [] : '') as RelationValueTypeChoice<Tmultiple>),
 		message = 'Onaylıyor musunuz?',
-		yes = 'Seç',
+		yes = 'Seçimi Kaydet',
 		no = 'İptal',
 		class: classes = '',
 		id = '',
@@ -31,13 +32,13 @@
 		onValueChange
 	}: RelationPropsType<Tmultiple> = $props();
 
-	let itemDetailCache = new SvelteMap<string, Record<string, string>>();
+	// svelte-ignore state_referenced_locally
+	const context = createRelationInputsContext<Tmultiple>(value, defaultSearch); // init
 
 	// let pickerDataTimestamp = $state(new Date().getTime());
-	// svelte-ignore state_referenced_locally
-	let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
-	let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
-	let pickerValue = $state(value);
+	// let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
+	// let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
+	// let context.pickerValue = $state(value);
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let isOpen = $state(false);
@@ -56,7 +57,7 @@
 	};
 
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-	const hide = async (log: string, confirm: boolean) => {
+	const hide: HideFuncType = async (log, confirm) => {
 		if (isClosing) return;
 		isClosing = true;
 		await sleep(animationDuration);
@@ -91,40 +92,26 @@
 		};
 	};
 
-	function handleToggle(item: Record<string, string>) {
-		const isSelected = Array.isArray(pickerValue) ? pickerValue.includes(item.id) : pickerValue === item.id;
-
-		itemDetailCache.set(item.id, item);
-
-		if (Array.isArray(pickerValue)) {
-			const newSelection = isSelected ? pickerValue.filter((id) => id !== item.id) : [...pickerValue, item.id];
-			pickerValue = newSelection as RelationValueTypeChoice<Tmultiple>;
-		} else {
-			const newSelection = isSelected ? '' : item.id;
-			pickerValue = newSelection as RelationValueTypeChoice<Tmultiple>;
-		}
-	}
-
 	async function pickerOpen() {
 		if (disabled || readonly) return;
-		pickerAnswer = 'waiting';
-		pickerValue = value;
-		pickerSearch = { search: defaultSearch, timestamp: new Date().getTime() };
+		// pickerAnswer = 'waiting';
+		context.pickerValue = value;
+		context.pickerParams = { collection, search: defaultSearch, timestamp: new Date().getTime() };
 
 		const { confirm } = await show();
 
 		if (confirm) {
-			pickerAnswer = 'true';
-			if (multiple && Array.isArray(pickerValue)) {
-				const newValue = pickerValue as string[];
+			// pickerAnswer = 'true';
+			if (multiple && Array.isArray(context.pickerValue)) {
+				const newValue = context.pickerValue as string[];
 				value = newValue as RelationValueTypeChoice<Tmultiple>;
-			} else if (!multiple && typeof pickerValue === 'string') {
-				const newValue = pickerValue as string;
+			} else if (!multiple && typeof context.pickerValue === 'string') {
+				const newValue = context.pickerValue as string;
 				value = newValue as RelationValueTypeChoice<Tmultiple>;
 			}
 			await tick();
 		} else {
-			pickerAnswer = 'false';
+			// pickerAnswer = 'false';
 		}
 	}
 
@@ -155,15 +142,6 @@
 		}
 	}
 
-	function removePickerSelectedItem(idToRemove: string) {
-		if (disabled || readonly) return;
-		if (multiple && Array.isArray(pickerValue)) {
-			pickerValue = pickerValue.filter((id) => id !== idToRemove) as RelationValueTypeChoice<Tmultiple>;
-		} else if (!multiple && pickerValue === idToRemove) {
-			pickerValue = '' as RelationValueTypeChoice<Tmultiple>;
-		}
-	}
-
 	// ######### BEGIN: Initial Selected List ###########
 	let selectedListPromiseTimestamp = $state(new Date().getTime());
 	let selectedListPromiseValue = $state.raw(value);
@@ -180,26 +158,13 @@
 					timestamp: selectedListPromiseTimestamp
 				})
 	);
-	const watchSelectedListPromise = () => selectedListPromise.current?.forEach((item) => itemDetailCache.set(item.id, item));
+	const watchSelectedListPromise = () => selectedListPromise.current?.forEach((item) => context.itemDetailCache.set(item.id, item));
 	// ######### END: Initial Selected List #############
 
 	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
 </script>
 
 <div style:display="none" {@attach watchSelectedListPromise}>relation-component-state-watcher</div>
-
-{#snippet loadinSVG(sizeClasses: string = 'h-4 w-4')}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		class="animate-spin {sizeClasses}"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
-	>
-{/snippet}
 
 {#snippet listItem({ id, label, isLoading }: { id: string; label: string; isLoading: boolean })}
 	<!-- list-item -->
@@ -209,7 +174,7 @@
 		<!-- content -->
 		<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
 			{#if isLoading}
-				{@render loadinSVG()}
+				<LoadingSvg />
 			{/if}
 			<!-- label -->
 			<span class="bg-surface-300 border-surface-400 rounded-sm border px-1 py-0.5 text-sm shadow-sm">{label}</span>
@@ -225,7 +190,7 @@
 					aria-label="{label} kaldır"
 				>
 					{#if isLoading}
-						{@render loadinSVG()}
+						<LoadingSvg />
 					{:else}
 						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -250,7 +215,7 @@
 					{/each}
 				{:else}
 					{#each listItems as item, i (i)}
-						{@render listItem({ id: item, label: itemDetailCache.get(item)?.label ?? 'no data', isLoading })}
+						{@render listItem({ id: item, label: context.itemDetailCache.get(item)?.label ?? 'no data', isLoading })}
 					{/each}
 				{/if}
 			{/if}
@@ -266,7 +231,7 @@
 				tabindex={disabled || readonly ? -1 : 0}
 			>
 				{#if isLoading}
-					{@render loadinSVG()}
+					<LoadingSvg />
 				{:else}
 					<svg class="h-4 w-4" stroke="currentColor" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -291,113 +256,9 @@
 	{@attach focustrap}
 	{@attach portal}
 >
-	<div class="flex flex-col gap-3">
-		<!-- input -->
-		<div class="px-3 pt-3">
-			<input
-				value={pickerSearch.search}
-				type="text"
-				placeholder="Ara..."
-				class="{inputClasses.base} {inputClasses.variants.default} {inputClasses.sizes.md}"
-				onkeydown={(e) => {
-					if (e.key === 'Enter') {
-						e.preventDefault();
-						const target = e.target as HTMLInputElement;
-						pickerSearch = { search: target.value, timestamp: new Date().getTime() };
-					}
-				}}
-			/>
-		</div>
-		{#snippet loading()}
-			<div class="bg-surface-300/50 absolute inset-0 flex items-center justify-center">
-				{#if isOpen}
-					<div class="flex items-center gap-2">
-						{@render loadinSVG()}
-						<span>Lütfen bekleyin...</span>
-					</div>
-				{/if}
-			</div>
-		{/snippet}
-
-		<!-- all records -->
-		<div class="px-3">
-			<p class="mb-2 text-xs font-semibold tracking-wider">Kayıtlar</p>
-			<div class="bg-surface-200 border-surface-300 relative flex h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
-				{#if isOpen}
-					<svelte:boundary>
-						{#if $effect.pending()}
-							{@render loading()}
-						{/if}
-
-						{#each (await getRelationList({ ...pickerSearch, collection })).items ?? [] as item, idx (idx)}
-							{#if typeof item.id === 'string'}
-								{@const isMultiple = Array.isArray(pickerValue)}
-								{@const isRadio = !isMultiple}
-								{@const isSelected = isMultiple ? pickerValue.includes(item.id) : pickerValue === item.id}
-								<button
-									type="button"
-									aria-checked={isSelected}
-									role={isRadio ? 'radio' : 'checkbox'}
-									onclick={() => handleToggle(item)}
-									class="w-full rounded-md text-left"
-								>
-									<div
-										class="flex items-center justify-between rounded-md border p-2.5 transition-all duration-150 {isSelected
-											? 'bg-primary-50 border-primary-500 text-primary-900'
-											: 'bg-surface-200 hover:bg-surface-300 text-surface-800 border-transparent'}"
-									>
-										<span>{item.label}</span>
-										<span class="indicator text-primary-600 font-bold">{isSelected ? '✓' : ''}</span>
-									</div>
-								</button>
-							{/if}
-						{/each}
-
-						{#snippet pending()}
-							{@render loading()}
-						{/snippet}
-					</svelte:boundary>
-				{/if}
-			</div>
-		</div>
-
-		<!-- selected records -->
-		{#if isOpen}
-			{@const isEmpty = multiple ? pickerValue.length === 0 : pickerValue === ''}
-			{@const listItems = (multiple ? pickerValue : [pickerValue]) as string[]}
-
-			<div class="px-3">
-				<p class="mb-2 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
-				<div class="bg-surface-200 border-surface-300 flex h-10 flex-wrap items-center gap-1.5 rounded-md border p-1">
-					{#if !isEmpty}
-						{#each listItems as item, i (i)}
-							<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
-								<span>{itemDetailCache.get(item)?.label ?? item}</span>
-								<button
-									type="button"
-									tabindex="-1"
-									onclick={() => removePickerSelectedItem(item)}
-									class="text-primary-500 hover:text-primary-800 ml-1 font-bold"
-								>
-									✕
-								</button>
-							</div>
-						{/each}
-						{#if pickerValue === '' || (Array.isArray(pickerValue) && pickerValue.length === 0)}
-							<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
-						{/if}
-					{/if}
-				</div>
-			</div>
-		{/if}
-
-		<!-- actions -->
-		<div class="bg-surface-100 border-surface-200 flex items-center justify-between gap-2 border-t p-3">
-			<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
-
-			<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
-		</div>
-	</div>
+	{#if isOpen}
+		<RelationDialogContent {hide} {multiple} {yes} {no} />
+	{/if}
 </dialog>
 
 <style>
