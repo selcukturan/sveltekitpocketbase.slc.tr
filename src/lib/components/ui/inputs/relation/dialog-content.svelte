@@ -3,15 +3,13 @@
 	import { Button } from '#lib/components/ui/inputs/index.js';
 	import { getRelationList } from '#lib/remotes/relations.remote.js';
 	import { untrack } from 'svelte';
-	import type { RelationValueTypeChoice, RelationResolveData, RelationDialogContentPropsType } from '../type.js';
+	import type { RelationValueTypeChoice, RelationDialogContentPropsType } from '../type.js';
 	import { getRelationInputsContext } from './context.svelte.js';
 	import LoadingSvg from './loading-svg.svelte';
 
 	let { multiple = false as Tmultiple, yes = 'Seçimi Kaydet', no = 'İptal', hide }: RelationDialogContentPropsType<Tmultiple> = $props();
 
 	const context = getRelationInputsContext<Tmultiple>();
-
-	// let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
 
 	function handleToggle(item: Record<string, string>) {
 		const isSelected = Array.isArray(context.pickerValue) ? context.pickerValue.includes(item.id) : context.pickerValue === item.id;
@@ -37,7 +35,7 @@
 
 	let relationListPromise = $derived(getRelationList(context.pickerParams));
 	let isLoading = $derived(relationListPromise.loading);
-	let currentData = $state<typeof relationListPromise.current>(); // watchCurrentChanged ile değişir
+	let currentData = $state<typeof relationListPromise.current>();
 	let items = $derived(currentData?.items ?? []);
 	const watchCurrentChanged = () => {
 		const query = relationListPromise;
@@ -50,6 +48,66 @@
 		});
 	};
 </script>
+
+{#snippet circleCheck()}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-circle-check preview-icon"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg
+	>
+{/snippet}
+
+{#snippet circle()}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-circle preview-icon"><circle cx="12" cy="12" r="10" /></svg
+	>
+{/snippet}
+
+{#snippet square()}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-square preview-icon"><rect width="18" height="18" x="3" y="3" rx="2" /></svg
+	>
+{/snippet}
+
+{#snippet squareCheck()}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-square-check preview-icon"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="m16 9-5.5 5.5L8 12" /></svg
+	>
+{/snippet}
 
 <div class="flex flex-col gap-3" {@attach watchCurrentChanged}>
 	<!-- input -->
@@ -68,14 +126,10 @@
 			}}
 		/>
 	</div>
-	{#snippet loading()}
-
-	{/snippet}
-
 	<!-- all records -->
 	<div class="px-3">
 		<p class="mb-2 text-xs font-semibold tracking-wider">Kayıtlar</p>
-		<div class="bg-surface-200 border-surface-300 relative flex h-60 flex-col gap-1.5 overflow-y-auto rounded-md border p-1">
+		<div class="bg-surface-200 border-surface-300 relative flex h-60 flex-col gap-2 overflow-y-auto rounded-md border p-2">
 			{#if isLoading}
 				<div class="bg-surface-300/50 absolute inset-0 flex items-center justify-center">
 					<div class="flex items-center gap-2">
@@ -94,16 +148,25 @@
 						aria-checked={isSelected}
 						role={isRadio ? 'radio' : 'checkbox'}
 						onclick={() => handleToggle(item)}
-						class="w-full rounded-md text-left"
+						class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 select-none {isSelected
+							? 'bg-success-400/90 hover:bg-success-400/70'
+							: 'bg-surface-400/90 hover:bg-surface-400/60'}"
 					>
-						<div
-							class="flex items-center justify-between rounded-md border p-2.5 transition-all duration-150 {isSelected
-								? 'bg-primary-50 border-primary-500 text-primary-900'
-								: 'bg-surface-200 hover:bg-surface-300 text-surface-800 border-transparent'}"
-						>
-							<span>{item.label}</span>
-							<span class="indicator text-primary-600 font-bold">{isSelected ? '✓' : ''}</span>
-						</div>
+						{#if isRadio}
+							{#if isSelected}
+								{@render circleCheck()}
+							{:else}
+								{@render circle()}
+							{/if}
+						{:else}
+							{#if isSelected}
+								{@render squareCheck()}
+							{:else}
+								{@render square()}
+							{/if}
+						{/if}
+
+						<span>{item.label}</span>
 					</button>
 				{/if}
 			{/each}
@@ -112,24 +175,31 @@
 
 	<!-- selected records -->
 	{#if true}
-		{@const isEmpty = multiple ? context.pickerValue.length === 0 : context.pickerValue === ''}
-		{@const listItems = (multiple ? context.pickerValue : [context.pickerValue]) as string[]}
+		<!-- {@const listItems = (multiple ? context.pickerValue : [context.pickerValue]) as string[]} -->
+		{@const listItems = (Array.isArray(context.pickerValue) ? [...context.pickerValue].reverse() : context.pickerValue ? [context.pickerValue] : []) as string[]}
+		{@const isEmpty = listItems.length === 0}
 
 		<div class="px-3">
 			<p class="mb-2 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
-			<div class="bg-surface-200 border-surface-300 flex h-10 flex-wrap items-center gap-1.5 rounded-md border p-1">
+			<div tabindex="-1" class="bg-surface-200 border-surface-300 flex h-12 items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-1">
 				{#if !isEmpty}
 					{#each listItems as item, i (i)}
-						<div class="bg-primary-50 border-primary-200 text-primary-800 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
+						<div
+							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs whitespace-nowrap select-none"
+						>
 							<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
-							<button type="button" tabindex="-1" onclick={() => removePickerSelectedItem(item)} class="text-primary-500 hover:text-primary-800 ml-1 font-bold">
+							<button
+								type="button"
+								tabindex="-1"
+								onclick={() => removePickerSelectedItem(item)}
+								class="text-success-500 hover:text-success-800 ml-1 cursor-pointer font-bold"
+							>
 								✕
 							</button>
 						</div>
 					{/each}
-					{#if context.pickerValue === '' || (Array.isArray(context.pickerValue) && context.pickerValue.length === 0)}
-						<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
-					{/if}
+				{:else}
+					<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
 				{/if}
 			</div>
 		</div>

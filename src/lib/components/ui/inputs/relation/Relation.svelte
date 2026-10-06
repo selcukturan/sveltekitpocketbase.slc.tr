@@ -250,7 +250,7 @@
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	{@attach dialogEvents}
-	class="bg-surface-50 shadow-surface-400 m-auto w-11/12 max-w-lg rounded-md shadow-md"
+	class="bg-surface-50 shadow-surface-400 m-auto w-11/12 max-w-lg rounded-md shadow-2xl"
 	bind:this={dialog}
 	class:closing={isClosing}
 	{@attach focustrap}

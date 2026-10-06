@@ -406,7 +406,7 @@
 	{matchTriggerWidth}
 	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-400)'} "
 	--background-color="var(--color-surface-200)"
-	--box-shadow="0px 8px 5px -5px var(--color-surface-100)"
+	--box-shadow="0px 8px 5px -5px color-mix(in srgb, var(--color-surface-token-700) 30%, transparent)"
 	--gutter={inform === true ? '-3px' : '5px'}
 	--min-height="100px"
 	--max-height="320px"
@@ -469,15 +469,7 @@
 	{/snippet}
 
 	{#snippet children({ triggerId })}
-		<ul
-			bind:this={listbox}
-			id={listboxId}
-			role="listbox"
-			aria-labelledby={triggerId}
-			style:outline="none"
-			style:list-style-type="none"
-			class="slc-input space-y-1"
-		>
+		<ul bind:this={listbox} id={listboxId} role="listbox" aria-labelledby={triggerId} style:outline="none" style:list-style-type="none" class="slc-input space-y-1">
 			{#each displayOptions as option, i (i)}
 				{@const isSelected = selectedIndexes.includes(i)}
 				{@const isActive = i === activeIndex}
