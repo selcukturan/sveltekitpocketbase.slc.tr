@@ -145,9 +145,8 @@
 		</div>
 	{/if}
 
-	<!-- actions -->
-	<div class="bg-surface-200 border-surface-300 flex items-center justify-between gap-2 border-t p-3">
-		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" class="hover:bg-surface-300! active:bg-surface-300/70!" />
+	<div class="inset-shadow-surface-200 mt-2 flex items-center justify-between border-t p-3 inset-shadow-sm">
+		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
 
 		<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
 	</div>
