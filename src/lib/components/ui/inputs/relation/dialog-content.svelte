@@ -47,10 +47,6 @@
 			}
 		});
 	};
-
-	let outerW = $state(0);
-	let innerW = $state(0);
-	let hasScroll = $derived(innerW > outerW);
 </script>
 
 <div class="flex flex-col gap-1" {@attach watchCurrentChanged}>
@@ -122,68 +118,29 @@
 	{#if true}
 		{@const listItems = (Array.isArray(context.pickerValue) ? [...context.pickerValue].reverse() : context.pickerValue ? [context.pickerValue] : []) as string[]}
 		{@const isEmpty = listItems.length === 0}
-		<!-- class="bg-surface-100 border-surface-300 scrollbar-thumb-surface-100 hover:scrollbar-thumb-surface-300 scrollbar-thin scrollbar-track-transparent overflow-x-scroll overflow-y-hidden rounded-md border px-2.5 pt-2" -->
+
 		<div class="px-3">
 			<p class="pb-1 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
-			<p>{outerW} - {innerW} = {hasScroll}</p>
-			<div
-				bind:clientWidth={outerW}
-				tabindex="-1"
-				class="{hasScroll
-					? 'hover:scrollbar-thumb-surface-300'
-					: ''} scrollbar-thumb-surface-100 bg-surface-100 border-surface-300 scrollbar-thin scrollbar-track-transparent overflow-x-scroll overflow-y-hidden rounded-md border"
-			>
-				<div class="flex w-max flex-nowrap gap-2 px-2 pt-2.5 pb-0.5" bind:offsetWidth={innerW}>
-					{#if !isEmpty}
-						{#each listItems as item, i (i)}
-							<div
-								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
+			<div tabindex="-1" class="bg-surface-100 border-surface-300 flex items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-2.5">
+				{#if !isEmpty}
+					{#each listItems as item, i (i)}
+						<div
+							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
+						>
+							<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
+							<button
+								type="button"
+								tabindex="-1"
+								onclick={() => removePickerSelectedItem(item)}
+								class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
 							>
-								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
-								<button
-									type="button"
-									tabindex="-1"
-									onclick={() => removePickerSelectedItem(item)}
-									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
-								>
-									✕
-								</button>
-							</div>
-						{/each}
-						{#each listItems as item, i (i)}
-							<div
-								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
-							>
-								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
-								<button
-									type="button"
-									tabindex="-1"
-									onclick={() => removePickerSelectedItem(item)}
-									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
-								>
-									✕
-								</button>
-							</div>
-						{/each}
-						{#each listItems as item, i (i)}
-							<div
-								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
-							>
-								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
-								<button
-									type="button"
-									tabindex="-1"
-									onclick={() => removePickerSelectedItem(item)}
-									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer border border-transparent font-bold"
-								>
-									✕
-								</button>
-							</div>
-						{/each}
-					{:else}
-						<p class="text-surface-400 px-2.5 py-0.5 text-sm italic">Seçili kayıt yok.</p>
-					{/if}
-				</div>
+								✕
+							</button>
+						</div>
+					{/each}
+				{:else}
+					<p class="text-surface-400 border border-transparent py-0.5 text-xs font-bold whitespace-nowrap">Seçili kayıt yok.</p>
+				{/if}
 			</div>
 		</div>
 	{/if}

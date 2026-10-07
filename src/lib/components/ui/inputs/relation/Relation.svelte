@@ -17,7 +17,7 @@
 		value = $bindable((multiple ? [] : '') as RelationValueTypeChoice<Tmultiple>),
 		message = 'Onaylıyor musunuz?',
 		yes = 'Seçimi Kaydet',
-		no = 'İptal',
+		no = 'Vazgeç',
 		class: classes = '',
 		id = '',
 		name,
