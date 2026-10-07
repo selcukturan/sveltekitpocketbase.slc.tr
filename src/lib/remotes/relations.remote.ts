@@ -20,7 +20,7 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 	// 🔒🔐
 	await checkAuthenticated();
 
-	await sleep(1000);
+	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -47,7 +47,7 @@ export const getMultipleRelationSelectedList = query(relationMultipleSelectedLis
 	// 🔒🔐
 	await checkAuthenticated();
 
-	await sleep(1000);
+	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -81,7 +81,7 @@ export const getSingleRelationSelectedList = query(relationSingleSelectedListPar
 	// 🔒🔐
 	await checkAuthenticated();
 
-	await sleep(1000);
+	await sleep(300);
 
 	const { locals } = getRequestEvent();
 

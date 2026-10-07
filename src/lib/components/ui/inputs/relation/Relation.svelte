@@ -204,8 +204,8 @@
 
 {#snippet list()}
 	{@const isLoading = selectedListPromise.loading}
-	{@const isEmpty = multiple ? value.length === 0 : value === ''}
-	{@const listItems = (multiple ? value : [value]) as string[]}
+	{@const listItems = (Array.isArray(value) ? [...value].reverse() : value ? [value] : []) as string[]}
+	{@const isEmpty = listItems.length === 0}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
 		<div class="border-surface-300 max-h-80 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
 			{#if !isEmpty}

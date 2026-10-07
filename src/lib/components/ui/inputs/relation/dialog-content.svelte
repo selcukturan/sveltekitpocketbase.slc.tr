@@ -47,76 +47,21 @@
 			}
 		});
 	};
+
+	let outerW = $state(0);
+	let innerW = $state(0);
+	let hasScroll = $derived(innerW > outerW);
 </script>
 
-{#snippet circleCheck()}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-circle-check preview-icon"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg
-	>
-{/snippet}
-
-{#snippet circle()}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-circle preview-icon"><circle cx="12" cy="12" r="10" /></svg
-	>
-{/snippet}
-
-{#snippet square()}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-square preview-icon"><rect width="18" height="18" x="3" y="3" rx="2" /></svg
-	>
-{/snippet}
-
-{#snippet squareCheck()}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-square-check preview-icon"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="m16 9-5.5 5.5L8 12" /></svg
-	>
-{/snippet}
-
-<div class="flex flex-col gap-3" {@attach watchCurrentChanged}>
-	<!-- input -->
+<div class="flex flex-col gap-1" {@attach watchCurrentChanged}>
+	<!-- search record -->
 	<div class="px-3 pt-3">
+		<p class="pb-1 text-xs font-semibold tracking-wider">Kayıt Ara</p>
 		<input
 			value={context.pickerParams.search}
 			type="text"
 			placeholder="Ara..."
-			class="{inputClasses.base} {inputClasses.variants.default} {inputClasses.sizes.md}"
+			class="{inputClasses.base} {inputClasses.variants.default} {inputClasses.sizes.md} border-surface-300! bg-surface-100!"
 			onkeydown={(e) => {
 				if (e.key === 'Enter' && !isLoading) {
 					e.preventDefault();
@@ -128,86 +73,124 @@
 	</div>
 	<!-- all records -->
 	<div class="px-3">
-		<p class="mb-2 text-xs font-semibold tracking-wider">Kayıtlar</p>
-		<div class="bg-surface-200 border-surface-300 relative flex h-60 flex-col gap-2 overflow-y-auto rounded-md border p-2">
+		<p class="pb-1 text-xs font-semibold tracking-wider">Tüm Kayıtlar</p>
+		<div class="bg-surface-100 border-surface-300 relative flex h-48 flex-col overflow-y-auto rounded-md border">
 			{#if isLoading}
-				<div class="bg-surface-300/50 absolute inset-0 flex items-center justify-center">
+				<div class="bg-surface-100/50 absolute inset-0 flex items-center justify-center">
 					<div class="flex items-center gap-2">
 						<LoadingSvg />
 						<span>Lütfen bekleyin...</span>
 					</div>
 				</div>
 			{/if}
-			{#each items as item, idx (idx)}
-				{#if typeof item.id === 'string'}
-					{@const isMultiple = Array.isArray(context.pickerValue)}
-					{@const isRadio = !isMultiple}
-					{@const isSelected = isMultiple ? context.pickerValue.includes(item.id) : context.pickerValue === item.id}
-					<button
-						type="button"
-						aria-checked={isSelected}
-						role={isRadio ? 'radio' : 'checkbox'}
-						onclick={() => handleToggle(item)}
-						class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 select-none {isSelected
-							? 'bg-success-400/90 hover:bg-success-400/70'
-							: 'bg-surface-400/90 hover:bg-surface-400/60'}"
-					>
-						{#if isRadio}
-							{#if isSelected}
-								{@render circleCheck()}
-							{:else}
-								{@render circle()}
-							{/if}
-						{:else}
-							{#if isSelected}
-								{@render squareCheck()}
-							{:else}
-								{@render square()}
-							{/if}
-						{/if}
+			{#if items.length > 0}
+				{#each items as item, idx (idx)}
+					{#if typeof item.id === 'string'}
+						{@const isMultiple = Array.isArray(context.pickerValue)}
+						{@const isRadio = !isMultiple}
+						{@const isSelected = isMultiple ? context.pickerValue.includes(item.id) : context.pickerValue === item.id}
+						<div class="border-b-surface-300 hover:bg-surface-200/50 active:bg-surface-200 touch-manipulation border-b">
+							<button
+								type="button"
+								aria-checked={isSelected}
+								role={isRadio ? 'radio' : 'checkbox'}
+								onclick={() => handleToggle(item)}
+								class="flex w-full cursor-pointer touch-manipulation items-center gap-2 rounded-lg px-2.5 py-2 -outline-offset-5 select-none"
+							>
+								<span
+									class="border-surface-600 before:bg-surface-100 grid h-3.5 w-3.5 shrink-0 place-items-center border before:h-1.5 before:w-1.5 before:transition-transform before:content-[''] {isRadio
+										? 'rounded-full before:rounded-full'
+										: 'rounded-sm before:rounded-xs'} {isSelected ? 'bg-success-700! border-success-700! before:scale-100' : 'before:scale-0'}"
+								></span>
 
-						<span>{item.label}</span>
-					</button>
-				{/if}
-			{/each}
+								<span>{item.label}</span>
+							</button>
+						</div>
+					{/if}
+				{/each}
+			{:else if !isLoading}
+				<div class="bg-surface-100/50 absolute inset-0 flex items-center justify-center">
+					<div class="flex items-center gap-2">
+						<span>Gösterilecek kayıt yok.</span>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 
 	<!-- selected records -->
 	{#if true}
-		<!-- {@const listItems = (multiple ? context.pickerValue : [context.pickerValue]) as string[]} -->
 		{@const listItems = (Array.isArray(context.pickerValue) ? [...context.pickerValue].reverse() : context.pickerValue ? [context.pickerValue] : []) as string[]}
 		{@const isEmpty = listItems.length === 0}
-
+		<!-- class="bg-surface-100 border-surface-300 scrollbar-thumb-surface-100 hover:scrollbar-thumb-surface-300 scrollbar-thin scrollbar-track-transparent overflow-x-scroll overflow-y-hidden rounded-md border px-2.5 pt-2" -->
 		<div class="px-3">
-			<p class="mb-2 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
-			<div tabindex="-1" class="bg-surface-200 border-surface-300 flex h-12 items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-1">
-				{#if !isEmpty}
-					{#each listItems as item, i (i)}
-						<div
-							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs whitespace-nowrap select-none"
-						>
-							<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
-							<button
-								type="button"
-								tabindex="-1"
-								onclick={() => removePickerSelectedItem(item)}
-								class="text-success-500 hover:text-success-800 ml-1 cursor-pointer font-bold"
+			<p class="pb-1 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
+			<p>{outerW} - {innerW} = {hasScroll}</p>
+			<div
+				bind:clientWidth={outerW}
+				tabindex="-1"
+				class="{hasScroll
+					? 'hover:scrollbar-thumb-surface-300'
+					: ''} scrollbar-thumb-surface-100 bg-surface-100 border-surface-300 scrollbar-thin scrollbar-track-transparent overflow-x-scroll overflow-y-hidden rounded-md border"
+			>
+				<div class="flex w-max flex-nowrap gap-2 px-2 pt-2.5 pb-0.5" bind:offsetWidth={innerW}>
+					{#if !isEmpty}
+						{#each listItems as item, i (i)}
+							<div
+								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
 							>
-								✕
-							</button>
-						</div>
-					{/each}
-				{:else}
-					<p class="text-surface-400 text-sm italic">Seçili kayıt yok.</p>
-				{/if}
+								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
+								<button
+									type="button"
+									tabindex="-1"
+									onclick={() => removePickerSelectedItem(item)}
+									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
+								>
+									✕
+								</button>
+							</div>
+						{/each}
+						{#each listItems as item, i (i)}
+							<div
+								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
+							>
+								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
+								<button
+									type="button"
+									tabindex="-1"
+									onclick={() => removePickerSelectedItem(item)}
+									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
+								>
+									✕
+								</button>
+							</div>
+						{/each}
+						{#each listItems as item, i (i)}
+							<div
+								class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
+							>
+								<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
+								<button
+									type="button"
+									tabindex="-1"
+									onclick={() => removePickerSelectedItem(item)}
+									class="text-success-800 hover:text-success-600 ml-1 cursor-pointer border border-transparent font-bold"
+								>
+									✕
+								</button>
+							</div>
+						{/each}
+					{:else}
+						<p class="text-surface-400 px-2.5 py-0.5 text-sm italic">Seçili kayıt yok.</p>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}
 
 	<!-- actions -->
-	<div class="bg-surface-100 border-surface-200 flex items-center justify-between gap-2 border-t p-3">
-		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
+	<div class="bg-surface-200 border-surface-300 flex items-center justify-between gap-2 border-t p-3">
+		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" class="hover:bg-surface-300! active:bg-surface-300/70!" />
 
 		<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
 	</div>
