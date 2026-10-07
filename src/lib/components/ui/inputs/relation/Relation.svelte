@@ -147,18 +147,22 @@
 	let selectedListPromiseValue = $state.raw(value);
 	let selectedListPromise = $derived(
 		multiple
-			? getMultipleRelationSelectedList({
-					ids: selectedListPromiseValue as RelationValueTypeChoice<true>,
-					collection,
-					timestamp: selectedListPromiseTimestamp
-				})
-			: getSingleRelationSelectedList({
-					id: selectedListPromiseValue as RelationValueTypeChoice<false>,
-					collection,
-					timestamp: selectedListPromiseTimestamp
-				})
+			? selectedListPromiseValue.length > 0
+				? getMultipleRelationSelectedList({
+						ids: selectedListPromiseValue as RelationValueTypeChoice<true>,
+						collection,
+						timestamp: selectedListPromiseTimestamp
+					})
+				: undefined
+			: selectedListPromiseValue !== ''
+				? getSingleRelationSelectedList({
+						id: selectedListPromiseValue as RelationValueTypeChoice<false>,
+						collection,
+						timestamp: selectedListPromiseTimestamp
+					})
+				: undefined
 	);
-	const watchSelectedListPromise = () => selectedListPromise.current?.forEach((item) => context.itemDetailCache.set(item.id, item));
+	const watchSelectedListPromise = () => selectedListPromise?.current?.forEach((item) => context.itemDetailCache.set(item.id, item));
 	// ######### END: Initial Selected List #############
 
 	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
@@ -203,7 +207,7 @@
 {/snippet}
 
 {#snippet list()}
-	{@const isLoading = selectedListPromise.loading}
+	{@const isLoading = selectedListPromise?.loading ?? false}
 	{@const listItems = (Array.isArray(value) ? [...value].reverse() : value ? [value] : []) as string[]}
 	{@const isEmpty = listItems.length === 0}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
