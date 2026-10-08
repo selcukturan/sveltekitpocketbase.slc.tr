@@ -94,13 +94,14 @@
 								class="flex w-full cursor-pointer touch-manipulation items-center gap-2 rounded-lg px-2.5 py-2 -outline-offset-5 select-none"
 							>
 								<span
-									class="text-surface-50 border-surface-600 flex h-3.5 w-3.5 items-center justify-center border p-px {isRadio ? 'rounded-full' : 'rounded-sm'} {isSelected
+									class="text-surface-50 border-surface-600 flex h-3.5 w-3.5 shrink-0 items-center justify-center border p-px {isRadio ? 'rounded-full' : 'rounded-sm'} {isSelected
 										? 'bg-success-700! border-success-700!'
 										: ''}"
 								>
 									{#if isSelected}
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
+											class="h-full w-full"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
