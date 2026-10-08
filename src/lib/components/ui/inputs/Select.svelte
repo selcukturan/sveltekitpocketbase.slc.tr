@@ -478,7 +478,8 @@
 					id="{optionId}-{i}"
 					role="option"
 					aria-selected={isSelected}
-					class:bg-success-300!={isSelected}
+					class:bg-success-700!={isSelected}
+					class:text-success-50!={isSelected}
 					class:outline-2={isActive && isKeyboardNav}
 					class:outline-primary-400={isActive && isKeyboardNav}
 					class="{internalOptionClasses} {optionClass}"

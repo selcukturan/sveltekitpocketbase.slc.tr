@@ -94,10 +94,24 @@
 								class="flex w-full cursor-pointer touch-manipulation items-center gap-2 rounded-lg px-2.5 py-2 -outline-offset-5 select-none"
 							>
 								<span
-									class="border-surface-600 before:bg-surface-100 grid h-3.5 w-3.5 shrink-0 place-items-center border before:h-1.5 before:w-1.5 before:transition-transform before:content-[''] {isRadio
-										? 'rounded-full before:rounded-full'
-										: 'rounded-sm before:rounded-xs'} {isSelected ? 'bg-success-700! border-success-700! before:scale-100' : 'before:scale-0'}"
-								></span>
+									class="text-surface-50 border-surface-600 flex h-3.5 w-3.5 items-center justify-center border p-px {isRadio ? 'rounded-full' : 'rounded-sm'} {isSelected
+										? 'bg-success-700! border-success-700!'
+										: ''}"
+								>
+									{#if isSelected}
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="3"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path d="M20 6 9 17l-5-5" />
+										</svg>
+									{/if}
+								</span>
 
 								<span>{item.label}</span>
 							</button>
@@ -120,7 +134,7 @@
 		{@const isEmpty = listItems.length === 0}
 
 		<div class="px-3">
-			<p class="pb-1 text-xs font-semibold tracking-wider">Seçilen Kayıtlar</p>
+			<p class="pb-1 text-xs font-semibold tracking-wider">Seçilen Kayıtlar ({listItems.length})</p>
 			<div tabindex="-1" class="bg-surface-100 border-surface-300 flex items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-2.5">
 				{#if !isEmpty}
 					{#each listItems as item, i (i)}
@@ -145,7 +159,7 @@
 		</div>
 	{/if}
 
-	<div class="inset-shadow-surface-200 mt-2 flex items-center justify-between border-t p-3 inset-shadow-sm">
+	<div class="bg-surface-100 inset-shadow-surface-200 mt-2 flex items-center justify-between border-t p-3 inset-shadow-sm">
 		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
 
 		<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
