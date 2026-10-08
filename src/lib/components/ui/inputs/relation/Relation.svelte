@@ -173,7 +173,7 @@
 {#snippet listItem({ id, label, isLoading }: { id: string; label: string; isLoading: boolean })}
 	<!-- list-item -->
 	<div
-		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-2 wrap-break-word outline-none first:border-t-0"
+		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
 		<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
@@ -181,7 +181,7 @@
 				<LoadingSvg />
 			{/if}
 			<!-- label -->
-			<span class="bg-surface-300 border-surface-400 rounded-sm border px-1 py-0.5 text-sm shadow-sm">{label}</span>
+			<span class="bg-surface-300 border-surface-400 rounded-sm border px-1 py-px text-sm shadow-sm">{label}</span>
 		</div>
 		<!-- action -->
 		<div class="inline-flex shrink-0 items-center gap-2.5">
@@ -190,7 +190,7 @@
 					disabled={isLoading}
 					type="button"
 					onclick={() => removeInputSelectedItem(id)}
-					class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-2 outline-none"
+					class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
 					aria-label="{label} kaldır"
 				>
 					{#if isLoading}
@@ -211,7 +211,7 @@
 	{@const listItems = (Array.isArray(value) ? [...value].reverse() : value ? [value] : []) as string[]}
 	{@const isEmpty = listItems.length === 0}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
-		<div class="border-surface-300 max-h-80 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
+		<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
 			{#if !isEmpty}
 				{#if isLoading}
 					{#each listItems as item, i (i)}

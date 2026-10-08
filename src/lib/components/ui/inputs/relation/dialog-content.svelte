@@ -91,12 +91,12 @@
 								aria-checked={isSelected}
 								role={isRadio ? 'radio' : 'checkbox'}
 								onclick={() => handleToggle(item)}
-								class="flex w-full cursor-pointer touch-manipulation items-center gap-2 rounded-lg px-2.5 py-2 -outline-offset-5 select-none"
+								class="flex w-full cursor-pointer touch-manipulation items-center gap-2 rounded-lg px-2.5 py-1.5 -outline-offset-5 select-none"
 							>
 								<span
-									class="text-surface-50 border-surface-600 flex h-3.5 w-3.5 shrink-0 items-center justify-center border p-px {isRadio ? 'rounded-full' : 'rounded-sm'} {isSelected
-										? 'bg-success-700! border-success-700!'
-										: ''}"
+									class="text-surface-50 border-surface-600 flex h-3.5 w-3.5 shrink-0 items-center justify-center border p-px {isRadio
+										? 'rounded-full'
+										: 'rounded-sm'} {isSelected ? 'bg-success-700! border-success-700!' : ''}"
 								>
 									{#if isSelected}
 										<svg
@@ -140,7 +140,7 @@
 				{#if !isEmpty}
 					{#each listItems as item, i (i)}
 						<div
-							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs whitespace-nowrap select-none"
+							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-px text-xs whitespace-nowrap select-none"
 						>
 							<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
 							<button
@@ -154,7 +154,7 @@
 						</div>
 					{/each}
 				{:else}
-					<p class="text-surface-400 border border-transparent py-0.5 text-xs font-bold whitespace-nowrap">Seçili kayıt yok.</p>
+					<p class="text-surface-400 border border-transparent py-px text-xs font-bold whitespace-nowrap">Seçili kayıt yok.</p>
 				{/if}
 			</div>
 		</div>
