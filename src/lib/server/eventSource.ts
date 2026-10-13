@@ -19,6 +19,8 @@ class SimpleEventSource {
 	}
 
 	private async connect() {
+		// const startedAt = Date.now();
+		// const elapsed = () => `${Math.round((Date.now() - startedAt) / 1000)} sn`;
 		try {
 			const response = await fetch(this.url, {
 				headers: {
@@ -43,7 +45,16 @@ class SimpleEventSource {
 
 			while (true) {
 				const { value, done } = await reader.read();
-				if (done) break;
+				if (done) {
+					// PocketBase boşta kalan SSE bağlantısını (~5 dk) sunucu tarafında kapatır. Gerçek EventSource burada
+					// otomatik yeniden bağlanır. Aynı davranış için hata olarak bildirip SDK'nın yeniden bağlanmasını tetikleriz.
+					// console.log(`[SimpleEventSource] Akış sunucu tarafından kapatıldı. Süre: ${elapsed()}, yeniden bağlanılacak.`);
+					if (!this.controller.signal.aborted) {
+						this.readyState = 2; // CLOSED
+						this.onerror?.(new Error('SSE akışı sunucu tarafından kapatıldı.'));
+					}
+					break;
+				}
 
 				buffer += value;
 				const lines = buffer.split(/\r\n|\r|\n/);
@@ -108,7 +119,7 @@ class SimpleEventSource {
 				return;
 			}
 			this.readyState = 2; // CLOSED
-			console.error(`[SimpleEventSource] SSE hatası (${this.url}):`, err);
+			// console.log(`[SimpleEventSource] SSE hatası (${elapsed()} sonra):`, err);
 			if (this.onerror) {
 				this.onerror(err);
 			}

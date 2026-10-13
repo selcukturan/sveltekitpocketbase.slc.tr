@@ -66,7 +66,7 @@ export function closeConnection(id: string, userId: string) {
 }
 
 /** Logout vb. durumlarda kullanıcının tüm açık bağlantılarını kapatır. */
-export function closeUserConnections(userId: string) {
+export function closeUserLiveConnections(userId: string) {
 	for (const [id, conn] of connections) {
 		if (conn.userId === userId) {
 			conn.close();
