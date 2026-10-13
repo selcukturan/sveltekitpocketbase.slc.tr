@@ -1,9 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { Page, Head } from '#lib/components/templates/index.js';
-	import { notificationsRemote, updateNotificationReadStatus, createNotification, deleteNotification } from '#lib/remotes/notifications.remote.js';
+	import {
+		notificationsRemote,
+		closeNotifications,
+		pingNotifications,
+		updateNotificationReadStatus,
+		createNotification,
+		deleteNotification
+	} from '#lib/remotes/notifications.remote.js';
+	import { getToaster } from '#lib/components/ui/toast/toaster.svelte.ts';
 
-	const notifications = notificationsRemote();
+	const toast = getToaster('app-toaster');
+	const connectionId = crypto.randomUUID();
+
+	const notifications = notificationsRemote({ connectionId });
 	// void notifications.then;
 
 	let titleInput = $state('');
@@ -18,6 +29,23 @@
 	}
 
 	onMount(() => {
+		// Bileşen yok olunca (SPA geçişi/çıkış) sunucudaki canlı bağlantıyı GC'yi beklemeden kapat
+		const cleanup = () => {
+			clearInterval(heartbeat);
+			void closeNotifications({ connectionId });
+		};
+
+		// Sekme kapanması gibi cleanup'ın çalışamadığı durumlar için canlılık sinyali.
+		// Sekme kapanınca ping kesilir ve en geç yaklaşık 3,5 dakika içinde (3 dakika timeout artı 30 saniyelik süpürme aralığı) sunucu bağlantıyı kapatır.
+		// Sunucu bağlantıyı bilmiyorsa (idle timeout) yeniden bağlanılır.
+		const heartbeat = setInterval(async () => {
+			try {
+				if (!(await pingNotifications({ connectionId }))) notifications.reconnect();
+			} catch {
+				// ağ hatası: bir sonraki turda tekrar denenir
+			}
+		}, 30_000);
+
 		const storedDate = localStorage.getItem('notif_date');
 		const today = getTodayDateString();
 
@@ -31,6 +59,8 @@
 			addCount = parseInt(localStorage.getItem('notif_add_count') || '0', 10);
 			deleteCount = parseInt(localStorage.getItem('notif_delete_count') || '0', 10);
 		}
+
+		return cleanup;
 	});
 
 	function updateLocalStorage() {
@@ -79,6 +109,30 @@
 	async function toggleRead(id: string, currentReadStatus: boolean) {
 		await updateNotificationReadStatus({ id, read: !currentReadStatus });
 	}
+
+	let currentInitial = 0;
+	const currentInitialCheckPoint = 1;
+	const watchCurrent = () => {
+		void notifications.current;
+		if (currentInitial > currentInitialCheckPoint) {
+			untrack(() => {
+				toast.add({
+					type: 'info',
+					title: 'Bildirimler',
+					description: 'Yeni bir bildiriminiz var.',
+					action: {
+						label: 'Aç',
+						onClick: () => {
+							console.log('onClick');
+						}
+					}
+				});
+			});
+		} else if (currentInitial <= currentInitialCheckPoint) {
+			currentInitial++;
+		}
+		console.log('currentInitial', currentInitial);
+	};
 </script>
 
 <Head>
@@ -88,7 +142,7 @@
 
 <Page>
 	<Page.Header>
-		<div class="flex w-full items-center justify-between">
+		<div class="flex w-full items-center justify-between" {@attach watchCurrent}>
 			<div class="space-y-1">
 				<h1 class="text-2xl font-bold tracking-tight text-white">Sistem Bildirimleri</h1>
 				<p class="text-sm text-zinc-400">PocketBase demo_notification koleksiyonundan anlık reaktif veri akışı</p>

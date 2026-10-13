@@ -4,6 +4,7 @@ import { mapUnknownToError } from '#lib/server/error.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { ResultAsync } from 'neverthrow';
 import { loginSchema } from '#lib/app/schemas/login.js';
+import { closeUserConnections } from '#lib/server/liveConnections.js';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -30,6 +31,7 @@ export const checkAuthenticated = query(() => {
 export const logout = form(async () => {
 	const { locals } = getRequestEvent();
 
+	if (locals.user?.id) closeUserConnections(locals.user.id);
 	locals.auth.clear();
 	locals.user = null;
 

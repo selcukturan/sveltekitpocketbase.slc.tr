@@ -1,6 +1,7 @@
 import { query, command, form, getRequestEvent } from '$app/server';
 import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
 import { AsyncQueue } from '#lib/utils/asyncQueue.js';
+import { closeConnection, registerConnection, touchConnection, unregisterConnection } from '#lib/server/liveConnections.js';
 import * as v from 'valibot';
 
 export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;
@@ -52,8 +53,26 @@ export const deleteNotification = form(deleteSchema, async (params) => {
 	await locals.pb.collection('demo_notification').delete(params.id);
 });
 
-export const notificationsRemote = query.live(async function* () {
-	console.log('[notificationsRemote] Sunucuda remote fonksiyon tetiklendi.');
+const connectionSchema = v.object({
+	// İstemcide bileşen örneği başına üretilen benzersiz bağlantı kimliği
+	connectionId: v.pipe(v.string(), v.minLength(8), v.maxLength(64))
+});
+
+export const closeNotifications = command(connectionSchema, async ({ connectionId }) => {
+	const userId = getRequestEvent().locals.user?.id;
+	if (!userId) return;
+	closeConnection(connectionId, userId);
+});
+
+// İstemci periyodik olarak çağırır; false dönerse sunucuda bağlantı yoktur (idle timeout vb.)
+export const pingNotifications = command(connectionSchema, async ({ connectionId }) => {
+	const userId = getRequestEvent().locals.user?.id;
+	if (!userId) return false;
+	return touchConnection(connectionId, userId);
+});
+
+export const notificationsRemote = query.live(connectionSchema, async function* ({ connectionId }) {
+	console.log('[notificationsRemote] Sunucuda remote fonksiyon tetiklendi.', connectionId);
 	const { locals, request } = getRequestEvent();
 	const pb = locals.pb;
 	const user = locals.user;
@@ -122,6 +141,12 @@ export const notificationsRemote = query.live(async function* () {
 		queue.push(null);
 	};
 	request.signal.addEventListener('abort', abortHandler);
+
+	const entry = registerConnection(connectionId, userId, () => queue.push(null));
+	if (!entry) {
+		request.signal.removeEventListener('abort', abortHandler);
+		return;
+	}
 
 	try {
 		console.log('[notificationsRemote] PocketBase demo_notification real-time aboneliği başlatılıyor...');
