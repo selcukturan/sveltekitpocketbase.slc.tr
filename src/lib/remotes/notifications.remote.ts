@@ -1,7 +1,6 @@
 import { query, command, form, getRequestEvent } from '$app/server';
 import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
 import { AsyncQueue } from '#lib/utils/asyncQueue.js';
-import { closeConnection, registerConnection, touchConnection, unregisterConnection } from '#lib/server/liveConnections.js';
 import * as v from 'valibot';
 
 export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;
@@ -58,17 +57,23 @@ const connectionSchema = v.object({
 	connectionId: v.pipe(v.string(), v.minLength(8), v.maxLength(64))
 });
 
-export const closeNotifications = command(connectionSchema, async ({ connectionId }) => {
-	const userId = getRequestEvent().locals.user?.id;
-	if (!userId) return;
-	closeConnection(connectionId, userId);
-});
+// Açık bildirim akışları: connectionId -> kapatma işlevi.
+// SvelteKit bağlantıyı GC'ye bıraktığı için bileşen yok olurken akışı buradan kapatırız.
+const connections = new Map<string, () => void>();
+// Akış kurulmadan önce gelen kapatma istekleri (hızlı sayfa geçişi yarışı için)
+const pendingCloses = new Map<string, ReturnType<typeof setTimeout>>();
 
-// İstemci periyodik olarak çağırır; false dönerse sunucuda bağlantı yoktur (idle timeout vb.)
-export const pingNotifications = command(connectionSchema, async ({ connectionId }) => {
-	const userId = getRequestEvent().locals.user?.id;
-	if (!userId) return false;
-	return touchConnection(connectionId, userId);
+// Kullanıcı kontrolü yapılmaz: logout'ta oturum bileşen yok olmadan önce temizlenir.
+// connectionId istemcide üretilen rastgele bir UUID olduğu için yalnızca sahibi bilir.
+export const closeNotifications = command(connectionSchema, async ({ connectionId }) => {
+	const close = connections.get(connectionId);
+	if (close) {
+		close();
+		return;
+	}
+	const timer = setTimeout(() => pendingCloses.delete(connectionId), 30_000);
+	timer.unref?.();
+	pendingCloses.set(connectionId, timer);
 });
 
 export const notificationsRemote = query.live(connectionSchema, async function* ({ connectionId }) {
@@ -142,11 +147,15 @@ export const notificationsRemote = query.live(connectionSchema, async function* 
 	};
 	request.signal.addEventListener('abort', abortHandler);
 
-	const entry = registerConnection(connectionId, userId, () => queue.push(null));
-	if (!entry) {
+	const pendingClose = pendingCloses.get(connectionId);
+	if (pendingClose) {
+		clearTimeout(pendingClose);
+		pendingCloses.delete(connectionId);
 		request.signal.removeEventListener('abort', abortHandler);
 		return;
 	}
+	const close = () => queue.push(null);
+	connections.set(connectionId, close);
 
 	try {
 		console.log('[notificationsRemote] PocketBase demo_notification real-time aboneliği başlatılıyor...');
@@ -201,6 +210,7 @@ export const notificationsRemote = query.live(connectionSchema, async function* 
 	} finally {
 		console.log('[notificationsRemote] Temizlik ve abonelik iptali adımları başlatılıyor...');
 		request.signal.removeEventListener('abort', abortHandler);
+		if (connections.get(connectionId) === close) connections.delete(connectionId);
 		try {
 			await pb.collection('demo_notification').unsubscribe('*');
 			console.log('[notificationsRemote] PocketBase demo_notification aboneliği başarıyla iptal edildi.');

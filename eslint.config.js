@@ -5,9 +5,6 @@ import svelte from 'eslint-plugin-svelte';
 import { defineConfig, includeIgnoreFile } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import { loadConfig } from '@sveltejs/load-config';
-
-const svelteConfig = (await loadConfig('./', { traverse: false }))?.config;
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
@@ -37,8 +34,7 @@ export default defineConfig(
 			parserOptions: {
 				projectService: true,
 				extraFileExtensions: ['.svelte'],
-				parser: ts.parser,
-				svelteConfig
+				parser: ts.parser
 			}
 		}
 	},

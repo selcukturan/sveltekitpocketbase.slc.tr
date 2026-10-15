@@ -1,14 +1,7 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import { Page, Head } from '#lib/components/templates/index.js';
-	import {
-		notificationsRemote,
-		closeNotifications,
-		pingNotifications,
-		updateNotificationReadStatus,
-		createNotification,
-		deleteNotification
-	} from '#lib/remotes/notifications.remote.js';
+	import { notificationsRemote, closeNotifications, updateNotificationReadStatus, createNotification } from '#lib/remotes/notifications.remote.js';
 	import { getToaster } from '#lib/components/ui/toast/toaster.svelte.ts';
 
 	const toast = getToaster('app-toaster');
@@ -31,20 +24,8 @@
 	onMount(() => {
 		// Bileşen yok olunca (SPA geçişi/çıkış) sunucudaki canlı bağlantıyı GC'yi beklemeden kapat
 		const cleanup = () => {
-			clearInterval(heartbeat);
 			void closeNotifications({ connectionId });
 		};
-
-		// Sekme kapanması gibi cleanup'ın çalışamadığı durumlar için canlılık sinyali.
-		// Sekme kapanınca ping kesilir ve en geç yaklaşık 3,5 dakika içinde (3 dakika timeout artı 30 saniyelik süpürme aralığı) sunucu bağlantıyı kapatır.
-		// Sunucu bağlantıyı bilmiyorsa (idle timeout) yeniden bağlanılır.
-		const heartbeat = setInterval(async () => {
-			try {
-				if (!(await pingNotifications({ connectionId }))) notifications.reconnect();
-			} catch {
-				// ağ hatası: bir sonraki turda tekrar denenir
-			}
-		}, 30_000);
 
 		const storedDate = localStorage.getItem('notif_date');
 		const today = getTodayDateString();
