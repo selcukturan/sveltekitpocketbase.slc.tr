@@ -1,8 +1,9 @@
-import type { Handle } from '@sveltejs/kit/hooks';
 import '#lib/server/eventSource.js'; // required for notifications remote and nodejs pocketbase subscribe SSE
+import type { Handle } from '@sveltejs/kit/hooks';
 import { NODE_ENV } from '$app/env/private';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { createPocketBaseInstance } from '#lib/server/pb.js';
+import { shouldSkipAuthRefresh } from '#lib/server/authRefresh.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	console.log(new Date().getTime() + ' - hook.server.ts - ' + event.request.url + ' - NODE_ENV:' + NODE_ENV);
@@ -16,7 +17,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// ⌛🔒 Token kontrolü ve yenileme ################################################################################################
 	try {
 		if (event.locals.auth.isValid) {
-			await event.locals.pb.collection(Collections.SysUsers).authRefresh();
+			if (!shouldSkipAuthRefresh(event)) {
+				await event.locals.pb.collection(Collections.SysUsers).authRefresh();
+			}
 		} else {
 			event.locals.auth.clear();
 		}

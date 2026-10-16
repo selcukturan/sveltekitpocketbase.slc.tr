@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import { Page, Head } from '#lib/components/templates/index.js';
-	import { notificationsRemote, closeNotifications, updateNotificationReadStatus, createNotification } from '#lib/remotes/notifications.remote.js';
+	import { notificationsBG, closeNotificationsBG, updateNotificationReadStatus, createNotification } from '#lib/remotes/notifications.remote.js';
 	import { getToaster } from '#lib/components/ui/toast/toaster.svelte.ts';
 
 	const toast = getToaster('app-toaster');
 	const connectionId = crypto.randomUUID();
 
-	const notifications = notificationsRemote({ connectionId });
+	const notifs = notificationsBG({ connectionId });
 	// void notifications.then;
 
 	let titleInput = $state('');
@@ -24,8 +24,15 @@
 	onMount(() => {
 		// Bileşen yok olunca (SPA geçişi/çıkış) sunucudaki canlı bağlantıyı GC'yi beklemeden kapat
 		const cleanup = () => {
-			void closeNotifications({ connectionId });
+			clearInterval(reconnectInterval);
+			void closeNotificationsBG({ connectionId });
 		};
+
+		// Akış kurulduğu andaki token'ı kullanır. Periyodik reconnect, gerçek kullanıcı istekleriyle yenilenen
+		// güncel token'ı akışa taşır (bu istek token'ı yenilemez, bkz. authRefresh.ts) ve listeyi tazeler.
+		const reconnectInterval = setInterval(() => {
+			notifs.reconnect();
+		}, 240_000);
 
 		const storedDate = localStorage.getItem('notif_date');
 		const today = getTodayDateString();
@@ -91,28 +98,28 @@
 		await updateNotificationReadStatus({ id, read: !currentReadStatus });
 	}
 
-	let currentInitial = 0;
-	const currentInitialCheckPoint = 1;
+	// Daha önce görülen bildirim id'leri. Reconnect listeyi yeniden gönderdiğinde sahte toast çıkmasın diye
+	// yalnızca ilk kez görülen okunmamış bildirimler için toast gösterilir.
+	let seenIds: Set<string> | null = null;
 	const watchCurrent = () => {
-		void notifications.current;
-		if (currentInitial > currentInitialCheckPoint) {
-			untrack(() => {
-				toast.add({
-					type: 'info',
-					title: 'Bildirimler',
-					description: 'Yeni bir bildiriminiz var.',
-					action: {
-						label: 'Aç',
-						onClick: () => {
-							console.log('onClick');
-						}
+		const current = notifs.current;
+		if (!current) return;
+		untrack(() => {
+			const hasNew = seenIds !== null && current.unread.some((n) => !seenIds!.has(n.id));
+			seenIds = new Set([...current.unread, ...current.read].map((n) => n.id));
+			if (!hasNew) return;
+			toast.add({
+				type: 'info',
+				title: 'Bildirimler',
+				description: 'Yeni bir bildiriminiz var.',
+				action: {
+					label: 'Aç',
+					onClick: () => {
+						console.log('onClick');
 					}
-				});
+				}
 			});
-		} else if (currentInitial <= currentInitialCheckPoint) {
-			currentInitial++;
-		}
-		console.log('currentInitial', currentInitial);
+		});
 	};
 </script>
 
@@ -132,22 +139,22 @@
 				<!-- Bağlantı Durumu -->
 				<div class="flex items-center space-x-2 rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium">
 					<span class="relative flex h-2 w-2">
-						{#if notifications.connected}
+						{#if notifs.connected}
 							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
 							<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
 						{:else}
 							<span class="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
 						{/if}
 					</span>
-					<span class={notifications.connected ? 'text-emerald-400' : 'text-rose-400'}>
-						{notifications.connected ? 'Bağlantı Aktif' : 'Bağlantı Yok'}
+					<span class={notifs.connected ? 'text-emerald-400' : 'text-rose-400'}>
+						{notifs.connected ? 'Bağlantı Aktif' : 'Bağlantı Yok'}
 					</span>
 				</div>
 
 				<!-- Yeniden Bağlan Butonu -->
 				<button
-					disabled={!notifications.connected}
-					onclick={() => notifications.reconnect()}
+					disabled={!notifs.connected}
+					onclick={() => notifs.reconnect()}
 					class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 px-3.5 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:bg-zinc-700 active:scale-95"
 				>
 					Bağlantıyı Yenile
@@ -225,7 +232,7 @@
 					</div>
 				</form>
 
-				{#if notifications.ready}
+				{#if notifs.ready}
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<!-- Okunmamış Bildirimler Kolonu -->
 						<div class="space-y-4">
@@ -233,13 +240,13 @@
 								<h2 class="flex items-center gap-2 text-lg font-bold text-white">
 									Okunmamış Bildirimler
 									<span class="rounded-full bg-indigo-500/20 px-2 py-0.5 font-mono text-xs font-bold text-indigo-400">
-										{notifications.current.unread.length}
+										{notifs.current.unread.length}
 									</span>
 								</h2>
 							</div>
 
 							<div class="grid gap-3">
-								{#each notifications.current.unread as item (item.id)}
+								{#each notifs.current.unread as item (item.id)}
 									<div
 										class="group relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-md transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900 hover:shadow-xl"
 									>
@@ -322,13 +329,13 @@
 								<h2 class="flex items-center gap-2 text-lg font-bold text-zinc-400">
 									Okunmuş Bildirimler
 									<span class="bg-zinc-850 rounded-full px-2 py-0.5 font-mono text-xs font-bold text-zinc-500">
-										{notifications.current.read.length}
+										{notifs.current.read.length}
 									</span>
 								</h2>
 							</div>
 
 							<div class="grid gap-3">
-								{#each notifications.current.read as item (item.id)}
+								{#each notifs.current.read as item (item.id)}
 									<div
 										class="group hover:border-zinc-850 relative overflow-hidden rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 opacity-70 shadow-sm transition-all duration-300 hover:bg-zinc-900 hover:opacity-100"
 									>

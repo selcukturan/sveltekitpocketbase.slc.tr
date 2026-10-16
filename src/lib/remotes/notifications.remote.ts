@@ -1,74 +1,52 @@
 import { query, command, form, getRequestEvent } from '$app/server';
 import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
 import { AsyncQueue } from '#lib/utils/asyncQueue.js';
+import { getTokenPayload } from 'pocketbase';
 import * as v from 'valibot';
 
 export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;
-
-const updateReadSchema = v.object({
-	id: v.string(),
-	read: v.boolean()
-});
-
-export const updateNotificationReadStatus = command(updateReadSchema, async (params) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user?.id) return;
-
-	const userId = locals.user.id;
-
-	if (params.read) {
-		await locals.pb.collection('demo_notification').update(params.id, { 'read_by+': userId });
-	} else {
-		await locals.pb.collection('demo_notification').update(params.id, { 'read_by-': userId });
-	}
-});
-
-const createSchema = v.object({
-	title: v.string(),
-	message: v.string()
-});
-
-export const createNotification = form(createSchema, async (params) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user?.id) return;
-
-	await locals.pb.collection('demo_notification').create({
-		title: params.title,
-		message: params.message,
-		user: [locals.user.id],
-		select: 'info',
-		read_by: []
-	});
-});
-
-const deleteSchema = v.object({
-	id: v.string()
-});
-
-export const deleteNotification = form(deleteSchema, async (params) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user?.id) return;
-
-	await locals.pb.collection('demo_notification').delete(params.id);
-});
 
 const connectionSchema = v.object({
 	// İstemcide bileşen örneği başına üretilen benzersiz bağlantı kimliği
 	connectionId: v.pipe(v.string(), v.minLength(8), v.maxLength(64))
 });
 
-// Açık bildirim akışları: connectionId -> kapatma işlevi.
+// Açık bildirim akışları: connectionId -> kullanıcı, token bitiş zamanı ve kapatma işlevi.
 // SvelteKit bağlantıyı GC'ye bıraktığı için bileşen yok olurken akışı buradan kapatırız.
-const connections = new Map<string, () => void>();
+type Connection = { userId: string; tokenExpiresAt: number; close: () => void };
+const connections = new Map<string, Connection>();
 // Akış kurulmadan önce gelen kapatma istekleri (hızlı sayfa geçişi yarışı için)
 const pendingCloses = new Map<string, ReturnType<typeof setTimeout>>();
 
+// Token süresi dolmuş ama kapanmamış akışları ara ara temizler. Yalnızca açık akış varken çalışır.
+const SWEEP_INTERVAL_MS = 60_000;
+let sweeper: ReturnType<typeof setInterval> | null = null;
+
+function ensureSweeper() {
+	if (sweeper) return;
+	sweeper = setInterval(() => {
+		const now = Date.now();
+		for (const [id, conn] of connections) {
+			if (conn.tokenExpiresAt <= now) {
+				console.warn(`[notificationsRemote] Token süresi dolmuş akış kapatılıyor: ${id}`);
+				conn.close();
+				connections.delete(id);
+			}
+		}
+		if (connections.size === 0 && sweeper) {
+			clearInterval(sweeper);
+			sweeper = null;
+		}
+	}, SWEEP_INTERVAL_MS);
+	sweeper.unref?.();
+}
+
 // Kullanıcı kontrolü yapılmaz: logout'ta oturum bileşen yok olmadan önce temizlenir.
 // connectionId istemcide üretilen rastgele bir UUID olduğu için yalnızca sahibi bilir.
-export const closeNotifications = command(connectionSchema, async ({ connectionId }) => {
-	const close = connections.get(connectionId);
-	if (close) {
-		close();
+export const closeNotificationsBG = command(connectionSchema, async ({ connectionId }) => {
+	const conn = connections.get(connectionId);
+	if (conn) {
+		conn.close();
 		return;
 	}
 	const timer = setTimeout(() => pendingCloses.delete(connectionId), 30_000);
@@ -76,7 +54,7 @@ export const closeNotifications = command(connectionSchema, async ({ connectionI
 	pendingCloses.set(connectionId, timer);
 });
 
-export const notificationsRemote = query.live(connectionSchema, async function* ({ connectionId }) {
+export const notificationsBG = query.live(connectionSchema, async function* ({ connectionId }) {
 	console.log('[notificationsRemote] Sunucuda remote fonksiyon tetiklendi.', connectionId);
 	const { locals, request } = getRequestEvent();
 	const pb = locals.pb;
@@ -154,8 +132,11 @@ export const notificationsRemote = query.live(connectionSchema, async function* 
 		request.signal.removeEventListener('abort', abortHandler);
 		return;
 	}
-	const close = () => queue.push(null);
-	connections.set(connectionId, close);
+	// exp saniye cinsindendir; okunamazsa süpürücü akışı ilk turda kapatır
+	const tokenExpiresAt = (Number(getTokenPayload(pb.authStore.token).exp) || 0) * 1000;
+	const entry: Connection = { userId, tokenExpiresAt, close: () => queue.push(null) };
+	connections.set(connectionId, entry);
+	ensureSweeper();
 
 	try {
 		console.log('[notificationsRemote] PocketBase demo_notification real-time aboneliği başlatılıyor...');
@@ -210,7 +191,7 @@ export const notificationsRemote = query.live(connectionSchema, async function* 
 	} finally {
 		console.log('[notificationsRemote] Temizlik ve abonelik iptali adımları başlatılıyor...');
 		request.signal.removeEventListener('abort', abortHandler);
-		if (connections.get(connectionId) === close) connections.delete(connectionId);
+		if (connections.get(connectionId) === entry) connections.delete(connectionId);
 		try {
 			await pb.collection('demo_notification').unsubscribe('*');
 			console.log('[notificationsRemote] PocketBase demo_notification aboneliği başarıyla iptal edildi.');
@@ -218,4 +199,51 @@ export const notificationsRemote = query.live(connectionSchema, async function* 
 			console.error('[notificationsRemote] Unsubscribe hatası:', uErr);
 		}
 	}
+});
+
+const updateReadSchema = v.object({
+	id: v.string(),
+	read: v.boolean()
+});
+
+export const updateNotificationReadStatus = command(updateReadSchema, async (params) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user?.id) return;
+
+	const userId = locals.user.id;
+
+	if (params.read) {
+		await locals.pb.collection('demo_notification').update(params.id, { 'read_by+': userId });
+	} else {
+		await locals.pb.collection('demo_notification').update(params.id, { 'read_by-': userId });
+	}
+});
+
+const createSchema = v.object({
+	title: v.string(),
+	message: v.string()
+});
+
+export const createNotification = form(createSchema, async (params) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user?.id) return;
+
+	await locals.pb.collection('demo_notification').create({
+		title: params.title,
+		message: params.message,
+		user: [locals.user.id],
+		select: 'info',
+		read_by: []
+	});
+});
+
+const deleteSchema = v.object({
+	id: v.string()
+});
+
+export const deleteNotification = form(deleteSchema, async (params) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user?.id) return;
+
+	await locals.pb.collection('demo_notification').delete(params.id);
 });

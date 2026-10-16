@@ -47,7 +47,7 @@ class SimpleEventSource {
 				const { value, done } = await reader.read();
 				if (done) {
 					// PocketBase boşta kalan SSE bağlantısını (~5 dk) sunucu tarafında kapatır. Gerçek EventSource burada
-					// otomatik yeniden bağlanır. Aynı davranış için hata olarak bildirip SDK'nın yeniden bağlanmasını tetikleriz.
+					// otomatik yeniden bağlanır. Aynı davranış için hata olarak bildirip SDK'nın yeniden bağlanmasını tetikliyoruz.
 					// console.log(`[SimpleEventSource] Akış sunucu tarafından kapatıldı. Süre: ${elapsed()}, yeniden bağlanılacak.`);
 					if (!this.controller.signal.aborted) {
 						this.readyState = 2; // CLOSED
