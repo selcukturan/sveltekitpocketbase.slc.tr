@@ -42,7 +42,7 @@
 	onclick={toggle}
 	aria-pressed={theme.current === 'dark' ? 'true' : 'false'}
 	aria-label="Theme mode"
-	class="bg-surface-50 hover:border-surface-400 relative block h-5.5 w-10 rounded-xl border hover:cursor-pointer"
+	class="bg-surface-50 border-surface-300 hover:border-surface-400 relative block h-5.5 w-10 shrink-0 rounded-xl border hover:cursor-pointer"
 	{@attach tooltip(t('change_theme'))}
 >
 	<span

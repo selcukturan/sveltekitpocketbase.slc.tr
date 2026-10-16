@@ -133,6 +133,8 @@
 		--default-box-shadow: 0px 0px 16px -1px var(--slc-system-color-shadow);
 		--default-border: solid 1px var(--slc-system-border);
 		--default-border-radius: 10px;
+		--default-overflow: auto;
+		--default-display: inline-block;
 		display: inline-block;
 	}
 
@@ -158,7 +160,7 @@
 		height: max-content;
 		max-height: min(calc(100% - var(--gutter, 5px) * 2), var(--max-height, 100dvh));
 
-		overflow: auto;
+		overflow: var(--overflow, var(--default-overflow));
 
 		border: var(--border, var(--default-border));
 		border-radius: var(--border-radius, var(--default-border-radius));
@@ -175,6 +177,11 @@
 			transform 0.15s ease-out,
 			overlay 0.15s allow-discrete,
 			display 0.15s allow-discrete; */
+	}
+
+	.popover:popover-open {
+		display: var(--display, var(--default-display));
+		flex-direction: column; /* display block iken etkisi yok */
 	}
 
 	/* Animasyon Bitiş Durumu (Açık) */

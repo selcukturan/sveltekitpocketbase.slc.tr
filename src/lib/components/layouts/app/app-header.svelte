@@ -10,6 +10,7 @@
 	import { logout } from '#lib/remotes/guarded.remote.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import { getUser } from '#lib/remotes/guarded.remote.js';
+	import { Notifications } from '#lib/components/ui/notifications/index.js';
 
 	type Props = SvelteHTMLElements['header'];
 	let { class: classes, style, ...attributes }: Props = $props();
@@ -44,6 +45,7 @@
 			<p>{config.version}</p>
 		</div>
 		<div class="flex items-center gap-4">
+			<Notifications />
 			<form
 				{...logout.enhance(async ({ submit }) => {
 					try {
@@ -61,7 +63,7 @@
 				<!-- form içeriği -->
 
 				<button
-					class="bg-primary-300 hover:bg-primary-300/80 text-primary-900 flex cursor-pointer rounded-sm px-2.5 *:disabled:opacity-50"
+					class="bg-primary-300 hover:bg-primary-300/80 text-primary-900 flex cursor-pointer rounded-sm px-2.5 whitespace-nowrap *:disabled:opacity-50"
 					{@attach tooltip(t('logout'))}
 				>
 					{t('logout')}

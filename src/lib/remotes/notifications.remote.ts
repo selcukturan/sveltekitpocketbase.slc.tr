@@ -6,6 +6,8 @@ import * as v from 'valibot';
 
 export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;
 
+const NOTIFICATION_LIMIT = 100;
+
 const connectionSchema = v.object({
 	// İstemcide bileşen örneği başına üretilen benzersiz bağlantı kimliği
 	connectionId: v.pipe(v.string(), v.minLength(8), v.maxLength(64))
@@ -93,30 +95,29 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 		return { read, unread };
 	};
 
+	// Hem liste sorgusu hem abonelik aynı hedefleme kuralını kullanır
+	const targetFilter = pb.filter('user.id ?= {:id} || user:length = 0', { id: userId });
+
 	const getRawList = async (): Promise<DemoNotificationResponse[]> => {
 		try {
 			console.log('[notificationsRemote] Veritabanından en güncel log listesi çekiliyor...');
-			const result = await pb.collection('demo_notification').getFullList<DemoNotificationResponse>({
-				filter: locals.pb.filter('user.id ?= {:id} || user:length = 0', { id: userId }),
-				sort: '-created'
+			const result = await pb.collection('demo_notification').getList<DemoNotificationResponse>(1, NOTIFICATION_LIMIT, {
+				filter: targetFilter,
+				sort: '-created',
+				skipTotal: true
 			});
 			console.log('[notificationsRemote] Veritabanından en güncel log listesi çekildi:');
-			return result;
+			return result.items;
 		} catch (err) {
 			console.error('[notificationsRemote] Veritabanından log listesi çekilirken hata oluştu:', err);
 			return [];
 		}
 	};
 
-	// Adım 1: İlk yükleme (SSR ve anında hidrasyon için)
-	const initialRawList = await getRawList();
-	console.log('[notificationsRemote] İlk list yield ediliyor.');
-	yield splitList(initialRawList);
-
 	// Bellekte güncel listeyi tutacak değişken
-	let currentList = [...initialRawList];
+	let currentList: DemoNotificationResponse[] = [];
 
-	// Adım 2: Real-time Abonelik ve Async Kuyruğun Dinlenmesi
+	// Real-time güncellemeleri generator'a taşıyan kuyruk
 	const queue = new AsyncQueue<{ read: PublicNotificationResponse[]; unread: PublicNotificationResponse[] } | null>();
 
 	const abortHandler = () => {
@@ -139,41 +140,61 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	ensureSweeper();
 
 	try {
+		// Önce abone olunur, sonra liste çekilir. Böylece liste çekilirken oluşan değişiklikler kaçmaz.
+		// Liste hazır olana kadar gelen olaylar uygulanmaz; yalnızca listenin yeniden çekilmesi gerektiği işaretlenir.
+		let ready = false;
+		let dirty = false;
+
 		console.log('[notificationsRemote] PocketBase demo_notification real-time aboneliği başlatılıyor...');
 		await pb.collection('demo_notification').subscribe<DemoNotificationResponse>(
 			'*',
 			async (e) => {
 				console.log(`[notificationsRemote] 💥 PocketBase güncelleme olayını yakaladı! Eylem: ${e.action}, Kayıt ID: ${e.record.id}`);
 
-				// Kaydın bu kullanıcıya ait olup olmadığını kontrol eden yardımcı mantık
-				const isTargeted = !e.record.user || e.record.user.length === 0 || e.record.user.includes(userId);
-
-				if (e.action === 'create') {
-					if (isTargeted) {
-						currentList = [e.record, ...currentList];
-					}
-				} else if (e.action === 'update') {
-					if (isTargeted) {
-						const exists = currentList.some((item) => item.id === e.record.id);
-						if (exists) {
-							currentList = currentList.map((item) => (item.id === e.record.id ? e.record : item));
-						} else {
-							currentList = [e.record, ...currentList].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
-						}
-					} else {
-						currentList = currentList.filter((item) => item.id !== e.record.id);
-					}
-				} else if (e.action === 'delete') {
-					currentList = currentList.filter((item) => item.id !== e.record.id);
+				if (!ready) {
+					dirty = true;
+					return;
 				}
 
-				queue.push(splitList(currentList));
+				if (e.action === 'create') {
+					currentList = [e.record, ...currentList];
+
+					currentList = currentList.slice(0, NOTIFICATION_LIMIT);
+					queue.push(splitList(currentList));
+				} else if (e.action === 'update') {
+					const exists = currentList.some((item) => item.id === e.record.id);
+					if (exists) {
+						currentList = currentList.map((item) => (item.id === e.record.id ? e.record : item));
+					} else {
+						currentList = [e.record, ...currentList].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+					}
+
+					currentList = currentList.slice(0, NOTIFICATION_LIMIT);
+					queue.push(splitList(currentList));
+				} else if (e.action === 'delete') {
+					// Liste 99'a düşer; bir sonraki reconnect listeyi tekrar NOTIFICATION_LIMIT'e tamamlar.
+					currentList = currentList.filter((item) => item.id !== e.record.id);
+					queue.push(splitList(currentList));
+				}
 			},
 			{
-				filter: locals.pb.filter('user.id ?= {:id} || user:length = 0', { id: userId })
+				filter: targetFilter
 			}
 		);
-		console.log('[notificationsRemote] PocketBase subscribe başarıyla tamamlandı, akış dinleniyor...');
+		console.log('[notificationsRemote] PocketBase subscribe başarıyla tamamlandı.');
+
+		// İlk liste çekilirken olay geldiyse liste eskimiş olabilir, değişiklik durana kadar yeniden çekilir.
+		// Son çekimden sonra `ready = true` aynı adımda çalıştığı için araya olay giremez.
+		currentList = await getRawList();
+		while (dirty) {
+			dirty = false;
+			console.log('[notificationsRemote] Liste çekilirken değişiklik oldu, yeniden çekiliyor...');
+			currentList = await getRawList();
+		}
+		ready = true;
+
+		console.log('[notificationsRemote] İlk list yield ediliyor, akış dinleniyor...');
+		yield splitList(currentList);
 
 		// Kuyruğa yeni veri geldikçe yield et
 		while (true) {

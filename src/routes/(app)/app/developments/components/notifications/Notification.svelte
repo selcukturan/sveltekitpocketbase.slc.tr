@@ -98,15 +98,21 @@
 		await updateNotificationReadStatus({ id, read: !currentReadStatus });
 	}
 
-	// Daha önce görülen bildirim id'leri. Reconnect listeyi yeniden gönderdiğinde sahte toast çıkmasın diye
-	// yalnızca ilk kez görülen okunmamış bildirimler için toast gösterilir.
+	// Toast yalnızca gerçekten yeni gelen okunmamış bildirimler için gösterilir:
+	// - id daha önce görülmemiş olmalı (reconnect listeyi yeniden gönderdiğinde sahte toast çıkmasın)
+	// - görülen en yeni kayıttan daha yeni olmalı (silme sonrası reconnect, listeye alttan eski bir
+	//   kaydı soktuğunda toast çıkmasın; bkz. NOTIFICATION_LIMIT)
+	// `created` PocketBase'de sabit genişlikli UTC metni olduğu için metin karşılaştırması yeterlidir.
 	let seenIds: Set<string> | null = null;
+	let newestCreated = '';
 	const watchCurrent = () => {
 		const current = notifs.current;
 		if (!current) return;
 		untrack(() => {
-			const hasNew = seenIds !== null && current.unread.some((n) => !seenIds!.has(n.id));
-			seenIds = new Set([...current.unread, ...current.read].map((n) => n.id));
+			const all = [...current.unread, ...current.read];
+			const hasNew = seenIds !== null && current.unread.some((n) => !seenIds!.has(n.id) && n.created > newestCreated);
+			seenIds = new Set(all.map((n) => n.id));
+			for (const n of all) if (n.created > newestCreated) newestCreated = n.created;
 			if (!hasNew) return;
 			toast.add({
 				type: 'info',
