@@ -87,7 +87,7 @@
 
 <Toggler
 	bind:this={toggl}
-	animation
+	animation={false}
 	style="margin-inline: var(--gutter, 5px);"
 	placement="bottom-center"
 	--border="1px solid var(--color-surface-300)"
@@ -108,21 +108,29 @@
 	{#snippet children({ close })}
 		<div class="flex min-h-0 flex-auto flex-col">
 			<!-- header -->
-			<div class="bg-surface-200 inset-shadow-surface-300 flex items-center justify-between border-b p-3 inset-shadow-[0_-2px_4px_rgb(0_0_0/0.05)]">
+			<div class="bg-surface-200 border-surface-300 flex items-center justify-between border-b p-3">
 				<h3 class="text-lg font-semibold">Bildirimler</h3>
-				<button class="btn-sm" onclick={close}>Kapat</button>
+				<Button variant="ghost" color="error" icon="close" iconOnly={true} onclick={close} class="text-surface-950!" />
 			</div>
 			<!-- filter -->
-			<div class="flex items-center justify-between border-b p-2">
+			<div class="bg-surface-200/90 border-surface-300 flex items-center justify-between border-b p-2">
 				<!-- <input.Button variant="light" color="surface" label="Surface" /> -->
-				<Button variant={filter === 'all' ? 'light' : 'ghost'} color={filter === 'all' ? 'success' : 'quaternary'} label="Hepsi" onclick={() => (filter = 'all')} />
 				<Button
+					size="sm"
+					variant={filter === 'all' ? 'light' : 'ghost'}
+					color={filter === 'all' ? 'success' : 'quaternary'}
+					label="Hepsi"
+					onclick={() => (filter = 'all')}
+				/>
+				<Button
+					size="sm"
 					variant={filter === 'unread' ? 'light' : 'ghost'}
 					color={filter === 'unread' ? 'success' : 'quaternary'}
 					label="Okunmamışlar"
 					onclick={() => (filter = 'unread')}
 				/>
 				<Button
+					size="sm"
 					variant={filter === 'read' ? 'light' : 'ghost'}
 					color={filter === 'read' ? 'success' : 'quaternary'}
 					label="Okunmuşlar"
@@ -138,9 +146,9 @@
 				{/each}
 			</div>
 			<!-- footer -->
-			<div class="bg-surface-200 inset-shadow-surface-300 flex items-center justify-between border-t p-3 inset-shadow-sm">
-				<button class="btn-sm" onclick={close}>Tümünü Oku</button>
-				<button class="btn-sm" onclick={close}>Ayarlar</button>
+			<div class="bg-surface-200 border-surface-300 flex items-center justify-between border-t p-3">
+				<Button size="sm" variant="filled" color="primary" startIcon="grape" label="Tümünü Oku" onclick={close} />
+				<Button size="sm" variant="filled" color="success" icon="grape" iconOnly={true} onclick={close} />
 			</div>
 
 			<!-- detail dialog -->
@@ -148,7 +156,7 @@
 				bind:this={dialog}
 				onclose={onDialogClose}
 				onclick={(e) => e.target === dialog && dialog?.close()}
-				class="bg-surface-50 border-surface-300 m-auto w-[min(90vw,480px)] rounded-md border p-0 shadow-xl backdrop:bg-black/40"
+				class="bg-surface-50 border-surface-300 backdrop:bg-surface-200/40 m-auto w-[min(90vw,480px)] rounded-md border p-0 shadow-xl"
 			>
 				{#if selected}
 					<div class="flex flex-col">
