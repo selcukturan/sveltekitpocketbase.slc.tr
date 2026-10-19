@@ -14,7 +14,7 @@
 	--background-color="var(--color-surface-50)"
 	--box-shadow="0px 0px 16px -1px var(--color-surface-100)"
 	--min-height="200px"
-	--max-height="540px"
+	--max-height="min(540px, 75dvh)"
 	--min-width="400px"
 	--max-width="450px"
 	--display="flex"
@@ -25,13 +25,13 @@
 	{/snippet}
 
 	{#snippet children({ close })}
-		<div class="flex min-h-0 flex-1 flex-col">
+		<div class="flex min-h-0 flex-auto flex-col">
 			<header class="flex shrink-0 items-center justify-between p-2">
 				<h3 class="text-lg font-semibold">Bildirimler</h3>
 				<button class="btn-sm" onclick={close}>Kapat</button>
 			</header>
 
-			<div class="min-h-0 flex-1 overflow-y-auto">
+			<div class="min-h-0 flex-auto overflow-y-auto">
 				<ul class="my-select-menu">
 					<li><button onclick={close}>İstanbul</button></li>
 					<li><button onclick={close}>Ankara</button></li>
