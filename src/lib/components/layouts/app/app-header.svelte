@@ -70,9 +70,9 @@
 				</button>
 			</form>
 
-			<!-- <ThemeToggle />
+			<ThemeToggle />
 
-			<LangToggle /> -->
+			<LangToggle />
 		</div>
 	</nav>
 </header>

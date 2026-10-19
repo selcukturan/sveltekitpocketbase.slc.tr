@@ -1,8 +1,89 @@
 <script lang="ts">
 	import { Toggler } from '#lib/components/base/toggler/index.js';
+	import { Button } from '../inputs/index.js';
+
+	let filter = $state<'all' | 'unread' | 'read'>('all');
 
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
+
+	type Item = { id: string; title: string; body: string; read: boolean };
+
+	const exampleBodies = [
+		'Siparişiniz kargoya verildi. Takip numarası ile teslimat durumunu anlık olarak izleyebilirsiniz.',
+		'Hesabınıza yeni bir cihazdan giriş yapıldı. Bu siz değilseniz lütfen şifrenizi hemen değiştirin.',
+		'Haftalık rapor hazır.',
+		'Ekip toplantısı yarın saat 10:00’a ertelendi. Gündem maddeleri toplantı notlarına eklendi, katılmadan önce göz atmanız önerilir. Gündem maddeleri toplantı notlarına eklendi, katılmadan önce göz atmanız önerilir.'
+	];
+
+	let items = $state<Item[]>(
+		Array.from({ length: 20 }, (_, i) => ({
+			id: String(i + 1),
+			title: `Bildirim ${i + 1}`,
+			body: exampleBodies[i % exampleBodies.length],
+			read: i % 3 === 0
+		}))
+	);
+
+	const unreadCount = $derived(items.filter((item) => !item.read).length);
+	const filteredItems = $derived(filter === 'all' ? items : items.filter((item) => item.read === (filter === 'read')));
+
+	const toggleRead = (item: Item) => (item.read = !item.read);
+	const remove = (id: string) => (items = items.filter((item) => item.id !== id));
+
+	// Detay dialog'u. Popover'ın içinde durmalı: dışarıda olursa odak popover'dan çıkar ve popover kapanır.
+	let dialog = $state<HTMLDialogElement | null>(null);
+	let selected = $state<Item | null>(null);
+
+	const openItem = (item: Item) => {
+		selected = item;
+		dialog?.showModal();
+	};
+	// Okundu işaretini kapanışta koyuyoruz: "Okunmamışlar" filtresinde satır, dialog açıkken listeden düşmesin.
+	const onDialogClose = () => {
+		if (selected) selected.read = true;
+		selected = null;
+	};
 </script>
+
+{#snippet listItem(item: Item)}
+	<!-- list-item -->
+	<div class="hover:bg-surface-300/50 border-surface-300 flex w-full items-stretch border-t first:border-t-0">
+		<!-- read status -->
+		<div class="flex w-8 shrink-0 items-center justify-center">
+			<span class="size-2 rounded-full {item.read ? 'bg-transparent' : 'bg-info-500'}" aria-label={item.read ? 'Okundu' : 'Okunmadı'}></span>
+		</div>
+		<!-- content -->
+		<button type="button" onclick={() => openItem(item)} class="flex min-w-0 flex-auto cursor-pointer flex-col gap-0.5 rounded-lg p-2 text-left -outline-offset-5">
+			<span class="truncate text-sm {item.read ? 'font-normal' : 'font-semibold'}">{item.title}</span>
+			<span class="text-surface-600 line-clamp-2 text-xs">{item.body}</span>
+		</button>
+		<!-- action -->
+		<div class="flex shrink-0 flex-col items-center justify-center gap-0.5 px-2 py-1">
+			<button
+				type="button"
+				onclick={() => remove(item.id)}
+				class="hover:bg-surface-400/50 cursor-pointer rounded-full p-1"
+				aria-label="{item.title} kaldır"
+				title="Kaldır"
+			>
+				<svg class="size-3.5" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+			<button
+				type="button"
+				onclick={() => toggleRead(item)}
+				class="hover:bg-surface-400/50 cursor-pointer rounded-full p-1"
+				aria-label={item.read ? 'Okunmadı olarak işaretle' : 'Okundu olarak işaretle'}
+				title={item.read ? 'Okunmadı yap' : 'Okundu yap'}
+			>
+				<svg class="size-3.5" stroke="currentColor" fill={item.read ? 'none' : 'currentColor'} stroke-width="2" viewBox="0 0 24 24">
+					<circle cx="12" cy="12" r="6"></circle>
+				</svg>
+			</button>
+		</div>
+	</div>
+{/snippet}
 
 <Toggler
 	bind:this={toggl}
@@ -10,9 +91,9 @@
 	style="margin-inline: var(--gutter, 5px);"
 	placement="bottom-center"
 	--border="1px solid var(--color-surface-300)"
-	--border-radius="10px"
+	--border-radius="6px"
 	--background-color="var(--color-surface-50)"
-	--box-shadow="0px 0px 16px -1px var(--color-surface-100)"
+	--box-shadow="0px 25px 50px -12px var(--color-surface-100)"
 	--min-height="200px"
 	--max-height="min(540px, 75dvh)"
 	--min-width="400px"
@@ -21,50 +102,64 @@
 	--overflow="hidden"
 >
 	{#snippet trigger({ active, toggle, attr })}
-		<button {...attr} class="bg-error-300 cursor-pointer" class:bg-error-400={active}> Bildirimler (13) </button>
+		<button {...attr} class="bg-error-300 cursor-pointer touch-manipulation" class:bg-error-400={active}> Bildirimler ({unreadCount}) </button>
 	{/snippet}
 
 	{#snippet children({ close })}
 		<div class="flex min-h-0 flex-auto flex-col">
-			<header class="flex shrink-0 items-center justify-between p-2">
+			<!-- header -->
+			<div class="bg-surface-200 inset-shadow-surface-300 flex items-center justify-between border-b p-3 inset-shadow-[0_-2px_4px_rgb(0_0_0/0.05)]">
 				<h3 class="text-lg font-semibold">Bildirimler</h3>
 				<button class="btn-sm" onclick={close}>Kapat</button>
-			</header>
-
-			<div class="min-h-0 flex-auto overflow-y-auto">
-				<ul class="my-select-menu">
-					<li><button onclick={close}>İstanbul</button></li>
-					<li><button onclick={close}>Ankara</button></li>
-					<li><button onclick={close}>İzmir</button></li>
-					<li><button onclick={close}>Bursa</button></li>
-					<li><button onclick={close}>Antalya</button></li>
-					<li><button onclick={close}>İstanbul</button></li>
-					<li><button onclick={close}>Ankara</button></li>
-					<li><button onclick={close}>İzmir</button></li>
-					<li><button onclick={close}>Bursa</button></li>
-					<li><button onclick={close}>Antalya</button></li>
-					<li><button onclick={close}>İstanbul</button></li>
-					<li><button onclick={close}>Ankara</button></li>
-					<li><button onclick={close}>İzmir</button></li>
-					<li><button onclick={close}>Bursa</button></li>
-					<li><button onclick={close}>Antalya</button></li>
-					<li><button onclick={close}>İstanbul</button></li>
-					<li><button onclick={close}>Ankara</button></li>
-					<li><button onclick={close}>İzmir</button></li>
-					<li><button onclick={close}>Bursa</button></li>
-					<li><button onclick={close}>Antalya</button></li>
-					<li><button onclick={close}>İstanbul</button></li>
-					<li><button onclick={close}>Ankara</button></li>
-					<li><button onclick={close}>İzmir</button></li>
-					<li><button onclick={close}>Bursa</button></li>
-					<li><button onclick={close}>Antalya</button></li>
-				</ul>
 			</div>
-
-			<footer class="flex shrink-0 items-center justify-between p-2">
+			<!-- filter -->
+			<div class="flex items-center justify-between border-b p-2">
+				<!-- <input.Button variant="light" color="surface" label="Surface" /> -->
+				<Button variant={filter === 'all' ? 'light' : 'ghost'} color={filter === 'all' ? 'success' : 'quaternary'} label="Hepsi" onclick={() => (filter = 'all')} />
+				<Button
+					variant={filter === 'unread' ? 'light' : 'ghost'}
+					color={filter === 'unread' ? 'success' : 'quaternary'}
+					label="Okunmamışlar"
+					onclick={() => (filter = 'unread')}
+				/>
+				<Button
+					variant={filter === 'read' ? 'light' : 'ghost'}
+					color={filter === 'read' ? 'success' : 'quaternary'}
+					label="Okunmuşlar"
+					onclick={() => (filter = 'read')}
+				/>
+			</div>
+			<!-- main -->
+			<div class="bg-surface-100 min-h-0 flex-auto overflow-y-auto">
+				{#each filteredItems as item (item.id)}
+					{@render listItem(item)}
+				{:else}
+					<p class="text-surface-600 p-6 text-center text-sm">Bildirim yok.</p>
+				{/each}
+			</div>
+			<!-- footer -->
+			<div class="bg-surface-200 inset-shadow-surface-300 flex items-center justify-between border-t p-3 inset-shadow-sm">
 				<button class="btn-sm" onclick={close}>Tümünü Oku</button>
 				<button class="btn-sm" onclick={close}>Ayarlar</button>
-			</footer>
+			</div>
+
+			<!-- detail dialog -->
+			<dialog
+				bind:this={dialog}
+				onclose={onDialogClose}
+				onclick={(e) => e.target === dialog && dialog?.close()}
+				class="bg-surface-50 border-surface-300 m-auto w-[min(90vw,480px)] rounded-md border p-0 shadow-xl backdrop:bg-black/40"
+			>
+				{#if selected}
+					<div class="flex flex-col">
+						<div class="bg-surface-200 flex items-center justify-between gap-2 border-b p-3">
+							<h4 class="truncate font-semibold">{selected.title}</h4>
+							<button class="btn-sm" onclick={() => dialog?.close()}>Kapat</button>
+						</div>
+						<p class="max-h-[60dvh] overflow-y-auto p-4 text-sm whitespace-pre-line">{selected.body}</p>
+					</div>
+				{/if}
+			</dialog>
 		</div>
 	{/snippet}
 </Toggler>

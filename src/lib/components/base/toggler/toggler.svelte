@@ -105,9 +105,13 @@
 	class="container"
 	style:--anchor={anchorname}
 	onfocusout={(e: FocusEvent) => {
-		if (!e.relatedTarget || !container?.contains(e.relatedTarget as Node)) {
+		if (e.relatedTarget && container?.contains(e.relatedTarget as Node)) return;
+		const target = e.target as Node;
+		queueMicrotask(() => {
+			// Odaktaki eleman DOM'dan kaldırıldıysa (ör. listeden silinen satır) kapatma, odağı popover'a al.
+			if (!target.isConnected) return popoverEl?.focus();
 			close();
-		}
+		});
 	}}
 >
 	<!-- Trigger -->
