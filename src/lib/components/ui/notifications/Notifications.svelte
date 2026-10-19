@@ -6,7 +6,9 @@
 
 <Toggler
 	bind:this={toggl}
-	placement="bottom-end"
+	animation
+	style="margin-inline: var(--gutter, 5px);"
+	placement="bottom-center"
 	--border="1px solid var(--color-surface-300)"
 	--border-radius="10px"
 	--background-color="var(--color-surface-50)"
@@ -19,7 +21,7 @@
 	--overflow="hidden"
 >
 	{#snippet trigger({ active, toggle, attr })}
-		<button {...attr} class="btn" class:active> Bildirimler (13) </button>
+		<button {...attr} class="bg-error-300 cursor-pointer" class:bg-error-400={active}> Bildirimler (13) </button>
 	{/snippet}
 
 	{#snippet children({ close })}

@@ -6,6 +6,7 @@
 	type Placement = `${'top' | 'bottom'}-${'start' | 'center' | 'end'}` | `${'left' | 'right'}-${'start' | 'center' | 'end'}`;
 
 	type Props = Omit<SvelteHTMLElements['div'], 'children'> & {
+		animation?: boolean;
 		placement?: Placement;
 		matchTriggerWidth?: boolean;
 		escClose?: boolean;
@@ -28,7 +29,7 @@
 		children?: Snippet<[{ close: () => void; triggerId: string }]>;
 	};
 
-	let { placement = 'bottom-start', matchTriggerWidth = false, escClose = true, class: classes = '', trigger, children, ...rest }: Props = $props();
+	let { animation = false, placement = 'bottom-start', matchTriggerWidth = false, escClose = true, class: classes = '', trigger, children, ...rest }: Props = $props();
 
 	const id = $props.id();
 
@@ -120,6 +121,7 @@
 		popover="auto"
 		{@attach popoverEvents}
 		class="popover {placement} {classes}"
+		class:animation
 		class:match-width={matchTriggerWidth}
 		{...rest}
 	>
@@ -152,11 +154,13 @@
 		outline: none;
 
 		/* size */
-		min-width: min(var(--min-width, anchor-size(width)), 100%);
+		min-width: min(var(--min-width, anchor-size(width)), calc(100% - var(--gutter, 5px) * 2));
+		/* min-width: min(var(--min-width, anchor-size(width)), 100%); */
 		width: max-content;
 		max-width: min(calc(100% - var(--gutter, 5px) * 2), var(--max-width, 100vw));
 
-		min-height: var(--min-height, auto);
+		min-height: min(var(--min-height, 0px), calc(100% - var(--gutter, 5px) * 2));
+		/* min-height: var(--min-height, auto); */
 		height: max-content;
 		max-height: min(calc(100% - var(--gutter, 5px) * 2), var(--max-height, 100dvh));
 
@@ -166,9 +170,9 @@
 		border-radius: var(--border-radius, var(--default-border-radius));
 		background-color: var(--background-color, var(--default-background-color));
 		box-shadow: var(--box-shadow, var(--default-box-shadow));
-
+	}
+	.popover.animation {
 		/* Animasyon başlangıç ve kapanış geçiş ayarları */
-		/* 
 		opacity: 0;
 		transform: translateY(3px);
 		display: none;
@@ -176,7 +180,7 @@
 			opacity 0.15s ease-out,
 			transform 0.15s ease-out,
 			overlay 0.15s allow-discrete,
-			display 0.15s allow-discrete; */
+			display 0.15s allow-discrete;
 	}
 
 	.popover:popover-open {
@@ -185,21 +189,18 @@
 	}
 
 	/* Animasyon Bitiş Durumu (Açık) */
-	/* 
-	.popover:popover-open {
+	.popover.animation:popover-open {
 		opacity: 1;
-		display: block;
+		/* display: block; */
 		transform: translateY(0px);
-	} */
-
+	}
 	/* Animasyon Başlangıç Durumu (Açık) */
-	/* 
 	@starting-style {
-		.popover:popover-open {
+		.popover.animation:popover-open {
 			opacity: 0;
 			transform: translateY(3px);
 		}
-	} */
+	}
 
 	.popover.match-width {
 		width: min(anchor-size(width), 100%);
