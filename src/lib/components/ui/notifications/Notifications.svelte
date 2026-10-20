@@ -105,7 +105,7 @@
 	--border="1px solid var(--color-surface-300)"
 	--border-radius="6px"
 	--background-color="var(--color-surface-50)"
-	--box-shadow="0px 25px 50px -12px var(--color-surface-200)"
+	--box-shadow="0px 25px 50px -12px var(--color-surface-100)"
 	--min-height="200px"
 	--max-height="min(540px, 75dvh)"
 	--min-width="400px"
@@ -171,7 +171,7 @@
 	bind:this={dialog}
 	onClose={onDialogClose}
 	{@attach focustrap}
-	class="border-surface-300 bg-surface-50 shadow-surface-200 m-auto w-11/12 max-w-lg rounded-md border shadow-2xl"
+	class="border-surface-300 bg-surface-50 shadow-surface-100 m-auto w-11/12 max-w-lg rounded-md border shadow-2xl"
 >
 	{#if selected}
 		<div class="flex flex-col">
