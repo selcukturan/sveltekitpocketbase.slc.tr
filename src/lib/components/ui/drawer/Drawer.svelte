@@ -192,10 +192,10 @@
 <!-- {#if isOpen} -->
 
 <dialog
-	style="--drawer-animation-duration: {animationDuration / 1000}s"
+	style="--animation-duration: {animationDuration / 1000}s; --animation-move: 200px;"
 	{closedby}
 	class:closing={isClosing}
-	class="{dialogClasses} {dialogFocusOverrideClasses}"
+	class="slc-dialog slc-dialog-right {dialogClasses} {dialogFocusOverrideClasses}"
 	bind:this={dialog}
 	{@attach focustrap}
 	{@attach dialogAttach}
@@ -223,80 +223,5 @@
 		height: 100%;
 		/* Başlangıçta dialog görünmez ve animasyona hazır */
 		opacity: 0;
-	}
-
-	dialog::backdrop {
-		background-color: var(--color-surface-300);
-		/* Başlangıçta backdrop görünmez ve animasyona hazır */
-		opacity: 0;
-	}
-
-	/* Animate In */
-	dialog[open] {
-		animation: dialog-enter-from-right var(--drawer-animation-duration) ease-out forwards;
-	}
-	dialog[open]::backdrop {
-		animation: backdrop-fade-in var(--drawer-animation-duration) ease-out forwards;
-	}
-
-	/* Starting style for entry animation */
-	@starting-style {
-		dialog[open] {
-			/* Başlangıçta dialog görünmez ve animasyona hazır */
-			opacity: 0;
-		}
-
-		dialog[open]::backdrop {
-			/* Başlangıçta backdrop görünmez ve animasyona hazır */
-			opacity: 0;
-		}
-	}
-
-	dialog[open].closing {
-		animation: dialog-exit-to-right var(--drawer-animation-duration) ease-out forwards;
-	}
-
-	dialog[open].closing::backdrop {
-		animation: backdrop-fade-out var(--drawer-animation-duration) ease-out forwards;
-	}
-
-	@keyframes dialog-enter-from-right {
-		from {
-			opacity: 0;
-			transform: translateX(200px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
-
-	@keyframes dialog-exit-to-right {
-		from {
-			opacity: 1;
-			transform: translateX(0);
-		}
-		to {
-			opacity: 0;
-			transform: translateX(200px);
-		}
-	}
-
-	@keyframes backdrop-fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 0.5;
-		}
-	}
-
-	@keyframes backdrop-fade-out {
-		from {
-			opacity: 0.5;
-		}
-		to {
-			opacity: 0;
-		}
 	}
 </style>

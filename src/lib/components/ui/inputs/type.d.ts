@@ -101,7 +101,7 @@ export type RelationPropsType<Tmultiple extends boolean> = {
 	onValueChange?: (args: RelationValueChangeArgs<Tmultiple>) => void;
 };
 
-export type HideFuncType = (message: string, confirm: boolean) => void;
+export type HideFuncType = (confirm: boolean) => void;
 
 export type RelationDialogContentPropsType<Tmultiple extends boolean> = {
 	hide: HideFuncType;

@@ -10,6 +10,7 @@
 	import RelationDialogContent from './dialog-content.svelte';
 	import { createRelationInputsContext } from './context.svelte.js';
 	import LoadingSvg from './loading-svg.svelte';
+	import { Dialog } from '#lib/components/base/dialog/index.js';
 
 	let {
 		collection,
@@ -35,70 +36,15 @@
 	// svelte-ignore state_referenced_locally
 	const context = createRelationInputsContext<Tmultiple>(value, defaultSearch); // init
 
-	// let pickerDataTimestamp = $state(new Date().getTime());
-	// let pickerSearch = $state.raw({ search: defaultSearch, timestamp: new Date().getTime() });
-	// let pickerAnswer = $state<'init' | 'waiting' | 'true' | 'false'>('init');
-	// let context.pickerValue = $state(value);
-
-	let dialog: HTMLDialogElement | null = $state(null);
-	let isOpen = $state(false);
-	let resolvePromise: ((data: RelationResolveData) => void) | null = null;
-	let isClosing = $state(false);
-	let closedby = $state<'any' | 'none' | 'closerequest' | null | undefined>('any');
-
-	const show = (): Promise<RelationResolveData> => {
-		return new Promise<RelationResolveData>((resolve) => {
-			resolvePromise = resolve;
-			isOpen = true;
-			tick().then(() => {
-				dialog?.showModal();
-			});
-		});
-	};
-
-	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-	const hide: HideFuncType = async (log, confirm) => {
-		if (isClosing) return;
-		isClosing = true;
-		await sleep(animationDuration);
-		isClosing = false;
-		dialog?.close();
-		isOpen = false;
-		resolvePromise?.({ confirm });
-		resolvePromise = null;
-	};
-
-	const dialogEvents = (dialogElement: HTMLElement) => {
-		if (!(dialogElement instanceof HTMLDialogElement)) {
-			throw new Error('Dialog element is not an HTMLDialogElement');
-		}
-
-		const destroyKeydown = on(dialogElement, 'keydown', (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				e.preventDefault();
-				hide('confirm - handleKeydown - Esc key pressed', false);
-			}
-		});
-		const destroyCancel = on(dialogElement, 'cancel', (e: Event) => {
-			e.preventDefault();
-			if (e.target === dialogElement) {
-				hide('handleCancel - Backdrop click', false);
-			}
-		});
-
-		return () => {
-			destroyKeydown();
-			destroyCancel();
-		};
-	};
+	let dialog = $state<Dialog | null>(null);
 
 	async function pickerOpen() {
-		if (disabled || readonly) return;
+		if (disabled || readonly || !dialog) return;
 		// pickerAnswer = 'waiting';
 		context.pickerValue = value;
 		context.pickerParams = { collection, search: defaultSearch, timestamp: new Date().getTime() };
 
-		const { confirm } = await show();
+		const { confirm } = await dialog.show();
 
 		if (confirm) {
 			// pickerAnswer = 'true';
@@ -250,93 +196,14 @@
 
 {@render list()}
 
-<dialog
-	style="--confirm-animation-duration: {animationDuration / 1000}s"
-	{closedby}
-	{@attach dialogEvents}
-	class="bg-surface-50 shadow-surface-400 m-auto w-11/12 max-w-lg rounded-md shadow-2xl"
+<Dialog
 	bind:this={dialog}
-	class:closing={isClosing}
+	{animationDuration}
 	{@attach focustrap}
 	{@attach portal}
+	class="bg-surface-50 shadow-surface-400 m-auto w-11/12 max-w-lg rounded-md shadow-2xl"
 >
-	{#if isOpen}
-		<RelationDialogContent {hide} {multiple} {yes} {no} />
+	{#if dialog}
+		<RelationDialogContent hide={dialog.hide} {multiple} {yes} {no} />
 	{/if}
-</dialog>
-
-<style>
-	/* BEGIN Base Dialog Style */
-	dialog {
-		opacity: 0;
-	}
-
-	dialog::backdrop {
-		background-color: var(--color-surface-300);
-		opacity: 0;
-	}
-
-	dialog[open] {
-		animation: dialog-enter-from-bottom var(--confirm-animation-duration) ease-out forwards;
-	}
-	dialog[open]::backdrop {
-		animation: backdrop-fade-in var(--confirm-animation-duration) ease-out forwards;
-	}
-
-	@starting-style {
-		dialog[open] {
-			opacity: 0;
-		}
-		dialog[open]::backdrop {
-			opacity: 0;
-		}
-	}
-
-	dialog[open].closing {
-		animation: dialog-exit-to-bottom var(--confirm-animation-duration) ease-out forwards;
-	}
-	dialog[open].closing::backdrop {
-		animation: backdrop-fade-out var(--confirm-animation-duration) ease-out forwards;
-	}
-
-	@keyframes dialog-enter-from-bottom {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	@keyframes dialog-exit-to-bottom {
-		from {
-			opacity: 1;
-			transform: translateY(0);
-		}
-		to {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-	}
-
-	@keyframes backdrop-fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 0.5;
-		}
-	}
-
-	@keyframes backdrop-fade-out {
-		from {
-			opacity: 0.5;
-		}
-		to {
-			opacity: 0;
-		}
-	}
-	/* END Base Dialog Style */
-</style>
+</Dialog>

@@ -161,8 +161,8 @@
 	{/if}
 
 	<div class="bg-surface-100 inset-shadow-surface-200 mt-2 flex items-center justify-between border-t p-3 inset-shadow-sm">
-		<Button label={no} onclick={() => hide('no button clicked', false)} variant="ghost" color="surface" />
+		<Button label={no} onclick={() => hide(false)} variant="ghost" color="surface" />
 
-		<Button label={yes} variant="filled" color="surface" onclick={() => hide('yes button clicked', true)} />
+		<Button label={yes} variant="filled" color="surface" onclick={() => hide(true)} />
 	</div>
 </div>

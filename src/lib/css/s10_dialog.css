@@ -1,0 +1,142 @@
+@layer components {
+	.slc-dialog {
+		--dialog-duration: var(--animation-duration, 0.15s);
+		--dialog-enter: dialog-enter-from-bottom;
+		--dialog-exit: dialog-exit-to-bottom;
+		--dialog-move: var(--animation-move, 20px);
+		opacity: 0;
+	}
+	.slc-dialog::backdrop {
+		background-color: var(--color-surface-300);
+		opacity: 0;
+	}
+
+	.slc-dialog[open] {
+		animation: var(--dialog-enter) var(--dialog-duration) ease-out forwards;
+	}
+	.slc-dialog[open]::backdrop {
+		animation: backdrop-fade-in var(--dialog-duration) ease-out forwards;
+	}
+
+	.slc-dialog[open].closing {
+		animation: var(--dialog-exit) var(--dialog-duration) ease-out forwards;
+	}
+	.slc-dialog[open].closing::backdrop {
+		animation: backdrop-fade-out var(--dialog-duration) ease-out forwards;
+	}
+
+	/* Drawer: sağdan kayan varyant */
+	.slc-dialog-right {
+		--dialog-enter: dialog-enter-from-right;
+		--dialog-exit: dialog-exit-to-right;
+	}
+
+	.slc-dialog-left {
+		--dialog-enter: dialog-enter-from-left;
+		--dialog-exit: dialog-exit-to-left;
+	}
+
+	.slc-dialog-top {
+		--dialog-enter: dialog-enter-from-top;
+		--dialog-exit: dialog-exit-to-top;
+	}
+}
+
+@keyframes dialog-enter-from-bottom {
+	from {
+		opacity: 0;
+		transform: translateY(var(--dialog-move));
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes dialog-exit-to-bottom {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(var(--dialog-move));
+	}
+}
+@keyframes dialog-enter-from-right {
+	from {
+		opacity: 0;
+		transform: translateX(var(--dialog-move));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes dialog-exit-to-right {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(var(--dialog-move));
+	}
+}
+@keyframes dialog-enter-from-left {
+	from {
+		opacity: 0;
+		transform: translateX(calc(var(--dialog-move) * -1));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+@keyframes dialog-exit-to-left {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(calc(var(--dialog-move) * -1));
+	}
+}
+@keyframes dialog-enter-from-top {
+	from {
+		opacity: 0;
+		transform: translateY(calc(var(--dialog-move) * -1));
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes dialog-exit-to-top {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(calc(var(--dialog-move) * -1));
+	}
+}
+
+@keyframes backdrop-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 0.5;
+	}
+}
+@keyframes backdrop-fade-out {
+	from {
+		opacity: 0.5;
+	}
+	to {
+		opacity: 0;
+	}
+}
