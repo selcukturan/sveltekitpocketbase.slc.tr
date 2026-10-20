@@ -1,12 +1,19 @@
 import { query, command, form, getRequestEvent } from '$app/server';
 import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
 import { AsyncQueue } from '#lib/utils/asyncQueue.js';
-import { getTokenPayload } from 'pocketbase';
+import { getTokenPayload, type ClientResponseError } from 'pocketbase';
 import * as v from 'valibot';
 
-export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'user' | 'read_by'>;
+export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'to' | 'read_by' | 'remove_by'>;
 
 const NOTIFICATION_LIMIT = 100;
+// PocketBase ayarlarındaki Batch API "max requests" değeriyle aynı olmalı.
+const BATCH_SIZE = 50;
+// Art arda gelen olaylar (ör. toplu işlemler) bu süre içinde tek bir yield'e birleştirilir.
+const FLUSH_DELAY_MS = 100;
+
+// Kullanıcıya giden ve kullanıcının silmediği bildirimler.
+const visibleFilter = (pb: App.Locals['pb'], userId: string) => pb.filter('(to.id ?= {:id} || to:length = 0) && remove_by.id != {:id}', { id: userId });
 
 const connectionSchema = v.object({
 	// İstemcide bileşen örneği başına üretilen benzersiz bağlantı kimliği
@@ -20,7 +27,7 @@ const connections = new Map<string, Connection>();
 // Akış kurulmadan önce gelen kapatma istekleri (hızlı sayfa geçişi yarışı için)
 const pendingCloses = new Map<string, ReturnType<typeof setTimeout>>();
 
-// Token süresi dolmuş ama kapanmamış akışları ara ara temizler. Yalnızca açık akış varken çalışır.
+// Token süresi dolmuş ama kapanmamış akışları ara ara temizler. Yalnızca açık akış varken çalışır. 60_000 = 1 dakika
 const SWEEP_INTERVAL_MS = 60_000;
 let sweeper: ReturnType<typeof setInterval> | null = null;
 
@@ -84,7 +91,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 
 		for (const item of list) {
 			const isRead = item.read_by.includes(userId);
-			const { user: _user_unused, read_by: _read_by_unused, ...publicItem } = item;
+			const { to: _user_unused, read_by: _read_by_unused, remove_by: _remove_by_unused, ...publicItem } = item;
 			if (isRead) {
 				read.push(publicItem);
 			} else {
@@ -95,14 +102,19 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 		return { read, unread };
 	};
 
-	// Hem liste sorgusu hem abonelik aynı hedefleme kuralını kullanır
-	const targetFilter = pb.filter('user.id ?= {:id} || user:length = 0', { id: userId });
+	// Kendi listesinde olan ve tüm kullanıcılara giden bildirimler.
+	const targetFilter = pb.filter('to.id ?= {:id} || to:length = 0', { id: userId });
+	// Liste çekilirken kullanıcının sildikleri hariç tutulur.
+	// Abonelikte bu filtre kullanılmaz: kayıt filtreden çıktığında PocketBase olay göndermez,
+	// silme işareti hiç gelmez. Bu yüzden abonelik tüm güncellemeleri alır, kontrolü `isRemoved` yapar.
+	const listFilter = visibleFilter(pb, userId);
+	const isRemoved = (item: DemoNotificationResponse) => item.remove_by?.includes(userId) ?? false;
 
 	const getRawList = async (): Promise<DemoNotificationResponse[]> => {
 		try {
 			console.log('[notificationsRemote] Veritabanından en güncel log listesi çekiliyor...');
 			const result = await pb.collection('demo_notification').getList<DemoNotificationResponse>(1, NOTIFICATION_LIMIT, {
-				filter: targetFilter,
+				filter: listFilter,
 				sort: '-created',
 				skipTotal: true
 			});
@@ -119,6 +131,16 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 
 	// Real-time güncellemeleri generator'a taşıyan kuyruk
 	const queue = new AsyncQueue<{ read: PublicNotificationResponse[]; unread: PublicNotificationResponse[] } | null>();
+
+	// Toplu işlemde her kayıt ayrı olay üretir; ilk olaydan FLUSH_DELAY_MS sonra son durum tek seferde gönderilir.
+	let flushTimer: ReturnType<typeof setTimeout> | null = null;
+	const scheduleFlush = () => {
+		if (flushTimer) return;
+		flushTimer = setTimeout(() => {
+			flushTimer = null;
+			queue.push(splitList(currentList));
+		}, FLUSH_DELAY_MS);
+	};
 
 	const abortHandler = () => {
 		console.log('[notificationsRemote] İstemci bağlantı kesme sinyali (AbortSignal) yakalandı.');
@@ -140,6 +162,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	ensureSweeper();
 
 	try {
+		// ayaz, kerem, akın
 		// Önce abone olunur, sonra liste çekilir. Böylece liste çekilirken oluşan değişiklikler kaçmaz.
 		// Liste hazır olana kadar gelen olaylar uygulanmaz; yalnızca listenin yeniden çekilmesi gerektiği işaretlenir.
 		let ready = false;
@@ -160,7 +183,12 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 					currentList = [e.record, ...currentList];
 
 					currentList = currentList.slice(0, NOTIFICATION_LIMIT);
-					queue.push(splitList(currentList));
+					scheduleFlush();
+				} else if (e.action === 'update' && isRemoved(e.record)) {
+					// Kullanıcı sildi: listedeyse çıkar, değilse (ör. limit dışı) yok say.
+					if (!currentList.some((item) => item.id === e.record.id)) return;
+					currentList = currentList.filter((item) => item.id !== e.record.id);
+					scheduleFlush();
 				} else if (e.action === 'update') {
 					const exists = currentList.some((item) => item.id === e.record.id);
 					if (exists) {
@@ -168,13 +196,12 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 					} else {
 						currentList = [e.record, ...currentList].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
 					}
-
 					currentList = currentList.slice(0, NOTIFICATION_LIMIT);
-					queue.push(splitList(currentList));
+					scheduleFlush();
 				} else if (e.action === 'delete') {
 					// Liste 99'a düşer; bir sonraki reconnect listeyi tekrar NOTIFICATION_LIMIT'e tamamlar.
 					currentList = currentList.filter((item) => item.id !== e.record.id);
-					queue.push(splitList(currentList));
+					scheduleFlush();
 				}
 			},
 			{
@@ -212,6 +239,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	} finally {
 		console.log('[notificationsRemote] Temizlik ve abonelik iptali adımları başlatılıyor...');
 		request.signal.removeEventListener('abort', abortHandler);
+		if (flushTimer) clearTimeout(flushTimer);
 		if (connections.get(connectionId) === entry) connections.delete(connectionId);
 		try {
 			await pb.collection('demo_notification').unsubscribe('*');
@@ -240,24 +268,6 @@ export const updateNotificationReadStatus = command(updateReadSchema, async (par
 	}
 });
 
-const createSchema = v.object({
-	title: v.string(),
-	message: v.string()
-});
-
-export const createNotification = form(createSchema, async (params) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user?.id) return;
-
-	await locals.pb.collection('demo_notification').create({
-		title: params.title,
-		message: params.message,
-		user: [locals.user.id],
-		select: 'info',
-		read_by: []
-	});
-});
-
 const deleteSchema = v.object({
 	id: v.string()
 });
@@ -266,5 +276,41 @@ export const deleteNotification = form(deleteSchema, async (params) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user?.id) return;
 
-	await locals.pb.collection('demo_notification').delete(params.id);
+	// Kayıt silinmez, yalnızca bu kullanıcı için gizlenir. Canlı liste update olayıyla kaydı düşürür.
+	await locals.pb.collection('demo_notification').update(params.id, { 'remove_by+': locals.user.id });
+});
+
+// Filtreye uyan tüm görünür bildirimlere aynı güncellemeyi Batch API ile uygular.
+// Her batch kendi içinde atomiktir; parçalar arası değildir (yeniden denemek zararsızdır).
+const updateAllVisible = async (body: (userId: string) => Record<string, unknown>, extraFilter?: string) => {
+	const { locals } = getRequestEvent();
+	const userId = locals.user?.id;
+	if (!userId) return;
+	const pb = locals.pb;
+
+	const base = visibleFilter(pb, userId);
+	const filter = extraFilter ? `(${base}) && (${pb.filter(extraFilter, { id: userId })})` : base;
+	const items = await pb.collection('demo_notification').getFullList({ filter, fields: 'id' });
+
+	for (let i = 0; i < items.length; i += BATCH_SIZE) {
+		const batch = pb.createBatch();
+		for (const { id } of items.slice(i, i + BATCH_SIZE)) {
+			batch.collection('demo_notification').update(id, body(userId));
+		}
+		try {
+			await batch.send();
+		} catch (err) {
+			// Batch hatası hangi isteğin neden reddedildiğini response.data içinde taşır.
+			console.error('[notificationsRemote] Batch hatası:', JSON.stringify((err as ClientResponseError).response, null, 2));
+			throw err;
+		}
+	}
+};
+
+export const markAllNotificationsRead = command(async () => {
+	await updateAllVisible((userId) => ({ 'read_by+': userId }), 'read_by.id != {:id}');
+});
+
+export const removeAllNotifications = command(async () => {
+	await updateAllVisible((userId) => ({ 'remove_by+': userId }));
 });

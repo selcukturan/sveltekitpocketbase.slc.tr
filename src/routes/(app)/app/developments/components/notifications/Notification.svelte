@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import { Page, Head } from '#lib/components/templates/index.js';
-	import { notificationsBG, closeNotificationsBG, updateNotificationReadStatus, createNotification } from '#lib/remotes/notifications.remote.js';
+	import {
+		notificationsBG,
+		closeNotificationsBG,
+		updateNotificationReadStatus,
+		markAllNotificationsRead,
+		removeAllNotifications
+	} from '#lib/remotes/notifications.remote.js';
 	import { getToaster } from '#lib/components/ui/toast/toaster.svelte.ts';
 
 	const toast = getToaster('app-toaster');
@@ -172,71 +178,18 @@
 	<Page.Main>
 		<Page.Main.Panel>
 			<div class="space-y-6">
-				<!-- Test Bildirim Ekleme Paneli -->
-				<form
-					{...createNotification.enhance(async ({ submit }) => {
-						if (!checkAddPermission()) return;
-						if (await submit()) {
-							onAddSuccess();
-						}
-					})}
-					class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5"
-				>
-					<div class="flex flex-col justify-between gap-3 border-b border-zinc-800 pb-3 sm:flex-row sm:items-center">
-						<div>
-							<h2 class="text-md font-bold text-white">Test Bildirimi Gönder</h2>
-							<p class="text-xs text-zinc-500">PocketBase veritabanına test bildirimi kaydı ekleyin.</p>
-						</div>
-
-						<!-- Limit Göstergeleri -->
-						<div class="flex items-center gap-3">
-							<div class="bg-zinc-850 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300">
-								Günlük Ekleme: <span class="font-mono font-bold text-indigo-400">{5 - addCount}/5</span>
-							</div>
-							<div class="bg-zinc-850 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300">
-								Kalan Silme Hakkı: <span class="font-mono font-bold text-rose-400">{addCount - deleteCount}</span>
-							</div>
-						</div>
-					</div>
-
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-						<div class="space-y-1">
-							<label for="notif-title" class="text-xs font-semibold text-zinc-400">Bildirim Başlığı</label>
-							<input
-								id="notif-title"
-								type="text"
-								name="title"
-								bind:value={titleInput}
-								placeholder="Örn: Yeni Sipariş Bildirimi"
-								class="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-sm text-white placeholder-zinc-600 transition-colors focus:border-zinc-700 focus:outline-hidden"
-							/>
-						</div>
-						<div class="space-y-1">
-							<label for="notif-message" class="text-xs font-semibold text-zinc-400">Bildirim Detayı</label>
-							<input
-								id="notif-message"
-								type="text"
-								name="message"
-								bind:value={messageInput}
-								placeholder="Örn: 1092 nolu siparişiniz oluşturuldu."
-								class="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-sm text-white placeholder-zinc-600 transition-colors focus:border-zinc-700 focus:outline-hidden"
-							/>
-						</div>
-					</div>
-
-					<div class="flex justify-end pt-2">
-						<button
-							type="submit"
-							disabled={addCount >= 5}
-							class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-600"
-						>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-							</svg>
-							Bildirim Ekle ({5 - addCount} Kalan)
-						</button>
-					</div>
-				</form>
+				<div class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+					<button
+						onclick={async () => await markAllNotificationsRead()}
+						class="inline-flex cursor-pointer items-center gap-1.5 rounded border border-indigo-500/20 bg-indigo-600/10 px-2.5 py-1.5 text-xs font-semibold text-indigo-400 transition-all duration-200 hover:bg-indigo-600/20 active:scale-95"
+						>Tümünü Oku</button
+					>
+					<button
+						onclick={async () => await removeAllNotifications()}
+						class="inline-flex cursor-pointer items-center gap-1.5 rounded border border-indigo-500/20 bg-indigo-600/10 px-2.5 py-1.5 text-xs font-semibold text-indigo-400 transition-all duration-200 hover:bg-indigo-600/20 active:scale-95"
+						>Tümünü Sil</button
+					>
+				</div>
 
 				{#if notifs.ready}
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
