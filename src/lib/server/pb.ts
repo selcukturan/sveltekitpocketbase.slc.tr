@@ -71,8 +71,12 @@ export function createPocketBaseInstance(event: RequestEvent): { pb: TypedPocket
 	auth.init(pb);
 
 	pb.beforeSend = (url, options) => {
-		const userIp =
-			event.request.headers.get('cf-connecting-ip') || event.request.headers.get('x-forwarded-for') || event.request.headers.get('x-real-ip') || null;
+		// Realtime abonelik isteği (POST /api/realtime), SSE bağlantısını açan istemciyle aynı görünmeli.
+		// SSE bağlantısı EventSource polyfill'inden bu başlıklar olmadan açıldığı için burada da eklenmez;
+		// aksi halde canlıda (Cloudflare arkasında) IP farklı görünür ve PB "Invalid realtime client." döner.
+		if (new URL(url).pathname.endsWith('/api/realtime')) return { url, options };
+
+		const userIp = event.request.headers.get('cf-connecting-ip') || event.request.headers.get('x-forwarded-for') || event.request.headers.get('x-real-ip') || null;
 
 		const userAgent = event.request.headers.get('user-agent');
 		const newHeaders = { ...options.headers };
