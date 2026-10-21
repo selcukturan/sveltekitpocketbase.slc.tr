@@ -81,7 +81,7 @@ export function createPocketBaseInstance(event: RequestEvent): { pb: TypedPocket
 		const userAgent = event.request.headers.get('user-agent');
 		const newHeaders = { ...options.headers };
 
-		if (userIp) newHeaders['slc-connecting-ip'] = userIp;
+		if (userIp) newHeaders['cf-connecting-ip'] = userIp;
 		if (userAgent) newHeaders['user-agent'] = userAgent;
 
 		return { url, options: { ...options, headers: newHeaders } };
