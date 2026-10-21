@@ -14,6 +14,10 @@
 	const connectionId = crypto.randomUUID();
 
 	const notifs = notificationsBG({ connectionId });
+	// Sunucu listeyi en yeni en üstte gönderir; filter sırayı korur.
+	const all = $derived(notifs.current ?? []);
+	const unread = $derived(all.filter((n) => !n.read));
+	const read = $derived(all.filter((n) => n.read));
 	// void notifications.then;
 
 	let titleInput = $state('');
@@ -115,10 +119,9 @@
 		const current = notifs.current;
 		if (!current) return;
 		untrack(() => {
-			const all = [...current.unread, ...current.read];
-			const hasNew = seenIds !== null && current.unread.some((n) => !seenIds!.has(n.id) && n.created > newestCreated);
-			seenIds = new Set(all.map((n) => n.id));
-			for (const n of all) if (n.created > newestCreated) newestCreated = n.created;
+			const hasNew = seenIds !== null && current.some((n) => !n.read && !seenIds!.has(n.id) && n.created > newestCreated);
+			seenIds = new Set(current.map((n) => n.id));
+			for (const n of current) if (n.created > newestCreated) newestCreated = n.created;
 			if (!hasNew) return;
 			toast.add({
 				type: 'info',
@@ -191,6 +194,19 @@
 					>
 				</div>
 
+				<!-- Hata: akış durur, son liste (varsa) görünmeye devam eder. Periyodik reconnect de yeniden dener. -->
+				{#if notifs.error}
+					<div class="flex items-center justify-between gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+						<span>{notifs.error.message}</span>
+						<button
+							onclick={() => notifs.reconnect()}
+							class="cursor-pointer rounded border border-rose-500/30 px-2.5 py-1.5 text-xs font-semibold hover:bg-rose-500/20 active:scale-95"
+						>
+							Tekrar Dene
+						</button>
+					</div>
+				{/if}
+
 				{#if notifs.ready}
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<!-- Okunmamış Bildirimler Kolonu -->
@@ -199,13 +215,13 @@
 								<h2 class="flex items-center gap-2 text-lg font-bold text-white">
 									Okunmamış Bildirimler
 									<span class="rounded-full bg-indigo-500/20 px-2 py-0.5 font-mono text-xs font-bold text-indigo-400">
-										{notifs.current.unread.length}
+										{unread.length}
 									</span>
 								</h2>
 							</div>
 
 							<div class="grid gap-3">
-								{#each notifs.current.unread as item (item.id)}
+								{#each unread as item (item.id)}
 									<div
 										class="group relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-md transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900 hover:shadow-xl"
 									>
@@ -288,13 +304,13 @@
 								<h2 class="flex items-center gap-2 text-lg font-bold text-zinc-400">
 									Okunmuş Bildirimler
 									<span class="bg-zinc-850 rounded-full px-2 py-0.5 font-mono text-xs font-bold text-zinc-500">
-										{notifs.current.read.length}
+										{read.length}
 									</span>
 								</h2>
 							</div>
 
 							<div class="grid gap-3">
-								{#each notifs.current.read as item (item.id)}
+								{#each read as item (item.id)}
 									<div
 										class="group hover:border-zinc-850 relative overflow-hidden rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 opacity-70 shadow-sm transition-all duration-300 hover:bg-zinc-900 hover:opacity-100"
 									>
@@ -365,7 +381,7 @@
 							</div>
 						</div>
 					</div>
-				{:else}
+				{:else if !notifs.error}
 					<!-- Yükleniyor İskeleti -->
 					<div class="grid animate-pulse grid-cols-1 gap-8 lg:grid-cols-2">
 						<div class="space-y-4">
