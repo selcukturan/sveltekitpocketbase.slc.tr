@@ -10,3 +10,11 @@ onBootstrap((e) => {
 
 	// e.app
 });
+
+// Gönderen etiketi her zaman sunucuda, `from` kaydından yazılır; istemcinin gönderdiği değer yok sayılır.
+/* onRecordCreateRequest((e) => {
+	const fromId = e.record.get('from');
+	const sender = fromId ? e.app.findRecordById('sys_users', fromId) : null;
+	e.record.set('from_label', sender ? sender.get('label') : '');
+	e.next();
+}, 'demo_notification'); */

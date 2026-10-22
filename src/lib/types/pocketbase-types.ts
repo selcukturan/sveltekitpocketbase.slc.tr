@@ -162,6 +162,7 @@ export type DemoNotificationTypeOptions = typeof DemoNotificationTypeOptions[key
 export type DemoNotificationRecord = {
 	created: IsoAutoDateString
 	from?: RecordIdString
+	from_label?: string
 	id: string
 	message: HTMLString
 	read_by?: RecordIdString[]
