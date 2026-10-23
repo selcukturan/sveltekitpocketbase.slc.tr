@@ -15,6 +15,21 @@ export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'to' | '
 // Aynı anda oluşturulanlarda sıra id ile sabitlenir.
 const newestFirst = (a: DemoNotificationResponse, b: DemoNotificationResponse) => (a.created === b.created ? (a.id < b.id ? 1 : -1) : a.created < b.created ? 1 : -1);
 
+// `message` PB editöründen HTML gelir; istemciye düz metin gider. Blok sonları satır sonuna çevrilir,
+// arayüz metni `whitespace-pre-line` ile gösterir. Svelte metni zaten kaçışladığı için bu bir güvenlik değil görünüm işlemidir.
+const toPlainText = (html: string) =>
+	html
+		.replace(/<br\s*\/?>|<\/(p|div|li|h[1-6])>/gi, '\n')
+		.replace(/<[^>]*>/g, '')
+		.replace(/&nbsp;/g, ' ')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, '&')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
+
 // Akışın adım adım logları yalnızca geliştirmede basılır; uyarı ve hatalar canlıda da görünür.
 const debug = (...args: unknown[]) => {
 	if (dev) console.log('[notificationsRemote]', ...args);
@@ -116,7 +131,11 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 
 	// En yeni en üstte sıralı liste. read/unread ayrımı istemcide `read` alanından türetilir.
 	const toPublicList = (list: DemoNotificationResponse[]): PublicNotificationResponse[] =>
-		list.toSorted(newestFirst).map(({ to: _to, read_by, remove_by: _remove_by, ...item }) => ({ ...item, read: read_by.includes(userId) }));
+		list.toSorted(newestFirst).map(({ to: _to, read_by, remove_by: _remove_by, ...item }) => ({
+			...item,
+			message: toPlainText(item.message),
+			read: read_by.includes(userId)
+		}));
 
 	// Liste çekilirken kullanıcının sildikleri hariç tutulur (visibleFilter).
 	// Abonelikte yalnızca targetFilter kullanılır: kayıt filtreden çıktığında PocketBase olay göndermez,

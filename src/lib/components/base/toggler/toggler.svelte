@@ -108,8 +108,9 @@
 		if (e.relatedTarget && container?.contains(e.relatedTarget as Node)) return;
 		const target = e.target as Node;
 		queueMicrotask(() => {
-			// Odaktaki eleman DOM'dan kaldırıldıysa (ör. listeden silinen satır) kapatma, odağı popover'a al.
-			if (!target.isConnected) return popoverEl?.focus();
+			// Odaktaki eleman DOM'dan kaldırıldıysa (ör. listeden silinen satır) ya da devre dışı kaldıysa
+			// (ör. tıklanınca disabled olan buton) odak kendiliğinden düşer; kapatma, odağı popover'a al.
+			if (!target.isConnected || (target as HTMLButtonElement).disabled) return popoverEl?.focus();
 			close();
 		});
 	}}
