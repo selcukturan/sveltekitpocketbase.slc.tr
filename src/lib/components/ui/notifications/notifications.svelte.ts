@@ -15,7 +15,7 @@ export type NotificationItem = PublicNotificationResponse;
 // Akış kurulduğu andaki token'ı kullanır. Periyodik reconnect, gerçek kullanıcı istekleriyle yenilenen
 // güncel token'ı akışa taşır (bu istek token'ı yenilemez, bkz. authRefresh.ts) ve listeyi tazeler.
 const RECONNECT_INTERVAL_MS = 240_000;
-// Komut bittikten sonra canlı güncelleme gelmezse (ör. değişiklik olmadı) gösterge en geç bu süre sonra kalkar.
+// Komut bittikten sonra canlı güncelleme gelmezse (ör. değişiklik olmadı) gösterge en geç bu süre sonra kalkar. 2 saniye.
 const SETTLE_FALLBACK_MS = 2_000;
 
 // Bekleyen işlem anahtarları: satır işlemleri için bildirim id'si, toplu işlemler için sabitler.
