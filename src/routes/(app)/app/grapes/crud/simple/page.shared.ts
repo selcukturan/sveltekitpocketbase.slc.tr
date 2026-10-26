@@ -42,7 +42,8 @@ export const createFormSchema = v.object({
 	...input.Relation('relation_optional_multiple', { required: false, multiple: true }),
 	...input.Relation('relation_optional_single', { required: false, multiple: false }),
 	...input.File('file_optional_multiple', { required: false, multiple: true }),
-	...input.File('file_optional_single', { required: false, multiple: false })
+	...input.File('file_optional_single', { required: false, multiple: false }),
+	...input.Bool('bool_optional')
 });
 export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 

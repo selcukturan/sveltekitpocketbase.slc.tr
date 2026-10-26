@@ -7,7 +7,7 @@
 
 	const componentId = $props.id();
 
-	const labelFor = $derived(`slc_${componentId}${name || ''}${id || ''}_bool`);
+	const textId = `slc_${componentId}_bool_text`;
 
 	let button = $state<HTMLButtonElement>();
 
@@ -63,25 +63,19 @@
 <div
 	{@attach divClick}
 	{@attach watchValueChange}
-	class="group inline-flex items-center gap-3 select-none {classes} {disabled
-		? 'cursor-not-allowed opacity-50'
-		: readonly
-			? 'cursor-default'
-			: 'cursor-pointer'}"
+	class="group inline-flex items-center gap-3 select-none {classes} {disabled ? 'cursor-not-allowed opacity-50' : readonly ? 'cursor-default' : 'cursor-pointer'}"
 >
+	<!-- hover:bg-surface-400/50 focus:bg-surface-500/50 -->
 	<button
 		bind:this={button}
+		{id}
 		type="button"
 		role="switch"
 		aria-checked={value}
-		aria-label={text || 'Boolean toggle button'}
+		aria-describedby={text ? textId : undefined}
 		disabled={disabled || readonly}
-		class="{value ? 'bg-success-400 border-success-600' : 'bg-surface-200 border-surface-400'}
-			{!disabled && !readonly
-			? value
-				? 'group-hover:bg-success-500 group-hover:border-success-700'
-				: 'group-hover:bg-surface-300 group-hover:border-surface-500'
-			: ''}
+		class="{value ? 'bg-success-400 border-success-600' : 'bg-surface-300 border-surface-400'}
+			{!disabled && !readonly ? (value ? 'group-hover:bg-success-500 group-hover:border-success-700' : 'group-hover:bg-surface-400/50 group-hover:border-surface-500') : ''}
 			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
 			{readonly ? 'cursor-default' : 'cursor-pointer'}
 			relative h-6 w-11 overflow-hidden rounded-md border px-0.5 py-1"
@@ -95,6 +89,6 @@
 	</button>
 
 	{#if text}
-		<span class="text-surface-900 text-sm font-medium">{text}</span>
+		<span id={textId} class="text-surface-900 text-sm font-medium">{text}</span>
 	{/if}
 </div>

@@ -164,6 +164,9 @@ export type FilePropsType<Tmultiple extends boolean> = {
 	maxCount?: number; // Maksimum dosya sayısı
 	class?: string;
 	selectedFiles?: File[]; // yerel seçilen dosyalar
+	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
+	size?: 'sm' | 'md' | 'lg';
+	inform?: boolean;
 	disabled?: boolean;
 	readonly?: boolean;
 	onValueChange?: (args: FileValueChangeArgs<Tmultiple>) => void;

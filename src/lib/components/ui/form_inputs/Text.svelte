@@ -11,7 +11,7 @@
 		label?: string;
 	};
 
-	let { label: componentLabel, field, ...restProps }: Props = $props();
+	let { label: componentLabel, field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
@@ -47,7 +47,7 @@
 
 		// Value Change Callback
 		field.set(args.value);
-		restProps?.onValueChange?.(args);
+		userOnValueChange?.(args);
 
 		// Validate Form
 		context?.props.form.validate({ preflightOnly: true, all: false });

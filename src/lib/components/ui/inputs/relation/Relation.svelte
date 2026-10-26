@@ -122,12 +122,24 @@
 		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
-		<div class="flex w-full max-w-full min-w-0 items-center gap-1 leading-0.5 select-text">
+		<div class="flex w-full max-w-full min-w-0 items-center gap-2 select-text">
 			{#if isLoading}
 				<LoadingSvg />
+			{:else}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="text-surface-500 h-4 w-4 shrink-0"
+					><path d="M20 6 9 17l-5-5" />
+				</svg>
 			{/if}
 			<!-- label -->
-			<span class="bg-surface-300 border-surface-400 rounded-sm border px-1 py-px text-sm shadow-sm">{label}</span>
+			<span class="truncate text-sm">{label}</span>
 		</div>
 		<!-- action -->
 		<div class="inline-flex shrink-0 items-center gap-2.5">

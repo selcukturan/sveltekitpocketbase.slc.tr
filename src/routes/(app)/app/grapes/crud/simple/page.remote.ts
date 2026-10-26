@@ -58,13 +58,14 @@ export const updateForm = form(updateFormSchema, async (params) => {
 	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
+	console.log('server-values-1', params);
 
 	const transformedParams = paramsFileKeyTransform(params);
 
 	const id = transformedParams.id;
 	const values = { ...transformedParams, id: undefined };
 
-	console.log('server-values', values);
+	console.log('server-values-2', values);
 
 	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(id, values), mapUnknownToError);
 

@@ -139,6 +139,7 @@ export const DemoCrudSelectOptionalSingleOptions = {
 } as const
 export type DemoCrudSelectOptionalSingleOptions = typeof DemoCrudSelectOptionalSingleOptions[keyof typeof DemoCrudSelectOptionalSingleOptions]
 export type DemoCrudRecord = {
+	bool_optional?: boolean
 	created: IsoAutoDateString
 	file_optional_multiple?: FileNameString[]
 	file_optional_single?: FileNameString

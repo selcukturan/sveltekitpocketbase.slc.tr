@@ -293,6 +293,7 @@
 								/>
 								<formInput.File label="Single File" field={updateForm.fields.file_optional_single} value={dbData.file_optional_single} />
 								<formInput.File label="Multiple Files" multiple field={updateForm.fields.file_optional_multiple} value={dbData.file_optional_multiple} />
+								<formInput.Bool label="bool_optional" text="Rahatsız Etmeyin (Do not disturb)" field={updateForm.fields.bool_optional} value={dbData.bool_optional} />
 							{/snippet}
 
 							{#snippet buttons()}

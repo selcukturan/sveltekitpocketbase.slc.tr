@@ -1,6 +1,6 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
 	import { SvelteMap } from 'svelte/reactivity';
-	import { fade, slide } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import { on } from 'svelte/events';
 	import { inputClasses } from './common.js';
 	import type { FilePropsType, FileDisplayType, FileFileTypeChoice, FileValueTypeChoice } from './type.js';
@@ -15,6 +15,9 @@
 		name,
 		class: classes = '',
 		selectedFiles = $bindable([] as File[]),
+		status = 'default',
+		size = 'md',
+		inform = false,
 		disabled = false,
 		readonly = false,
 		onValueChange,
@@ -27,7 +30,39 @@
 
 	const valueMap = new SvelteMap<string, FileDisplayType>();
 
+	// valueMap'i bileşen oluşturulurken doldur; böylece liste ilk render'da dolu gelir.
+	const initValueMap = () => {
+		// 1. Initial values from value prop (uploaded files)
+		const initialValues = Array.isArray(value) ? value : value ? [value] : [];
+		initialValues.forEach((fileName) => {
+			if (fileName) {
+				valueMap.set(fileName, {
+					name: fileName,
+					uploaded: true,
+					deleted: false
+				});
+			}
+		});
+
+		// 2. Initial selected files from selectedFiles prop (unuploaded local files)
+		if (Array.isArray(selectedFiles)) {
+			selectedFiles.forEach((file) => {
+				if (file && file.name) {
+					valueMap.set(file.name, {
+						name: file.name,
+						uploaded: false,
+						deleted: false,
+						size: file.size,
+						fileObj: file
+					});
+				}
+			});
+		}
+	};
+	initValueMap();
+
 	const displayFiles = $derived([...valueMap.values()]);
+	const isEmpty = $derived(displayFiles.length === 0);
 
 	const deletedFileNames = $derived.by(() => {
 		const deleted = [...valueMap.values()].filter((f) => f.uploaded && f.deleted).map((f) => f.name);
@@ -226,21 +261,24 @@
 		syncChanges();
 	}
 
-	// Sürükle-bırak olayları ve tıklama dinleyicisi
-	const dropzoneEvents = (node: HTMLElement) => {
-		const destroyClick = on(node, 'click', () => {
-			if (disabled || readonly) return;
-			inputElement?.click();
-		});
+	// Tekli modda dosya seçiliyse veya çoklu modda limit dolduysa buton soluk görünür
+	const isFull = $derived.by(() => {
+		const activeCount = displayFiles.filter((f) => !f.deleted).length;
+		return multiple ? activeCount >= maxCount : activeCount >= 1;
+	});
 
+	// Sürükle-bırak olayları (tüm kart bırakma alanıdır)
+	const dropzoneEvents = (node: HTMLElement) => {
 		const destroyDragOver = on(node, 'dragover', (e: DragEvent) => {
 			e.preventDefault();
 			if (disabled || readonly) return;
 			isDragging = true;
 		});
 
-		const destroyDragLeave = on(node, 'dragleave', () => {
+		const destroyDragLeave = on(node, 'dragleave', (e: DragEvent) => {
 			if (disabled || readonly) return;
+			// Alt elemanlar arasında gezinirken titremeyi önle
+			if (e.relatedTarget instanceof Node && node.contains(e.relatedTarget)) return;
 			isDragging = false;
 		});
 
@@ -254,7 +292,6 @@
 		});
 
 		return () => {
-			destroyClick();
 			destroyDragOver();
 			destroyDragLeave();
 			destroyDrop();
@@ -277,33 +314,7 @@
 			if (first) {
 				first = false;
 
-				// 1. Initial values from value prop (uploaded files)
-				const initialValues = Array.isArray(currentVal) ? currentVal : currentVal ? [currentVal] : [];
-				initialValues.forEach((fileName) => {
-					if (fileName) {
-						valueMap.set(fileName, {
-							name: fileName,
-							uploaded: true,
-							deleted: false
-						});
-					}
-				});
-
-				// 2. Initial selected files from selectedFiles prop (unuploaded local files)
-				if (Array.isArray(selectedFiles)) {
-					selectedFiles.forEach((file) => {
-						if (file && file.name) {
-							valueMap.set(file.name, {
-								name: file.name,
-								uploaded: false,
-								deleted: false,
-								size: file.size,
-								fileObj: file
-							});
-						}
-					});
-				}
-
+				// valueMap initValueMap() ile zaten dolduruldu; burada yalnızca ilk değer senkronize edilir
 				const initialNotDeleted = getMapNotDeletedFiles();
 				// Sync the initial value prop to include any preloaded selectedFiles
 				value = initialNotDeleted;
@@ -410,152 +421,123 @@
 		});
 	};
 	// ######### END: preventDefaultClick handlers #############
+
+	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
 </script>
 
-<div class="flex flex-col gap-4 {classes}">
-	<!-- Sürükle Bırak Alanı -->
-	<button
-		{id}
-		type="button"
-		class="relative flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center select-none
-			{isDragging ? 'border-primary-500 bg-primary-100/30' : inputClasses.variants.default}
-			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
-			{readonly ? 'opacity-80' : ''}
-			{!disabled && !readonly ? 'cursor-pointer' : 'cursor-default'}"
-		disabled={disabled || readonly}
-		{@attach dropzoneEvents}
+{#snippet listItem(file: FileDisplayType)}
+	<!-- list-item -->
+	<div
+		transition:slide={{ duration: 150 }}
+		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
-		<!-- Cloud Upload SVG -->
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke-width="1.5"
-			stroke="currentColor"
-			class="text-surface-400 mb-3 h-10 w-10 transition-colors duration-200 {isDragging ? 'text-primary-500' : ''}"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
-			/>
-		</svg>
+		<!-- content -->
+		<div class="flex w-full max-w-full min-w-0 items-center gap-2 select-text" class:opacity-50={file.deleted}>
+			<svg class="text-surface-500 h-4 w-4 shrink-0" stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+				/>
+			</svg>
+			{#if !file.uploaded}
+				<span class="bg-success-200 border-success-400 text-success-800 shrink-0 rounded-sm border px-1 py-px text-xs font-medium">Yeni</span>
+			{/if}
+			<!-- label -->
+			<span class="truncate text-sm" class:line-through={file.deleted}>{file.name}</span>
+			{#if file.size !== undefined}
+				<span class="text-surface-500 shrink-0 text-xs">{formatBytes(file.size)}</span>
+			{/if}
+		</div>
+		<!-- action -->
+		<div class="inline-flex shrink-0 items-center gap-2.5">
+			{#if !disabled && !readonly}
+				{#if file.deleted}
+					<button
+						type="button"
+						onclick={() => restoreFile(file.name)}
+						class="slc-input text-warning-700 hover:bg-warning-400/50 focus:bg-warning-500/50 inline-flex cursor-pointer items-center gap-1 rounded-md p-1 text-xs font-bold outline-none"
+						aria-label="{file.name} geri al"
+					>
+						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+						</svg>
+						Geri al
+					</button>
+				{:else}
+					<button
+						type="button"
+						onclick={() => removeFile(file.name)}
+						class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
+						aria-label="{file.name} kaldır"
+					>
+						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				{/if}
+			{/if}
+		</div>
+	</div>
+{/snippet}
 
-		<span class="text-surface-700 block text-sm font-medium">
-			{#if multiple}
-				Dosyaları buraya sürükleyin veya <span class="text-primary-500 font-semibold underline">Gözatın</span>
-			{:else}
-				Dosyayı buraya sürükleyin veya <span class="text-primary-500 font-semibold underline">Gözatın</span>
-			{/if}
-		</span>
-
-		<!-- Açıklayıcı Alt Bilgiler -->
-		<span class="text-surface-500 mt-1.5 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-xs">
-			{#if accept && accept !== '*'}
-				<span>Format: <code class="bg-surface-100 text-surface-700 rounded px-1 text-[11px] font-semibold">{accept}</code></span>
-			{/if}
-			{#if maxSize !== Infinity}
-				<span>• Maksimum: <span class="font-medium">{formatBytes(maxSize)}</span></span>
-			{/if}
-			{#if maxCount !== Infinity && multiple}
-				<span>• En Fazla: <span class="font-medium">{maxCount} Adet</span></span>
-			{/if}
-		</span>
-	</button>
-
-	<!-- Gizli Dosya Seçme Elemanı -->
-	<input type="file" {multiple} {accept} {name} bind:files={proxy.files} bind:this={inputElement} class="sr-only" tabindex={-1} aria-hidden={true} />
+<output
+	class="mt-1 flex flex-col gap-0 rounded-sm transition-colors {defaultClasses} {isDragging
+		? 'outline-primary-500 bg-primary-100/30 outline-2 outline-dashed'
+		: ''} {classes}"
+	{@attach dropzoneEvents}
+>
+	<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true} {@attach preventDefaultClick}>
+		{#each displayFiles as file (file.name)}
+			{@render listItem(file)}
+		{/each}
+	</div>
 
 	<!-- Hata Bildirimi -->
 	{#if errorText}
 		<div
 			transition:slide={{ duration: 200 }}
-			class="bg-error-50 text-error-700 border-error-100 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
+			class="bg-error-50 text-error-700 border-error-100 mx-1 mt-1 flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-semibold"
 		>
-			<!-- Warning SVG -->
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 shrink-0">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
 			</svg>
 			<span>{errorText}</span>
 		</div>
 	{/if}
 
-	<!-- Dosya Listesi -->
-	{#if displayFiles.length > 0}
-		<div class="flex flex-col gap-1.5" {@attach preventDefaultClick} transition:fade={{ duration: 150 }}>
-			{#each displayFiles as file (file.name)}
-				<div
-					transition:slide={{ duration: 150 }}
-					class="group border-surface-200 hover:bg-surface-50/50 relative flex items-center justify-between gap-3 rounded-lg border bg-white p-2.5 transition-all duration-150
-						{file.deleted ? 'bg-surface-50 border-surface-150 line-through opacity-40' : ''}"
-				>
-					<div class="flex min-w-0 flex-1 items-center gap-2.5">
-						<!-- File Icon SVG -->
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="1.5"
-							stroke="currentColor"
-							class="text-surface-400 group-hover:text-primary-500 h-5 w-5 shrink-0 transition-colors"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-							/>
-						</svg>
+	<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>
+		<button
+			{id}
+			type="button"
+			{disabled}
+			onclick={() => !readonly && inputElement?.click()}
+			class="slc-input group-hover/btn:bg-surface-400/50 focus:bg-surface-500/50 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md p-1 text-start text-sm font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			class:opacity-50={isFull || readonly}
+			tabindex={disabled || readonly ? -1 : 0}
+		>
+			<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+			</svg>
+			<span>{!multiple && isFull ? 'Dosyayı değiştir veya sürükleyip bırak' : 'Dosya yükle veya sürükleyip bırak'}</span>
+		</button>
+	</div>
 
-						<div class="flex min-w-0 flex-col">
-							<p class="text-surface-800 truncate text-sm leading-tight font-medium">{file.name}</p>
-							{#if file.size !== undefined}
-								<span class="text-surface-500 mt-0.5 text-[11px] leading-none font-normal">{formatBytes(file.size)}</span>
-							{/if}
-						</div>
-					</div>
-
-					<div class="flex shrink-0 items-center gap-2">
-						<!-- Durum Rozetleri -->
-						{#if !file.deleted}
-							<span
-								class="rounded-full border px-2 py-0.5 text-[10px] leading-normal font-bold tracking-wide uppercase
-									{file.uploaded ? 'bg-surface-100 border-surface-200 text-surface-600' : 'bg-primary-50 border-primary-100 text-primary-600'}"
-							>
-								{file.uploaded ? 'Kayıtlı' : 'Yeni'}
-							</span>
-						{/if}
-
-						<!-- Eylem Butonları -->
-						{#if !disabled && !readonly}
-							{#if file.deleted}
-								<button
-									type="button"
-									class="text-primary-500 hover:text-primary-600 inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold transition-colors"
-									onclick={() => restoreFile(file.name)}
-								>
-									<!-- Undo SVG -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-									</svg>
-									Geri Al
-								</button>
-							{:else}
-								<button
-									type="button"
-									class="text-surface-400 hover:bg-error-50 hover:text-error-600 rounded-md p-1.5 transition-colors"
-									onclick={() => removeFile(file.name)}
-									aria-label="Dosyayı kaldır"
-								>
-									<!-- Trash/X SVG -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4.5 w-4.5">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-									</svg>
-								</button>
-							{/if}
-						{/if}
-					</div>
-				</div>
-			{/each}
-		</div>
+	<!-- Açıklayıcı Alt Bilgiler -->
+	{#if (accept && accept !== '*') || maxSize !== Infinity || (multiple && maxCount !== Infinity)}
+		<span class="text-surface-500 flex flex-wrap justify-center gap-x-2 gap-y-0.5 px-3 pt-0.5 text-xs">
+			{#if accept && accept !== '*'}
+				<span>Format: <code class="font-semibold">{accept}</code></span>
+			{/if}
+			{#if maxSize !== Infinity}
+				<span>Maks. boyut: <span class="font-semibold">{formatBytes(maxSize)}</span></span>
+			{/if}
+			{#if multiple && maxCount !== Infinity}
+				<span>En fazla: <span class="font-semibold">{maxCount} adet</span></span>
+			{/if}
+		</span>
 	{/if}
-</div>
+
+	<!-- Gizli Dosya Seçme Elemanı -->
+	<input type="file" {multiple} {accept} {name} bind:files={proxy.files} bind:this={inputElement} class="sr-only" tabindex={-1} aria-hidden={true} />
+</output>

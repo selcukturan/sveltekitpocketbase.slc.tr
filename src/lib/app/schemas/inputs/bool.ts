@@ -2,10 +2,10 @@ import * as v from 'valibot';
 import * as base from '../base';
 
 const _BoolOptional = () => v.pipe(v.optional(base.bool, false), v.metadata({ slc_nonfalsey: false }));
-const _BoolNonfalsey = (message = 'Bu alan gereklidir.') =>
+const _BoolNonfalsey = (message = 'Bu alan işaretlenmelidir (Onay vermelisiniz).') =>
 	v.pipe(
 		v.optional(base.bool, false),
-		v.check((input) => input === true, 'Bu alan işaretlenmelidir (Onay vermelisiniz).'),
+		v.check((input) => input === true, message),
 		v.metadata({ slc_nonfalsey: true })
 	);
 

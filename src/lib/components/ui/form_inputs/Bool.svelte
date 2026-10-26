@@ -11,10 +11,10 @@
 		label?: string;
 	};
 
-	let { label: componentLabel, field, ...restProps }: Props = $props();
+	let { label: componentLabel, field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const cid = $props.id();
-	// const id = $derived(restProps.id || cid);
+	const id = $derived(restProps.id || cid);
 	const context = getFormInputsContext();
 
 	// ######### BEGIN: Remote Form `field` attributes #########
@@ -35,7 +35,7 @@
 	// ######### END: Valibot metadata ########################
 
 	// ######### BEGIN: custom props variables #################
-	let label = $derived(componentLabel || attrName || 'no_label');
+	let label = $derived(componentLabel || cleanAttrName || 'no_label');
 	// ######### END: custom props variables ###################
 
 	// ######### BEGIN: handle value change ###################
@@ -46,7 +46,7 @@
 
 		// Value Change Callback
 		field.set(args.value);
-		restProps?.onValueChange?.(args);
+		userOnValueChange?.(args);
 
 		// Validate Form
 		context?.props.form.validate({ preflightOnly: true, all: false });
@@ -54,6 +54,9 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} id={restProps.id || attrName || cid}>
-	<Bool id={restProps.id || attrName || cid} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} />
+<Field {issues} {required} {label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+	<Bool {id} name={attrName} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} class="px-3 pt-1" />
 </Field>
+
+<!-- Hidden Area -->
+<input {...attributes} class="sr-only" tabindex={-1} aria-hidden={true} />

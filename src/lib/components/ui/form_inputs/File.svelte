@@ -11,7 +11,7 @@
 		label?: string;
 	};
 
-	let { label: componentLabel, field, multiple = false as Tmultiple, ...restProps }: Props = $props();
+	let { label: componentLabel, field, multiple = false as Tmultiple, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
@@ -64,7 +64,7 @@
 		} else {
 			(field as RemoteFormField<string>).set(args.value as string);
 		}
-		restProps?.onValueChange?.(args);
+		userOnValueChange?.(args);
 
 		// Validate Form
 		context?.props.form.validate({ preflightOnly: true, all: false });
@@ -72,8 +72,8 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} {id}>
-	<FileInput name={plusName} {id} {onValueChange} {multiple} {...restProps} />
+<Field {issues} {required} {label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+	<FileInput name={plusName} {id} {onValueChange} {multiple} inform {...restProps} />
 </Field>
 
 <!--Hidden Area-->

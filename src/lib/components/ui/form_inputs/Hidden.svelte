@@ -9,7 +9,7 @@
 		field: RemoteFormField<string>;
 	};
 
-	let { field, ...restProps }: Props = $props();
+	let { field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const context = getFormInputsContext();
 
@@ -23,7 +23,7 @@
 		if (cleanAttrName) context.currentData.set(cleanAttrName, args.value);
 
 		field.set(String(args.value));
-		restProps?.onValueChange?.(args);
+		userOnValueChange?.(args);
 	};
 </script>
 

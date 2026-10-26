@@ -1,9 +1,6 @@
 import { redirect } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
 
-export async function load() {
-	console.log(new Date().getTime() + ' routes - (site) +layout.server.ts');
-
-	throw redirect(302, '/login');
-
-	// return {};
-}
+export const load: LayoutServerLoad = () => {
+	throw redirect(302, '/app');
+};
