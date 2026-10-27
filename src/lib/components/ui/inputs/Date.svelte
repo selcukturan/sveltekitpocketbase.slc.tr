@@ -3,16 +3,7 @@
 	import { inputClasses } from './common.js';
 	import type { DateProps, DateValueChangeArgs } from './type.js';
 
-	let {
-		value = $bindable(''),
-		class: classes = '',
-		status = 'default',
-		size = 'md',
-		disabled = false,
-		dev = false,
-		onValueChange,
-		...rest
-	}: DateProps = $props();
+	let { value = $bindable(''), class: classes = '', status = 'default', size = 'md', disabled = false, dev = false, onValueChange, ...rest }: DateProps = $props();
 
 	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
 	const triggerChange = ({ value, beforeValue, initial }: DateValueChangeArgs) => {
@@ -53,13 +44,7 @@
 	// ############################### END PROXY ###############################
 </script>
 
-<input
-	bind:value={proxy.value}
-	type="date"
-	{disabled}
-	class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"
-	{...rest}
-/>
+<input bind:value={proxy.value} type="date" {disabled} class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}" {...rest} />
 
 {#if dev}
 	<p class="text-surface-500 text-xs">Component Value: {value}</p>

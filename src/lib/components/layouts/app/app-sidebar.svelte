@@ -40,11 +40,7 @@
 					text: d.title,
 					position: global.isMobileBreakpoint ? 'bottom' : 'right'
 				})}
-				aria-current={d.href === '/app' && page.url.pathname === '/app'
-					? 'page'
-					: d.href !== '/app' && page.url.pathname.startsWith(`${d.href}`)
-						? 'page'
-						: undefined}
+				aria-current={d.href === '/app' && page.url.pathname === '/app' ? 'page' : d.href !== '/app' && page.url.pathname.startsWith(`${d.href}`) ? 'page' : undefined}
 				class="hover:bg-surface-200
 					active:bg-surface-300
 					aria-[current]:border-primary-900

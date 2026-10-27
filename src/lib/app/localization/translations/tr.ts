@@ -54,7 +54,25 @@ export const tr = {
 	error_internal_server: 'Sunucu hatası!',
 	error_bad_request: 'Geçersiz istek!',
 	error_user_or_password_incorrect: 'E-posta veya şifre hatalı!',
-	err0001: 'Bilinmeyen bir hata oluştu!'
+	err0001: 'Bilinmeyen bir hata oluştu!',
+	// input validation messages (params: InputMeta)
+	err_required: 'Bu alan gereklidir.',
+	err_min_length: 'Lütfen en az {min} karakter girin.',
+	err_max_length: 'Lütfen en fazla {max} karakter girin.',
+	err_required_true: 'Bu alan işaretlenmelidir.',
+	err_max_size: 'Boyut en fazla {maxSizeText} olabilir.',
+	err_min_value: 'Değer en az {min} olmalıdır.',
+	err_max_value: 'Değer en fazla {max} olmalıdır.',
+	err_only_int: 'Değer tam sayı olmalıdır.',
+	err_decimals: 'En fazla {decimals} ondalık basamak girilebilir.',
+	err_min_date: 'Tarih en erken {minDate} olabilir.',
+	err_max_date: 'Tarih en geç {maxDate} olabilir.',
+	err_domain: 'Bu alan adına izin verilmiyor.',
+	err_min_select: 'En az {minSelect} seçim yapılmalıdır.',
+	err_max_select: 'En fazla {maxSelect} seçim yapılabilir.',
+	err_invalid_option: 'Geçersiz seçenek.',
+	err_mime_type: 'Bu dosya türüne izin verilmiyor.',
+	err_not_unique: 'Bu değer zaten kullanılıyor.'
 } as const;
 
 export type BaseTranslationKeys = keyof typeof tr;

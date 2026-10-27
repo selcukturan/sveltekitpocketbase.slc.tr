@@ -1,37 +1,24 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 import * as base from '../base';
 
-const _TextOptional = () =>
+// PocketBase "Plain text" alanı: required, min length, max length
+// - required: boş olamaz
+// - min: yalnızca değer girildiyse kontrol edilir (boş + isteğe bağlı alan geçerlidir)
+// - max: PocketBase'de 0 = varsayılan 5000; burada varsayılan 255
+type TextOptions = { required?: boolean; min?: number; max?: number; message?: string };
+
+const _Text = ({ required = true, min = 0, max = 255, message = errorKeys.required }: TextOptions = {}) =>
 	v.pipe(
 		v.optional(base.text, ''),
-		v.metadata({
-			slc_required: false
-		})
-	);
-const _TextRequired = (message = 'Bu alan gereklidir.') =>
-	v.pipe(
-		base.text,
-		v.nonEmpty(message),
-		v.metadata({
-			slc_required: true
-		})
+		v.check((input) => !required || input !== '', message),
+		v.check((input) => input === '' || input.length >= min, errorKeys.minLength),
+		v.maxLength(max, errorKeys.maxLength),
+		inputMeta({ required, min, max })
 	);
 
-type TextOptional = ReturnType<typeof _TextOptional>;
-type TextRequired = ReturnType<typeof _TextRequired>;
-
-type TextTypeChoice<Required extends boolean> = Required extends true ? TextRequired : TextOptional;
-
-export function Text<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
-	const { required = true, message } = options;
-
-	/* console.log('key', key);
-	console.log('options', options);
-	console.log('required', required); */
-
-	const main = required ? _TextRequired(message) : _TextOptional();
-
+export function Text<Key extends string>(key: Key, options: TextOptions = {}) {
 	return {
-		[`${key}`]: main
-	} as { [P in Key]: TextTypeChoice<Required> };
+		[`${key}`]: _Text(options)
+	} as { [P in Key]: ReturnType<typeof _Text> };
 }

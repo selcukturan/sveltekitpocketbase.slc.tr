@@ -77,14 +77,7 @@
 	}
 </script>
 
-<div
-	data-pane={id}
-	class="slc-split-pane-container {type} {classes}"
-	bind:this={container}
-	bind:clientWidth={w}
-	bind:clientHeight={h}
-	style={`--pos:${position}`}
->
+<div data-pane={id} class="slc-split-pane-container {type} {classes}" bind:this={container} bind:clientWidth={w} bind:clientHeight={h} style={`--pos:${position}`}>
 	<div class="pane">
 		{@render slotA()}
 	</div>

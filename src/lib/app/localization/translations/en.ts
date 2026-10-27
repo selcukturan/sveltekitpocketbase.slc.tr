@@ -56,5 +56,23 @@ export const en = {
 	error_internal_server: 'Internal server error!',
 	error_bad_request: 'Bad request!',
 	error_user_or_password_incorrect: 'E-mail or password is incorrect!',
-	err0001: 'An unknown error occurred!'
+	err0001: 'An unknown error occurred!',
+	// input validation messages (params: InputMeta)
+	err_required: 'This field is required.',
+	err_min_length: 'Please enter at least {min} characters.',
+	err_max_length: 'Please enter at most {max} characters.',
+	err_required_true: 'This field must be checked.',
+	err_max_size: 'Size can be at most {maxSizeText}.',
+	err_min_value: 'Value must be at least {min}.',
+	err_max_value: 'Value must be at most {max}.',
+	err_only_int: 'Value must be an integer.',
+	err_decimals: 'At most {decimals} decimal places are allowed.',
+	err_min_date: 'Date cannot be earlier than {minDate}.',
+	err_max_date: 'Date cannot be later than {maxDate}.',
+	err_domain: 'This domain is not allowed.',
+	err_min_select: 'Select at least {minSelect} items.',
+	err_max_select: 'Select at most {maxSelect} items.',
+	err_invalid_option: 'Invalid option.',
+	err_mime_type: 'This file type is not allowed.',
+	err_not_unique: 'This value is already in use.'
 } as const satisfies Record<BaseTranslationKeys, string>;

@@ -2,6 +2,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
 	import { on } from 'svelte/events';
+	import { formatBytes } from '#lib/utils/input-helper.js';
 	import { inputClasses } from './common.js';
 	import type { FilePropsType, FileDisplayType, FileFileTypeChoice, FileValueTypeChoice } from './type.js';
 
@@ -30,32 +31,24 @@
 
 	const valueMap = new SvelteMap<string, FileDisplayType>();
 
+	// Kayıtlı ve yeni dosyalar ayrı anahtarla tutulur; aynı adlı yeni dosya kayıtlı olanı ezmez.
+	const keyOf = (f: Pick<FileDisplayType, 'name' | 'uploaded'>) => (f.uploaded ? 'saved:' : 'new:') + f.name;
+	const setSaved = (name: string) => valueMap.set(keyOf({ name, uploaded: true }), { name, uploaded: true, deleted: false });
+	const setNew = (file: File) =>
+		valueMap.set(keyOf({ name: file.name, uploaded: false }), { name: file.name, uploaded: false, deleted: false, size: file.size, fileObj: file });
+
 	// valueMap'i bileşen oluşturulurken doldur; böylece liste ilk render'da dolu gelir.
 	const initValueMap = () => {
 		// 1. Initial values from value prop (uploaded files)
 		const initialValues = Array.isArray(value) ? value : value ? [value] : [];
 		initialValues.forEach((fileName) => {
-			if (fileName) {
-				valueMap.set(fileName, {
-					name: fileName,
-					uploaded: true,
-					deleted: false
-				});
-			}
+			if (fileName) setSaved(fileName);
 		});
 
 		// 2. Initial selected files from selectedFiles prop (unuploaded local files)
 		if (Array.isArray(selectedFiles)) {
 			selectedFiles.forEach((file) => {
-				if (file && file.name) {
-					valueMap.set(file.name, {
-						name: file.name,
-						uploaded: false,
-						deleted: false,
-						size: file.size,
-						fileObj: file
-					});
-				}
+				if (file && file.name) setNew(file);
 			});
 		}
 	};
@@ -89,16 +82,6 @@
 			return filesArray[0] as FileFileTypeChoice<Tmultiple>;
 		}
 	};
-
-	// Bayt formatlayıcı (Örn: 1048576 -> "1.00 MB")
-	function formatBytes(bytes: number, decimals = 2) {
-		if (bytes === 0 || bytes === Infinity) return '0 Bytes';
-		const k = 1024;
-		const dm = decimals < 0 ? 0 : decimals;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-	}
 
 	// Dosyaları doğrulayıp ekleyen ana fonksiyon
 	const handleFilesAdded = (fileList: FileList | File[] | null) => {
@@ -152,16 +135,12 @@
 
 		// 3. Adet (maxCount) doğrulaması ve ekleme
 		if (!multiple) {
-			// Tekli seçim
-			valueMap.clear();
-			const file = sizeOkFiles[0];
-			valueMap.set(file.name, {
-				name: file.name,
-				uploaded: false,
-				deleted: false,
-				size: file.size,
-				fileObj: file
+			// Tekli seçim: önceki yeni dosya atılır, kayıtlı dosya silinecek olarak işaretlenir (_Minus ile gönderilir)
+			valueMap.forEach((item, key) => {
+				if (item.uploaded) valueMap.set(key, { ...item, deleted: true });
+				else valueMap.delete(key);
 			});
+			setNew(sizeOkFiles[0]);
 		} else {
 			// Çoklu seçim
 			const currentActiveCount = [...valueMap.values()].filter((f) => !f.deleted).length;
@@ -179,15 +158,7 @@
 			}
 
 			filesToAdd.forEach((file) => {
-				if (!valueMap.has(file.name)) {
-					valueMap.set(file.name, {
-						name: file.name,
-						uploaded: false,
-						deleted: false,
-						size: file.size,
-						fileObj: file
-					});
-				}
+				if (!valueMap.has(keyOf({ name: file.name, uploaded: false }))) setNew(file);
 			});
 		}
 
@@ -226,22 +197,24 @@
 	};
 
 	// Dosya kaldırma
-	function removeFile(nameToDelete: string) {
-		const item = valueMap.get(nameToDelete);
+	function removeFile(file: FileDisplayType) {
+		const key = keyOf(file);
+		const item = valueMap.get(key);
 		if (!item) return;
 
 		if (item.uploaded) {
-			valueMap.set(nameToDelete, { ...item, deleted: true });
+			valueMap.set(key, { ...item, deleted: true });
 		} else {
-			valueMap.delete(nameToDelete);
+			valueMap.delete(key);
 		}
 
 		syncChanges();
 	}
 
 	// Dosyayı geri alma
-	function restoreFile(nameToRestore: string) {
-		const item = valueMap.get(nameToRestore);
+	function restoreFile(file: FileDisplayType) {
+		const keyToRestore = keyOf(file);
+		const item = valueMap.get(keyToRestore);
 		if (!item) return;
 
 		if (multiple) {
@@ -253,11 +226,11 @@
 			}
 		} else {
 			valueMap.forEach((val, key) => {
-				if (key !== nameToRestore) valueMap.delete(key);
+				if (key !== keyToRestore) valueMap.delete(key);
 			});
 		}
 
-		valueMap.set(nameToRestore, { ...item, deleted: false });
+		valueMap.set(keyToRestore, { ...item, deleted: false });
 		syncChanges();
 	}
 
@@ -337,13 +310,7 @@
 				valueMap.clear();
 				const valuesToSet = Array.isArray(currentVal) ? currentVal : currentVal ? [currentVal] : [];
 				valuesToSet.forEach((fileName) => {
-					if (fileName) {
-						valueMap.set(fileName, {
-							name: fileName,
-							uploaded: true,
-							deleted: false
-						});
-					}
+					if (fileName) setSaved(fileName);
 				});
 				selectedFiles = [];
 				lastValue = currentVal;
@@ -372,15 +339,7 @@
 					});
 
 					// selectedFiles'tan tüm dosyaları ekle
-					selectedFiles.forEach((file) => {
-						valueMap.set(file.name, {
-							name: file.name,
-							uploaded: false,
-							deleted: false,
-							size: file.size,
-							fileObj: file
-						});
-					});
+					selectedFiles.forEach((file) => setNew(file));
 
 					const tempBefore = lastValue;
 					const beforeSelected = lastSelectedFiles;
@@ -455,7 +414,7 @@
 				{#if file.deleted}
 					<button
 						type="button"
-						onclick={() => restoreFile(file.name)}
+						onclick={() => restoreFile(file)}
 						class="slc-input text-warning-700 hover:bg-warning-400/50 focus:bg-warning-500/50 inline-flex cursor-pointer items-center gap-1 rounded-md p-1 text-xs font-bold outline-none"
 						aria-label="{file.name} geri al"
 					>
@@ -467,7 +426,7 @@
 				{:else}
 					<button
 						type="button"
-						onclick={() => removeFile(file.name)}
+						onclick={() => removeFile(file)}
 						class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
 						aria-label="{file.name} kaldır"
 					>
@@ -488,7 +447,7 @@
 	{@attach dropzoneEvents}
 >
 	<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true} {@attach preventDefaultClick}>
-		{#each displayFiles as file (file.name)}
+		{#each displayFiles as file (keyOf(file))}
 			{@render listItem(file)}
 		{/each}
 	</div>

@@ -1,24 +1,41 @@
-<script lang="ts" generics="Tmultiple extends boolean = false">
+<script lang="ts" generics="T extends string | string[] = string">
 	import type { RemoteFormField } from '$app/server';
-	import { getFormInputsContext } from './context.svelte';
 	import { File as FileInput } from '#lib/components/ui/inputs/index.js';
-	import type { FileValueChangeArgs, FilePropsType, FileValueTypeChoice } from '#lib/components/ui/inputs/type.js';
+	import type { FileValueChangeArgs, FilePropsType } from '#lib/components/ui/inputs/type.js';
 	import Field from './Field.svelte';
 	import { parseNamePath } from './utils.js';
+	import { useFormField } from './form-field.svelte.js';
 
-	type Props = FilePropsType<Tmultiple> & {
-		field: RemoteFormField<Tmultiple extends true ? string[] : string>;
+	// `multiple`, `accept`, `maxSize` ve `maxCount` şemadan (metadata) gelir; tip `field` üzerinden çıkarılır.
+	// Prop olarak verilen `accept`, `maxSize`, `maxCount` şemadakini ezer.
+	type Tmultiple = T extends string[] ? true : false;
+	type Props = Omit<FilePropsType<Tmultiple>, 'multiple'> & {
+		field: RemoteFormField<T>;
 		label?: string;
 	};
 
-	let { label: componentLabel, field, multiple = false as Tmultiple, onValueChange: userOnValueChange, ...restProps }: Props = $props();
+	let { label: componentLabel, field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
-	const context = getFormInputsContext();
 
-	// svelte-ignore state_referenced_locally
-	let deletedFileNames = $state<FileValueTypeChoice<Tmultiple>>((multiple ? [] : '') as unknown as FileValueTypeChoice<Tmultiple>);
+	// ######### BEGIN: form field (metadata, issues, label) ####
+	// Şema anahtarı `multiple` bilinmeden okunur: 'select' ve 'select multiple' adları yalnızca '[]' ile ayrılır.
+	// `_Plus` (boyut, tür) ve `_Minus` hataları da bu alanın altında gösterilir.
+	const formField = useFormField(() => ({
+		name: (field as RemoteFormField<string>).as('select').name,
+		issues: field.issues(),
+		label: componentLabel,
+		shadowSuffixes: ['_Plus', '_Minus']
+	}));
+	// ######### END: form field (metadata, issues, label) ######
+
+	let multiple = $derived(formField.meta.multiple === true);
+	let accept = $derived(formField.meta.mimeTypes?.length ? formField.meta.mimeTypes.join(',') : undefined);
+	let maxCount = $derived(multiple ? formField.meta.maxSelect : undefined);
+
+	// Silinecek kayıtlı dosya adları (`_Minus`); tekli modda en fazla bir eleman
+	let deletedFileNames = $state<string[]>([]);
 
 	// ######### BEGIN: Remote Form `field` attributes #########
 	const attributes = $derived.by(() => {
@@ -29,36 +46,16 @@
 		}
 	});
 
-	let { pathFieldName, pathRemoteId, pathFormFunction } = $derived(parseNamePath(attributes.name));
+	let { pathRemoteId, pathFormFunction } = $derived(parseNamePath(attributes.name));
 
-	let attrName = $derived(pathFieldName || restProps.name);
-	let cleanAttrName = $derived(attrName ? attrName.replace('[]', '') : '');
-	let plusName = $derived((multiple ? cleanAttrName + '_Plus[]' : cleanAttrName + '_Plus') + '/' + pathRemoteId + '/' + pathFormFunction);
-	let minusName = $derived((multiple ? cleanAttrName + '_Minus[]' : cleanAttrName + '_Minus') + '/' + pathRemoteId + '/' + pathFormFunction);
+	let plusName = $derived((multiple ? formField.key + '_Plus[]' : formField.key + '_Plus') + '/' + pathRemoteId + '/' + pathFormFunction);
+	let minusName = $derived((multiple ? formField.key + '_Minus[]' : formField.key + '_Minus') + '/' + pathRemoteId + '/' + pathFormFunction);
 	// ######### END: Remote Form `field` attributes ###########
-
-	// ######### BEGIN: Remote Form `field.issues()` ###########
-	let issues = $derived(field.issues() ?? []);
-	// ######### END: Remote Form `field.issues()` #############
-
-	// ######### BEGIN: Valibot metadata ######################
-
-	let metadata = $derived(context?.getValibotMetadata(cleanAttrName));
-	let required = $derived(metadata?.slc_required === true ? true : false);
-	// ######### END: Valibot metadata ########################
-
-	// ######### BEGIN: custom props variables #################
-	let label = $derived(componentLabel || attrName || 'no_label');
-	// ######### END: custom props variables ###################
 
 	// ######### BEGIN: handle value change ###################
 	const onValueChange = (args: FileValueChangeArgs<Tmultiple>) => {
-		// Set Context Data
-		if (args.initial && cleanAttrName) context.initialData.set(cleanAttrName, args.value);
-		if (cleanAttrName) context.currentData.set(cleanAttrName, args.value);
-
-		// Value Change Callback
-		deletedFileNames = args.deletedFileNames;
+		formField.track(args.value, args.initial);
+		deletedFileNames = Array.isArray(args.deletedFileNames) ? args.deletedFileNames : args.deletedFileNames ? [args.deletedFileNames] : [];
 		if (multiple) {
 			(field as RemoteFormField<string[]>).set(args.value as string[]);
 		} else {
@@ -66,21 +63,20 @@
 		}
 		userOnValueChange?.(args);
 
-		// Validate Form
-		context?.props.form.validate({ preflightOnly: true, all: false });
+		formField.validate();
 	};
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} {id} fieldClasses="group-focus-within:bg-surface-200!">
-	<FileInput name={plusName} {id} {onValueChange} {multiple} inform {...restProps} />
+<Field issues={formField.issues} required={formField.required} label={formField.label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+	<FileInput name={plusName} {id} {onValueChange} multiple={multiple as Tmultiple} {accept} maxSize={formField.meta.maxSize} {maxCount} inform {...restProps} />
 </Field>
 
 <!--Hidden Area-->
 
 <select {...attributes} class="sr-only" tabindex={-1} aria-hidden={true}>
 	{#if multiple}
-		{#each field.value() as item, i (i)}
+		{#each field.value() as string[] as item, i (i)}
 			<option value={item} selected>{item}</option>
 		{/each}
 	{:else}
@@ -88,12 +84,8 @@
 	{/if}
 </select>
 
-<select {multiple} name={minusName} value={deletedFileNames} class="sr-only" tabindex={-1} aria-hidden={true}>
-	{#if multiple}
-		{#each deletedFileNames as option (option)}
-			<option value={option} selected>{option}</option>
-		{/each}
-	{:else}
-		<option value={deletedFileNames} selected>{deletedFileNames}</option>
-	{/if}
+<select {multiple} name={minusName} class="sr-only" tabindex={-1} aria-hidden={true}>
+	{#each deletedFileNames as option (option)}
+		<option value={option} selected>{option}</option>
+	{/each}
 </select>

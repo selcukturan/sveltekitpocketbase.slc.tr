@@ -18,21 +18,13 @@ export const id = v.pipe(v.string(), v.regex(safeStringIdCharsRegex, 'ID için g
 
 export const text = v.union([
 	v.literal(''), // Boş string ise kabul et
-	v.pipe(
-		v.string(),
-		v.regex(safeStringCharsRegex, 'Girdi sadece harf, rakam ve belirli noktalama işaretleri içerebilir.'),
-		v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')
-	) // Değilse text formatı ara
-]);
+	v.pipe(v.string(), v.regex(safeStringCharsRegex, 'Girdi sadece harf, rakam ve belirli noktalama işaretleri içerebilir.')) // Değilse text formatı ara
+]); // Uzunluk sınırı builder'da (inputs/text.ts) verilir
 
 export const textarea = v.union([
 	v.literal(''), // Boş string ise kabul et
-	v.pipe(
-		v.string(),
-		v.regex(safeStringTextareaCharsRegex, 'Textarea için geçersiz karakterler içeriyor.'),
-		v.maxLength(1024, 'Lütfen en fazla 1024 karakter girin.')
-	) // Değilse textarea formatı ara
-]);
+	v.pipe(v.string(), v.regex(safeStringTextareaCharsRegex, 'Textarea için geçersiz karakterler içeriyor.')) // Değilse textarea formatı ara
+]); // Boyut sınırı builder'da (inputs/textarea.ts) verilir
 
 export const email = v.union([
 	v.literal(''), // Boş string ise kabul et
@@ -51,19 +43,6 @@ export const number = v.pipe(
 	v.maxValue(Number.MAX_SAFE_INTEGER, 'Sayısal değer çok büyük.')
 );
 
-export const maxDecimalPlaces = (max: number) =>
-	v.check((input: number) => new RegExp(`^-?\\d+(\\.\\d{1,${max}})?$`).test(String(input)), `Sayı en fazla ${max} ondalık basamağa sahip olabilir. `);
-
-export const integer = v.pipe(number, v.integer('Sayı tam sayı olmalıdır.'));
-export const decimal_1 = v.pipe(number, maxDecimalPlaces(1));
-export const decimal_2 = v.pipe(number, maxDecimalPlaces(2));
-export const decimal_3 = v.pipe(number, maxDecimalPlaces(3));
-export const decimal_4 = v.pipe(number, maxDecimalPlaces(4));
-export const decimal_5 = v.pipe(number, maxDecimalPlaces(5));
-export const decimal_6 = v.pipe(number, maxDecimalPlaces(6));
-export const decimal_7 = v.pipe(number, maxDecimalPlaces(7));
-export const decimal_8 = v.pipe(number, maxDecimalPlaces(8));
-export const decimal_9 = v.pipe(number, maxDecimalPlaces(9));
 // ########################### END NUMBER ###########################
 
 // ########################### BEGIN BOOLEAN ###########################

@@ -1,20 +1,28 @@
 import * as v from 'valibot';
+import { domainAllowed, errorKeys, inputMeta } from './meta';
 import * as base from '../base';
 
-const _UrlOptional = () => v.pipe(v.optional(base.url, ''), v.metadata({ slc_required: false }));
-const _UrlRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.url, v.nonEmpty(message), v.metadata({ slc_required: true }));
+// PocketBase "URL" alanı: required, except domains, only domains
+type UrlOptions = { required?: boolean; exceptDomains?: string[]; onlyDomains?: string[]; message?: string };
 
-type UrlOptional = ReturnType<typeof _UrlOptional>;
-type UrlRequired = ReturnType<typeof _UrlRequired>;
+const hostname = (input: string) => {
+	try {
+		return new URL(input).hostname;
+	} catch {
+		return '';
+	}
+};
 
-type UrlTypeChoice<Required extends boolean> = Required extends true ? UrlRequired : UrlOptional;
+const _Url = ({ required = true, exceptDomains = [], onlyDomains = [], message = errorKeys.required }: UrlOptions = {}) =>
+	v.pipe(
+		v.optional(base.url, ''),
+		v.check((input) => !required || input !== '', message),
+		v.check((input) => hostname(input) === '' || domainAllowed(hostname(input), { exceptDomains, onlyDomains }), errorKeys.domain), // biçim hatası varsa yalnızca o gösterilir
+		inputMeta({ required, exceptDomains, onlyDomains })
+	);
 
-export function Url<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
-	const { required = true, message } = options;
-
-	const main = required ? _UrlRequired(message) : _UrlOptional();
-
+export function Url<Key extends string>(key: Key, options: UrlOptions = {}) {
 	return {
-		[`${key}`]: main
-	} as { [P in Key]: UrlTypeChoice<Required> };
+		[`${key}`]: _Url(options)
+	} as { [P in Key]: ReturnType<typeof _Url> };
 }

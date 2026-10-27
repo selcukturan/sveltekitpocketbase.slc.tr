@@ -1,71 +1,34 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 
-// Optional
-const _SingleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
+// PocketBase "Select" alanı: required, values, (multiple) max select
+// - values: geçerli seçenekler; UI seçenek listesi de buradan gelir
+// - geçersiz değer reddedilir (sessizce boşaltılmaz)
+type SelectOptions<Multiple extends boolean> = { required?: boolean; multiple?: Multiple; values: readonly string[]; maxSelect?: number; message?: string };
+
+const _SelectSingle = ({ required = true, values, message = errorKeys.required }: SelectOptions<false>) =>
 	v.pipe(
-		v.optional(v.picklist([...selectOptions, '']), ''),
-		v.metadata({
-			slc_required: false
-		})
+		v.optional(v.string(), ''),
+		v.check((input) => !required || input !== '', message),
+		v.check((input) => input === '' || values.includes(input), errorKeys.invalidOption),
+		inputMeta({ required, multiple: false, values: [...values] })
 	);
 
-const _MultipleSelectOptional = ({ selectOptions = [] }: { selectOptions: string[] }) =>
+const _SelectMultiple = ({ required = true, values, maxSelect, message = errorKeys.required }: SelectOptions<true>) =>
 	v.pipe(
-		v.fallback(v.array(v.picklist(selectOptions)), []),
-		v.metadata({
-			slc_required: false
-		})
+		v.optional(v.array(v.string()), []),
+		v.check((input) => !required || input.length > 0, message),
+		v.check((input) => input.every((item) => values.includes(item)), errorKeys.invalidOption),
+		v.check((input) => maxSelect === undefined || input.length <= maxSelect, errorKeys.maxSelect),
+		inputMeta({ required, multiple: true, values: [...values], maxSelect })
 	);
 
-// Required
-const _SingleSelectRequired = ({ selectOptions = [], message = 'Bu alan gereklidir.' }: { selectOptions: string[]; message?: string }) =>
-	v.pipe(
-		v.optional(v.picklist([...selectOptions, '']), ''),
-		v.nonEmpty(message),
-		v.metadata({
-			slc_required: true
-		})
-	);
+type SelectChoice<Multiple extends boolean> = Multiple extends true ? ReturnType<typeof _SelectMultiple> : ReturnType<typeof _SelectSingle>;
 
-const _MultipleSelectRequired = ({ selectOptions = [], minLength = 1 }: { selectOptions: string[]; minLength?: number }) => {
-	const minLengthValue = minLength <= 0 ? 1 : minLength;
-	return v.pipe(
-		v.fallback(v.array(v.picklist(selectOptions)), []),
-		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.'),
-		v.metadata({
-			slc_required: true
-		})
-	);
-};
-
-type SingleSelectTypeOptional = ReturnType<typeof _SingleSelectOptional>;
-type MultipleSelectTypeOptional = ReturnType<typeof _MultipleSelectOptional>;
-type SingleSelectTypeRequired = ReturnType<typeof _SingleSelectRequired>;
-type MultipleSelectTypeRequired = ReturnType<typeof _MultipleSelectRequired>;
-
-type SelectChoice<Multiple extends boolean, Required extends boolean> = Required extends true
-	? Multiple extends true
-		? MultipleSelectTypeRequired
-		: SingleSelectTypeRequired
-	: Multiple extends true
-		? MultipleSelectTypeOptional
-		: SingleSelectTypeOptional;
-
-export function Select<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
-	key: Key,
-	options: { multiple?: Multiple; required?: Required; selectOptions?: string[]; minLength?: number; message?: string } = {}
-) {
-	const { multiple = false, required = true, selectOptions = [], minLength = 1, message } = options;
-
-	const main = required
-		? multiple
-			? _MultipleSelectRequired({ selectOptions, minLength })
-			: _SingleSelectRequired({ selectOptions, message })
-		: multiple
-			? _MultipleSelectOptional({ selectOptions })
-			: _SingleSelectOptional({ selectOptions });
+export function Select<Key extends string, Multiple extends boolean = false>(key: Key, options: SelectOptions<Multiple>) {
+	const main = options.multiple ? _SelectMultiple(options as SelectOptions<true>) : _SelectSingle(options as SelectOptions<false>);
 
 	return {
 		[`${key}`]: main
-	} as { [P in Key]: SelectChoice<Multiple, Required> };
+	} as { [P in Key]: SelectChoice<Multiple> };
 }

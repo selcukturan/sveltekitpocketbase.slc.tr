@@ -1,20 +1,23 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 import * as base from '../base';
 
-const _TextareaOptional = () => v.pipe(v.optional(base.textarea, ''), v.metadata({ slc_required: false }));
-const _TextareaRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.textarea, v.nonEmpty(message), v.metadata({ slc_required: true }));
+// PocketBase "Rich editor" alanı: required, max size (bayt)
+// - maxSize karakter değil bayt sayar (Türkçe karakterler 2 bayttır)
+type TextareaOptions = { required?: boolean; maxSize?: number; message?: string };
 
-type TextareaOptional = ReturnType<typeof _TextareaOptional>;
-type TextareaRequired = ReturnType<typeof _TextareaRequired>;
+const byteLength = (input: string) => new TextEncoder().encode(input).length;
 
-type TextareaTypeChoice<Required extends boolean> = Required extends true ? TextareaRequired : TextareaOptional;
+const _Textarea = ({ required = true, maxSize = 1024, message = errorKeys.required }: TextareaOptions = {}) =>
+	v.pipe(
+		v.optional(base.textarea, ''),
+		v.check((input) => !required || input !== '', message),
+		v.check((input) => byteLength(input) <= maxSize, errorKeys.maxSize),
+		inputMeta({ required, maxSize })
+	);
 
-export function Textarea<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
-	const { required = true, message } = options;
-
-	const main = required ? _TextareaRequired(message) : _TextareaOptional();
-
+export function Textarea<Key extends string>(key: Key, options: TextareaOptions = {}) {
 	return {
-		[`${key}`]: main
-	} as { [P in Key]: TextareaTypeChoice<Required> };
+		[`${key}`]: _Textarea(options)
+	} as { [P in Key]: ReturnType<typeof _Textarea> };
 }

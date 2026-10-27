@@ -1,11 +1,11 @@
-import { getRequestEvent, query, form, requested } from '$app/server';
+import { getRequestEvent, query, form, command, requested } from '$app/server';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
 import { ResultAsync } from 'neverthrow';
-import { throwError, mapUnknownToError } from '#lib/server/error.js';
-import { paramsFileKeyTransform } from '#lib/utils/transform-params-helper.js';
+import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
+import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import { listParamsSchema, oneParamsSchema, updateFormSchema } from './page.shared';
+import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -54,26 +54,48 @@ export const getOne = query(oneParamsSchema, async (params) => {
 	return oneResult.value;
 });
 
+export const createForm = form(createFormSchema, async (params) => {
+	await checkAuthenticated(); // 🔒
+
+	const { locals } = getRequestEvent();
+
+	const createdResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).create(toPbPayload(params)), mapUnknownToError);
+
+	if (createdResult.isErr()) {
+		throwFormError(createdResult.error, params);
+	}
+
+	await requested(getList, 1).refreshAll();
+
+	return createdResult.value;
+});
+
 export const updateForm = form(updateFormSchema, async (params) => {
 	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
-	console.log('server-values-1', params);
 
-	const transformedParams = paramsFileKeyTransform(params);
-
-	const id = transformedParams.id;
-	const values = { ...transformedParams, id: undefined };
-
-	console.log('server-values-2', values);
-
-	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(id, values), mapUnknownToError);
+	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(params.id, toPbPayload(params, ['id'])), mapUnknownToError);
 
 	if (updatedResult.isErr()) {
-		throwError(updatedResult.error);
+		throwFormError(updatedResult.error, params);
 	}
 
 	await requested(getList, 1).refreshAll();
 
 	return updatedResult.value;
+});
+
+export const deleteRecord = command(deleteParamsSchema, async (params) => {
+	await checkAuthenticated(); // 🔒
+
+	const { locals } = getRequestEvent();
+
+	const deletedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).delete(params.id), mapUnknownToError);
+
+	if (deletedResult.isErr()) {
+		throwError(deletedResult.error);
+	}
+
+	await requested(getList, 1).refreshAll();
 });

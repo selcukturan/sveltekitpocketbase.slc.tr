@@ -1,76 +1,63 @@
-<script lang="ts" generics="Tmultiple extends boolean = false">
+<script lang="ts" generics="T extends string | string[] = string">
 	import type { RemoteFormField } from '$app/server';
-	import { getFormInputsContext } from './context.svelte';
 	import { Relation } from '#lib/components/ui/inputs/index.js';
 	import Field from './Field.svelte';
-	import type { RelationValueChangeArgs, RelationPropsType } from '#lib/components/ui/inputs/type.js';
-	import { parseNamePath } from './utils.js';
+	import type { RelationValueChangeArgs, RelationPropsType, CollectionName } from '#lib/components/ui/inputs/type.js';
+	import { useFormField } from './form-field.svelte.js';
 
-	type Props = RelationPropsType<Tmultiple> & {
-		field: RemoteFormField<Tmultiple extends true ? string[] : string>;
+	// `multiple` ve `collection` şemadan (metadata) gelir; tip `field` üzerinden çıkarılır.
+	type Tmultiple = T extends string[] ? true : false;
+	type Props = Omit<RelationPropsType<Tmultiple>, 'multiple' | 'collection'> & {
+		field: RemoteFormField<T>;
+		collection?: CollectionName; // verilmezse şemadaki `collection` kullanılır
 		label?: string;
 	};
 
-	let { label: componentLabel, field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
+	let { label: componentLabel, field, collection: componentCollection, onValueChange: userOnValueChange, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
-	const context = getFormInputsContext();
+
+	// ######### BEGIN: form field (metadata, issues, label) ####
+	// Şema anahtarı `multiple` bilinmeden okunur: 'select' ve 'select multiple' adları yalnızca '[]' ile ayrılır.
+	const formField = useFormField(() => ({ name: (field as RemoteFormField<string>).as('select').name, issues: field.issues(), label: componentLabel }));
+	// ######### END: form field (metadata, issues, label) ######
+
+	let multiple = $derived(formField.meta.multiple === true);
+	let collection = $derived(componentCollection ?? (formField.meta.collection as CollectionName));
 
 	// ######### BEGIN: Remote Form `field` attributes #########
 	let attributes = $derived.by(() => {
-		if (restProps.multiple) {
+		if (multiple) {
 			return (field as RemoteFormField<string[]>).as('select multiple');
 		} else {
 			return (field as RemoteFormField<string>).as('select');
 		}
 	});
-	let { pathFieldName } = $derived(parseNamePath(attributes.name));
-
-	let attrName = $derived(attributes.name || restProps.name);
 	// ######### END: Remote Form `field` attributes ###########
-
-	// ######### BEGIN: Remote Form `field.issues()` ###########
-	let issues = $derived(field.issues() ?? []);
-	// ######### END: Remote Form `field.issues()` #############
-
-	// ######### BEGIN: Valibot metadata ######################
-	let cleanAttrName = $derived(pathFieldName ? pathFieldName.replace('[]', '') : '');
-	let metadata = $derived(context?.getValibotMetadata(cleanAttrName));
-	let required = $derived(metadata?.slc_required === true ? true : false);
-	// ######### END: Valibot metadata ########################
-
-	// ######### BEGIN: custom props variables #################
-	let label = $derived(componentLabel || attrName || 'no_label');
-	// ######### END: custom props variables ###################
 
 	// ######### BEGIN: handle value change ###################
 	const onValueChange = (args: RelationValueChangeArgs<Tmultiple>) => {
-		// Set Context Data
-		if (args.initial && cleanAttrName) context.initialData.set(cleanAttrName, args.value);
-		if (cleanAttrName) context.currentData.set(cleanAttrName, args.value);
-
-		// Value Change Callback
-		if (restProps.multiple) {
+		formField.track(args.value, args.initial);
+		if (multiple) {
 			(field as RemoteFormField<string[]>).set(args.value as string[]);
 		} else {
 			(field as RemoteFormField<string>).set(args.value as string);
 		}
 		userOnValueChange?.(args);
 
-		// Validate Form
-		context?.props.form.validate({ preflightOnly: true, all: false });
+		formField.validate();
 	};
 	// ######### END: handle value change #####################
 </script>
 
-<Field {issues} {required} {label} {id} fieldClasses="group-focus-within:bg-surface-200!">
-	<Relation {onValueChange} {...restProps} {id} inform />
+<Field issues={formField.issues} required={formField.required} label={formField.label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+	<Relation multiple={multiple as Tmultiple} {collection} {onValueChange} {...restProps} {id} inform />
 
 	<!--Hidden Area-->
 	<select {...attributes} class="sr-only" tabindex={-1} aria-hidden={true}>
-		{#if restProps.multiple}
-			{#each field.value() as item, i (i)}
+		{#if multiple}
+			{#each field.value() as string[] as item, i (i)}
 				<option value={item} selected>{item}</option>
 			{/each}
 		{:else}

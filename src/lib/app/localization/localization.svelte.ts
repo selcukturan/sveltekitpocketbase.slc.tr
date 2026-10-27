@@ -53,10 +53,13 @@ export function setSelectedLang(lang: SupportedLangs) {
 // t('welcome_message', { name: 'Selçuk', count: 5 })
 // → "Merhaba Selçuk, 5 yeni mesajın var"
 
+// fallback: anahtar bulunamazsa döndürülecek metin (örn: çeviri anahtarı olmayan hata mesajları)
+// t('Bu alan gereklidir.', undefined, 'Bu alan gereklidir.') → "Bu alan gereklidir."
+
 export type TranslationParams = Record<string, string | number>;
 
-export function t(key: BaseTranslationKeys | (string & {}), params?: TranslationParams): string {
-	const text = translations[selected][key as BaseTranslationKeys] || `"${key}" not found in "${selected}"`;
+export function t(key: BaseTranslationKeys | (string & {}), params?: TranslationParams, fallback?: string): string {
+	const text = translations[selected][key as BaseTranslationKeys] ?? fallback ?? `"${key}" not found in "${selected}"`;
 
 	if (!params) return text;
 	return text.replace(/\{(\w+)\}/g, (_: string, k: string) => (k in params ? String(params[k]) : `{${k}}`));

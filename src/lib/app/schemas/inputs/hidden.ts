@@ -3,8 +3,8 @@ import * as base from '../base';
 
 const _HiddenIdOptional = () => v.optional(base.id, '');
 const _HiddenIdRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.id, v.nonEmpty(message));
-const _HiddenTextOptional = () => v.optional(base.text, '');
-const _HiddenTextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message));
+const _HiddenTextOptional = () => v.optional(v.pipe(base.text, v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')), '');
+const _HiddenTextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message), v.maxLength(255, 'Lütfen en fazla 255 karakter girin.'));
 
 type HiddenIdOptional = ReturnType<typeof _HiddenIdOptional>;
 type HiddenIdRequired = ReturnType<typeof _HiddenIdRequired>;
@@ -25,13 +25,7 @@ export function Hidden<Key extends string, Type extends 'id' | 'text' = 'id', Re
 ) {
 	const { required = true, type = 'id', message } = options;
 
-	const main = required
-		? type === 'id'
-			? _HiddenIdRequired(message)
-			: _HiddenTextRequired(message)
-		: type === 'id'
-			? _HiddenIdOptional()
-			: _HiddenTextOptional();
+	const main = required ? (type === 'id' ? _HiddenIdRequired(message) : _HiddenTextRequired(message)) : type === 'id' ? _HiddenIdOptional() : _HiddenTextOptional();
 
 	return {
 		[`${key}`]: main

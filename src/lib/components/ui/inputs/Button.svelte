@@ -43,20 +43,15 @@
 	const colorClasses = $derived(
 		{
 			filled: {
-				primary:
-					'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-surface-50 border-primary-600 hover:border-primary-700 active:border-primary-800',
+				primary: 'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-surface-50 border-primary-600 hover:border-primary-700 active:border-primary-800',
 				secondary:
 					'bg-secondary-500 hover:bg-secondary-600 active:bg-secondary-700 text-secondary-50 border-secondary-500 hover:border-secondary-600 active:border-secondary-700',
-				tertiary:
-					'bg-tertiary-500 hover:bg-tertiary-600 active:bg-tertiary-700 text-surface-50 border-tertiary-500 hover:border-tertiary-600 active:border-tertiary-700',
+				tertiary: 'bg-tertiary-500 hover:bg-tertiary-600 active:bg-tertiary-700 text-surface-50 border-tertiary-500 hover:border-tertiary-600 active:border-tertiary-700',
 				quaternary:
 					'bg-quaternary-500 hover:bg-quaternary-600 active:bg-quaternary-700 text-quaternary-50 border-quaternary-500 hover:border-quaternary-600 active:border-quaternary-700',
-				surface:
-					'bg-surface-700 hover:bg-surface-800 active:bg-surface-900 text-surface-50 border-surface-700 hover:border-surface-800 active:border-surface-900',
-				success:
-					'bg-success-500 hover:bg-success-600 active:bg-success-700 text-success-50 border-success-500 hover:border-success-600 active:border-success-700',
-				warning:
-					'bg-warning-500 hover:bg-warning-600 active:bg-warning-700 text-warning-50 border-warning-500 hover:border-warning-600 active:border-warning-700',
+				surface: 'bg-surface-700 hover:bg-surface-800 active:bg-surface-900 text-surface-50 border-surface-700 hover:border-surface-800 active:border-surface-900',
+				success: 'bg-success-500 hover:bg-success-600 active:bg-success-700 text-success-50 border-success-500 hover:border-success-600 active:border-success-700',
+				warning: 'bg-warning-500 hover:bg-warning-600 active:bg-warning-700 text-warning-50 border-warning-500 hover:border-warning-600 active:border-warning-700',
 				error: 'bg-error-500 hover:bg-error-600 active:bg-error-700 text-surface-50 border-error-500 hover:border-error-600 active:border-error-700',
 				info: 'bg-info-500 hover:bg-info-600 active:bg-info-700 text-surface-50 border-info-500 hover:border-info-600 active:border-info-700'
 			},

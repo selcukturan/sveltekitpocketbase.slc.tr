@@ -1,71 +1,41 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
+import type { Collections } from '#lib/types/pocketbase-types.js';
 
-// Optional
-const _RelationSingleOptional = () =>
-	v.pipe(
-		v.optional(v.string(), ''),
-		v.metadata({
-			slc_required: false
-		})
-	);
-
-const _RelationMultipleOptional = () =>
-	v.pipe(
-		v.fallback(v.array(v.string()), []),
-		v.metadata({
-			slc_required: false
-		})
-	);
-
-// Required
-const _RelationSingleRequired = ({ message = 'Bu alan gereklidir.' }: { message?: string }) =>
-	v.pipe(
-		v.optional(v.string(), ''),
-		v.nonEmpty(message),
-		v.metadata({
-			slc_required: true
-		})
-	);
-
-const _RelationMultipleRequired = ({ minLength = 1 }: { minLength?: number }) => {
-	const minLengthValue = minLength <= 0 ? 1 : minLength;
-	return v.pipe(
-		v.fallback(v.array(v.string()), []),
-		v.minLength(minLengthValue, 'Bu alan en az ' + minLengthValue + ' değer içermelidir.'),
-		v.metadata({
-			slc_required: true
-		})
-	);
+// PocketBase "Relation" alanı: required, collection, (multiple) min select, max select
+// - collection: UI kayıt seçicisi bu koleksiyondan arar
+// - minSelect/maxSelect: boş değer için atlanır; boşluk yalnızca `required` ile kontrol edilir
+type RelationOptions<Multiple extends boolean> = {
+	collection: `${Collections}`;
+	required?: boolean;
+	multiple?: Multiple;
+	minSelect?: number;
+	maxSelect?: number;
+	message?: string;
 };
 
-type RelationSingleSelectTypeOptional = ReturnType<typeof _RelationSingleOptional>;
-type RelationMultipleSelectTypeOptional = ReturnType<typeof _RelationMultipleOptional>;
-type RelationSingleSelectTypeRequired = ReturnType<typeof _RelationSingleRequired>;
-type RelationMultipleSelectTypeRequired = ReturnType<typeof _RelationMultipleRequired>;
+const _RelationSingle = ({ collection, required = true, message = errorKeys.required }: RelationOptions<false>) =>
+	v.pipe(
+		v.optional(v.string(), ''),
+		v.check((input) => !required || input !== '', message),
+		inputMeta({ required, multiple: false, collection })
+	);
 
-type RelationSelectChoice<Multiple extends boolean, Required extends boolean> = Required extends true
-	? Multiple extends true
-		? RelationMultipleSelectTypeRequired
-		: RelationSingleSelectTypeRequired
-	: Multiple extends true
-		? RelationMultipleSelectTypeOptional
-		: RelationSingleSelectTypeOptional;
+const _RelationMultiple = ({ collection, required = true, minSelect, maxSelect, message = errorKeys.required }: RelationOptions<true>) =>
+	v.pipe(
+		v.optional(v.array(v.string()), []),
+		v.check((input) => !required || input.length > 0, message),
+		v.check((input) => input.length === 0 || minSelect === undefined || input.length >= minSelect, errorKeys.minSelect),
+		v.check((input) => maxSelect === undefined || input.length <= maxSelect, errorKeys.maxSelect),
+		inputMeta({ required, multiple: true, collection, minSelect, maxSelect })
+	);
 
-export function Relation<Key extends string, Multiple extends boolean = false, Required extends boolean = true>(
-	key: Key,
-	options: { multiple?: Multiple; required?: Required; minLength?: number; message?: string } = {}
-) {
-	const { multiple = false, required = true, minLength = 1, message } = options;
+type RelationChoice<Multiple extends boolean> = Multiple extends true ? ReturnType<typeof _RelationMultiple> : ReturnType<typeof _RelationSingle>;
 
-	const main = required
-		? multiple
-			? _RelationMultipleRequired({ minLength })
-			: _RelationSingleRequired({ message })
-		: multiple
-			? _RelationMultipleOptional()
-			: _RelationSingleOptional();
+export function Relation<Key extends string, Multiple extends boolean = false>(key: Key, options: RelationOptions<Multiple>) {
+	const main = options.multiple ? _RelationMultiple(options as RelationOptions<true>) : _RelationSingle(options as RelationOptions<false>);
 
 	return {
 		[`${key}`]: main
-	} as { [P in Key]: RelationSelectChoice<Multiple, Required> };
+	} as { [P in Key]: RelationChoice<Multiple> };
 }

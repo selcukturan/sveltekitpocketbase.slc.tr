@@ -37,10 +37,10 @@ export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
 export const createFormSchema = v.object({
 	...input.Text('text_required'),
 	...input.Text('text_optional', { required: false }),
-	...input.Select('select_optional_multiple', { required: false, multiple: true, selectOptions: Object.values(DemoCrudSelectOptionalMultipleOptions) }),
-	...input.Select('select_optional_single', { required: false, multiple: false, selectOptions: Object.values(DemoCrudSelectOptionalSingleOptions) }),
-	...input.Relation('relation_optional_multiple', { required: false, multiple: true }),
-	...input.Relation('relation_optional_single', { required: false, multiple: false }),
+	...input.Select('select_optional_multiple', { required: false, multiple: true, values: Object.values(DemoCrudSelectOptionalMultipleOptions) }),
+	...input.Select('select_optional_single', { required: false, values: Object.values(DemoCrudSelectOptionalSingleOptions) }),
+	...input.Relation('relation_optional_multiple', { collection: Collections.DemoRelationInputMultiple, required: false, multiple: true }),
+	...input.Relation('relation_optional_single', { collection: Collections.DemoRelationInputSingle, required: false }),
 	...input.File('file_optional_multiple', { required: false, multiple: true }),
 	...input.File('file_optional_single', { required: false, multiple: false }),
 	...input.Bool('bool_optional'),
@@ -58,6 +58,10 @@ export const updateFormSchema = v.object({
 	...createFormSchema.entries
 });
 export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
+
+export const deleteParamsSchema = v.object({
+	...input.Hidden('id')
+});
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------------------------------------------------------------

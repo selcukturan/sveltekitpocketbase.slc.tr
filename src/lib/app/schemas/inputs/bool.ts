@@ -1,25 +1,20 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 import * as base from '../base';
 
-const _BoolOptional = () => v.pipe(v.optional(base.bool, false), v.metadata({ slc_nonfalsey: false }));
-const _BoolNonfalsey = (message = 'Bu alan işaretlenmelidir (Onay vermelisiniz).') =>
+// PocketBase "Bool" alanı: required
+// - required: true olmalıdır (PocketBase'de zorunlu bool = işaretli)
+type BoolOptions = { required?: boolean; message?: string };
+
+const _Bool = ({ required = false, message = errorKeys.requiredTrue }: BoolOptions = {}) =>
 	v.pipe(
 		v.optional(base.bool, false),
-		v.check((input) => input === true, message),
-		v.metadata({ slc_nonfalsey: true })
+		v.check((input) => !required || input === true, message),
+		inputMeta({ required })
 	);
 
-type BoolOptional = ReturnType<typeof _BoolOptional>;
-type BoolNonfalsey = ReturnType<typeof _BoolNonfalsey>;
-
-type BoolTypeChoice<Nonfalsey extends boolean> = Nonfalsey extends true ? BoolNonfalsey : BoolOptional;
-
-export function Bool<Key extends string, Nonfalsey extends boolean = false>(key: Key, options: { nonfalsey?: Nonfalsey; message?: string } = {}) {
-	const { nonfalsey = false, message } = options;
-
-	const main = nonfalsey ? _BoolNonfalsey(message) : _BoolOptional();
-
+export function Bool<Key extends string>(key: Key, options: BoolOptions = {}) {
 	return {
-		[`${key}`]: main
-	} as { [P in Key]: BoolTypeChoice<Nonfalsey> };
+		[`${key}`]: _Bool(options)
+	} as { [P in Key]: ReturnType<typeof _Bool> };
 }

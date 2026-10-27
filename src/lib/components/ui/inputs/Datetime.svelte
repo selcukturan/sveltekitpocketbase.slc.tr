@@ -3,16 +3,7 @@
 	import { inputClasses } from './common.js';
 	import type { DatetimeProps, DatetimeValueChangeArgs } from './type.js';
 
-	let {
-		value = $bindable(''),
-		class: classes = '',
-		status = 'default',
-		size = 'md',
-		disabled = false,
-		dev = false,
-		onValueChange,
-		...rest
-	}: DatetimeProps = $props();
+	let { value = $bindable(''), class: classes = '', status = 'default', size = 'md', disabled = false, dev = false, onValueChange, ...rest }: DatetimeProps = $props();
 
 	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
 	const triggerChange = ({ value, beforeValue, initial }: DatetimeValueChangeArgs) => {

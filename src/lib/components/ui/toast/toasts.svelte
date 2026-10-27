@@ -92,12 +92,7 @@
 			{/if}
 			{#if toastId && toast.closable !== false}
 				<div class="self-start">
-					<button
-						type="button"
-						class={`${closeButtonClasses.base} ${closeButtonClasses[toastType]}`}
-						onclick={() => toaster.remove(toastId)}
-						aria-label="Close"
-					>
+					<button type="button" class={`${closeButtonClasses.base} ${closeButtonClasses[toastType]}`} onclick={() => toaster.remove(toastId)} aria-label="Close">
 						<Icon name="close" size="100%" />
 					</button>
 				</div>

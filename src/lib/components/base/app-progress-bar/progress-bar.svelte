@@ -16,10 +16,7 @@
 </script>
 
 {#if navigate.to}
-	<div
-		class="navigation-loader bg-secondary-600 fixed top-0 right-0 left-0 z-50 h-1"
-		in:slide={{ delay: 100, duration: 12000, axis: 'x', easing: expoOut }}
-	></div>
+	<div class="navigation-loader bg-secondary-600 fixed top-0 right-0 left-0 z-50 h-1" in:slide={{ delay: 100, duration: 12000, axis: 'x', easing: expoOut }}></div>
 {/if}
 
 {#if children}

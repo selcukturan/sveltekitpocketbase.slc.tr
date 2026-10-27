@@ -1,33 +1,27 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 import * as base from '../base';
+import { parseDateInputToIso } from '#lib/utils/input-helper.js';
 
-const _DateOptional = () =>
-	v.pipe(
+// PocketBase "DateTime" alanı (yalnızca tarih): required, min date, max date
+// - min/max input biçiminde verilir: 'YYYY-MM-DD' (UI min/max özniteliği ve hata mesajı da bunu kullanır)
+// - karşılaştırma ISO biçiminde ('YYYY-MM-DD HH:mm:ss.sssZ') metin olarak yapılır
+type DateOptions = { required?: boolean; min?: string; max?: string; message?: string };
+
+const _Date = ({ required = true, min, max, message = errorKeys.required }: DateOptions = {}) => {
+	const minIso = min ? parseDateInputToIso(min) : '';
+	const maxIso = max ? parseDateInputToIso(max) : '';
+	return v.pipe(
 		v.optional(base.date, ''),
-		v.metadata({
-			slc_required: false
-		})
+		v.check((input) => !required || input !== '', message),
+		v.check((input) => input === '' || !minIso || input >= minIso, errorKeys.minDate),
+		v.check((input) => input === '' || !maxIso || input <= maxIso, errorKeys.maxDate),
+		inputMeta({ required, minDate: min, maxDate: max })
 	);
-const _DateRequired = (message = 'Bu alan gereklidir.') =>
-	v.pipe(
-		base.date,
-		v.nonEmpty(message),
-		v.metadata({
-			slc_required: true
-		})
-	);
+};
 
-type DateOptional = ReturnType<typeof _DateOptional>;
-type DateRequired = ReturnType<typeof _DateRequired>;
-
-type DateTypeChoice<Required extends boolean> = Required extends true ? DateRequired : DateOptional;
-
-export function Date<Key extends string, Required extends boolean = true>(key: Key, options: { required?: Required; message?: string } = {}) {
-	const { required = true, message } = options;
-
-	const main = required ? _DateRequired(message) : _DateOptional();
-
+export function Date<Key extends string>(key: Key, options: DateOptions = {}) {
 	return {
-		[`${key}`]: main
-	} as { [P in Key]: DateTypeChoice<Required> };
+		[`${key}`]: _Date(options)
+	} as { [P in Key]: ReturnType<typeof _Date> };
 }

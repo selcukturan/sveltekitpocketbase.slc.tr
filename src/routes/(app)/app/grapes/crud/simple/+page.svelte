@@ -20,9 +20,9 @@
 	import { confirm } from '#lib/components/ui/confirm/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	// Types and Schemas
-	import { oneParamsSchema, listParamsSchema, updateFormSchema, type ListParamsSchemaType, type OneParamsSchemaType } from './page.shared';
+	import { oneParamsSchema, listParamsSchema, createFormSchema, updateFormSchema, type ListParamsSchemaType, type OneParamsSchemaType } from './page.shared';
 	// Remote functions
-	import { getOne, getList, updateForm } from './page.remote';
+	import { getOne, getList, createForm, updateForm, deleteRecord } from './page.remote';
 
 	// ----------- Begin Page Context ----------------------------------------------------------------------------------------------------------------
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
@@ -48,6 +48,41 @@
 	let drawerFormIsChanged = $state(false);
 	// ----------- End Drawer Logic ------------------------------------------------------------------------------------------------------------------
 
+	// ----------- Begin Form Submit Logic -----------------------------------------------------------------------------------------------------------
+	type RecordType = Awaited<ReturnType<typeof getOne>>;
+
+	const showError = (error: unknown) => {
+		const myError = isHttpError(error) ? error : null;
+		pageToaster.add({
+			type: 'error',
+			title: t('error'),
+			description: myError?.body.message ?? t('error_generic'),
+			action: {
+				label: t('close'),
+				onClick: (id) => {
+					pageToaster.remove(id);
+				}
+			}
+		});
+	};
+
+	// create ve update formlarının ortak gönderim akışı
+	// Alan hataları (istemci ön kontrolü, sunucu valibot, PocketBase) ilgili input'un altında gösterilir.
+	const submitAndNotify = async (run: () => Promise<boolean>) => {
+		try {
+			if (await run()) {
+				drawerFormIsChanged = false;
+				drawerRef?.close();
+				pageToaster.add({ type: 'success', title: 'Başarıyla kaydedildi!', description: 'Başarıyla kaydedildi!' });
+			} else {
+				pageToaster.add({ type: 'error', title: t('error'), description: t('invalid_data') });
+			}
+		} catch (error) {
+			showError(error);
+		}
+	};
+	// ----------- End Form Submit Logic -------------------------------------------------------------------------------------------------------------
+
 	// ----------- Begin Data Table Logic ------------------------------------------------------------------------------------------------------------
 	type DataType = Awaited<typeof query>;
 	type ItemType = DataType['items'][number] & { slcAction?: string };
@@ -62,6 +97,25 @@
 	// ----------- End Data Table Logic ------------------------------------------------------------------------------------------------------------
 </script>
 
+<!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
+{#snippet recordInputs(fields: typeof createForm.fields, data: Partial<RecordType>)}
+	<formInput.Text label="text_required" field={fields.text_required} value={data.text_required} />
+	<formInput.Text label="text_optional" field={fields.text_optional} value={data.text_optional} />
+	<formInput.Select label="select_optional_multiple" field={fields.select_optional_multiple} value={data.select_optional_multiple} />
+	<formInput.Select label="select_optional_single" field={fields.select_optional_single} value={data.select_optional_single} />
+	<formInput.Relation label="relation_optional_multiple" field={fields.relation_optional_multiple} value={data.relation_optional_multiple} />
+	<formInput.Relation label="relation_optional_single" field={fields.relation_optional_single} value={data.relation_optional_single} />
+	<formInput.Email label="email_optional" field={fields.email_optional} value={data.email_optional} />
+	<formInput.Number label="number_optional" field={fields.number_optional} value={data.number_optional} />
+	<formInput.Textarea label="textarea_optional" field={fields.textarea_optional} value={data.textarea_optional} />
+	<formInput.Url label="url_optional" field={fields.url_optional} value={data.url_optional} />
+	<formInput.Date label="date_optional" field={fields.date_optional} value={data.date_optional} />
+	<formInput.Datetime label="datetime_optional" field={fields.datetime_optional} value={data.datetime_optional} />
+	<formInput.File label="file_optional_single" field={fields.file_optional_single} value={data.file_optional_single} />
+	<formInput.File label="file_optional_multiple" field={fields.file_optional_multiple} value={data.file_optional_multiple} />
+	<formInput.Bool label="bool_optional" text="Rahatsız Etmeyin (Do not disturb)" field={fields.bool_optional} value={data.bool_optional} />
+{/snippet}
+
 <Head>
 	<title>create-read-update-delete - SLC Web Applications</title>
 	<meta name="description" content="SLC Web Applications" />
@@ -71,7 +125,7 @@
 
 <Page>
 	<Page.Header>
-		<input.Button label={t('create')} onclick={() => setParams({ cmd: 'create', id: 'sp7wfdu7zg85vue' })} />
+		<input.Button label={t('create')} onclick={() => setParams({ cmd: 'create', id: '' })} />
 		<div class="flex gap-2 p-2">
 			<input.Text
 				id="filter_text_required"
@@ -134,11 +188,16 @@
 													no: t('no')
 												});
 												if (shouldDelete) {
-													pageToaster.add({
-														type: 'success',
-														title: 'Başarıyla silindi!',
-														description: `[${dr.row.id}] ID'li kayıt silindi!`
-													});
+													try {
+														await deleteRecord({ id: dr.row.id }).updates(query);
+														pageToaster.add({
+															type: 'success',
+															title: 'Başarıyla silindi!',
+															description: `[${dr.row.id}] ID'li kayıt silindi!`
+														});
+													} catch (error) {
+														showError(error);
+													}
 												}
 											}}
 										/>
@@ -178,7 +237,7 @@
 				const cmd = getParam('cmd', currentHash) || '';
 				const id = getParam('id', currentHash) || '';
 				drawerCommand = { cmd, id };
-				if (drawerRef && id && ['create', 'update', 'view'].includes(cmd)) drawerRef.open();
+				if (drawerRef && (cmd === 'create' || (id && ['update', 'view'].includes(cmd)))) drawerRef.open();
 			})}
 			onBeforeClose={async () => {
 				if (drawerFormIsChanged) {
@@ -198,8 +257,33 @@
 			}}
 		>
 			{#if drawerCommand.cmd === 'create'}
-				<p>This is a drawer for creating a new record.</p>
+				<!-- .for(): drawer her açılışta temiz bir form örneği alır; kapanınca örnek (değerler, hatalar) silinir -->
+				{@const form = createForm.for('create')}
+				<DrawerFormContent>
+					<DrawerFormContent.Header label="Create">
+						<input.Button label=" X " onclick={() => drawerRef?.close()} />
+					</DrawerFormContent.Header>
+					<DrawerFormContent.Content boundary>
+						<DrawerFormContent.Content.Form
+							enctype="multipart/form-data"
+							schema={createFormSchema}
+							{form}
+							onIsChange={(v) => (drawerFormIsChanged = v)}
+							{...form.preflight(createFormSchema).enhance(({ submit }) => submitAndNotify(() => submit().updates(query)))}
+						>
+							{#snippet inputs()}
+								{@render recordInputs(form.fields, {})}
+							{/snippet}
+
+							{#snippet buttons()}
+								<formInput.Button label={t('close')} onclick={() => drawerRef?.close(true)} />
+								<formInput.Button type="submit" label={t('create')} disabled={Boolean(form.pending)} />
+							{/snippet}
+						</DrawerFormContent.Content.Form>
+					</DrawerFormContent.Content>
+				</DrawerFormContent>
 			{:else if drawerCommand.cmd === 'update' && drawerCommand.id}
+				{@const form = updateForm.for(drawerCommand.id)}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`Update ID: ${drawerCommand.id}`}>
 						<input.Button label=" X " onclick={() => drawerRef?.close()} />
@@ -210,104 +294,19 @@
 						<DrawerFormContent.Content.Form
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
-							form={updateForm}
-							OnIsChange={(v) => (drawerFormIsChanged = v)}
-							{...updateForm.preflight(updateFormSchema).enhance(async ({ /* form, */ submit }) => {
-								try {
-									if (await submit().updates(query)) {
-										// başarılı
-										drawerFormIsChanged = false;
-										drawerRef?.close();
-
-										pageToaster.add({
-											type: 'success',
-											title: 'Başarıyla kaydedildi!',
-											description: 'Başarıyla kaydedildi!',
-											action: {
-												label: t('close'),
-												onClick: (id) => {
-													pageToaster.remove(id);
-												}
-											}
-										});
-									} else {
-										// geçersiz veri
-										pageToaster.add({
-											type: 'error',
-											title: t('error'),
-											description: t('invalid_data')
-										});
-									}
-								} catch (error) {
-									// hata
-									const myError = isHttpError(error) ? error : null;
-									pageToaster.add({
-										type: 'error',
-										title: 'Hata!',
-										description: 'Client: ' + myError?.body.message,
-										action: {
-											label: t('close'),
-											onClick: (id) => {
-												pageToaster.remove(id);
-											}
-										}
-									});
-								}
-							})}
+							{form}
+							onIsChange={(v) => (drawerFormIsChanged = v)}
+							{...form.preflight(updateFormSchema).enhance(({ submit }) => submitAndNotify(() => submit().updates(query)))}
 						>
 							{#snippet inputs()}
-								<formInput.Hidden field={updateForm.fields.id} value={dbData.id} />
-								<formInput.Text label="text_required" field={updateForm.fields.text_required} value={dbData.text_required} />
-								<formInput.Text label="text_optional" field={updateForm.fields.text_optional} value={dbData.text_optional} />
-								<formInput.Select
-									multiple
-									label="select_optional_multiple"
-									field={updateForm.fields.select_optional_multiple}
-									value={dbData.select_optional_multiple}
-									options={[
-										{ label: 'html', value: 'html' },
-										{ label: 'css', value: 'css' },
-										{ label: 'javascript', value: 'javascript' }
-									]}
-								/>
-								<formInput.Select
-									label="select_optional_single"
-									field={updateForm.fields.select_optional_single}
-									value={dbData.select_optional_single}
-									options={[
-										{ label: 'linux', value: 'linux' },
-										{ label: 'mac', value: 'mac' },
-										{ label: 'windows', value: 'windows' }
-									]}
-								/>
-								<formInput.Relation
-									multiple
-									collection="demo_relation_input_multiple"
-									label="relation_optional_multiple"
-									field={updateForm.fields.relation_optional_multiple}
-									value={dbData.relation_optional_multiple}
-								/>
-								<formInput.Relation
-									collection="demo_relation_input_single"
-									label="relation_optional_single"
-									field={updateForm.fields.relation_optional_single}
-									value={dbData.relation_optional_single}
-								/>
-								<formInput.Email label="email_optional" field={updateForm.fields.email_optional} value={dbData.email_optional} />
-								<formInput.Number label="number_optional" field={updateForm.fields.number_optional} value={dbData.number_optional} />
-								<formInput.Textarea label="textarea_optional" field={updateForm.fields.textarea_optional} value={dbData.textarea_optional} />
-								<formInput.Url label="url_optional" field={updateForm.fields.url_optional} value={dbData.url_optional} />
-								<formInput.Date label="date_optional" field={updateForm.fields.date_optional} value={dbData.date_optional} />
-								<formInput.Datetime label="datetime_optional" field={updateForm.fields.datetime_optional} value={dbData.datetime_optional} />
-								<formInput.File label="file_optional_single" field={updateForm.fields.file_optional_single} value={dbData.file_optional_single} />
-								<formInput.File label="file_optional_multiple" multiple field={updateForm.fields.file_optional_multiple} value={dbData.file_optional_multiple} />
-								<formInput.Bool label="bool_optional" text="Rahatsız Etmeyin (Do not disturb)" field={updateForm.fields.bool_optional} value={dbData.bool_optional} />
+								<formInput.Hidden field={form.fields.id} value={dbData.id} />
+								{@render recordInputs(form.fields, dbData)}
 							{/snippet}
 
 							{#snippet buttons()}
 								<formInput.Button label={t('close')} onclick={() => drawerRef?.close(true)} />
-								<!-- <formInput.Button type="submit" label={t('update')} disabled={Boolean(updateForm.pending) || !drawerFormIsChanged} /> -->
-								<formInput.Button type="submit" label={t('update')} disabled={Boolean(updateForm.pending)} />
+								<!-- <formInput.Button type="submit" label={t('update')} disabled={Boolean(form.pending) || !drawerFormIsChanged} /> -->
+								<formInput.Button type="submit" label={t('update')} disabled={Boolean(form.pending)} />
 							{/snippet}
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>

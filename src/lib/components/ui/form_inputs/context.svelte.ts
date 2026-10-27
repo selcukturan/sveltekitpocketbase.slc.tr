@@ -12,13 +12,13 @@ export type MainProps<TInput extends RemoteFormInput, TOutput, TSchema extends O
 	SvelteHTMLElements['form'],
 	'class'
 > & {
-	form: RemoteForm<TInput, TOutput>;
+	form: Omit<RemoteForm<TInput, TOutput>, 'for'>; // `form.for(key)` ile oluşturulan örnekler de kabul edilir
 	schema: TSchema;
 	inputs?: Snippet<[args?: SnippetArgs]>;
 	children?: Snippet<[args?: SnippetArgs]>;
 	buttons?: Snippet<[args?: SnippetArgs]>;
 	formClass?: SvelteHTMLElements['form']['class'];
-	OnIsChange?: (isChanged: boolean) => void;
+	onIsChange?: (isChanged: boolean) => void;
 };
 
 class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>> {
@@ -26,7 +26,7 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 	props!: MainProps<TInput, TOutput, TSchema>;
 
 	readonly formAttributes = $derived.by(() => {
-		const { form, schema, inputs, children, buttons, formClass, OnIsChange, ...attributes } = this.props;
+		const { form, schema, inputs, children, buttons, formClass, onIsChange, ...attributes } = this.props;
 		return attributes;
 	});
 
@@ -68,7 +68,7 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 
 	readonly watchIsChanged = () => {
 		void this.isChanged;
-		return untrack(() => this.props.OnIsChange?.(this.isChanged));
+		return untrack(() => this.props.onIsChange?.(this.isChanged));
 	};
 	// ############### END STATES ###############
 
@@ -86,21 +86,15 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 // ################################## BEGIN Export Form Context ##############################################
 const key = Symbol('SLC-FORM-INPUTS-CONTEXT');
 
-export function createFormInputsContext<
-	TInput extends RemoteFormInput,
-	TOutput,
-	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
->(props: MainProps<TInput, TOutput, TSchema>) {
+export function createFormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>>(
+	props: MainProps<TInput, TOutput, TSchema>
+) {
 	const instance = new FormInputsContext<TInput, TOutput, TSchema>(props);
 	setContext(key, instance);
 	return instance;
 }
 
-export function getFormInputsContext<
-	TInput extends RemoteFormInput,
-	TOutput,
-	TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
->() {
+export function getFormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>>() {
 	const instance = getContext<FormInputsContext<TInput, TOutput, TSchema>>(key);
 	if (!instance) {
 		throw new Error('FormInputsContext not found');

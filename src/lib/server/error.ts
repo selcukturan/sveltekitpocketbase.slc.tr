@@ -1,5 +1,39 @@
-import { error } from '@sveltejs/kit';
+import { error, invalid } from '@sveltejs/kit';
 import { ClientResponseError } from 'pocketbase';
+
+// PocketBase doğrulama kodu → çeviri anahtarı (istemcide `t()` ile çevrilir, parametreler alan metadata'sından dolar).
+// Listede olmayan kodlar için PocketBase'in kendi mesajı gösterilir.
+const pbCodeToMessageKey: Record<string, string> = {
+	validation_required: 'err_required',
+	validation_not_unique: 'err_not_unique',
+	validation_min_text_constraint: 'err_min_length',
+	validation_max_text_constraint: 'err_max_length'
+};
+
+/**
+ * Remote form handler'larında kullanılır.
+ * PocketBase 400 doğrulama hatalarını `invalid()` ile ilgili form alanının altına yönlendirir;
+ * diğer hatalar için `throwError` davranışı geçerlidir.
+ * @param err Yakalanan hata.
+ * @param data Formun doğrulanmış verisi; hangi PocketBase alanının formda karşılığı olduğunu belirlemek için kullanılır.
+ *             Formda karşılığı olmayan alan hataları form geneline (alan adıyla) yazılır.
+ */
+export function throwFormError(err: unknown, data: Record<string, unknown>): never {
+	if (err instanceof ClientResponseError && err.status === 400) {
+		const fieldErrors = (err.response?.data ?? {}) as Record<string, { code?: string; message?: string }>;
+
+		const issues = Object.entries(fieldErrors).map(([pbField, fieldError]) => {
+			// Dosya alanları 'alan+', '+alan', 'alan-' olarak gönderilir; hata ana alana yazılır.
+			const key = pbField.replace(/^\+|[+-]$/g, '');
+			const message = (fieldError.code && pbCodeToMessageKey[fieldError.code]) || fieldError.message || err.message;
+			return Object.hasOwn(data, key) ? { message, path: [key] } : { message: `${key}: ${message}` };
+		});
+
+		invalid(...(issues.length > 0 ? issues : [err.response?.message || err.message]));
+	}
+
+	throwError(err);
+}
 
 /**
  * Hata yönetimi için merkezi bir servis.

@@ -2,16 +2,7 @@
 	import { inputClasses } from './common.js';
 	import type { TextareaProps, TextareaValueChangeArgs } from './type.js';
 
-	let {
-		value = $bindable(''),
-		class: classes = '',
-		status = 'default',
-		size = 'md',
-		disabled = false,
-		dev = false,
-		onValueChange,
-		...rest
-	}: TextareaProps = $props();
+	let { value = $bindable(''), class: classes = '', status = 'default', size = 'md', disabled = false, dev = false, onValueChange, ...rest }: TextareaProps = $props();
 
 	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
 	const triggerChange = ({ value, beforeValue, initial }: TextareaValueChangeArgs) => {
@@ -52,8 +43,7 @@
 	// ############################### END PROXY ###############################
 </script>
 
-<textarea bind:value={proxy.value} {disabled} {...rest} class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"
-></textarea>
+<textarea bind:value={proxy.value} {disabled} {...rest} class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"></textarea>
 
 {#if dev}
 	<p class="text-surface-500 text-xs">Component Value: {value}</p>
