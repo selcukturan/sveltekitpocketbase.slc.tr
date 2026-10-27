@@ -1,7 +1,7 @@
 export { File } from './file';
 export { Text } from './text';
 export { Hidden } from './hidden';
-export { date } from './date';
+export { Date } from './date';
 export { Datetime } from './datetime';
 export { Select } from './select';
 export { Number } from './number';

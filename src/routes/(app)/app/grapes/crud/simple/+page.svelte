@@ -261,6 +261,7 @@
 								<formInput.Text label="text_optional" field={updateForm.fields.text_optional} value={dbData.text_optional} />
 								<formInput.Select
 									multiple
+									label="select_optional_multiple"
 									field={updateForm.fields.select_optional_multiple}
 									value={dbData.select_optional_multiple}
 									options={[
@@ -270,6 +271,7 @@
 									]}
 								/>
 								<formInput.Select
+									label="select_optional_single"
 									field={updateForm.fields.select_optional_single}
 									value={dbData.select_optional_single}
 									options={[
@@ -281,18 +283,24 @@
 								<formInput.Relation
 									multiple
 									collection="demo_relation_input_multiple"
-									label="Multiple Relation"
+									label="relation_optional_multiple"
 									field={updateForm.fields.relation_optional_multiple}
 									value={dbData.relation_optional_multiple}
 								/>
 								<formInput.Relation
 									collection="demo_relation_input_single"
-									label="Single Relation"
+									label="relation_optional_single"
 									field={updateForm.fields.relation_optional_single}
 									value={dbData.relation_optional_single}
 								/>
-								<formInput.File label="Single File" field={updateForm.fields.file_optional_single} value={dbData.file_optional_single} />
-								<formInput.File label="Multiple Files" multiple field={updateForm.fields.file_optional_multiple} value={dbData.file_optional_multiple} />
+								<formInput.Email label="email_optional" field={updateForm.fields.email_optional} value={dbData.email_optional} />
+								<formInput.Number label="number_optional" field={updateForm.fields.number_optional} value={dbData.number_optional} />
+								<formInput.Textarea label="textarea_optional" field={updateForm.fields.textarea_optional} value={dbData.textarea_optional} />
+								<formInput.Url label="url_optional" field={updateForm.fields.url_optional} value={dbData.url_optional} />
+								<formInput.Date label="date_optional" field={updateForm.fields.date_optional} value={dbData.date_optional} />
+								<formInput.Datetime label="datetime_optional" field={updateForm.fields.datetime_optional} value={dbData.datetime_optional} />
+								<formInput.File label="file_optional_single" field={updateForm.fields.file_optional_single} value={dbData.file_optional_single} />
+								<formInput.File label="file_optional_multiple" multiple field={updateForm.fields.file_optional_multiple} value={dbData.file_optional_multiple} />
 								<formInput.Bool label="bool_optional" text="Rahatsız Etmeyin (Do not disturb)" field={updateForm.fields.bool_optional} value={dbData.bool_optional} />
 							{/snippet}
 

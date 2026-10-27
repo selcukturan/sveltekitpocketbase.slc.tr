@@ -65,7 +65,6 @@
 	{@attach watchValueChange}
 	class="group inline-flex items-center gap-3 select-none {classes} {disabled ? 'cursor-not-allowed opacity-50' : readonly ? 'cursor-default' : 'cursor-pointer'}"
 >
-	<!-- hover:bg-surface-400/50 focus:bg-surface-500/50 -->
 	<button
 		bind:this={button}
 		{id}
@@ -74,8 +73,8 @@
 		aria-checked={value}
 		aria-describedby={text ? textId : undefined}
 		disabled={disabled || readonly}
-		class="{value ? 'bg-success-400 border-success-600' : 'bg-surface-300 border-surface-400'}
-			{!disabled && !readonly ? (value ? 'group-hover:bg-success-500 group-hover:border-success-700' : 'group-hover:bg-surface-400/50 group-hover:border-surface-500') : ''}
+		class="{value ? 'bg-success-300 border-success-400' : 'bg-surface-300 border-surface-400'}
+			{!disabled && !readonly ? (value ? 'group-hover:bg-success-400 group-hover:border-success-500' : 'group-hover:bg-surface-400 group-hover:border-surface-500') : ''}
 			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
 			{readonly ? 'cursor-default' : 'cursor-pointer'}
 			relative h-6 w-11 overflow-hidden rounded-md border px-0.5 py-1"

@@ -141,10 +141,14 @@ export type DemoCrudSelectOptionalSingleOptions = typeof DemoCrudSelectOptionalS
 export type DemoCrudRecord = {
 	bool_optional?: boolean
 	created: IsoAutoDateString
+	date_optional?: IsoDateString
+	datetime_optional?: IsoDateString
+	email_optional?: string
 	file_optional_multiple?: FileNameString[]
 	file_optional_single?: FileNameString
 	id: string
 	label?: string
+	number_optional?: number
 	relation_optional_multiple?: RecordIdString[]
 	relation_optional_single?: RecordIdString
 	search_label?: string
@@ -152,7 +156,9 @@ export type DemoCrudRecord = {
 	select_optional_single?: DemoCrudSelectOptionalSingleOptions
 	text_optional?: string
 	text_required: string
+	textarea_optional?: HTMLString
 	updated: IsoAutoDateString
+	url_optional?: string
 }
 
 export const DemoNotificationTypeOptions = {

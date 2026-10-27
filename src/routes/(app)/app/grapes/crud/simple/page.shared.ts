@@ -43,7 +43,13 @@ export const createFormSchema = v.object({
 	...input.Relation('relation_optional_single', { required: false, multiple: false }),
 	...input.File('file_optional_multiple', { required: false, multiple: true }),
 	...input.File('file_optional_single', { required: false, multiple: false }),
-	...input.Bool('bool_optional')
+	...input.Bool('bool_optional'),
+	...input.Date('date_optional', { required: false }),
+	...input.Datetime('datetime_optional', { required: false }),
+	...input.Email('email_optional', { required: false }),
+	...input.Number('number_optional', { required: false }),
+	...input.Textarea('textarea_optional', { required: false }),
+	...input.Url('url_optional', { required: false })
 });
 export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 
