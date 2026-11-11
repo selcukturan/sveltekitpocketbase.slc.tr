@@ -1,12 +1,13 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
+	import { t } from '#lib/app/localization/index.js';
 	import { focustrap, portal } from '#lib/attachments/index.js';
 	import { tick, untrack } from 'svelte';
-	import { on } from 'svelte/events';
+	import { slide } from 'svelte/transition';
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from '../common.js';
 
 	import { getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
-	import type { RelationValueTypeChoice, RelationResolveData, RelationPropsType, RelationValueChangeArgs, HideFuncType } from '../type.js';
+	import type { RelationValueTypeChoice, RelationPropsType, RelationValueChangeArgs } from '../type.js';
 	import RelationDialogContent from './dialog-content.svelte';
 	import { createRelationInputsContext } from './context.svelte.js';
 	import LoadingSvg from './loading-svg.svelte';
@@ -16,9 +17,8 @@
 		collection,
 		multiple = false as Tmultiple,
 		value = $bindable((multiple ? [] : '') as RelationValueTypeChoice<Tmultiple>),
-		message = 'Onaylıyor musunuz?',
-		yes = 'Seçimi Kaydet',
-		no = 'Vazgeç',
+		yes,
+		no,
 		class: classes = '',
 		id = '',
 		name,
@@ -119,6 +119,7 @@
 {#snippet listItem({ id, label, isLoading }: { id: string; label: string; isLoading: boolean })}
 	<!-- list-item -->
 	<div
+		transition:slide={{ duration: animationDuration }}
 		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
@@ -149,7 +150,7 @@
 					type="button"
 					onclick={() => removeInputSelectedItem(id)}
 					class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
-					aria-label="{label} kaldır"
+					aria-label={t('remove_item_aria', { name: label })}
 				>
 					{#if isLoading}
 						<LoadingSvg />
@@ -170,17 +171,9 @@
 	{@const isEmpty = listItems.length === 0}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
 		<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
-			{#if !isEmpty}
-				{#if isLoading}
-					{#each listItems as item, i (i)}
-						{@render listItem({ id: item, label: item, isLoading })}
-					{/each}
-				{:else}
-					{#each listItems as item, i (i)}
-						{@render listItem({ id: item, label: context.itemDetailCache.get(item)?.label ?? 'no data', isLoading })}
-					{/each}
-				{/if}
-			{/if}
+			{#each listItems as item (item)}
+				{@render listItem({ id: item, label: isLoading ? item : (context.itemDetailCache.get(item)?.label ?? t('relation_no_data')), isLoading })}
+			{/each}
 		</div>
 		<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>
 			<button
@@ -200,7 +193,7 @@
 					</svg>
 				{/if}
 
-				<span>{label || 'Kayıt seçiciyi aç'}</span>
+				<span>{label || t('relation_open_picker')}</span>
 			</button>
 		</div>
 	</output>

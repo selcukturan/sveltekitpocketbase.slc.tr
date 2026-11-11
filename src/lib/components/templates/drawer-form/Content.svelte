@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import { type Snippet } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
@@ -18,15 +19,15 @@
 			{#if children}
 				{@render children()}
 			{:else}
-				<span>No content available.</span>
+				<span>{t('no_content')}</span>
 			{/if}
 			{#snippet pending()}
-				<p class="slc-boundary-drawer-form-content-pending">Loading...</p>
+				<p>{t('loading')}</p>
 			{/snippet}
 		</svelte:boundary>
 	{:else if children}
 		{@render children()}
 	{:else}
-		<span>No content available.</span>
+		<span>{t('no_content')}</span>
 	{/if}
 </main>

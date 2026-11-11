@@ -1,4 +1,5 @@
 <script lang="ts" generics="TData extends Row">
+	import { t } from '#lib/app/localization/index.js';
 	import type { Row } from './types.js';
 	import Pagination from './parts/Pagination.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
@@ -27,11 +28,13 @@
 	{@render context.toolbar?.()}
 	<div class:slc-table-container={true} class={context.containerClass}>
 		{#if context.query?.loading === true}
-			<div class="slc-table-message"><p>Loading...</p></div>
+			<div class="slc-table-message"><p>{t('loading')}</p></div>
 		{:else if context.query?.error !== undefined}
-			<div class="slc-table-message"><p>{context.query?.error.message ?? 'Error occurred'}</p></div>
+			<div class="slc-table-message">
+				<p>{context.query?.error.message ? t(context.query.error.message, undefined, context.query.error.message) : t('error_generic')}</p>
+			</div>
 		{:else if context.dataLength === 0}
-			<div class="slc-table-message"><p>No data to display</p></div>
+			<div class="slc-table-message"><p>{t('dt_no_data')}</p></div>
 		{/if}
 		<div
 			role="grid"

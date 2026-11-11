@@ -56,7 +56,7 @@
 		pageToaster.add({
 			type: 'error',
 			title: t('error'),
-			description: myError?.body.message ?? t('error_generic'),
+			description: myError ? t(myError.body.message, undefined, myError.body.message) : t('error_generic'),
 			action: {
 				label: t('close'),
 				onClick: (id) => {
@@ -73,7 +73,7 @@
 			if (await run()) {
 				drawerFormIsChanged = false;
 				drawerRef?.close();
-				pageToaster.add({ type: 'success', title: 'Başarıyla kaydedildi!', description: 'Başarıyla kaydedildi!' });
+				pageToaster.add({ type: 'success', title: t('toast_saved_title'), description: t('toast_saved_description') });
 			} else {
 				pageToaster.add({ type: 'error', title: t('error'), description: t('invalid_data') });
 			}
@@ -113,7 +113,7 @@
 	<formInput.Datetime label="datetime_optional" field={fields.datetime_optional} value={data.datetime_optional} />
 	<formInput.File label="file_optional_single" field={fields.file_optional_single} value={data.file_optional_single} />
 	<formInput.File label="file_optional_multiple" field={fields.file_optional_multiple} value={data.file_optional_multiple} />
-	<formInput.Bool label="bool_optional" text="Rahatsız Etmeyin (Do not disturb)" field={fields.bool_optional} value={data.bool_optional} />
+	<formInput.Bool label="bool_optional" text={t('do_not_disturb')} field={fields.bool_optional} value={data.bool_optional} />
 {/snippet}
 
 <Head>
@@ -130,13 +130,13 @@
 			<input.Text
 				id="filter_text_required"
 				bind:value={filterData.filter_text_required}
-				placeholder="Search - text_required contains..."
+				placeholder={t('search_contains', { field: 'text_required' })}
 				onkeydown={(e) => e.key === 'Enter' && search()}
 			/>
 			<input.Text
 				id="filter_text_optional"
 				bind:value={filterData.filter_text_optional}
-				placeholder="Search - text_optional contains..."
+				placeholder={t('search_contains', { field: 'text_optional' })}
 				onkeydown={(e) => e.key === 'Enter' && search()}
 			/>
 			<input.Button label={t('search')} onclick={search} disabled={query.loading} />
@@ -192,8 +192,8 @@
 														await deleteRecord({ id: dr.row.id }).updates(query);
 														pageToaster.add({
 															type: 'success',
-															title: 'Başarıyla silindi!',
-															description: `[${dr.row.id}] ID'li kayıt silindi!`
+															title: t('toast_deleted_title'),
+															description: t('toast_deleted_description', { id: dr.row.id })
 														});
 													} catch (error) {
 														showError(error);
@@ -242,9 +242,9 @@
 			onBeforeClose={async () => {
 				if (drawerFormIsChanged) {
 					let shouldClose = await confirm({
-						message: 'Kaydedilmemiş değişiklikleriniz var. Bunları gerçekten silmek istiyor musunuz?',
-						yes: 'Evet',
-						no: 'Hayır'
+						message: t('unsaved_changes_confirm'),
+						yes: t('yes'),
+						no: t('no')
 					});
 					if (shouldClose) {
 						setParams({ cmd: '', id: '' });
@@ -260,7 +260,7 @@
 				<!-- .for(): drawer her açılışta temiz bir form örneği alır; kapanınca örnek (değerler, hatalar) silinir -->
 				{@const form = createForm.for('create')}
 				<DrawerFormContent>
-					<DrawerFormContent.Header label="Create">
+					<DrawerFormContent.Header label={t('create')}>
 						<input.Button label=" X " onclick={() => drawerRef?.close()} />
 					</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
@@ -276,7 +276,7 @@
 							{/snippet}
 
 							{#snippet buttons()}
-								<formInput.Button label={t('close')} onclick={() => drawerRef?.close(true)} />
+								<formInput.Button label={t('close')} onclick={() => drawerRef?.close()} />
 								<formInput.Button type="submit" label={t('create')} disabled={Boolean(form.pending)} />
 							{/snippet}
 						</DrawerFormContent.Content.Form>
@@ -304,7 +304,7 @@
 							{/snippet}
 
 							{#snippet buttons()}
-								<formInput.Button label={t('close')} onclick={() => drawerRef?.close(true)} />
+								<formInput.Button label={t('close')} onclick={() => drawerRef?.close()} />
 								<!-- <formInput.Button type="submit" label={t('update')} disabled={Boolean(form.pending) || !drawerFormIsChanged} /> -->
 								<formInput.Button type="submit" label={t('update')} disabled={Boolean(form.pending)} />
 							{/snippet}

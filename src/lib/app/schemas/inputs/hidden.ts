@@ -1,10 +1,13 @@
 import * as v from 'valibot';
+import { errorKeys, inputMeta } from './meta';
 import * as base from '../base';
 
-const _HiddenIdOptional = () => v.optional(base.id, '');
-const _HiddenIdRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.id, v.nonEmpty(message));
-const _HiddenTextOptional = () => v.optional(v.pipe(base.text, v.maxLength(255, 'Lütfen en fazla 255 karakter girin.')), '');
-const _HiddenTextRequired = (message = 'Bu alan gereklidir.') => v.pipe(base.text, v.nonEmpty(message), v.maxLength(255, 'Lütfen en fazla 255 karakter girin.'));
+// Gizli alanlar UI'da hata göstermez; mesajlar diğer alanlarla tutarlı olsun diye çeviri anahtarıdır.
+const _HiddenIdOptional = () => v.pipe(v.optional(base.id, ''), inputMeta({ required: false }));
+const _HiddenIdRequired = (message: string = errorKeys.required) => v.pipe(base.id, v.nonEmpty(message), inputMeta({ required: true }));
+const _HiddenTextOptional = () => v.pipe(v.optional(v.pipe(base.text, v.maxLength(255, errorKeys.maxLength)), ''), inputMeta({ required: false, max: 255 }));
+const _HiddenTextRequired = (message: string = errorKeys.required) =>
+	v.pipe(base.text, v.nonEmpty(message), v.maxLength(255, errorKeys.maxLength), inputMeta({ required: true, max: 255 }));
 
 type HiddenIdOptional = ReturnType<typeof _HiddenIdOptional>;
 type HiddenIdRequired = ReturnType<typeof _HiddenIdRequired>;

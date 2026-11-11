@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	let { totalItems, pageSize, currentPage = $bindable(1) } = $props();
 
 	let totalPages = $derived(Math.ceil(totalItems / pageSize));
@@ -49,7 +50,7 @@
 </script>
 
 <nav class="pagination">
-	<button onclick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}> Geri </button>
+	<button onclick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>{t('previous')}</button>
 
 	{#each visiblePages as page, index (index)}
 		{#if page === '...'}
@@ -61,7 +62,7 @@
 		{/if}
 	{/each}
 
-	<button onclick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}> İleri </button>
+	<button onclick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>{t('next')}</button>
 </nav>
 
 <style>

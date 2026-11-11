@@ -69,7 +69,6 @@ export type SelectPropsType<Tmultiple extends boolean> = SelectBasePropsType & {
 
 // ################# BEGIN Relation.svelte Props ###############################
 export type RelationValueTypeChoice<T extends boolean> = T extends true ? string[] : string;
-export type RelationResolveData = { confirm: boolean };
 export type ItemDetailCacheType = SvelteMap<string, Record<string, string>>;
 
 export type RelationValueChangeArgs<T extends boolean> = {
@@ -100,8 +99,6 @@ export type RelationPropsType<Tmultiple extends boolean> = {
 	readonly?: boolean;
 	onValueChange?: (args: RelationValueChangeArgs<Tmultiple>) => void;
 };
-
-export type HideFuncType = (confirm: boolean) => void;
 
 export type RelationDialogContentPropsType<Tmultiple extends boolean> = {
 	hide: HideFuncType;

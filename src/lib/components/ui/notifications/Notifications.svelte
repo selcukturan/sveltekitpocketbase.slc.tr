@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { Button } from '../inputs/index.js';
 	import { Dialog } from '#lib/components/base/dialog/index.js';
@@ -33,23 +34,23 @@
 		onNew: (items) =>
 			toast.add({
 				type: 'info',
-				title: 'Bildirimler',
-				description: items.length === 1 ? items[0].title : `${items.length} yeni bildiriminiz var.`,
-				action: { label: 'Aç', onClick: () => openFromToast(items) }
+				title: t('notif_title'),
+				description: items.length === 1 ? items[0].title : t('notif_new_count', { count: items.length }),
+				action: { label: t('notif_open'), onClick: () => openFromToast(items) }
 			}),
-		onError: (message) => toast.add({ type: 'error', title: 'Bildirimler', description: message })
+		onError: (message) => toast.add({ type: 'error', title: t('notif_title'), description: t(message, undefined, message) })
 	});
 
 	let filter = $state<'all' | 'unread' | 'read'>('all');
 	const filteredItems = $derived(filter === 'all' ? stream.all : filter === 'unread' ? stream.unread : stream.read);
-	const emptyText = $derived(filter === 'unread' ? 'Okunmamış bildirim yok.' : filter === 'read' ? 'Okunmuş bildirim yok.' : 'Bildirim yok.');
+	const emptyText = $derived(filter === 'unread' ? t('notif_empty_unread') : filter === 'read' ? t('notif_empty_read') : t('notif_empty_all'));
 	const readingAll = $derived(stream.isPending(PENDING_READ_ALL));
 	const removingAll = $derived(stream.isPending(PENDING_REMOVE_ALL));
 	const reconnecting = $derived(stream.isPending(PENDING_RECONNECT));
 	const badge = $derived(stream.unread.length > 99 ? '99+' : String(stream.unread.length));
 
 	const removeAll = () => {
-		if (confirm('Tüm bildirimler listenizden kaldırılacak. Emin misiniz?')) stream.removeAll();
+		if (confirm(t('notif_remove_all_confirm'))) stream.removeAll();
 	};
 
 	// Detay dialog'u. Popover'ın içinde durmalı: dışarıda olursa odak popover'dan çıkar ve popover kapanır.
@@ -74,7 +75,8 @@
 </script>
 
 {#snippet typeTag(item: NotificationItem)}
-	<span class="bg-surface-200 text-surface-700 shrink-0 rounded px-1.5 py-px text-[10px] font-medium">{typeLabels[item.type] ?? item.type}</span>
+	<span class="bg-surface-200 text-surface-700 shrink-0 rounded px-1.5 py-px text-[10px] font-medium">{typeLabels[item.type] ? t(typeLabels[item.type]) : item.type}</span
+	>
 {/snippet}
 
 {#snippet spinner()}
@@ -87,7 +89,7 @@
 	<div class="hover:bg-surface-300/50 border-surface-300 flex w-full items-stretch border-t first:border-t-0">
 		<!-- read status -->
 		<div class="flex w-8 shrink-0 items-center justify-center">
-			<span class="size-2 rounded-full {item.read ? 'bg-transparent' : 'bg-info-500'}" aria-label={item.read ? 'Okundu' : 'Okunmadı'}></span>
+			<span class="size-2 rounded-full {item.read ? 'bg-transparent' : 'bg-info-500'}" aria-label={item.read ? t('notif_status_read') : t('notif_status_unread')}></span>
 		</div>
 		<!-- content -->
 		<button type="button" onclick={() => openItem(item)} class="flex min-w-0 flex-auto cursor-pointer flex-col gap-0.5 rounded-lg p-2 text-left -outline-offset-5">
@@ -102,14 +104,14 @@
 		<!-- action: işlem sürerken iki düğme yerine tek gösterge (aria-busy ile ekran okuyucuya da bildirilir) -->
 		<div class="flex w-8 shrink-0 flex-col items-center justify-center gap-0.5 py-1" aria-busy={busy}>
 			{#if busy}
-				<span class="text-surface-500 p-1" role="status" aria-label="İşlem sürüyor">{@render spinner()}</span>
+				<span class="text-surface-500 p-1" role="status" aria-label={t('in_progress')}>{@render spinner()}</span>
 			{:else}
 				<button
 					type="button"
 					onclick={() => stream.remove(item)}
 					class="hover:bg-surface-400/50 cursor-pointer rounded-full p-1"
-					aria-label="{item.title} kaldır"
-					title="Kaldır"
+					aria-label={t('remove_item_aria', { name: item.title })}
+					title={t('remove')}
 				>
 					<svg class="size-3.5" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -119,8 +121,8 @@
 					type="button"
 					onclick={() => stream.toggleRead(item)}
 					class="hover:bg-surface-400/50 cursor-pointer rounded-full p-1"
-					aria-label={item.read ? 'Okunmadı olarak işaretle' : 'Okundu olarak işaretle'}
-					title={item.read ? 'Okunmadı yap' : 'Okundu yap'}
+					aria-label={item.read ? t('notif_mark_unread') : t('notif_mark_read')}
+					title={item.read ? t('notif_mark_unread') : t('notif_mark_read')}
 				>
 					<svg class="size-3.5" stroke="currentColor" fill={item.read ? 'none' : 'currentColor'} stroke-width="2" viewBox="0 0 24 24">
 						<circle cx="12" cy="12" r="6"></circle>
@@ -148,7 +150,7 @@
 	--overflow="hidden"
 >
 	{#snippet trigger({ active, attr })}
-		<button {...attr} class="bg-error-300 cursor-pointer touch-manipulation" class:bg-error-400={active}> Bildirimler ({badge}) </button>
+		<button {...attr} class="bg-error-300 cursor-pointer touch-manipulation" class:bg-error-400={active}>{t('notif_title')} ({badge})</button>
 	{/snippet}
 
 	{#snippet children({ close })}
@@ -156,13 +158,13 @@
 			<!-- header -->
 			<div class="bg-surface-200 border-surface-300 flex items-center justify-between border-b p-2">
 				<h3 class="text-surface-800 flex items-center gap-2 text-lg font-semibold">
-					Bildirimler
+					{t('notif_title')}
 					<!-- Canlı bağlantı: bağlıyken yeşil ve dalgalanan, değilken kırmızı ve sabit -->
 					<span
 						class="relative flex size-2.5"
 						role="status"
-						aria-label={stream.connected ? 'Canlı bağlantı aktif' : 'Canlı bağlantı yok'}
-						title={stream.connected ? 'Canlı bağlantı aktif' : 'Canlı bağlantı yok'}
+						aria-label={stream.connected ? t('notif_live_on') : t('notif_live_off')}
+						title={stream.connected ? t('notif_live_on') : t('notif_live_off')}
 					>
 						{#if stream.connected}
 							<span class="bg-success-500 absolute inline-flex size-full animate-ping rounded-full motion-reduce:animate-none"></span>
@@ -178,29 +180,29 @@
 					size="sm"
 					variant={filter === 'all' ? 'light' : 'ghost'}
 					color={filter === 'all' ? 'success' : 'quaternary'}
-					label="Hepsi ({stream.all.length})"
+					label={t('notif_filter_all', { count: stream.all.length })}
 					onclick={() => (filter = 'all')}
 				/>
 				<Button
 					size="sm"
 					variant={filter === 'unread' ? 'light' : 'ghost'}
 					color={filter === 'unread' ? 'success' : 'quaternary'}
-					label="Okunmamışlar ({stream.unread.length})"
+					label={t('notif_filter_unread', { count: stream.unread.length })}
 					onclick={() => (filter = 'unread')}
 				/>
 				<Button
 					size="sm"
 					variant={filter === 'read' ? 'light' : 'ghost'}
 					color={filter === 'read' ? 'success' : 'quaternary'}
-					label="Okunmuşlar ({stream.read.length})"
+					label={t('notif_filter_read', { count: stream.read.length })}
 					onclick={() => (filter = 'read')}
 				/>
 			</div>
 			<!-- error: akış durur, son liste (varsa) görünmeye devam eder; periyodik reconnect de yeniden dener -->
 			{#if stream.error}
 				<div class="bg-error-100 text-error-800 border-surface-300 flex items-center justify-between gap-2 border-b px-3 py-2 text-xs">
-					<span>{stream.error.message}</span>
-					<Button size="sm" variant="ghost" color="error" label="Tekrar Dene" onclick={() => stream.reconnect()} />
+					<span>{t(stream.error.message, undefined, stream.error.message)}</span>
+					<Button size="sm" variant="ghost" color="error" label={t('retry')} onclick={() => stream.reconnect()} />
 				</div>
 			{/if}
 			<!-- main -->
@@ -232,14 +234,14 @@
 					variant="filled"
 					color="primary"
 					startIcon={readingAll ? 'loader' : 'circle_check'}
-					label="Tümünü Oku"
+					label={t('notif_read_all')}
 					class={readingAll ? '[&_svg]:animate-spin' : ''}
 					aria-busy={readingAll}
 					disabled={readingAll || !stream.unread.length}
 					onclick={() => stream.markAllRead()}
 				/>
 				<div class="flex items-center gap-1">
-					<span class="text-surface-500 text-[11px]">Sadece son 100 bildirim</span>
+					<span class="text-surface-500 text-[11px]">{t('notif_last_100')}</span>
 				</div>
 				<div class="flex items-center gap-1">
 					<Button
@@ -251,8 +253,8 @@
 						class={reconnecting ? '[&_svg]:animate-spin' : ''}
 						aria-busy={reconnecting}
 						disabled={reconnecting}
-						title="Yeniden bağlan"
-						aria-label="Yeniden bağlan"
+						title={t('reconnect')}
+						aria-label={t('reconnect')}
 						onclick={() => stream.reconnect()}
 					/>
 					<Button
@@ -264,8 +266,8 @@
 						class={removingAll ? '[&_svg]:animate-spin' : ''}
 						aria-busy={removingAll}
 						disabled={removingAll || !stream.all.length}
-						title="Tümünü kaldır"
-						aria-label="Tümünü kaldır"
+						title={t('notif_remove_all')}
+						aria-label={t('notif_remove_all')}
 						onclick={removeAll}
 					/>
 				</div>
@@ -289,12 +291,12 @@
 			</div>
 			<div class="text-surface-600 border-surface-200 flex items-center gap-2 border-b px-4 py-2 text-xs">
 				{@render typeTag(selected)}
-				<span class="min-w-0 flex-auto truncate">Kimden: <span class="text-surface-900 font-medium">{senderLabel(selected)}</span></span>
+				<span class="min-w-0 flex-auto truncate">{t('notif_from')} <span class="text-surface-900 font-medium">{senderLabel(selected)}</span></span>
 				<time class="shrink-0" datetime={selected.created}>{formatDate(selected.created)}</time>
 			</div>
 			<p class="max-h-[60dvh] overflow-y-auto p-4 text-sm whitespace-pre-line">{selected.message}</p>
 			<div class="bg-surface-100 inset-shadow-surface-200 mt-2 flex items-center justify-end border-t p-3 inset-shadow-sm">
-				<Button label="Kapat" variant="filled" color="surface" autofocus onclick={() => dialog?.hide(false)} />
+				<Button label={t('close')} variant="filled" color="surface" autofocus onclick={() => dialog?.hide(false)} />
 			</div>
 		</div>
 	{/if}

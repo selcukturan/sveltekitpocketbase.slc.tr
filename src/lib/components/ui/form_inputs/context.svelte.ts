@@ -19,6 +19,7 @@ export type MainProps<TInput extends RemoteFormInput, TOutput, TSchema extends O
 	buttons?: Snippet<[args?: SnippetArgs]>;
 	formClass?: SvelteHTMLElements['form']['class'];
 	onIsChange?: (isChanged: boolean) => void;
+	confirmLeave?: boolean; // değişiklik varken sayfadan ayrılırken uyar (varsayılan: true)
 };
 
 class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>> {
@@ -26,7 +27,7 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 	props!: MainProps<TInput, TOutput, TSchema>;
 
 	readonly formAttributes = $derived.by(() => {
-		const { form, schema, inputs, children, buttons, formClass, onIsChange, ...attributes } = this.props;
+		const { form, schema, inputs, children, buttons, formClass, onIsChange, confirmLeave, ...attributes } = this.props;
 		return attributes;
 	});
 
@@ -36,21 +37,16 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 	// ############### END PROPS ###############
 
 	// ############### BEGIN STATES ###############
-	readonly schemaFields = $derived(this.props.schema?.entries ? Object.keys(this.props.schema.entries) : []);
-	readonly schemaFieldsCount = $derived(this.schemaFields.length);
-
+	// Sarmalayıcılar `useFormField().track()` ile ilk değerlerini (initial) ve her değişiklikte güncel değerlerini yazar.
 	readonly initialData = new SvelteMap<string, unknown>();
 	readonly currentData = new SvelteMap<string, unknown>();
 
 	// Formda değişiklik olup olmadığının kontrolü
+	// Yalnızca ilk değerini yazmış alanlar karşılaştırılır (şemadaki gölge alanlar, örn. File `_Plus`/`_Minus`, takip edilmez).
+	// Değer ilk hâline geri getirilirse alan değişmemiş sayılır.
 	readonly isChanged = $derived.by(() => {
-		// schemaFieldsCount ile sayıları eşitlenene kadar false olmalı
-		if (this.currentData.size < this.schemaFieldsCount) {
-			return false;
-		}
-
-		// Her bir alanın mevcut değerini ilk değeriyle karşılaştır
 		for (const [key, val] of this.currentData) {
+			if (!this.initialData.has(key)) continue;
 			const initialVal = this.initialData.get(key);
 
 			// Eğer değer bir dizi (Array) ise (örneğin çoklu seçim) elemanlarını karşılaştır
@@ -70,6 +66,11 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 		void this.isChanged;
 		return untrack(() => this.props.onIsChange?.(this.isChanged));
 	};
+
+	// Güncel değerleri yeni ilk değer kabul eder (örn: kayıttan sonra açık kalan formlar için)
+	markClean() {
+		for (const [key, val] of this.currentData) this.initialData.set(key, val);
+	}
 	// ############### END STATES ###############
 
 	getValibotMetadata(key?: unknown) {

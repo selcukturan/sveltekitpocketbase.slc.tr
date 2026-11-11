@@ -35,5 +35,15 @@
 </script>
 
 <Field issues={formField.issues} required={formField.required} label={formField.label} {id}>
-	<Text type="email" {id} name={attributes.name} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} status="with-field" size="sm" />
+	<Text
+		type="email"
+		{id}
+		name={attributes.name}
+		maxlength={formField.meta.max}
+		aria-invalid={attrAriaInvalid}
+		{onValueChange}
+		{...restProps}
+		status="with-field"
+		size="sm"
+	/>
 </Field>

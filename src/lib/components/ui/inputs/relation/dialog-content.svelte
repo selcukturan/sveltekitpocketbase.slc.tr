@@ -1,4 +1,5 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
+	import { t } from '#lib/app/localization/index.js';
 	import { inputClasses } from '../common.js';
 	import { Button } from '#lib/components/ui/inputs/index.js';
 	import { getRelationList } from '#lib/remotes/relations.remote.js';
@@ -7,7 +8,7 @@
 	import { getRelationInputsContext } from './context.svelte.js';
 	import LoadingSvg from './loading-svg.svelte';
 
-	let { multiple = false as Tmultiple, yes = 'Seçimi Kaydet', no = 'İptal', hide }: RelationDialogContentPropsType<Tmultiple> = $props();
+	let { multiple = false as Tmultiple, yes, no, hide }: RelationDialogContentPropsType<Tmultiple> = $props();
 
 	const context = getRelationInputsContext<Tmultiple>();
 
@@ -52,11 +53,11 @@
 <div class="flex flex-col gap-1" {@attach watchCurrentChanged}>
 	<!-- search record -->
 	<div class="px-3 pt-3">
-		<p class="pb-1 text-xs font-semibold tracking-wider">Kayıt Ara</p>
+		<p class="pb-1 text-xs font-semibold tracking-wider">{t('relation_search_label')}</p>
 		<input
 			value={context.pickerParams.search}
 			type="text"
-			placeholder="Ara..."
+			placeholder={t('relation_search_placeholder')}
 			class="{inputClasses.base} {inputClasses.variants.default} {inputClasses.sizes.md} border-surface-300! bg-surface-100!"
 			onkeydown={(e) => {
 				if (e.key === 'Enter' && !isLoading) {
@@ -69,13 +70,13 @@
 	</div>
 	<!-- all records -->
 	<div class="px-3">
-		<p class="pb-1 text-xs font-semibold tracking-wider">Tüm Kayıtlar</p>
+		<p class="pb-1 text-xs font-semibold tracking-wider">{t('relation_all_records')}</p>
 		<div class="bg-surface-100 border-surface-300 relative flex h-48 flex-col overflow-y-auto rounded-md border">
 			{#if isLoading}
 				<div class="bg-surface-100/50 absolute inset-0 flex items-center justify-center">
 					<div class="flex items-center gap-2">
 						<LoadingSvg />
-						<span>Lütfen bekleyin...</span>
+						<span>{t('please_wait')}</span>
 					</div>
 				</div>
 			{/if}
@@ -122,7 +123,7 @@
 			{:else if !isLoading}
 				<div class="bg-surface-100/50 absolute inset-0 flex items-center justify-center">
 					<div class="flex items-center gap-2">
-						<span>Gösterilecek kayıt yok.</span>
+						<span>{t('relation_no_records')}</span>
 					</div>
 				</div>
 			{/if}
@@ -135,7 +136,7 @@
 		{@const isEmpty = listItems.length === 0}
 
 		<div class="px-3">
-			<p class="pb-1 text-xs font-semibold tracking-wider">Seçilen Kayıtlar ({listItems.length})</p>
+			<p class="pb-1 text-xs font-semibold tracking-wider">{t('relation_selected_records', { count: listItems.length })}</p>
 			<div tabindex="-1" class="bg-surface-100 border-surface-300 flex items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-2.5">
 				{#if !isEmpty}
 					{#each listItems as item, i (i)}
@@ -154,15 +155,15 @@
 						</div>
 					{/each}
 				{:else}
-					<p class="text-surface-400 border border-transparent py-px text-xs font-bold whitespace-nowrap">Seçili kayıt yok.</p>
+					<p class="text-surface-400 border border-transparent py-px text-xs font-bold whitespace-nowrap">{t('relation_no_selection')}</p>
 				{/if}
 			</div>
 		</div>
 	{/if}
 
 	<div class="bg-surface-100 inset-shadow-surface-200 mt-2 flex items-center justify-between border-t p-3 inset-shadow-sm">
-		<Button label={no} onclick={() => hide(false)} variant="ghost" color="surface" />
+		<Button label={no ?? t('cancel')} onclick={() => hide(false)} variant="ghost" color="surface" />
 
-		<Button label={yes} variant="filled" color="surface" onclick={() => hide(true)} />
+		<Button label={yes ?? t('relation_save')} variant="filled" color="surface" onclick={() => hide(true)} />
 	</div>
 </div>

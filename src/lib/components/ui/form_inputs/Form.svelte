@@ -3,6 +3,8 @@
 	import { createFormInputsContext, type MainProps } from '#lib/components/ui/form_inputs/context.svelte.js';
 	import type { ObjectSchema, ObjectEntries, ErrorMessage, ObjectIssue } from 'valibot';
 	import { t } from '#lib/app/localization/index.js';
+	import { beforeNavigate, goto } from '$app/navigation';
+	import { confirm } from '#lib/components/ui/confirm/index.js';
 
 	let props: MainProps<TInput, TOutput, TSchema> = $props();
 
@@ -11,6 +13,26 @@
 
 	// Belirli bir alana ait olmayan hatalar (örn: sunucuda `invalid('...')` ya da formda karşılığı olmayan PocketBase alanı)
 	const formIssues = $derived((context.props.form.fields.issues() ?? []).map((issue) => t(issue.message, undefined, issue.message)));
+
+	// ######### BEGIN: kaydedilmemiş değişiklik uyarısı #########
+	// - Sayfa yenileme, sekme kapatma, dış siteye gitme (willUnload): cancel() → tarayıcının kendi dialogu
+	// - Uygulama içi geçiş (link, geri tuşu): cancel() → confirm → onaylanırsa goto
+	// - Aynı sayfa içindeki hash değişiklikleri (drawer aç/kapa) atlanır; onları drawer'ın onBeforeClose'u ele alır
+	let leaveConfirmed = false;
+	beforeNavigate(({ from, to, willUnload, cancel }) => {
+		if (leaveConfirmed || context.props.confirmLeave === false || !context.isChanged) return;
+		if (!willUnload && from && to && from.url.pathname === to.url.pathname) return;
+
+		cancel();
+		if (willUnload || !to) return;
+
+		confirm({ message: t('unsaved_changes_confirm'), yes: t('yes'), no: t('no') }).then((ok) => {
+			if (!ok) return;
+			leaveConfirmed = true;
+			goto(to.url);
+		});
+	});
+	// ######### END: kaydedilmemiş değişiklik uyarısı ###########
 </script>
 
 <form class="flex flex-1 flex-col overflow-hidden {context.props.formClass || ''}" {...context.formAttributes} {@attach context.watchIsChanged}>

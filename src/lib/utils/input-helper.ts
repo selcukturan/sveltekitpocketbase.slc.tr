@@ -11,7 +11,9 @@ export function parseDateInputToIso(localDateTime: string) {
 	if (!localDateTime) return ''; // Input boşsa boş döndür.
 	// Olası zaman dilimi belirsizliklerini önlemek amacıyla,
 	// UTC gece yarısı olarak ayrıştırıldığından emin olmak için saat ve UTC göstergesi eklenir.
-	const dateCandidate = new Date(`${localDateTime} 00:00:00.000Z`);
+	// ISO biçimi ('T') kullanılmalı: boşluklu biçim tarayıcının eski ayrıştırıcısına düşer ve küçük yılları yanlış okur
+	// (örn: '0001-05-27 00:00:00.000Z' → 2027-01-05). Yıl yazılırken tarih inputu '0001-…' gibi ara değerler gönderir.
+	const dateCandidate = new Date(`${localDateTime}T00:00:00.000Z`);
 	if (isNaN(dateCandidate.getTime())) {
 		return ''; // Geçersiz tarih ise boş string döndür.
 	}

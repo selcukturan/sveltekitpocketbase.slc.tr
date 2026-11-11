@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { tooltip } from '#lib/attachments/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
@@ -11,7 +12,8 @@
 		iconSize?: string;
 	};
 
-	let { label = 'Action', icon = 'lucide', size = '28px', iconSize = '16px', ...attributes }: Props = $props();
+	let { label: labelProp, icon = 'lucide', size = '28px', iconSize = '16px', ...attributes }: Props = $props();
+	const label = $derived(labelProp ?? t('action'));
 </script>
 
 <button

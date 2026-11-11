@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import { on } from 'svelte/events';
 	import { formatBytes } from '#lib/utils/input-helper.js';
+	import { t } from '#lib/app/localization/index.js';
 	import { inputClasses } from './common.js';
 	import type { FilePropsType, FileDisplayType, FileFileTypeChoice, FileValueTypeChoice } from './type.js';
 
@@ -111,7 +112,7 @@
 		});
 
 		if (acceptedFiles.length < filesArray.length) {
-			errorText = 'Bazı dosyalar kabul edilmeyen formatta olduğu için eklenmedi.';
+			errorText = t('file_err_invalid_type');
 		}
 
 		if (acceptedFiles.length === 0) {
@@ -122,7 +123,7 @@
 		// 2. Boyut (maxSize) doğrulaması
 		const sizeOkFiles = acceptedFiles.filter((file) => {
 			if (file.size > maxSize) {
-				errorText = `"${file.name}" boyutu çok büyük. Maksimum limit: ${formatBytes(maxSize)}`;
+				errorText = t('file_err_too_large', { name: file.name, maxSize: formatBytes(maxSize) });
 				return false;
 			}
 			return true;
@@ -147,14 +148,14 @@
 			const allowedToAdd = maxCount - currentActiveCount;
 
 			if (allowedToAdd <= 0) {
-				errorText = `Maksimum dosya limitine ulaşıldı (${maxCount} adet).`;
+				errorText = t('file_err_limit_reached', { maxCount });
 				triggerErrorClear();
 				return;
 			}
 
 			const filesToAdd = sizeOkFiles.slice(0, allowedToAdd);
 			if (sizeOkFiles.length > allowedToAdd) {
-				errorText = `En fazla ${maxCount} dosya ekleyebilirsiniz. Sınırı aşan dosyalar eklenmedi.`;
+				errorText = t('file_err_some_not_added', { maxCount });
 			}
 
 			filesToAdd.forEach((file) => {
@@ -220,7 +221,7 @@
 		if (multiple) {
 			const currentActiveCount = [...valueMap.values()].filter((f) => !f.deleted).length;
 			if (currentActiveCount >= maxCount) {
-				errorText = `Maksimum dosya limitini (${maxCount} adet) aşacağı için geri alınamadı.`;
+				errorText = t('file_err_cannot_restore', { maxCount });
 				triggerErrorClear();
 				return;
 			}
@@ -400,7 +401,7 @@
 				/>
 			</svg>
 			{#if !file.uploaded}
-				<span class="bg-success-200 border-success-400 text-success-800 shrink-0 rounded-sm border px-1 py-px text-xs font-medium">Yeni</span>
+				<span class="bg-success-200 border-success-400 text-success-800 shrink-0 rounded-sm border px-1 py-px text-xs font-medium">{t('file_new')}</span>
 			{/if}
 			<!-- label -->
 			<span class="truncate text-sm" class:line-through={file.deleted}>{file.name}</span>
@@ -416,19 +417,19 @@
 						type="button"
 						onclick={() => restoreFile(file)}
 						class="slc-input text-warning-700 hover:bg-warning-400/50 focus:bg-warning-500/50 inline-flex cursor-pointer items-center gap-1 rounded-md p-1 text-xs font-bold outline-none"
-						aria-label="{file.name} geri al"
+						aria-label={t('file_restore_aria', { name: file.name })}
 					>
 						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
 						</svg>
-						Geri al
+						{t('file_restore')}
 					</button>
 				{:else}
 					<button
 						type="button"
 						onclick={() => removeFile(file)}
 						class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
-						aria-label="{file.name} kaldır"
+						aria-label={t('file_remove_aria', { name: file.name })}
 					>
 						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -478,7 +479,7 @@
 			<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
 			</svg>
-			<span>{!multiple && isFull ? 'Dosyayı değiştir veya sürükleyip bırak' : 'Dosya yükle veya sürükleyip bırak'}</span>
+			<span>{!multiple && isFull ? t('file_replace') : t('file_upload')}</span>
 		</button>
 	</div>
 
@@ -486,13 +487,13 @@
 	{#if (accept && accept !== '*') || maxSize !== Infinity || (multiple && maxCount !== Infinity)}
 		<span class="text-surface-500 flex flex-wrap justify-center gap-x-2 gap-y-0.5 px-3 pt-0.5 text-xs">
 			{#if accept && accept !== '*'}
-				<span>Format: <code class="font-semibold">{accept}</code></span>
+				<span>{t('file_format')}: <code class="font-semibold">{accept}</code></span>
 			{/if}
 			{#if maxSize !== Infinity}
-				<span>Maks. boyut: <span class="font-semibold">{formatBytes(maxSize)}</span></span>
+				<span>{t('file_max_size')}: <span class="font-semibold">{formatBytes(maxSize)}</span></span>
 			{/if}
 			{#if multiple && maxCount !== Infinity}
-				<span>En fazla: <span class="font-semibold">{maxCount} adet</span></span>
+				<span>{t('file_max_count')}: <span class="font-semibold">{t('file_count', { maxCount })}</span></span>
 			{/if}
 		</span>
 	{/if}

@@ -1,4 +1,5 @@
 <script lang="ts" generics="TData extends Row">
+	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { getTableContext } from '../context.svelte';
 	import type { Row } from '../types';
@@ -13,7 +14,7 @@
 	--box-shadow="0px 0px 16px -1px var(--color-surface-100)"
 >
 	{#snippet trigger({ active, toggle, attr })}
-		<button {...attr} class="slc-btn-toggler" class:active aria-label="Kolon Görünürlüğünü Değiştir">
+		<button {...attr} class="slc-btn-toggler" class:active aria-label={t('dt_toggle_columns')}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="16"
@@ -27,7 +28,7 @@
 			>
 				<path d="M12 3h9M12 9h9M12 15h9M12 21h9M3 6h6v12H3z" />
 			</svg>
-			<span>Kolonlar</span>
+			<span>{t('dt_columns')}</span>
 		</button>
 	{/snippet}
 

@@ -1,3 +1,4 @@
+import { t, getSelectedLang } from '#lib/app/localization/index.js';
 import { onMount, untrack } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
 import {
@@ -67,7 +68,7 @@ export function createNotificationStream({ onNew, onError }: Options = {}) {
 			},
 			(err: unknown) => {
 				clearPending(key);
-				onError?.((err as { body?: { message?: string } })?.body?.message ?? 'İşlem tamamlanamadı.');
+				onError?.((err as { body?: { message?: string } })?.body?.message ?? 'error_action_failed');
 			}
 		);
 	};
@@ -132,14 +133,19 @@ export function createNotificationStream({ onNew, onError }: Options = {}) {
 	};
 }
 
+// Değerler çeviri anahtarıdır; bileşende `t()` ile çevrilir
 export const typeLabels: Record<NotificationItem['type'], string> = {
-	notification: 'Bildirim',
-	message: 'Mesaj'
+	notification: 'notif_type_notification',
+	message: 'notif_type_message'
 };
 
 // Gönderen yoksa (sistem bildirimi) varsayılan etiket.
-export const senderLabel = (n: NotificationItem) => n.from_label || 'Sistem';
+export const senderLabel = (n: NotificationItem) => n.from_label || t('notif_system');
 
-const dateFormat = new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+// Tarih biçimi seçili dile göre
+const dateFormats = {
+	tr: new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' }),
+	en: new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' })
+};
 // PB tarihi "2026-10-21 12:00:00.000Z" biçiminde; boşluğu `T` yapmak tüm tarayıcılarda ayrıştırılmasını garanti eder.
-export const formatDate = (pbDate: string) => dateFormat.format(Date.parse(pbDate.replace(' ', 'T')));
+export const formatDate = (pbDate: string) => dateFormats[getSelectedLang()].format(Date.parse(pbDate.replace(' ', 'T')));

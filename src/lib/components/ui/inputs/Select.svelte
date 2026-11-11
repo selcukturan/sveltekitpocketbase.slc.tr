@@ -1,4 +1,5 @@
 <script lang="ts" generics="Tmultiple extends boolean = false">
+	import { t } from '#lib/app/localization/index.js';
 	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
@@ -22,9 +23,12 @@
 		disabled = false,
 		readonly = false,
 		inform = false,
-		deSelectText = '-- Seçiniz --',
+		deSelectText,
 		onValueChange
 	}: SelectPropsType<Tmultiple> = $props();
+
+	// Seçimi kaldırma metni; verilmezse seçili dile göre çevrilir
+	const deSelectLabel = $derived(deSelectText ?? `-- ${t('select_deselect')} --`);
 
 	// ########################### BEGIN Variables ##################################################################################################################
 
@@ -74,7 +78,7 @@
 		if (canDeselect) {
 			// Listenin başına "-- Seçiniz --" seçeneğini ekle
 			// orjinal indexi bir kaydırır. Orijinal options[0] artık displayOptions[1] olur
-			return [{ value: '', label: deSelectText }, ...options];
+			return [{ value: '', label: deSelectLabel }, ...options];
 		}
 
 		// Diğer tüm durumlarda orijinal seçenekleri kullan
@@ -109,7 +113,7 @@
 
 		const selectedCount = multiple ? `(${labels.length}) ` : '';
 
-		return labels.length > 0 ? `${selectedCount}${labels.join(', ')}` : deSelectText;
+		return labels.length > 0 ? `${selectedCount}${labels.join(', ')}` : deSelectLabel;
 	});
 
 	let activeOptionId = $derived.by(() => {

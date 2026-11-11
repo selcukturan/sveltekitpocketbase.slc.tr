@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 
 	type Props = {
@@ -79,7 +80,7 @@
 >
 	{#snippet trigger({ active, toggle, attr })}
 		<button {...attr} class="btn" class:active>
-			Menü ({active ? 'Açık' : 'Kapalı'})
+			{t('menu')} ({active ? t('state_open') : t('state_closed')})
 		</button>
 	{/snippet}
 
@@ -126,7 +127,7 @@
 </Toggler>
 
 <nav class="pagination">
-	<button onclick={() => goToPage(page - 1)} disabled={page === 1}> Geri </button>
+	<button onclick={() => goToPage(page - 1)} disabled={page === 1}>{t('previous')}</button>
 
 	{#each visiblePages as currentPage, index (index)}
 		{#if currentPage === '...'}
@@ -138,7 +139,7 @@
 		{/if}
 	{/each}
 
-	<button onclick={() => goToPage(page + 1)} disabled={page === totalPages}> İleri </button>
+	<button onclick={() => goToPage(page + 1)} disabled={page === totalPages}>{t('next')}</button>
 </nav>
 
 <style>

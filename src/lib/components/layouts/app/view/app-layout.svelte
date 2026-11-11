@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import { AppSidebar, AppHeader } from '..';
 	import type { AppLayoutPropsType, SidebarDataType } from '../types';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
@@ -7,34 +8,35 @@
 
 	let global = getGlobalContext();
 
-	let sidebarData: SidebarDataType[] = $state([
+	// Başlıklar seçili dile göre çevrilir
+	let sidebarData: SidebarDataType[] = $derived([
 		{
-			title: 'Home',
+			title: t('menu_home'),
 			href: '/app',
 			icon: 'home'
 		},
 		{
-			title: 'Grapes',
+			title: t('menu_grapes'),
 			href: '/app/grapes',
 			icon: 'grape'
 		},
 		{
-			title: 'Data Table',
+			title: t('menu_data_table'),
 			href: '/app/data-table',
 			icon: 'data_table'
 		},
 		{
-			title: 'Logs',
+			title: t('menu_logs'),
 			href: '/app/logs',
 			icon: 'chart_spline'
 		},
 		{
-			title: 'Developments',
+			title: t('menu_developments'),
 			href: '/app/developments',
 			icon: 'square_code'
 		},
 		{
-			title: 'Settings',
+			title: t('menu_settings'),
 			href: '/app/settings',
 			icon: 'settings'
 		}

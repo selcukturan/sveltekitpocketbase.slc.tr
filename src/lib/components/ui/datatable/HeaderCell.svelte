@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { t } from '#lib/app/localization/index.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, HeaderRowType, HeaderCellType } from './types.js';
@@ -102,7 +103,7 @@
 			onclick={(e) => e.stopPropagation()}
 			{@attach context.colResizePointerAttach((e: PointerEvent) => context.colResizeUpdate(e, col.originalIndex, col.data.field))}
 			role="separator"
-			aria-label="Kolon Genişlet"
+			aria-label={t('dt_resize_column')}
 		></div>
 	{/if}
 </div>

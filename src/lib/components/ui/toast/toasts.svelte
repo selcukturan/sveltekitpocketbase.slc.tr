@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import type { ToasterOptions, Toast, ToastsProps } from './types.js';
 	import { getToaster } from './toaster.svelte.js';
 	import { slide, fly } from 'svelte/transition';
@@ -92,7 +93,7 @@
 			{/if}
 			{#if toastId && toast.closable !== false}
 				<div class="self-start">
-					<button type="button" class={`${closeButtonClasses.base} ${closeButtonClasses[toastType]}`} onclick={() => toaster.remove(toastId)} aria-label="Close">
+					<button type="button" class={`${closeButtonClasses.base} ${closeButtonClasses[toastType]}`} onclick={() => toaster.remove(toastId)} aria-label={t('close')}>
 						<Icon name="close" size="100%" />
 					</button>
 				</div>

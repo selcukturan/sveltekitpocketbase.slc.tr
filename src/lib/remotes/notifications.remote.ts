@@ -249,7 +249,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 		if (request.signal.aborted) return;
 		console.error('[notificationsRemote] Abonelik veya akış hatası:', err);
 		// İstemcide `notifs.error` dolar ve akış durur; sayfanın periyodik reconnect'i yeniden dener.
-		error(503, 'Bildirimler şu anda yüklenemiyor.', { type: 'pb', errorId: '' });
+		error(503, 'error_notifications_unavailable', { type: 'pb', errorId: '' });
 		// throwError(err);
 	} finally {
 		debug('Temizlik ve abonelik iptali adımları başlatılıyor...');

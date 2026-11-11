@@ -41,7 +41,18 @@ export const errorKeys = {
 	minSelect: 'err_min_select',
 	maxSelect: 'err_max_select',
 	invalidOption: 'err_invalid_option',
-	mimeType: 'err_mime_type'
+	mimeType: 'err_mime_type',
+	// biçim hataları (schemas/base.ts)
+	invalidId: 'err_invalid_id',
+	invalidTextChars: 'err_invalid_text_chars',
+	invalidTextareaChars: 'err_invalid_textarea_chars',
+	invalidEmail: 'err_invalid_email',
+	invalidUrl: 'err_invalid_url',
+	invalidNumber: 'err_invalid_number',
+	numberOutOfRange: 'err_number_out_of_range',
+	invalidBool: 'err_invalid_bool',
+	invalidDate: 'err_invalid_date',
+	invalidDatetime: 'err_invalid_datetime'
 } as const;
 
 // Değer kontrolleri boş değer ('' | 0 | []) için atlanır; boşluk yalnızca `required` ile kontrol edilir (PocketBase davranışı).

@@ -53,8 +53,8 @@
 		show();
 	};
 
-	export const close = (force = false) => {
-		hide(force);
+	export const close = () => {
+		hide();
 	};
 
 	export const toast = (toast: Toast) => {
@@ -87,16 +87,7 @@
 	};
 
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-	const hide = async (force = false) => {
-		if (!force) {
-			// https://github.com/sveltejs/svelte/issues/17083
-			// https://github.com/sveltejs/kit/issues/14900
-			// Manuel, içerik yükleniyor kontrolü. Bu kısım değiştirilecek. <svelte:boundary> pending'inin dışa aktarılabilmesi lazım.
-			// if (contentLoading) return; // İçerik yükleniyor ise kapanamaz.
-			const pendingElement = document.querySelector('.slc-boundary-drawer-form-content-pending');
-			if (pendingElement) return;
-		}
-
+	const hide = async () => {
 		if (isClosing) return; // Kapatma işlemi zaten başladıysa tekrar çalıştırma
 
 		let canClose = true; // Varsayılan olarak kapatılabileceği kabul edilir.

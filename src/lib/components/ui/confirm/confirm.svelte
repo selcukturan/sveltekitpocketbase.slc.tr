@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { t } from '#lib/app/localization/index.js';
 	import { focustrap } from '#lib/attachments/index.js';
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
 	let {
-		message = 'Onaylıyor musunuz?',
-		yes = 'Evet',
-		no = 'Hayır',
+		message,
+		yes,
+		no,
 		animationDuration = 150 // Animasyon süresini, JS ve CSS'te senkronize tut.
 	}: { message?: string; yes?: string; no?: string; animationDuration?: number } = $props();
 
@@ -135,9 +136,9 @@
 	{@attach focustrap}
 >
 	<div class="dialog-content">
-		<p>{message}</p>
-		<button onclick={() => hide('no button clicked', false)}>{no}</button>
-		<button onclick={() => hide('yes button clicked', true)}>{yes}</button>
+		<p>{message ?? t('confirm_default')}</p>
+		<button onclick={() => hide('no button clicked', false)}>{no ?? t('no')}</button>
+		<button onclick={() => hide('yes button clicked', true)}>{yes ?? t('yes')}</button>
 	</div>
 </dialog>
 

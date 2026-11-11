@@ -1,6 +1,9 @@
 import { error, invalid } from '@sveltejs/kit';
 import { ClientResponseError } from 'pocketbase';
 
+// Kullanıcıya gösterilen hata mesajları çeviri anahtarıdır ('error_*'); istemcide `t(mesaj, undefined, mesaj)` ile çevrilir.
+// PocketBase'in kendi mesajları anahtar olmadığından olduğu gibi gösterilir.
+
 // PocketBase doğrulama kodu → çeviri anahtarı (istemcide `t()` ile çevrilir, parametreler alan metadata'sından dolar).
 // Listede olmayan kodlar için PocketBase'in kendi mesajı gösterilir.
 const pbCodeToMessageKey: Record<string, string> = {
@@ -46,7 +49,7 @@ export function throwFormError(err: unknown, data: Record<string, unknown>): nev
 export function throwError(err: unknown): never {
 	if (err instanceof ClientResponseError) {
 		const statusCode = err.status >= 400 && err.status <= 599 ? err.status : 500;
-		const message = err.data.message || err.message || 'Veritabanı işlemi sırasında bir hata oluştu.';
+		const message = err.data.message || err.message || 'error_db_operation';
 
 		console.error('PocketBase Hatası:', message);
 
@@ -60,7 +63,7 @@ export function throwError(err: unknown): never {
 
 	if (err instanceof Error) {
 		console.error('Genel Hata:', err.message);
-		throw error(500, err.message || 'Sunucuya bağlanırken bir sorun oluştu. Lütfen tekrar deneyin.', {
+		throw error(500, err.message || 'error_server_connection', {
 			type: 'general',
 			errorId: ''
 		});
@@ -68,7 +71,7 @@ export function throwError(err: unknown): never {
 
 	console.error('Beklenmedik Hata:', 'Beklenmedik bir hata oluştu.');
 	// Yakalanamayan diğer tüm durumlar için
-	throw error(500, 'Beklenmedik bir hata oluştu.', {
+	throw error(500, 'error_unexpected', {
 		type: 'general',
 		errorId: ''
 	});
@@ -89,5 +92,6 @@ export function mapUnknownToError(error: unknown): ClientResponseError | Error {
 		return error;
 	}
 	// Diğer tüm durumlar (örneğin bir string fırlatılması) için yeni bir Error oluştur.
-	return new Error('Beklenmedik bir hata oluştu: ' + String(error));
+	console.error('Beklenmedik hata nesnesi:', error);
+	return new Error('error_unexpected');
 }
