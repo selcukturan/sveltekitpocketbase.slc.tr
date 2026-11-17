@@ -1,10 +1,10 @@
 FROM alpine:latest
-ARG PB_VERSION=0.39.4
+ARG PB_VERSION=0.42.3
 RUN apk add --no-cache \
     unzip \
     ca-certificates \
     wget
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip -O /tmp/pb.zip && \
+RUN wget https://ganigeorgiev.com/meta/pocketbase/pocketbase/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip -O /tmp/pb.zip && \
     unzip /tmp/pb.zip -d /pb/ && \
     rm /tmp/pb.zip
 COPY ./.slc-production/pocketbase/pb_hooks /pb/pb_hooks
