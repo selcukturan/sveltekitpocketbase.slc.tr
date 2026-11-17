@@ -28,6 +28,7 @@ vite.config.ts.timestamp-*
 # /.slc-production/pocketbase/pb_public
 .vscode
 .agents
+.claude
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
