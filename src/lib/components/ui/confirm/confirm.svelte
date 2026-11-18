@@ -3,13 +3,19 @@
 	import { focustrap } from '#lib/attachments/index.js';
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { Button } from '#lib/components/ui/inputs/index.js';
+	import type { ConfirmOptions } from './confirm.js';
 
 	let {
+		title,
 		message,
 		yes,
 		no,
+		danger = false,
 		animationDuration = 150 // Animasyon süresini, JS ve CSS'te senkronize tut.
-	}: { message?: string; yes?: string; no?: string; animationDuration?: number } = $props();
+	}: ConfirmOptions = $props();
+
+	const titleId = $props.id();
 
 	let dialog: HTMLDialogElement | null = $state(null);
 	let resolvePromise: ((value: boolean) => void) | null = null;
@@ -130,15 +136,30 @@
 	style="--confirm-animation-duration: {animationDuration / 1000}s"
 	{closedby}
 	{@attach dialogAttach}
-	class="bg-surface-300 m-auto w-11/12 max-w-lg rounded-lg p-0 shadow-lg"
+	class="bg-surface-50 text-surface-900 border-surface-200 m-auto w-11/12 max-w-md overflow-hidden rounded-xl border p-0 shadow-2xl"
+	aria-labelledby={titleId}
 	bind:this={dialog}
 	class:closing={isClosing}
 	{@attach focustrap}
 >
-	<div class="dialog-content">
-		<p>{message ?? t('confirm_default')}</p>
-		<button onclick={() => hide('no button clicked', false)}>{no ?? t('no')}</button>
-		<button onclick={() => hide('yes button clicked', true)}>{yes ?? t('yes')}</button>
+	<div class="flex gap-4 p-6">
+		<div
+			class="flex size-10 shrink-0 items-center justify-center rounded-full text-lg font-bold {danger
+				? 'bg-error-100 text-error-600'
+				: 'bg-primary-100 text-primary-600'}"
+			aria-hidden="true"
+		>
+			{danger ? '!' : '?'}
+		</div>
+		<div class="min-w-0 flex-1">
+			<h2 id={titleId} class="text-base font-semibold">{title ?? t('confirm_title')}</h2>
+			<p class="text-surface-600 mt-1 text-sm break-words">{message ?? t('confirm_default')}</p>
+		</div>
+	</div>
+	<div class="bg-surface-100 border-surface-200 flex justify-end gap-2 border-t px-6 py-3">
+		<!-- Güvenli seçenek (Hayır) varsayılan odakta: Enter yanlışlıkla onaylamaz -->
+		<Button autofocus variant="ghost" color="surface" label={no ?? t('no')} onclick={() => hide('no button clicked', false)} />
+		<Button variant="filled" color={danger ? 'error' : 'primary'} label={yes ?? t('yes')} onclick={() => hide('yes button clicked', true)} />
 	</div>
 </dialog>
 
@@ -149,7 +170,8 @@
 	}
 
 	dialog::backdrop {
-		background-color: var(--color-surface-300);
+		background-color: color-mix(in srgb, var(--color-surface-950, #000) 30%, transparent);
+		backdrop-filter: blur(2px);
 		/* Başlangıçta backdrop görünmez ve animasyona hazır */
 		opacity: 0;
 	}
@@ -210,20 +232,16 @@
 			opacity: 0;
 		}
 		to {
-			opacity: 0.5;
+			opacity: 1;
 		}
 	}
 
 	@keyframes backdrop-fade-out {
 		from {
-			opacity: 0.5;
+			opacity: 1;
 		}
 		to {
 			opacity: 0;
 		}
-	}
-
-	.dialog-content {
-		padding: 1.5rem; /* 24px */
 	}
 </style>

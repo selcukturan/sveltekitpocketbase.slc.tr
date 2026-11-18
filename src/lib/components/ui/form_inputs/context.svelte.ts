@@ -18,6 +18,7 @@ export type MainProps<TInput extends RemoteFormInput, TOutput, TSchema extends O
 	children?: Snippet<[args?: SnippetArgs]>;
 	buttons?: Snippet<[args?: SnippetArgs]>;
 	formClass?: SvelteHTMLElements['form']['class'];
+	buttonsClass?: SvelteHTMLElements['div']['class']; // buton alanının hizalaması (varsayılan: 'justify-between')
 	onIsChange?: (isChanged: boolean) => void;
 	confirmLeave?: boolean; // değişiklik varken sayfadan ayrılırken uyar (varsayılan: true)
 };
@@ -27,7 +28,7 @@ class FormInputsContext<TInput extends RemoteFormInput, TOutput, TSchema extends
 	props!: MainProps<TInput, TOutput, TSchema>;
 
 	readonly formAttributes = $derived.by(() => {
-		const { form, schema, inputs, children, buttons, formClass, onIsChange, confirmLeave, ...attributes } = this.props;
+		const { form, schema, inputs, children, buttons, formClass, buttonsClass, onIsChange, confirmLeave, ...attributes } = this.props;
 		return attributes;
 	});
 

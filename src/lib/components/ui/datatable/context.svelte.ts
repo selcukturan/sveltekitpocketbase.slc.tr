@@ -1,13 +1,18 @@
 import type { RemoteQuery } from '$app/server';
 
-import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width } from './types.js';
+import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
+import type { ListSource } from './list-state.svelte.js';
 
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
+export type Borders = 'none' | 'horizontal' | 'vertical' | 'both';
+
 export interface MainProps<TData extends Row> {
 	// Data structure
+	// `list` (createList) verilirse query, sort, onPagination ve onSort ondan okunur. Ayrı ayrı da verilebilir.
+	list?: ListSource<ListResult<TData>> | ListSource<TData[]>;
 	query?: RemoteQuery<ListResult<TData>> | RemoteQuery<TData[]> | RemoteQuery<TData>;
 	sort?: string;
 	// Table structure
@@ -15,11 +20,15 @@ export interface MainProps<TData extends Row> {
 	footers?: Footer<TData>[];
 	// Snippets (Render Fonksiyonları)
 	toolbar?: Snippet;
-	headerRow: Snippet<[hr: HeaderRowType<TData>]>; // required
-	dataRow: Snippet<[dr: DataRowType<TData>]>; // required
+	// Verilmezse varsayılan satırlar çizilir (başlık: t(label), hücre: Value, alt: değer)
+	headerRow?: Snippet<[hr: HeaderRowType<TData>]>;
+	dataRow?: Snippet<[dr: DataRowType<TData>]>;
 	footerRow?: Snippet<[fr: FooterRowType<TData>]>;
+	actions?: Snippet<[row: TData]>; // type: 'actions' kolonunun içeriği (varsayılan dataRow'da)
 	statusbar?: Snippet;
+	settings?: boolean; // alt bardaki tablo ayarları popup'ı (varsayılan: true)
 	// UI State & Styling
+	borders?: Borders; // hücre çizgileri (varsayılan: 'horizontal'); kullanıcı ayarlar popup'ından değiştirebilir
 	headerRowHeight?: number;
 	dataRowHeight?: number;
 	footerRowHeight?: number;
@@ -38,57 +47,63 @@ export interface MainProps<TData extends Row> {
 class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
 
-	#mainProps!: MainProps<TData>;
-	#queryProps!: () => MainProps<TData>['query'];
-	#sortProps!: () => MainProps<TData>['sort'];
+	// Props doğrudan okunur (reaktif): sayfa columns/footers/freeze vb. değiştirirse tablo da değişir.
+	#props!: MainProps<TData>;
+
+	// Kullanıcının tablo içinde yaptığı değişiklikler (kolon genişletme/gizleme, freeze +/-).
+	// Props salt okunur olduğu için ayrı tutulur; kolonlar `field` ile eşlenir, böylece sayfa kolon ekleyip
+	// çıkarsa ya da sırasını değiştirse de ayarlar doğru kolonda kalır. (İleride localStorage'a yazılabilir.)
+	#ui = $state<{
+		columns: Record<string, Partial<Pick<Column<TData>, 'width' | 'hidden'>>>;
+		freezeLeft?: number;
+		freezeRight?: number;
+		borders?: Borders;
+	}>({ columns: {} });
 
 	#currentData = $state<ListResult<TData> | undefined>(undefined); // watchCurrentChanged ile değişir
 
 	// Data structure
-	readonly query = $derived(this.#queryProps());
-	readonly sort = $derived(this.#sortProps());
+	readonly list = $derived(this.#props.list);
+	readonly query = $derived(this.#props.list ? this.#props.list.query : this.#props.query);
+	readonly sort = $derived(this.#props.list?.sort ?? this.#props.sort);
 	readonly items = $derived(this.#currentData?.items ?? []);
 	readonly totalItems = $derived(this.#currentData?.totalItems ?? 0);
 	readonly page = $derived(this.#currentData?.page ?? 1);
 	readonly perPage = $derived(this.#currentData?.perPage ?? 30);
 	readonly totalPages = $derived(this.#currentData?.totalPages ?? 0);
-	// Table structure
-	readonly columns = $derived(this.#mainProps.columns); // required
-	readonly footers = $derived(this.#mainProps.footers ?? []);
+	// Table structure: props + kullanıcı ayarları
+	readonly columns = $derived(this.#props.columns.map((col) => ({ ...col, ...this.#ui.columns[col.field] })));
+	readonly footers = $derived(this.#props.footers ?? []);
 	// Snippets (Render Fonksiyonları)
-	readonly toolbar = $derived(this.#mainProps.toolbar);
-	readonly headerRow = $derived(this.#mainProps.headerRow); // required
-	readonly dataRow = $derived(this.#mainProps.dataRow); // required
-	readonly footerRow = $derived(this.#mainProps.footerRow);
-	readonly statusbar = $derived(this.#mainProps.statusbar);
+	readonly toolbar = $derived(this.#props.toolbar);
+	readonly headerRow = $derived(this.#props.headerRow);
+	readonly dataRow = $derived(this.#props.dataRow);
+	readonly footerRow = $derived(this.#props.footerRow);
+	readonly actions = $derived(this.#props.actions);
+	readonly statusbar = $derived(this.#props.statusbar);
+	readonly settings = $derived(this.#props.settings ?? true);
 	// UI State & Styling
-	readonly headerRowHeight = $derived(this.#mainProps.headerRowHeight ?? 35);
-	readonly dataRowHeight = $derived(this.#mainProps.dataRowHeight ?? 35);
-	readonly footerRowHeight = $derived(this.#mainProps.footerRowHeight ?? 35);
-	readonly freezeLeft = $derived(this.#mainProps.freezeLeft ?? 0);
-	readonly freezeRight = $derived(this.#mainProps.freezeRight ?? 0);
+	readonly borders = $derived(this.#ui.borders ?? this.#props.borders ?? 'horizontal');
+	// Kullanıcı props'tan farklı bir ayar yaptı mı ("Varsayılana dön" butonu için)
+	readonly isLayoutChanged = $derived(
+		Object.keys(this.#ui.columns).length > 0 || this.#ui.freezeLeft !== undefined || this.#ui.freezeRight !== undefined || this.#ui.borders !== undefined
+	);
+	readonly headerRowHeight = $derived(this.#props.headerRowHeight ?? 42);
+	readonly dataRowHeight = $derived(this.#props.dataRowHeight ?? 35);
+	readonly footerRowHeight = $derived(this.#props.footerRowHeight ?? 35);
+	readonly freezeLeft = $derived(this.#ui.freezeLeft ?? this.#props.freezeLeft ?? 0);
+	readonly freezeRight = $derived(this.#ui.freezeRight ?? this.#props.freezeRight ?? 0);
 	// Özel Class Tanımları
-	readonly tableClass = $derived(this.#mainProps.tableClass);
-	readonly containerClass = $derived(this.#mainProps.containerClass);
-	readonly mainClass = $derived(this.#mainProps.mainClass);
+	readonly tableClass = $derived(this.#props.tableClass);
+	readonly containerClass = $derived(this.#props.containerClass);
+	readonly mainClass = $derived(this.#props.mainClass);
 	// Events
-	readonly onPagination = $derived(this.#mainProps.onPagination);
-	readonly onRowClick = $derived(this.#mainProps.onRowClick);
-	readonly onSort = $derived(this.#mainProps.onSort);
+	readonly onPagination = $derived(this.#props.onPagination ?? this.#props.list?.paginate);
+	readonly onRowClick = $derived(this.#props.onRowClick);
+	readonly onSort = $derived(this.#props.onSort ?? this.#props.list?.setSort);
 
-	constructor(initialProps: MainProps<TData>) {
-		this.#mainProps = $state({
-			...initialProps,
-			query: undefined,
-			sort: undefined,
-			// Genişlik ve gizlilik vb. mutasyonların reaktif çalışabilmesi için klonluyoruz:
-			columns: $state.snapshot(initialProps.columns) as unknown as Column<TData>[],
-
-			footers: initialProps.footers ? ($state.snapshot(initialProps.footers) as unknown as Footer<TData>[]) : undefined
-		});
-
-		this.#queryProps = () => initialProps.query;
-		this.#sortProps = () => initialProps.sort;
+	constructor(props: MainProps<TData>) {
+		this.#props = props;
 	}
 
 	// ############### END PROPS ###############
@@ -271,41 +286,26 @@ class TableContext<TData extends Row> {
 		untrack(() => this.updateVisibleIndexes());
 	};
 
-	// Scroll takibi
+	// Scroll takibi: kaydırma olduğunda tek bir requestAnimationFrame planlanır (boştayken döngü çalışmaz)
 	readonly trackTableScroll = (node: HTMLElement) => {
-		return on(
+		let rafId = 0;
+		const off = on(
 			node,
 			'scroll',
 			() => {
 				this.#currentScrollY = node.scrollTop;
+				if (rafId) return;
+				rafId = requestAnimationFrame(() => {
+					rafId = 0;
+					this.#rafY = this.#currentScrollY;
+				});
 			},
 			{ passive: true }
 		);
-	};
-
-	// requestAnimationFrame döngüsü
-	readonly trackTableRaf: Attachment = (node) => {
-		// mount
-		if (!(node instanceof HTMLElement)) return;
-
-		// setup
-		const fps = 60; // saniyede 60 güncelleme için
-		let rafId: number;
-		let lastTime = 0;
-
-		const loop = (timestamp: number) => {
-			const interval = 1000 / fps;
-			const elapsed = timestamp - lastTime;
-			if (elapsed >= interval) {
-				lastTime = timestamp - (elapsed % interval);
-				this.#rafY = this.#currentScrollY;
-			}
-			rafId = requestAnimationFrame(loop);
+		return () => {
+			off();
+			cancelAnimationFrame(rafId);
 		};
-		rafId = requestAnimationFrame(loop);
-
-		// cleanup
-		return () => cancelAnimationFrame(rafId);
 	};
 
 	// ################################## END Virtual Scroll ##################################################################################################################
@@ -326,21 +326,16 @@ class TableContext<TData extends Row> {
 		return processedColumns;
 	});
 	toggleColumnVisibility = (originalIndex: number) => {
-		const col = this.#mainProps.columns[originalIndex];
-		if (col) {
-			this.helpers.setColumnProp(originalIndex, 'hidden', !col.hidden);
-		}
+		const col = this.columns[originalIndex];
+		if (col) this.helpers.setColumnProp(originalIndex, 'hidden', !col.hidden);
 	};
 
 	setColumnVisibility = (originalIndex: number, visible: boolean) => {
-		const col = this.#mainProps.columns[originalIndex];
-		if (col) {
-			this.helpers.setColumnProp(originalIndex, 'hidden', !visible);
-		}
+		this.helpers.setColumnProp(originalIndex, 'hidden', !visible);
 	};
 
 	isColumnVisible = (originalIndex: number) => {
-		const col = this.#mainProps.columns[originalIndex];
+		const col = this.columns[originalIndex];
 		return col ? col.hidden !== true : false;
 	};
 
@@ -385,33 +380,13 @@ class TableContext<TData extends Row> {
 		return offsets;
 	});
 
-	setFreezeLeft = () => {
-		if (this.#mainProps.freezeLeft !== undefined) {
-			const v = this.#mainProps.freezeLeft;
-			this.helpers.setMainProps('freezeLeft', v + 1);
-		}
-	};
+	// Sınır: 0 ile görünür kolon sayısı arası
+	#clampFreeze = (value: number) => Math.max(0, Math.min(value, this.visibleColumns.length));
 
-	unsetFreezeLeft = () => {
-		if (this.#mainProps.freezeLeft !== undefined) {
-			const v = this.#mainProps.freezeLeft;
-			this.helpers.setMainProps('freezeLeft', v - 1);
-		}
-	};
-
-	setFreezeRight = () => {
-		if (this.#mainProps.freezeRight !== undefined) {
-			const v = this.#mainProps.freezeRight;
-			this.helpers.setMainProps('freezeRight', v + 1);
-		}
-	};
-
-	unsetFreezeRight = () => {
-		if (this.#mainProps.freezeRight !== undefined) {
-			const v = this.#mainProps.freezeRight;
-			this.helpers.setMainProps('freezeRight', v - 1);
-		}
-	};
+	setFreezeLeft = () => this.helpers.setFreeze('freezeLeft', this.freezeLeft + 1);
+	unsetFreezeLeft = () => this.helpers.setFreeze('freezeLeft', this.freezeLeft - 1);
+	setFreezeRight = () => this.helpers.setFreeze('freezeRight', this.freezeRight + 1);
+	unsetFreezeRight = () => this.helpers.setFreeze('freezeRight', this.freezeRight - 1);
 
 	// ################################## END Sticky Columns ##################################################################################################################
 
@@ -439,6 +414,19 @@ class TableContext<TData extends Row> {
 
 	// ################################## END Grid Template ##################################################################################################################
 
+	// ################################## BEGIN Alignment ##################################################################################################################
+
+	// Kolon hizası: açıkça verilmediyse tipe göre (number → sağ, bool/actions → orta)
+	readonly alignOf = (col: Column<TData>, part: 'cell' | 'header' | 'footer' = 'cell'): Align => {
+		const explicit = part === 'header' ? col.alignHeader : part === 'footer' ? col.alignFooter : undefined;
+		if (explicit ?? col.align) return (explicit ?? col.align) as Align;
+		if (col.type === 'number') return 'right';
+		if (col.type === 'bool' || col.type === 'actions') return 'center';
+		return 'left';
+	};
+
+	// ################################## END Alignment ####################################################################################################################
+
 	// ################################## BEGIN Sorting Helpers ##############################################################################################################
 
 	readonly getColumnSortDirection = (field: Field<TData>): 'asc' | 'desc' | undefined => {
@@ -463,46 +451,21 @@ class TableContext<TData extends Row> {
 	// ################################## BEGIN Helpers ##################################################################################################################
 
 	readonly helpers = {
-		setMainProps: <K extends keyof MainProps<TData>>(key: K, value: MainProps<TData>[K]) => {
-			if (key === 'freezeRight') {
-				// console.log('freezeRight değiştirilecek.', value);
-			}
-
-			// Değişikliğin yapıldığı an:
-			// console.log('freezeRight değiştiriliyor.', value);
-
-			// 🔼 - Veri Değişmeden Önceki Kodlar Yukarıda
-			this.#mainProps[key] = value;
-			// 🔽 - Veri Değiştikten Sonraki Kodlar Aşağıda
-
-			if (key === 'freezeRight') {
-				// console.log('freezeRight değiştirildi.', value);
-			}
+		// Kolonun kullanıcı ayarını değiştirir (props'taki tanım değişmez)
+		setColumnProp: <K extends 'width' | 'hidden'>(colIndex: number, key: K, value: Column<TData>[K]) => {
+			const field = this.#props.columns[colIndex]?.field;
+			if (!field) return;
+			this.#ui.columns[field] = { ...this.#ui.columns[field], [key]: value };
 		},
-		setColumnProp: <K extends keyof Column<TData>>(colIndex: number, key: K, value: Column<TData>[K]) => {
-			const col = this.#mainProps.columns[colIndex];
-			if (col) {
-				if (key === 'width') {
-					// console.log('Kolon genişliği değiştirilecek.', value);
-				}
-
-				// Değişikliğin yapıldığı an:
-				// console.log('Kolon genişliği değiştiriliyor.', value);
-
-				// 🔼 - Veri Değişmeden Önceki Kodlar Yukarıda
-				col[key] = value;
-				// 🔽 - Veri Değiştikten Sonraki Kodlar Aşağıda
-
-				if (key === 'width') {
-					// console.log('Kolon genişliği değiştirildi.', value);
-				}
-			}
+		setFreeze: (key: 'freezeLeft' | 'freezeRight', value: number) => {
+			this.#ui[key] = this.#clampFreeze(value);
 		},
-		testHelper1: () => {
-			console.log('Mevcut veri:', this.#mainProps.freezeLeft);
+		setBorders: (value: Borders) => {
+			this.#ui.borders = value;
 		},
-		testHelper2: (index: number) => {
-			console.log('Satır yüksekliği:' + index, this.#mainProps.freezeRight);
+		// Kullanıcı ayarlarını siler; tablo props'taki hâline döner
+		resetLayout: () => {
+			this.#ui = { columns: {} };
 		}
 	};
 

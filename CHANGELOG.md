@@ -11,10 +11,55 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ## [Yayınlanmamış]
 
+### Eklendi
+
+- DataTable: `dt.createList()` (`ListState`) ile filtre, sayfalama, sıralama
+  ve sorgu tek yerden yönetiliyor; `autoLoad: false` ile ilk yüklemede istek
+  atılmıyor. Tablo `list={list}` ile bağlanıyor.
+- DataTable: kolon `type` alanı (`text`, `number`, `bool`, `date`,
+  `datetime`, `list`, `json`, `actions`) ve tipe göre değer gösteren
+  `dt.Value` bileşeni. Tip verilmezse değerden tahmin ediliyor.
+- DataTable: varsayılan başlık/hücre/alt satırlar ve `actions` snippet'i;
+  sayfada satır snippet'i yazmak gerekmiyor.
+- DataTable: alt barda kayıt aralığı, ayrı "sayfa başına" seçici ve tablo
+  ayarları popup'ı (kenarlık: yok/yatay/dikey/ikisi, sabit kolonlar,
+  varsayılana dön). `borders` prop'u eklendi.
+- DataTable: `--dt-*` tema değişkenleri; açık/koyu temaya uyumlu renkler.
+- Lucide sıralama ikonları (`sort_none`, `sort_asc`, `sort_desc`).
+- Form: `<button type="reset">` ile formu sıfırlama (create: boşaltır,
+  update: veritabanı değerine döner). Başarılı gönderimden sonra form
+  "değişiklik yok" durumuna dönüyor.
+- `createHashDrawer()`: URL hash'ine bağlı drawer durumu ve kaydedilmemiş
+  değişiklik onayı.
+- Toaster: `success()` ve `error()` kısayolları.
+- Confirm: `title` ve `danger` seçenekleri, yeni tasarım.
+- Ayarlar › Sistem › Uygulama sayfası: `sys_settings` koleksiyonunda
+  `application_name` için tek sayfa form örneği (koleksiyon migration'ları
+  ve tipleri dahil).
+- Simple CRUD: "view" drawer'ı kaydı salt okunur gösteriyor.
+- GEÇİCİ: Simple CRUD sayfasında 10.000 test kaydı ekleme/silme butonları
+  (`seedRecords`, `deleteSeedRecords`).
+
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.158` oldu.
+- Uygulama sürümü `v0.2.0-alpha.159` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
+- Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
+- DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
+  (genişlik, gizleme, freeze, kenarlık) ayrı tutuluyor. `helpers.setMainProps`
+  yerine `setColumnProp`, `setFreeze`, `setBorders`, `resetLayout`.
+- DataTable: başlık yüksekliği 42px; başlık sayfa zemininden ayrışıyor.
+  Freeze sınırı 2px çizgi. `devTools` prop'u kaldırıldı.
+- Sayfa şablonu: `Page.Header` araç çubuğu görünümü, `Page.Main.Table`
+  kenarlıklı tablo kartı.
+
+### Düzeltildi
+
+- DataTable: arama ve "sayfa başına" değişince 1. sayfaya dönülmüyordu.
+- DataTable: `requestAnimationFrame` döngüsü boştayken de sürekli çalışıyordu.
+- DataTable: `align` ayarları uygulanmıyordu; koyu temada freeze gölgesi
+  ve mesaj kartı görünmüyordu; Pagination sabit renkler kullanıyordu.
+- View drawer'ında uzun liste/dosya değerleri yatay scroll oluşturuyordu.
 
 ### Kaldırıldı
 

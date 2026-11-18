@@ -1,17 +1,29 @@
 <script lang="ts" generics="TData extends Row">
 	import { t } from '#lib/app/localization/index.js';
-	import type { Row } from './types.js';
+	import type { Row, HeaderRowType, DataRowType, FooterRowType } from './types.js';
 	import Pagination from './parts/Pagination.svelte';
+	import PerPage from './parts/PerPage.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
+	import TableSettings from './parts/TableSettings.svelte';
 	import { createTableContext, type MainProps } from './context.svelte';
+	import HeaderRow from './HeaderRow.svelte';
+	import HeaderCell from './HeaderCell.svelte';
+	import DataRow from './DataRow.svelte';
+	import DataCell from './DataCell.svelte';
+	import FooterRow from './FooterRow.svelte';
+	import FooterCell from './FooterCell.svelte';
 
 	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
 	const context = createTableContext<TData>(props); // init
 
-	// Parent kullanımı: tableRef?.helpers.testHelper1()
+	// Parent kullanımı: tableRef?.helpers.setFreeze('freezeLeft', 2) | tableRef?.helpers.resetLayout()
 	export const helpers = context.helpers;
+
+	// "1–30 / 245" bilgisi
+	const rangeFrom = $derived(context.totalItems === 0 ? 0 : (context.page - 1) * context.perPage + 1);
+	const rangeTo = $derived(Math.min(context.page * context.perPage, context.totalItems));
 
 	// Parent kullanımı: {tableRef?.states.loading}
 	export const states = {
@@ -24,13 +36,54 @@
 	};
 </script>
 
-<div class:slc-table-main={true} class={context.mainClass} style:width="100%" style:height="100%">
+<!-- Varsayılan satırlar: sayfada headerRow/dataRow/footerRow verilmezse kullanılır -->
+{#snippet defaultHeaderRow(hr: HeaderRowType<TData>)}
+	<HeaderRow {hr}>
+		{#snippet headerCell(hc)}
+			<HeaderCell {hr} {hc} />
+		{/snippet}
+	</HeaderRow>
+{/snippet}
+
+{#snippet defaultDataRow(dr: DataRowType<TData>)}
+	<DataRow {dr}>
+		{#snippet dataCell(dc)}
+			{#if dc.col.data.type === 'actions'}
+				<DataCell {dr} {dc}>
+					<div class="flex h-full w-full items-center justify-center gap-1">{@render context.actions?.(dr.row)}</div>
+				</DataCell>
+			{:else}
+				<DataCell {dr} {dc} />
+			{/if}
+		{/snippet}
+	</DataRow>
+{/snippet}
+
+{#snippet defaultFooterRow(fr: FooterRowType<TData>)}
+	<FooterRow {fr}>
+		{#snippet footerCell(fc)}
+			<FooterCell {fr} {fc} />
+		{/snippet}
+	</FooterRow>
+{/snippet}
+
+<!--
+	Yerleşim:
+	[toolbar]
+	[tablo .................................................]
+	[1–30 / 245 kayıt]      [‹ 1 2 3 … 9 ›]      [30 / sayfa ▾] [Kolonlar ▾] [⚙]
+	[statusbar]
+	Renkler tema değişkenlerinden gelir (bkz. <style> içindeki --dt-*); açık/koyu temada surface ölçeği kendiliğinden döner.
+-->
+<div class:slc-table-main={true} class={context.mainClass} data-borders={context.borders} style:width="100%" style:height="100%">
 	{@render context.toolbar?.()}
 	<div class:slc-table-container={true} class={context.containerClass}>
-		{#if context.query?.loading === true}
-			<div class="slc-table-message"><p>{t('loading')}</p></div>
+		{#if !context.query && context.list}
+			<div class="slc-table-message"><p>{t('dt_not_loaded')}</p></div>
+		{:else if context.query?.loading === true}
+			<div class="slc-table-message slc-table-message-loading"><p>{t('loading')}</p></div>
 		{:else if context.query?.error !== undefined}
-			<div class="slc-table-message">
+			<div class="slc-table-message slc-table-message-error">
 				<p>{context.query?.error.message ? t(context.query.error.message, undefined, context.query.error.message) : t('error_generic')}</p>
 			</div>
 		{:else if context.dataLength === 0}
@@ -45,20 +98,17 @@
 			{@attach context.watchScrollAndClientHeight}
 			{@attach context.watchItemsChanged}
 			{@attach context.trackTableScroll}
-			{@attach context.trackTableRaf}
 			class={context.tableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
 		>
 			{#if context.headerLength > 0}
-				{@render context.headerRow?.({
-					test: 'test'
-				})}
+				{@render (context.headerRow ?? defaultHeaderRow)({ headerIndex: 0 })}
 			{/if}
 
 			{#if context.dataLength > 0}
 				{#each context.virtualData as row, virtualIndex (row.data.id)}
-					{@render context.dataRow?.({
+					{@render (context.dataRow ?? defaultDataRow)({
 						row: row.data,
 						rowVirtualIndex: virtualIndex,
 						rowOriginalIndex: row.originalIndex
@@ -68,7 +118,7 @@
 
 			{#if context.dataLength > 0 && context.footerLength > 0}
 				{#each context.footers as row, footerIndex (footerIndex)}
-					{@render context.footerRow?.({
+					{@render (context.footerRow ?? defaultFooterRow)({
 						footerRow: row,
 						footerIndex
 					})}
@@ -76,38 +126,78 @@
 			{/if}
 		</div>
 	</div>
-	{#if context.paginable}
-		<div class="flex">
-			<Pagination
-				totalItems={context.totalItems}
-				page={context.page}
-				perPage={context.perPage}
-				totalPages={context.totalPages}
-				onChange={(data) => {
-					context.onPagination?.(data);
-				}}
-			/>
 
-			<ColumnToggler />
-
-			<button class="border-primary-500 bg-success-400 hover:bg-success-500 cursor-pointer border p-1" onclick={context.setFreezeLeft}> +</button>
-			<button class="border-primary-500 bg-error-400 hover:bg-error-500 cursor-pointer border p-1" onclick={context.unsetFreezeLeft}> -</button>
-
-			<button class="border-primary-500 bg-success-400 hover:bg-success-500 cursor-pointer border p-1" onclick={context.setFreezeRight}> +</button>
-			<button class="border-primary-500 bg-error-400 hover:bg-error-500 cursor-pointer border p-1" onclick={context.unsetFreezeRight}> -</button>
+	<div class="slc-table-bar">
+		<div class="slc-table-bar-start">
+			{#if context.paginable}
+				<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
+			{/if}
 		</div>
-	{/if}
+		<div class="slc-table-bar-center">
+			{#if context.paginable && context.totalPages > 1}
+				<Pagination page={context.page} perPage={context.perPage} totalPages={context.totalPages} onChange={(data) => context.onPagination?.(data)} />
+			{/if}
+		</div>
+		<div class="slc-table-bar-end">
+			{#if context.paginable}
+				<PerPage perPage={context.perPage} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
+			{/if}
+			<ColumnToggler />
+			{#if context.settings}
+				<TableSettings />
+			{/if}
+		</div>
+	</div>
 
 	{@render context.statusbar?.()}
 </div>
 
 <style>
-	/******************************************************/
+	/* ---------------------------------------------------------------------------
+	   Tema: tablonun tüm renkleri buradan gelir. Alt bileşenler (HeaderCell, DataCell...)
+	   yalnızca bu değişkenleri kullanır. Sayfa düzeyinde ezmek için (iç adlar --_dt-*, dış adlar --dt-*):
+	   <dt.DataTable --dt-header-bg="var(--color-primary-100)" ... />
+	--------------------------------------------------------------------------- */
 	.slc-table-main {
+		--_dt-bg: var(--dt-bg, var(--color-surface-50));
+		--_dt-text: var(--dt-text, var(--color-surface-900));
+		--_dt-muted: var(--dt-muted, var(--color-surface-500));
+		--_dt-header-bg: var(--dt-header-bg, var(--color-surface-200));
+		--_dt-bar-bg: var(--dt-bar-bg, var(--color-surface-100));
+		--_dt-header-text: var(--dt-header-text, var(--color-surface-700));
+		--_dt-header-hover: var(--dt-header-hover, var(--color-surface-300));
+		--_dt-row-hover: var(--dt-row-hover, color-mix(in srgb, var(--color-primary-500) 7%, var(--_dt-bg)));
+		--_dt-border: var(--dt-border, var(--color-surface-200));
+		--_dt-border-strong: var(--dt-border-strong, var(--color-surface-300));
+		/* freeze sınırı: koyu temada gölge görünmediği için ayrımı 2px çizgi sağlar */
+		--_dt-freeze-line: 2px solid var(--dt-freeze-border, var(--color-surface-400));
+		--_dt-accent: var(--dt-accent, var(--color-primary-500));
+		/* gölge: surface ölçeği koyu temada döndüğü için siyah üzerinden */
+		--_dt-shadow: var(--dt-shadow, color-mix(in srgb, black 18%, transparent));
+		--_dt-freeze-shadow-left: 6px 0 8px -4px var(--_dt-shadow);
+		--_dt-freeze-shadow-right: -6px 0 8px -4px var(--_dt-shadow);
+		/* hücre çizgileri: borders prop'una göre (aşağıdaki [data-borders] kuralları) */
+		--_dt-line: 1px solid var(--_dt-border);
+		--_dt-row-line: var(--_dt-line);
+		--_dt-col-line: none;
+
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
 		contain: inline-size;
+		color: var(--_dt-text);
+		background-color: var(--_dt-bg);
+		font-size: 0.875rem; /* 14px */
+	}
+	.slc-table-main[data-borders='none'] {
+		--_dt-row-line: none;
+	}
+	.slc-table-main[data-borders='vertical'] {
+		--_dt-row-line: none;
+		--_dt-col-line: var(--_dt-line);
+	}
+	.slc-table-main[data-borders='both'] {
+		--_dt-col-line: var(--_dt-line);
 	}
 	.slc-table-container {
 		flex: 1 1 0%;
@@ -125,7 +215,7 @@
 		box-sizing: border-box;
 		overflow: auto;
 		overscroll-behavior: none;
-		background-color: var(--color-surface-50);
+		background-color: var(--_dt-bg);
 	}
 	.slc-table:before {
 		content: '';
@@ -136,26 +226,61 @@
 	.slc-table-message {
 		display: flex;
 		position: absolute;
-		top: 0;
-		left: 0;
-		height: 100%;
-		width: 100%;
+		inset: 0;
 		align-items: center;
 		justify-content: center;
-		background-color: transparent;
 		pointer-events: none;
 		z-index: 5;
+		color: var(--_dt-muted);
+	}
+	/* Kart: koyu temada gölge görünmediği için kenarlık + başlık rengi ile ayrışır */
+	.slc-table-message p {
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--_dt-border-strong);
+		border-radius: 0.5rem;
+		background-color: var(--_dt-header-bg);
+		color: var(--_dt-header-text);
+		box-shadow: 0 4px 14px -4px var(--_dt-shadow);
+	}
+	/* Yüklenirken eski veri soluk görünür, mesaj üstte durur */
+	.slc-table-message-loading {
+		background-color: color-mix(in srgb, var(--_dt-bg) 55%, transparent);
+	}
+	.slc-table-message-error p {
+		border-color: var(--color-error-400);
+		color: var(--color-error-600);
 	}
 	/******************************************************/
-	.slc-table-default-toolbar {
+	.slc-table-bar {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		justify-content: flex-end;
-		padding: 8px 12px;
-		background-color: var(--color-surface-100, #f1f5f9);
-		border-bottom: 1px solid var(--color-surface-200, #e2e8f0);
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem;
+		border-top: 1px solid var(--_dt-border);
+		background-color: var(--_dt-bar-bg);
 	}
+	.slc-table-bar-start,
+	.slc-table-bar-end {
+		display: flex;
+		flex: 1 1 0%;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: max-content;
+	}
+	.slc-table-bar-end {
+		justify-content: flex-end;
+	}
+	.slc-table-bar-center {
+		display: flex;
+		justify-content: center;
+	}
+	.slc-table-range {
+		color: var(--_dt-muted);
+		white-space: nowrap;
+	}
+	/* Satır üzerine gelince tüm hücreler (sticky olanlar dahil) vurgulanır */
 	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell]) {
-		background-color: var(--color-surface-100, #f1f5f9) !important;
+		background-color: var(--_dt-row-hover) !important;
 	}
 </style>

@@ -61,6 +61,27 @@
 	<symbol id={icons.chevron_up} viewBox="0 0 24 24">
 		<path d="m18 15-6-6-6 6" />
 	</symbol>
+	<!-- lucide: chevrons-up-down -->
+	<symbol id={icons.sort_none} viewBox="0 0 24 24">
+		<path d="m7 15 5 5 5-5" />
+		<path d="m7 9 5-5 5 5" />
+	</symbol>
+	<!-- lucide: arrow-up-narrow-wide (artan: küçükten büyüğe) -->
+	<symbol id={icons.sort_asc} viewBox="0 0 24 24">
+		<path d="m3 8 4-4 4 4" />
+		<path d="M7 4v16" />
+		<path d="M11 12h4" />
+		<path d="M11 16h7" />
+		<path d="M11 20h10" />
+	</symbol>
+	<!-- lucide: arrow-down-wide-narrow (azalan: büyükten küçüğe) -->
+	<symbol id={icons.sort_desc} viewBox="0 0 24 24">
+		<path d="m3 16 4 4 4-4" />
+		<path d="M7 20V4" />
+		<path d="M11 4h10" />
+		<path d="M11 8h7" />
+		<path d="M11 12h4" />
+	</symbol>
 	<symbol id={icons.panel_right_close} viewBox="0 0 24 24">
 		<rect width="18" height="18" x="3" y="3" rx="2" />
 		<path d="M15 3v18" />

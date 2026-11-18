@@ -19,7 +19,7 @@
 
 <div data-slc-table-footerrow role="row" style:display="contents" class={classes} {...attributes}>
 	{#each context.visibleColumns as col, colVisibleIndex (col.data.field)}
-		{@const value = fr.footerRow[col.data.field]}
+		{@const value = (fr.footerRow as Record<string, unknown>)[col.data.field]}
 		{@render footerCell?.({ value, col, colVisibleIndex })}
 	{/each}
 </div>

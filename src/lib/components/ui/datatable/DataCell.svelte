@@ -4,11 +4,14 @@
 	import type { Row, DataRowType, DataCellType } from './types.js';
 	import { getTableContext } from './context.svelte.js';
 	import { on } from 'svelte/events';
+	import Value from './Value.svelte';
+
+	const JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' } as const;
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
-		children: Snippet;
+		children?: Snippet; // verilmezse değer kolon tipine göre <Value> ile gösterilir
 		class?: string;
 		dr: DataRowType<TData>;
 		dc: DataCellType<TData>;
@@ -19,10 +22,10 @@
 
 	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
 	const gridColumn = $derived(`${dc.colVisibleIndex + 1} / ${dc.colVisibleIndex + 2}`);
-	const background = $derived(dr.rowOriginalIndex % 2 === 0 ? 'var(--color-surface-50, #ffffff)' : 'var(--color-surface-50, #ffffff)');
 
 	const col = $derived(dc.col);
 	const field = $derived(col.data.field as string);
+	const justify = $derived(JUSTIFY[context.alignOf(col.data)]);
 
 	const isFreezeLeft = $derived(dc.colVisibleIndex < context.freezeLeft);
 	const isFreezeRight = $derived(dc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
@@ -69,7 +72,7 @@
 	class:clickable
 	style:grid-row-start={gridRowStart}
 	style:grid-column={gridColumn}
-	style:background
+	style:justify-content={justify}
 	style:position={isSticky ? 'sticky' : undefined}
 	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
 	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
@@ -77,7 +80,11 @@
 	{@attach clickable && cellClickAttach}
 	{...attributes}
 >
-	{@render children?.()}
+	{#if children}
+		{@render children()}
+	{:else}
+		<Value value={dc.value} type={col.data.type} />
+	{/if}
 </div>
 
 <style>
@@ -85,7 +92,9 @@
 		display: flex;
 		align-items: center;
 		padding: 8px 12px;
-		border-bottom: 1px solid var(--color-surface-200, #e2e8f0);
+		border-bottom: var(--_dt-row-line);
+		border-right: var(--_dt-col-line);
+		background-color: var(--_dt-bg); /* sticky hücreler altını örtsün */
 		box-sizing: border-box;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -95,11 +104,11 @@
 		cursor: pointer;
 	}
 	.slc-table-freeze-left-boundary {
-		box-shadow: 4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-right: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-left);
+		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
-		box-shadow: -4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-left: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-right);
+		border-left: var(--_dt-freeze-line);
 	}
 </style>

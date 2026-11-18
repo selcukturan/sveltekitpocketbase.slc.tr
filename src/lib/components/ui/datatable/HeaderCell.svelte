@@ -5,11 +5,12 @@
 	import type { Row, HeaderRowType, HeaderCellType } from './types.js';
 	import { getTableContext } from './context.svelte.js';
 	import { on } from 'svelte/events';
+	import { Icon } from '#lib/components/icons/index.js';
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
-		children: Snippet;
+		children?: Snippet; // verilmezse t(label) gösterilir
 		class?: string;
 		hr: HeaderRowType<TData>;
 		hc: HeaderCellType<TData>;
@@ -23,6 +24,8 @@
 
 	const col = $derived(hc.col);
 	const field = $derived(col.data.field as string);
+	const label = $derived(col.data.label ?? field);
+	const textAlign = $derived(context.alignOf(col.data, 'header'));
 
 	const isFreezeLeft = $derived(hc.colVisibleIndex < context.freezeLeft);
 	const isFreezeRight = $derived(hc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
@@ -66,14 +69,14 @@
 	class:slc-table-freeze-right-boundary={isFirstFreezeRight}
 	class:slc-table-headercell-sortable={isSortable}
 	role="columnheader"
+	aria-sort={!isSortable ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'}
 	data-coi={col.originalIndex}
-	data-test-headerrow={hr.test}
+	data-header-index={hr.headerIndex}
 	style:position="sticky"
 	style:top="0"
 	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
 	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
 	style:z-index={isSticky ? 3 : 2}
-	style:background="var(--color-surface-200, #e2e8f0)"
 	style:grid-row-start={gridRowStart}
 	style:grid-column={gridColumn}
 	class={classes}
@@ -81,20 +84,18 @@
 	tabindex={isSortable ? 0 : undefined}
 	{...attributes}
 >
-	<div class="slc-table-header-content">
-		{@render children?.()}
+	<div class="slc-table-header-content" style:text-align={textAlign}>
+		{#if children}
+			{@render children()}
+		{:else}
+			{t(label, undefined, label)}
+		{/if}
 	</div>
 
 	{#if isSortable}
-		<div class="slc-table-sort-icon" class:active={sortDir !== undefined}>
-			{#if sortDir === 'asc'}
-				▲
-			{:else if sortDir === 'desc'}
-				▼
-			{:else}
-				↕
-			{/if}
-		</div>
+		<span class="slc-table-sort-icon" class:active={sortDir !== undefined} aria-hidden="true">
+			<Icon name={sortDir === 'asc' ? 'sort_asc' : sortDir === 'desc' ? 'sort_desc' : 'sort_none'} size={sortDir ? 15 : 13} />
+		</span>
 	{/if}
 
 	{#if col.data.resizeable !== false}
@@ -115,8 +116,10 @@
 		align-items: center;
 		padding: 8px 12px;
 		font-weight: 600;
-		color: var(--color-surface-800, #1e293b);
-		border-bottom: 2px solid var(--color-surface-300, #cbd5e1);
+		color: var(--_dt-header-text);
+		background-color: var(--_dt-header-bg);
+		border-bottom: 1px solid var(--_dt-border-strong);
+		border-right: var(--_dt-col-line);
 		user-select: none;
 		box-sizing: border-box;
 	}
@@ -124,10 +127,10 @@
 		cursor: pointer;
 	}
 	.slc-table-headercell-sortable:hover {
-		background-color: var(--color-surface-300, #cbd5e1) !important;
+		background-color: var(--_dt-header-hover);
 	}
 	.slc-table-headercell-sortable:focus-visible {
-		outline: 2px solid var(--color-primary-500, #3b82f6);
+		outline: 2px solid var(--_dt-accent);
 		outline-offset: -2px;
 	}
 	.slc-table-header-content {
@@ -138,16 +141,20 @@
 	}
 	.slc-table-sort-icon {
 		margin-left: 6px;
-		font-size: 10px;
-		color: var(--color-surface-400, #94a3b8);
+		color: var(--_dt-muted);
+		opacity: 0.35; /* sıralanmamış: soluk; başlığın üzerine gelince belirginleşir */
+		transition: opacity 0.15s;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		user-select: none;
 	}
+	.slc-table-headercell-sortable:hover .slc-table-sort-icon {
+		opacity: 0.8;
+	}
 	.slc-table-sort-icon.active {
-		color: var(--color-primary-500, #3b82f6);
-		font-weight: bold;
+		color: var(--_dt-accent);
+		opacity: 1;
 	}
 	.slc-table-resizer {
 		position: absolute;
@@ -162,15 +169,15 @@
 		transition: background-color 0.2s;
 	}
 	.slc-table-resizer:hover {
-		background-color: var(--color-primary-500, #3b82f6);
+		background-color: var(--_dt-accent);
 		width: 6px;
 	}
 	.slc-table-freeze-left-boundary {
-		box-shadow: 4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-right: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-left);
+		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
-		box-shadow: -4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-left: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-right);
+		border-left: var(--_dt-freeze-line);
 	}
 </style>

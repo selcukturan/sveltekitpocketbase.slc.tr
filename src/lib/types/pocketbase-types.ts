@@ -16,6 +16,7 @@ export const Collections = {
 	DemoNotification: "demo_notification",
 	DemoRelationInputMultiple: "demo_relation_input_multiple",
 	DemoRelationInputSingle: "demo_relation_input_single",
+	SysSettings: "sys_settings",
 	SysUsers: "sys_users",
 } as const
 export type Collections = typeof Collections[keyof typeof Collections]
@@ -196,6 +197,13 @@ export type DemoRelationInputSingleRecord = {
 	updated: IsoAutoDateString
 }
 
+export type SysSettingsRecord = {
+	application_name?: string
+	created: IsoAutoDateString
+	id: string
+	updated: IsoAutoDateString
+}
+
 export type SysUsersRecord = {
 	avatar?: FileNameString
 	created: IsoAutoDateString
@@ -224,6 +232,7 @@ export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & Bas
 export type DemoNotificationResponse<Texpand = unknown> = Required<DemoNotificationRecord> & BaseSystemFields<Texpand>
 export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>
 export type DemoRelationInputSingleResponse<Texpand = unknown> = Required<DemoRelationInputSingleRecord> & BaseSystemFields<Texpand>
+export type SysSettingsResponse<Texpand = unknown> = Required<SysSettingsRecord> & BaseSystemFields<Texpand>
 export type SysUsersResponse<Texpand = unknown> = Required<SysUsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -239,6 +248,7 @@ export type CollectionRecords = {
 	demo_notification: DemoNotificationRecord
 	demo_relation_input_multiple: DemoRelationInputMultipleRecord
 	demo_relation_input_single: DemoRelationInputSingleRecord
+	sys_settings: SysSettingsRecord
 	sys_users: SysUsersRecord
 }
 
@@ -253,6 +263,7 @@ export type CollectionResponses = {
 	demo_notification: DemoNotificationResponse
 	demo_relation_input_multiple: DemoRelationInputMultipleResponse
 	demo_relation_input_single: DemoRelationInputSingleResponse
+	sys_settings: SysSettingsResponse
 	sys_users: SysUsersResponse
 }
 

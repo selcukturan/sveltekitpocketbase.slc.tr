@@ -14,7 +14,7 @@
 </script>
 
 <!-- position:relative; -->
-<main class="{classes} bg-surface-100/80" style="{internalStyles} {style} " {...attributes}>
+<main class="{classes} bg-surface-100" style="{internalStyles} {style} " {...attributes}>
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}

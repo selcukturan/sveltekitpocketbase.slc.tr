@@ -19,7 +19,7 @@
 
 <div data-slc-table-datarow role="row" style:display="contents" class={classes} {...attributes}>
 	{#each context.visibleColumns as col, colVisibleIndex (col.data.field)}
-		{@const value = dr.row[col.data.field]}
+		{@const value = (dr.row as Record<string, unknown>)[col.data.field]}
 		{@render dataCell?.({ value, col, colVisibleIndex })}
 	{/each}
 </div>

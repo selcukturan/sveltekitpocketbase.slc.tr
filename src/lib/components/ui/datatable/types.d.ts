@@ -1,24 +1,32 @@
 export type RowKey = string;
 export type RowValue = unknown;
-export type Row = Record<RowKey, RowValue>;
 export type Row = {
 	id: string | number; // required
 } & Record<RowKey, RowValue>;
 
-export type Field<TData> = Extract<keyof TData, string>;
+// Veri alanı ya da sanal alan. Sanal alanlar `_` ile başlar (örn: '_actions') ve satır verisinde karşılığı yoktur.
+export type VirtualField = `_${string}`;
+export type Field<TData> = Extract<keyof TData, string> | VirtualField;
 
 // 100px | minmax(100px,1.25fr) | minmax(1fr,1.25fr)
 export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(${number}fr,${number}fr)`;
 
+// Hücrenin nasıl gösterileceği. Verilmezse değerden tahmin edilir (bkz. Value.svelte).
+// 'actions': satır işlem butonları; DataTable'ın `actions` snippet'i ile çizilir.
+export type ColumnType = 'text' | 'number' | 'bool' | 'date' | 'datetime' | 'list' | 'json' | 'actions';
+
+export type Align = 'left' | 'center' | 'right';
+
 export type Column<TData> = {
 	field: Field<TData>; // required
-	label?: string;
+	label?: string; // çeviri anahtarı olabilir: t(label) bulunamazsa label olduğu gibi gösterilir
+	type?: ColumnType;
 	hidden?: boolean;
 	resizeable?: boolean;
 	sortable?: boolean;
-	align?: 'left' | 'center' | 'right';
-	alignHeader?: 'left' | 'center' | 'right';
-	alignFooter?: 'left' | 'center' | 'right';
+	align?: Align; // varsayılan: number → right, bool/actions → center, diğerleri → left
+	alignHeader?: Align;
+	alignFooter?: Align;
 	width?: Width;
 };
 
@@ -28,7 +36,7 @@ export type VisibleColumn<TData> = {
 };
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export type HeaderRowType<TData> = {
-	test: string;
+	headerIndex: number;
 };
 export type HeaderCellType<TData> = {
 	label: Column<TData>['label'];
@@ -42,7 +50,7 @@ export type DataRowType<TData> = {
 	rowOriginalIndex: number;
 };
 export type DataCellType<TData> = {
-	value: TData[Field<TData>];
+	value: unknown;
 	col: VisibleColumn<TData>;
 	colVisibleIndex: number;
 };

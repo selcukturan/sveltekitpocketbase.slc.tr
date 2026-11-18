@@ -3,6 +3,8 @@
 import type { Attachment } from 'svelte/attachments';
 import { getContext, onDestroy, setContext } from 'svelte';
 import type { Toast, ToastTimerData, ToasterOptions } from './types.js';
+import { isHttpError } from '@sveltejs/kit';
+import { t } from '#lib/app/localization/index.js';
 
 class Toaster {
 	options: Required<ToasterOptions>;
@@ -22,6 +24,20 @@ class Toaster {
 			this.toasts = [];
 		});
 	}
+
+	// Kısa yollar: toaster.success(t('toast_saved_title')) | toaster.error(error)
+	readonly success = (title: string, description?: string) => this.add({ type: 'success', title, description });
+
+	// HttpError ise sunucu mesajı (çeviri anahtarı olabilir), değilse genel hata metni gösterilir
+	readonly error = (error: unknown, description?: string) => {
+		const message = isHttpError(error) ? error.body.message : undefined;
+		this.add({
+			type: 'error',
+			title: t('error'),
+			description: description ?? (message ? t(message, undefined, message) : t('error_generic')),
+			action: { label: t('close'), onClick: (id) => this.remove(id) }
+		});
+	};
 
 	// Tüm toast'ların zamanlayıcılarını duraklatan bir metot
 	readonly pauseAll = () => {

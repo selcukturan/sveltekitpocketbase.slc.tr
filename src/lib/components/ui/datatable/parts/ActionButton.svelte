@@ -27,7 +27,7 @@
 	style:width={size}
 	style:height={size}
 	style:min-width={size}
-	class="bg-surface-200 hover:bg-surface-300 text-surface-800 m-0 flex cursor-pointer items-center justify-center rounded-full border border-transparent p-1 disabled:opacity-50 {attributes.class}"
+	class="text-surface-600 hover:bg-surface-200 hover:text-surface-900 active:bg-surface-300 focus-visible:outline-primary-500 m-0 flex cursor-pointer items-center justify-center rounded-md border border-transparent bg-transparent p-1 focus-visible:outline-2 disabled:opacity-50 {attributes.class}"
 >
 	<Icon name={icon} size="100%" />
 </button>

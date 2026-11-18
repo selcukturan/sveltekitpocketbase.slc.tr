@@ -7,7 +7,7 @@
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
-		children: Snippet;
+		children?: Snippet; // verilmezse değer olduğu gibi gösterilir
 		class?: string;
 		fr: FooterRowType<TData>;
 		fc: FooterCellType<TData>;
@@ -22,6 +22,7 @@
 
 	const col = $derived(fc.col);
 	const field = $derived(col.data.field as string);
+	const justify = $derived({ left: 'flex-start', center: 'center', right: 'flex-end' }[context.alignOf(col.data, 'footer')]);
 
 	const isFreezeLeft = $derived(fc.colVisibleIndex < context.freezeLeft);
 	const isFreezeRight = $derived(fc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
@@ -48,12 +49,16 @@
 	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
 	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
 	style:z-index={isSticky ? 3 : 2}
-	style:background="var(--color-surface-200, #e2e8f0)"
 	style:grid-row-start={gridRowStart}
 	style:grid-column={gridColumn}
+	style:justify-content={justify}
 	{...attributes}
 >
-	{@render children?.()}
+	{#if children}
+		{@render children()}
+	{:else if fc.value !== undefined && fc.value !== null}
+		{String(fc.value)}
+	{/if}
 </div>
 
 <style>
@@ -62,19 +67,21 @@
 		align-items: center;
 		padding: 8px 12px;
 		font-weight: 500;
-		color: var(--color-surface-700, #475569);
-		border-top: 2px solid var(--color-surface-300, #cbd5e1);
+		color: var(--_dt-header-text);
+		background-color: var(--_dt-header-bg);
+		border-top: 1px solid var(--_dt-border-strong);
+		border-right: var(--_dt-col-line);
 		box-sizing: border-box;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.slc-table-freeze-left-boundary {
-		box-shadow: 4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-right: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-left);
+		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
-		box-shadow: -4px 0 8px -3px color-mix(in srgb, var(--color-surface-950, #000) 15%, transparent);
-		border-left: 1px solid var(--color-surface-300, #cbd5e1);
+		box-shadow: var(--_dt-freeze-shadow-right);
+		border-left: var(--_dt-freeze-line);
 	}
 </style>
