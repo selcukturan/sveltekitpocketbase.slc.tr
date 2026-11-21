@@ -16,7 +16,7 @@
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
 	const columns: dt.Column<Item>[] = [
-		{ field: '_actions', type: 'actions', label: 'dt_actions', width: '120px', sortable: false },
+		{ field: '_actions', type: 'actions', label: 'dt_actions', sortable: false },
 		{ field: 'id', label: 'dt_id', width: 'minmax(50px,1fr)' },
 		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)' },
 		{ field: 'text_optional', label: 'dt_text_optional', width: 'minmax(50px,1fr)' },

@@ -1,6 +1,6 @@
 import type { RemoteQuery } from '$app/server';
 
-import type { Row, Column, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
+import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
 
 import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
@@ -8,6 +8,28 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
 export type Borders = 'none' | 'horizontal' | 'vertical' | 'both';
+
+// Kolona `width` verilmezse tipine göre bu değer kullanılır (tip yoksa 'text').
+// minmax: en az Npx, kalan alan fr oranıyla paylaşılır; tablo genişledikçe kolonlar da genişler.
+export const DEFAULT_COLUMN_WIDTHS: Record<ColumnType, Width> = {
+	text: 'minmax(120px,1fr)',
+	number: 'minmax(90px,0.75fr)',
+	bool: 'minmax(70px,0.5fr)',
+	date: 'minmax(110px,0.75fr)',
+	datetime: 'minmax(160px,1fr)',
+	list: 'minmax(140px,1fr)',
+	json: 'minmax(160px,1.25fr)',
+	actions: 'minmax(100px,0.5fr)'
+};
+
+// Kolonun geçerli genişlik tanımı: kullanıcı/props değeri, yoksa tip varsayılanı
+export const widthOf = <TData>(col: Column<TData>): Width => col.width ?? DEFAULT_COLUMN_WIDTHS[col.type ?? 'text'];
+
+// Ölçüm henüz yokken (ilk çizim) tahmini px: '130px' → 130, 'minmax(50px,1fr)' → 50
+const estimatePx = (width: Width): number => {
+	const match = /^(?:minmax\()?(\d+(?:\.\d+)?)px/.exec(width);
+	return match ? parseFloat(match[1]) : 150;
+};
 
 export interface MainProps<TData extends Row> {
 	// Data structure
@@ -173,9 +195,10 @@ class TableContext<TData extends Row> {
 		this.setColumnWidth(originalIndex, width, field);
 
 		if (!this.#colResizeIsAllWidth) {
+			// Diğer minmax kolonlar o anki genişliklerinde px'e sabitlenir; böylece sürüklerken kaymazlar
 			this.columns.forEach((column, index) => {
-				if (index !== originalIndex && column?.width?.startsWith('minmax')) {
-					const width = this.el?.querySelector(`div[role="columnheader"][data-coi="${index}"]`)?.getBoundingClientRect().width || 100;
+				if (index !== originalIndex && !column.hidden && widthOf(column).startsWith('minmax')) {
+					const width = this.#measuredWidths[column.field] ?? estimatePx(widthOf(column));
 					this.setColumnWidth(index, width, field);
 				}
 			});
@@ -343,6 +366,27 @@ class TableContext<TData extends Row> {
 
 	// ################################## BEGIN Sticky Columns ##################################################################################################################
 
+	// Başlık hücrelerinin gerçek genişliği (px), field ile. HeaderCell'deki measureColumn ile güncellenir.
+	// minmax/fr kolonların genişliği ancak çizildikten sonra bilinir; freeze ofseti buradan hesaplanır.
+	#measuredWidths = $state<Record<string, number>>({});
+
+	readonly measureColumn = (field: string): Attachment => {
+		return (node) => {
+			if (!(node instanceof HTMLElement)) return;
+			const observer = new ResizeObserver(([entry]) => {
+				const width = entry.borderBoxSize?.[0]?.inlineSize ?? node.offsetWidth;
+				if (this.#measuredWidths[field] !== width) this.#measuredWidths[field] = width;
+			});
+			observer.observe(node);
+			return () => {
+				observer.disconnect();
+				delete this.#measuredWidths[field];
+			};
+		};
+	};
+
+	#columnPx = (col: Column<TData>) => this.#measuredWidths[col.field] ?? estimatePx(widthOf(col));
+
 	stickyOffsets = $derived.by(() => {
 		const offsets: Record<string, { left?: number; right?: number }> = {};
 		let cumulativeLeft = 0;
@@ -356,9 +400,7 @@ class TableContext<TData extends Row> {
 			const isFrozenLeft = i < freezeL;
 			if (isFrozenLeft) {
 				offsets[col.data.field as string] = { left: cumulativeLeft };
-				const w = col.data.width ?? '150px';
-				const widthPx = parseFloat(w) || 150;
-				cumulativeLeft += widthPx;
+				cumulativeLeft += this.#columnPx(col.data);
 			}
 		}
 
@@ -371,9 +413,7 @@ class TableContext<TData extends Row> {
 					...offsets[col.data.field as string],
 					right: cumulativeRight
 				};
-				const w = col.data.width ?? '150px';
-				const widthPx = parseFloat(w) || 150;
-				cumulativeRight += widthPx;
+				cumulativeRight += this.#columnPx(col.data);
 			}
 		}
 
@@ -408,7 +448,7 @@ class TableContext<TData extends Row> {
 	});
 
 	gridTemplateColumns = $derived.by(() => {
-		const columnsWidth = this.visibleColumns.map((col) => col.data.width ?? `150px`);
+		const columnsWidth = this.visibleColumns.map((col) => widthOf(col.data));
 		return columnsWidth.join(' ');
 	});
 

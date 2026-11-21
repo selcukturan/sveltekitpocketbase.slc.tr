@@ -81,6 +81,7 @@
 	style:grid-column={gridColumn}
 	class={classes}
 	{@attach isSortable && sortableAttach}
+	{@attach context.measureColumn(field)}
 	tabindex={isSortable ? 0 : undefined}
 	{...attributes}
 >
@@ -156,21 +157,40 @@
 		color: var(--_dt-accent);
 		opacity: 1;
 	}
+	/* Tutma alanı geniş (8px), görünen çubuk ince ve yuvarlak uçlu; üst/alt/sağdan 2px boşluklu.
+	   Başlığın üzerine gelince soluk görünür, çubuğun üzerine gelince / sürüklerken vurgu rengi alır. */
 	.slc-table-resizer {
 		position: absolute;
 		top: 0;
 		right: 0;
-		width: 4px;
+		width: 8px;
 		height: 100%;
 		cursor: col-resize;
 		user-select: none;
 		touch-action: none;
 		z-index: 10;
-		transition: background-color 0.2s;
 	}
-	.slc-table-resizer:hover {
+	.slc-table-resizer::after {
+		content: '';
+		position: absolute;
+		top: 2px;
+		bottom: 2px;
+		right: 2px;
+		width: 4px;
+		border-radius: 9999px;
+		background-color: var(--_dt-muted); /* sıralanabilir başlığın hover zemininde de seçilir */
+		opacity: 0;
+		transition:
+			opacity 0.15s,
+			background-color 0.15s;
+	}
+	.slc-table-headercell:hover .slc-table-resizer::after {
+		opacity: 0.6;
+	}
+	.slc-table-resizer:hover::after,
+	.slc-table-resizer:active::after {
+		opacity: 1;
 		background-color: var(--_dt-accent);
-		width: 6px;
 	}
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);

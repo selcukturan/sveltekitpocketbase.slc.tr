@@ -42,7 +42,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.159` oldu.
+- Uygulama sürümü `v0.2.0-alpha.160` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -52,6 +52,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   Freeze sınırı 2px çizgi. `devTools` prop'u kaldırıldı.
 - Sayfa şablonu: `Page.Header` araç çubuğu görünümü, `Page.Main.Table`
   kenarlıklı tablo kartı.
+- DataTable: `width` verilmeyen kolon tipine göre varsayılan `minmax`
+  genişliği alıyor (`dt.DEFAULT_COLUMN_WIDTHS`; örn. text
+  `minmax(120px,1fr)`, bool `minmax(70px,0.5fr)`). Eskiden sabit 150px'ti.
+- DataTable: genişletme tutamağı başlığın üzerine gelince soluk görünüyor;
+  yuvarlak uçlu, üst/alt/sağdan 2px boşluklu, tutma alanı 8px.
 
 ### Düzeltildi
 
@@ -60,6 +65,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 - DataTable: `align` ayarları uygulanmıyordu; koyu temada freeze gölgesi
   ve mesaj kartı görünmüyordu; Pagination sabit renkler kullanıyordu.
 - View drawer'ında uzun liste/dosya değerleri yatay scroll oluşturuyordu.
+- DataTable: freeze ofseti `minmax(...)` genişlikli kolonlarda yanlıştı
+  (150px varsayıyordu). Artık başlık hücreleri `ResizeObserver` ile ölçülüyor.
 
 ### Kaldırıldı
 
