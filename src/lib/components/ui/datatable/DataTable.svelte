@@ -95,8 +95,6 @@
 			bind:this={context.el}
 			bind:clientHeight={context.clientHeight}
 			{@attach context.watchCurrentChanged}
-			{@attach context.watchScrollAndClientHeight}
-			{@attach context.watchItemsChanged}
 			{@attach context.trackTableScroll}
 			class={context.tableClass}
 			style:grid-template-rows={context.gridTemplateRows}

@@ -3,7 +3,7 @@ import type { RemoteQuery } from '$app/server';
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
 
-import { getContext, setContext, tick, untrack, type Snippet } from 'svelte';
+import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
@@ -141,12 +141,24 @@ class TableContext<TData extends Row> {
 	// ################################## END Base Variables ##################################################################################################################
 
 	// ################################## BEGIN Current/Query Data Watch ##################################################################################################################
+
+	// Gösterilen verinin geldiği sorgu. ListState her sayfa/sıralama/aramada yeni bir sorgu örneği üretir;
+	// refresh() ve .updates() ise aynı örneği tazeler. Yeni bir sorgunun verisi gelince tablo en üste kaydırılır,
+	// tazelemede (örn. kayıt silindikten sonra) kullanıcının konumu korunur.
+	#shownQuery: unknown = undefined;
+
 	watchCurrentChanged = () => {
 		const query = this.query;
 		const current = query?.current;
 
 		return untrack(() => {
 			if (query && query.ready) {
+				if (query !== this.#shownQuery) {
+					this.#shownQuery = query;
+					if (this.el) this.el.scrollTop = 0;
+					this.#currentScrollY = 0;
+					this.#rafY = 0;
+				}
 				if (current && typeof current === 'object' && 'items' in current) {
 					this.paginable = true;
 					this.#currentData = current as ListResult<TData>;
@@ -247,67 +259,34 @@ class TableContext<TData extends Row> {
 
 	// ################################## BEGIN Virtual Scroll ##################################################################################################################
 
+	// Yalnızca görünen veri satırları (+ üst/alt OVERSCAN satır) DOM'a çizilir. Grid'in satır şablonu tüm satırları
+	// kapsadığı için (gridTemplateRows) scroll yüksekliği doğrudur; her hücre grid-row-start ile kendi yerine oturur.
+	static readonly OVERSCAN = 10;
+
 	#currentScrollY = 0; // scroll event'inde güncellenir
-	#rafY = $state(0); // requestAnimationFrame ile güncellenir
+	#rafY = $state(0); // requestAnimationFrame ile güncellenir (karede en fazla bir kez)
 	clientHeight = $state(0); // bind:clientHeight
-	#rowIndices = $state.raw({
-		start: 0,
-		end: 0
-	});
 
-	// Manuel çalıştırılır. rowIndices güncellenir.
-	updateVisibleIndexes = (force: boolean = false) => {
-		const overscan = 10;
-		const rowHeight = this.dataRowHeight;
+	// Başlık sticky olduğu için veri alanı scrollTop + başlık yüksekliğinden başlar; i. satır başlık + i * satır yüksekliğinde.
+	// Bu yüzden ilk görünen satır floor(scrollTop / satır yüksekliği). Footer'lar sticky olup alttan örter, overscan karşılar.
+	// start/end ayrı sayı derived'ları: scroll her karede değişse de virtualData yalnızca aralık değişince yeniden hesaplanır.
+	#visibleStart = $derived(Math.max(0, Math.min(Math.floor(this.#rafY / this.dataRowHeight) - TableContext.OVERSCAN, this.dataLength - 1)));
+	#visibleEnd = $derived(
+		Math.min(this.dataLength - 1, Math.ceil((this.#rafY + this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + TableContext.OVERSCAN)
+	);
 
-		const start = Math.max(0, Math.floor(this.#rafY / rowHeight) - overscan);
-		const end = Math.min(this.dataLength - 1, Math.floor((this.#rafY + this.clientHeight) / rowHeight) + overscan);
-
-		const indicesChanged = start !== this.#rowIndices.start || end !== this.#rowIndices.end;
-
-		if (force || indicesChanged) {
-			this.#rowIndices = { start: start >= end ? 0 : start, end };
-		}
-	};
-
-	// `rowIndices` her değiştiğinde çalışır.
+	// Aralık ya da veri değişince yeniden hesaplanır
 	virtualData = $derived.by(() => {
-		const rawData = untrack(() => this.items);
-
+		const items = this.items;
 		const processedData: { data: TData; originalIndex: number }[] = [];
 
-		for (let i = this.#rowIndices.start; i <= this.#rowIndices.end; i++) {
-			const row = rawData[i];
-			if (row) {
-				processedData.push({ data: row as TData, originalIndex: i });
-			}
+		for (let i = this.#visibleStart; i <= this.#visibleEnd; i++) {
+			const row = items[i];
+			if (row) processedData.push({ data: row as TData, originalIndex: i });
 		}
 
 		return processedData;
 	});
-
-	readonly watchItemsChanged: Attachment = (node) => {
-		if (!(node instanceof HTMLElement)) return;
-
-		void this.items;
-
-		const cleanup = untrack(() => {
-			tick().then(() => {
-				this.updateVisibleIndexes(true);
-			});
-			return () => {
-				// cleanup code
-			};
-		});
-
-		return cleanup;
-	};
-
-	readonly watchScrollAndClientHeight = () => {
-		void this.#rafY;
-		void this.clientHeight;
-		untrack(() => this.updateVisibleIndexes());
-	};
 
 	// Scroll takibi: kaydırma olduğunda tek bir requestAnimationFrame planlanır (boştayken döngü çalışmaz)
 	readonly trackTableScroll = (node: HTMLElement) => {
@@ -456,11 +435,12 @@ class TableContext<TData extends Row> {
 
 	// ################################## BEGIN Alignment ##################################################################################################################
 
-	// Kolon hizası: açıkça verilmediyse tipe göre (number → sağ, bool/actions → orta)
+	// Kolon hizası: açıkça verilmediyse tipe göre (number/date/datetime → sağ, bool/actions → orta)
 	readonly alignOf = (col: Column<TData>, part: 'cell' | 'header' | 'footer' = 'cell'): Align => {
 		const explicit = part === 'header' ? col.alignHeader : part === 'footer' ? col.alignFooter : undefined;
 		if (explicit ?? col.align) return (explicit ?? col.align) as Align;
-		if (col.type === 'number') return 'right';
+		// sayı ve tarihler sabit biçimli: sağa dayalıyken basamaklar alt alta gelir, karşılaştırması kolay olur
+		if (col.type === 'number' || col.type === 'date' || col.type === 'datetime') return 'right';
 		if (col.type === 'bool' || col.type === 'actions') return 'center';
 		return 'left';
 	};

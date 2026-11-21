@@ -42,7 +42,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.160` oldu.
+- Uygulama sürümü `v0.2.0-alpha.161` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -57,6 +57,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `minmax(120px,1fr)`, bool `minmax(70px,0.5fr)`). Eskiden sabit 150px'ti.
 - DataTable: genişletme tutamağı başlığın üzerine gelince soluk görünüyor;
   yuvarlak uçlu, üst/alt/sağdan 2px boşluklu, tutma alanı 8px.
+- DataTable: `date` ve `datetime` kolonlar da `number` gibi varsayılan olarak
+  sağa dayalı (`align` ile değiştirilebilir).
 
 ### Düzeltildi
 
@@ -67,6 +69,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 - View drawer'ında uzun liste/dosya değerleri yatay scroll oluşturuyordu.
 - DataTable: freeze ofseti `minmax(...)` genişlikli kolonlarda yanlıştı
   (150px varsayıyordu). Artık başlık hücreleri `ResizeObserver` ile ölçülüyor.
+- DataTable (sanal kaydırma): veri azalınca (örn. son sayfa) aralık hesabı
+  ilk satırlara dönüp boş alan gösterebiliyordu. Görünen aralık artık
+  `$derived`; veri değişince ek `tick` zinciri olmadan yeniden hesaplanıyor.
+- DataTable: sayfa/sıralama/arama değişince tablo en üste kaydırılıyor;
+  aynı sorgunun tazelenmesinde (silme sonrası vb.) konum korunuyor.
 
 ### Kaldırıldı
 

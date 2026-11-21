@@ -24,7 +24,7 @@ export type Column<TData> = {
 	hidden?: boolean;
 	resizeable?: boolean;
 	sortable?: boolean;
-	align?: Align; // varsayılan: number → right, bool/actions → center, diğerleri → left
+	align?: Align; // varsayılan: number/date/datetime → right, bool/actions → center, diğerleri → left
 	alignHeader?: Align;
 	alignFooter?: Align;
 	width?: Width;
