@@ -70,3 +70,17 @@ export const relationListParamsSchema = v.object({
 	collection: v.picklist([...Object.values(Collections)])
 });
 export type RelationListParamsSchemaType = v.InferOutput<typeof relationListParamsSchema>;
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// Tablo içinde tek hücre düzenleme (DataTable onCellEdit). Alan başına doğrulama; değerler DataTable düzenleyicisinin
+// verdiği tipte: metin string, sayı number|null, bool boolean, tarih 'YYYY-MM-DD'|null, liste string|null.
+const cellId = { id: v.pipe(v.string(), v.nonEmpty()) };
+export const cellEditSchema = v.variant('field', [
+	v.object({ ...cellId, field: v.literal('text_required'), value: v.pipe(v.string(), v.trim(), v.nonEmpty('Bu alan zorunludur.')) }),
+	v.object({ ...cellId, field: v.literal('text_optional'), value: v.pipe(v.string(), v.trim()) }),
+	v.object({ ...cellId, field: v.literal('number_optional'), value: v.nullable(v.number()) }),
+	v.object({ ...cellId, field: v.literal('bool_optional'), value: v.boolean() }),
+	v.object({ ...cellId, field: v.literal('date_optional'), value: v.nullable(v.pipe(v.string(), v.isoDate())) }),
+	v.object({ ...cellId, field: v.literal('select_optional_single'), value: v.nullable(v.picklist(Object.values(DemoCrudSelectOptionalSingleOptions))) })
+]);
+export type CellEditSchemaType = v.InferOutput<typeof cellEditSchema>;

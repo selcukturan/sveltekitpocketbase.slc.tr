@@ -56,6 +56,7 @@ export const en = {
 	dt_selected: '{count} selected',
 	dt_clear_selection: 'Clear selection',
 	dt_select_page: 'Select all rows on this page',
+	dt_invalid_value: 'Invalid value',
 	dt_pagination: 'Pagination',
 	dt_per_page_label: 'Rows per page',
 	dt_settings: 'Table settings',

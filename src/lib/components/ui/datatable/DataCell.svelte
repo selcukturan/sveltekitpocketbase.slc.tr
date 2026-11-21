@@ -4,16 +4,18 @@
 	import type { Row, DataRowType, DataCellType } from './types.js';
 	import { getTableContext } from './context.svelte.js';
 	import Value from './Value.svelte';
+	import CellInput from './CellInput.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		children?: Snippet; // verilmezse değer kolon tipine göre <Value> ile gösterilir
+		editable?: boolean; // verilirse kolondaki editable'ı bu hücre için geçersiz kılar (kendi dataRow snippet'inde)
 		class?: string;
 		dr: DataRowType<TData>;
 		dc: DataCellType<TData>;
 	};
-	const { children, class: classes, dr, dc, ...attributes }: Props = $props();
+	const { children, class: classes, dr, dc, editable, ...attributes }: Props = $props();
 
 	const context = getTableContext<TData>();
 
@@ -25,6 +27,10 @@
 	const isActive = $derived(context.cursor.key === `${dr.rowOriginalIndex}:${dc.colVisibleIndex}`);
 	const isSelected = $derived(context.selection.enabled && context.selection.has(dr.row.id));
 	const inRange = $derived(context.cursor.inRange(dr.rowOriginalIndex, dc.colVisibleIndex));
+	// Düzenleme: düzenlenen hücre düzenleyiciyi çizer. Yeni değer (optimistik) sorgunun kendisinden gelir (withOverride);
+	// istek sürerken hücre "kaydediliyor" olarak işaretlenir.
+	const isEditing = $derived(context.editor.isEditing(dr.rowOriginalIndex, dc.colVisibleIndex));
+	const isSaving = $derived(context.editor.isSaving(dr.row.id, dc.col.data.field as string));
 </script>
 
 <div
@@ -34,8 +40,10 @@
 	data-active={isActive || undefined}
 	data-selected={isSelected || undefined}
 	data-in-range={inRange || undefined}
+	data-saving={isSaving || undefined}
 	aria-selected={inRange || undefined}
 	id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })}
+	{@attach editable !== undefined && context.editor.override(dr.row.id, dc.col.data.field as string, editable)}
 	role="gridcell"
 	class={classes}
 	class:slc-table-freeze-left={layout?.freezeLeft}
@@ -52,7 +60,9 @@
 	style:z-index={layout?.sticky ? 1 : undefined}
 	{...attributes}
 >
-	{#if children}
+	{#if isEditing}
+		<CellInput id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })} options={dc.col.data.options} align={context.alignOf(dc.col.data)} />
+	{:else if children}
 		{@render children()}
 	{:else if dc.col.data.type === 'select'}
 		<!-- Görsel: tıklama grid'deki dinleyiciyle (seçim kolonu) işlenir; durum satırın aria-selected'ında -->
@@ -81,6 +91,15 @@
 	}
 	[data-slc-table-datacell].clickable {
 		cursor: pointer;
+	}
+	/* Düzenleyici (CellInput) hücreyi kaplar; sticky hücrelerde inline style 'sticky' bunu ezer, o da konumlandırır */
+	[data-slc-table-datacell] {
+		position: relative;
+	}
+	/* Kaydediliyor */
+	[data-slc-table-datacell][data-saving] {
+		color: var(--_dt-muted);
+		font-style: italic;
 	}
 	.slc-table-check {
 		width: 15px;

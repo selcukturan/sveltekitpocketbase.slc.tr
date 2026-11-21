@@ -38,6 +38,22 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   sonra satır seçimini temizler. Ctrl/⌘+C aralığı (yoksa aktif hücreyi)
   sekmeyle ayrılmış metin olarak kopyalar (Excel'e yapıştırılabilir; seçim ve
   işlem kolonları atlanır). Aralık rengi `--dt-range`; hücrede `aria-selected`.
+- DataTable: hücre düzenleme (4. aşama). Kolonda `editable: true`, tabloda
+  `onCellEdit`. Başlatma: yazmaya başlamak, F2 / Enter, Backspace (boş), çift
+  tıklama. Bitirme: Enter / Shift+Enter (alt/üst), Tab / Shift+Tab, ↑ ↓
+  (metin/sayı), dışarı tıklama; Esc iptal. Düzenleyiciler: metin, sayı (dile göre
+  ondalık), tarih, tarih-saat, `options` ile liste; bool düzenleyicisiz anında
+  değişir. `validateCell` (forms'taki preflight gibi) mesaj döndürürse
+  kaydedilmez; düzenleyici açık kalır, mesaj hücrenin altında (popover + CSS
+  anchor positioning) görünür. Optimistik görünüm SvelteKit `withOverride` ile:
+  `ListState.updatesWith(fn)` istek sürerken listeyi değiştirilmiş gösterir,
+  hata olursa geri alınır; istek sürerken hücre "kaydediliyor" (soluk, italik).
+  `editable` satır bazında fonksiyon olabilir (`(row) => boolean`); kendi
+  `dataRow` snippet'inde `<DataCell editable={…}>` kolondakini o hücre için
+  geçersiz kılar.
+- Simple CRUD: `updateCell` komutu ve `cellEditSchema` (alan bazında doğrulama;
+  istemcide `validateCell`, sunucuda komut şeması); metin, sayı, liste, tarih
+  ve bool kolonları tabloda düzenlenebilir.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -70,7 +86,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.167` oldu.
+- Uygulama sürümü `v0.2.0-alpha.168` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

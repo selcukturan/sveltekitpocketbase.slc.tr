@@ -4,6 +4,7 @@ import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, Heade
 import type { ListSource } from './list-state.svelte.js';
 import { GridCursor, type CellPos } from './navigation.svelte.js';
 import { RowSelection, type SelectionMode, type RowId } from './selection.svelte.js';
+import { CellEditor, type CellEditEvent } from './editing.svelte.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
@@ -123,6 +124,12 @@ export interface MainProps<TData extends Row> {
 	selection?: SelectionMode;
 	selected?: RowId[]; // bind:selected (DataTable'da $bindable)
 	onSelectionChange?: (ids: RowId[]) => void;
+	// Hücre düzenleme: `editable: true` kolonlarda değişiklik buradan bildirilir; sayfa kaydeder ve sorguyu tazeler.
+	// Yeni değeri hemen göstermek için `.updates(...list.updatesWith(...))` (SvelteKit withOverride) kullanılır;
+	// istek hata verirse override kendiliğinden geri alınır (hatayı göstermek sayfanın işi, örn. toast).
+	onCellEdit?: (e: CellEditEvent<TData>) => void | Promise<void>;
+	// Kaydetmeden önce doğrulama (forms'taki preflight gibi): mesaj döndürürse kaydedilmez, düzenleyici açık kalır.
+	validateCell?: (e: CellEditEvent<TData>) => string | undefined;
 }
 
 // DataTable'ın $bindable `selected` prop'una erişim (okuma/yazma)
@@ -196,6 +203,8 @@ class TableContext<TData extends Row> {
 	readonly cursor: GridCursor;
 	// Satır seçimi (bkz. selection.svelte.ts)
 	readonly selection: RowSelection<TData>;
+	// Hücre düzenleme (bkz. editing.svelte.ts)
+	readonly editor: CellEditor<TData>;
 	readonly activeCellId = $derived.by(() => (this.cursor.active ? this.cellId(this.cursor.active) : undefined));
 
 	constructor(props: MainProps<TData>, binding: SelectedBinding) {
@@ -207,6 +216,15 @@ class TableContext<TData extends Row> {
 			value: () => binding.selected,
 			setValue: (ids) => (binding.selected = ids),
 			onChange: (ids) => this.#props.onSelectionChange?.(ids)
+		});
+		this.editor = new CellEditor<TData>({
+			items: () => this.items as TData[],
+			column: (col) => this.visibleColumns[col]?.data,
+			canSave: () => this.#props.onCellEdit !== undefined,
+			save: (e) => this.#props.onCellEdit?.(e),
+			validate: (e) => this.#props.validateCell?.(e),
+			focusGrid: () => this.el?.focus({ preventScroll: true }),
+			move: (pos) => this.cursor.set(pos, { scroll: true })
 		});
 		this.cursor = new GridCursor({
 			el: () => this.el,
@@ -283,6 +301,7 @@ class TableContext<TData extends Row> {
 					this.#rafY = 0;
 				}
 				queueMicrotask(() => {
+					if (isNewQuery) this.editor.cancel();
 					if (!active) return;
 					const index = isNewQuery ? 0 : this.items.findIndex((row) => row.id === activeId);
 					this.cursor.set({ row: index >= 0 ? index : active.row, col: active.col });
@@ -595,7 +614,8 @@ class TableContext<TData extends Row> {
 			const hit = hitCell(e);
 			if (!hit || hit.interactive || isSelectColumn(hit.pos.col)) return;
 			this.#props.onCellDblClick?.(cellEvent(hit.pos, hit.row, e));
-			this.#props.onRowActivate?.(hit.row);
+			// Düzenlenebilir hücrede çift tıklama düzenler; diğerlerinde satırı açar
+			if (!this.editor.start(hit.pos)) this.#props.onRowActivate?.(hit.row);
 		});
 		const offKeyDown = on(node, 'keydown', (e: KeyboardEvent) => {
 			if (e.target !== node) {
@@ -613,7 +633,8 @@ class TableContext<TData extends Row> {
 				if (this.copyRange()) e.preventDefault();
 				return;
 			}
-			if (this.cursor.handleKey(e) || this.selection.handleKey(e, this.cursor.active?.row)) e.preventDefault();
+			// Düzenlenebilir hücrede F2/Enter/yazma düzenlemeyi başlatır (Enter diğer hücrelerde satırı açar: cursor)
+			if (this.editor.handleKey(e, this.cursor.active) || this.cursor.handleKey(e) || this.selection.handleKey(e, this.cursor.active?.row)) e.preventDefault();
 		});
 
 		// Odak koruma: tabloda odaklı eleman (örn. silinen satırdaki Sil butonu) DOM'dan kalkarsa odak body'ye düşer;

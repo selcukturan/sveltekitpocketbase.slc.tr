@@ -187,3 +187,84 @@ test('Ctrl+C aralığı sekmeyle ayrılmış metin olarak kopyalar', async ({ pa
 	expect(lines[0][0]).toBe(rows[0][0]); // ID kolonu: ham değer = görünen metin
 	expect(lines[1][0]).toBe(rows[1][0]);
 });
+
+// ---------------------------------------------------------------- 4. aşama: hücre düzenleme
+// Kendi kayıtlarını oluşturur ('seed-e2e-…'), yalnızca onları düzenler ve sonunda siler.
+// Görünür kolonlar: 0 seçim, 1 işlemler, 2 id, 3 text_required, 4 text_optional, 5 number, 6 select_single, 7 select_multiple, 8 date, 9 bool
+test('hücre düzenleme: yazma/F2/Enter/Esc, sayı, liste, tarih, bool ve doğrulama', async ({ page }) => {
+	await openTable(page);
+	const stamp = `seed-e2e-${Date.now().toString(36)}`;
+	await createRecord(page, `${stamp}-1`);
+	await createRecord(page, `${stamp}-2`);
+	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	await search.fill(stamp);
+	await search.press('Enter');
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(2);
+	const editor = grid(page).locator('.slc-table-editor');
+
+	// Yazmaya başlamak düzenler, Enter kaydedip alt satıra geçer (sıralama text_required: 'aaa…' başta kalır)
+	await cell(page, 0, 3).click();
+	await page.keyboard.type('aaa yeni');
+	await expect(editor).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect(editor).toHaveCount(0);
+	await expect(grid(page)).toBeFocused();
+	await expect(activeCell(page)).toHaveAttribute('data-row', '1');
+	await expect(cell(page, 0, 3)).toHaveText('aaa yeni');
+
+	// Esc iptal eder
+	await page.keyboard.press('F2');
+	await page.keyboard.type('xyz');
+	await page.keyboard.press('Escape');
+	await expect(editor).toHaveCount(0);
+	await expect(cell(page, 1, 3)).not.toContainText('xyz');
+
+	// Sayı (virgüllü ondalık), Tab sağa geçer. withOverride: yeni değer sunucu yanıtından önce görünür
+	// (getList'te 300 ms gecikme var), istek sürerken hücre "kaydediliyor" işaretli, bitince işaret kalkar.
+	await cell(page, 0, 5).click();
+	await page.keyboard.type('12,5');
+	await page.keyboard.press('Tab');
+	await expect(activeCell(page)).toHaveAttribute('data-col', '6');
+	await expect(cell(page, 0, 5)).toHaveAttribute('data-saving', 'true', { timeout: 200 });
+	await expect(cell(page, 0, 5)).toHaveText('12,5', { timeout: 200 });
+	await expect(cell(page, 0, 5)).not.toHaveAttribute('data-saving');
+	await expect(cell(page, 0, 5)).toHaveText('12,5');
+
+	// Liste: Enter açar, seçenek seçilip Enter kaydeder
+	await page.keyboard.press('Enter');
+	await grid(page).locator('select.slc-table-editor').selectOption('linux');
+	await page.keyboard.press('Enter');
+	await expect(cell(page, 0, 6)).toHaveText('linux');
+
+	// Tarih
+	await cell(page, 0, 8).dblclick();
+	await grid(page).locator('input.slc-table-editor[type="date"]').fill('2026-03-15');
+	await page.keyboard.press('Enter');
+	await expect(cell(page, 0, 8)).toHaveText('15.03.2026');
+
+	// Bool: Enter düzenleyici açmadan tersine çevirir
+	await cell(page, 0, 9).click();
+	const before = await cell(page, 0, 9).locator('span').getAttribute('aria-label');
+	await page.keyboard.press('Enter');
+	await expect(editor).toHaveCount(0);
+	await expect(cell(page, 0, 9).locator('span')).not.toHaveAttribute('aria-label', before!);
+
+	// Doğrulama (validateCell): zorunlu alan boşaltılamaz → kaydedilmez, düzenleyici açık kalır ve mesaj görünür
+	await cell(page, 0, 3).click();
+	await page.keyboard.press('Backspace');
+	await page.keyboard.press('Enter');
+	await expect(editor).toBeVisible();
+	await expect(editor).toHaveAttribute('aria-invalid', 'true');
+	await expect(page.getByRole('alert').filter({ hasText: 'Bu alan zorunludur.' })).toBeVisible();
+	await page.keyboard.type('b'); // yazınca mesaj kalkar
+	await expect(page.getByRole('alert').filter({ hasText: 'Bu alan zorunludur.' })).toHaveCount(0);
+	await page.keyboard.press('Escape');
+	await expect(editor).toHaveCount(0);
+	await expect(cell(page, 0, 3)).toHaveText('aaa yeni');
+
+	// temizlik
+	await deleteFirstRow(page);
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(1);
+	await deleteFirstRow(page);
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(0);
+});

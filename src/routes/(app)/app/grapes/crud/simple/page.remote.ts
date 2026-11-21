@@ -6,7 +6,7 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema } from './page.shared';
+import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, cellEditSchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -99,6 +99,23 @@ export const deleteRecord = command(deleteParamsSchema, async (params) => {
 	}
 
 	await requested(getList, 1).refreshAll();
+});
+
+// Tablo içinde tek hücre düzenleme: yalnızca o alan güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).
+export const updateCell = command(cellEditSchema, async ({ id, field, value }) => {
+	await checkAuthenticated(); // 🔒
+
+	const { locals } = getRequestEvent();
+
+	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(id, { [field]: value ?? '' }), mapUnknownToError);
+
+	if (updatedResult.isErr()) {
+		throwError(updatedResult.error);
+	}
+
+	await requested(getList, 1).refreshAll();
+
+	return updatedResult.value;
 });
 
 // ######################################################################################################################

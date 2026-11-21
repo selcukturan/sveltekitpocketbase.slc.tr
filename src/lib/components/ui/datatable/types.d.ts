@@ -29,6 +29,12 @@ export type Column<TData> = {
 	alignHeader?: Align;
 	alignFooter?: Align;
 	width?: Width;
+	// Hücre düzenleme (DataTable'a onCellEdit verilmeli). Düzenleyici tipe göre: text, number, bool (anında değişir),
+	// date, datetime; `options` verilirse açılır liste. list/json/actions/select düzenlenmez.
+	// Fonksiyon verilirse satır bazında karar verilir: editable: (row) => !row.locked
+	// Kendi dataRow snippet'inde <DataCell editable={...}> bunu o hücre için geçersiz kılar.
+	editable?: boolean | ((row: TData) => boolean);
+	options?: readonly (string | { value: string; label: string })[];
 };
 
 export type VisibleColumn<TData> = {

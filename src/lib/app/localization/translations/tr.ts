@@ -54,6 +54,7 @@ export const tr = {
 	dt_selected: '{count} seçili',
 	dt_clear_selection: 'Seçimi temizle',
 	dt_select_page: 'Sayfadaki tüm satırları seç',
+	dt_invalid_value: 'Geçersiz değer',
 	dt_pagination: 'Sayfalama',
 	dt_per_page_label: 'Sayfa başına kayıt sayısı',
 	dt_settings: 'Tablo ayarları',

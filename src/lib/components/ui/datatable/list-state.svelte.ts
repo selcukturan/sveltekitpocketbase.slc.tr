@@ -1,4 +1,4 @@
-import type { RemoteQuery } from '$app/server';
+import type { RemoteQuery, RemoteQueryOverride } from '$app/server';
 import * as v from 'valibot';
 
 /**
@@ -42,6 +42,13 @@ export class ListState<TParams extends ListParams, TResult> {
 	readonly loading = $derived(this.query?.loading ?? false);
 	// Mutasyonlarda tazelenecek sorgular: submit().updates(...list.updates). Liste henüz yüklenmediyse boş.
 	readonly updates = $derived(this.query ? [this.query] : []);
+
+	/**
+	 * Optimistik güncelleme (SvelteKit withOverride): istek sürerken liste `update` ile değiştirilmiş gösterilir,
+	 * sunucunun tazelediği veri gelince override kalkar; istek hata verirse kendiliğinden geri alınır.
+	 * @example await updateCell(args).updates(...list.updatesWith((r) => ({ ...r, items: r.items.map(...) })))
+	 */
+	readonly updatesWith = (update: (current: TResult) => TResult): RemoteQueryOverride[] => (this.query ? [this.query.withOverride(update)] : []);
 
 	constructor(fetch: (params: TParams) => RemoteQuery<TResult>, defaults: TParams, { autoLoad = true }: ListOptions = {}) {
 		this.#fetch = fetch;

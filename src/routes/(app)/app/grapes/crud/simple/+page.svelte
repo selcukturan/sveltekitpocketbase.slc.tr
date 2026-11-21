@@ -7,8 +7,10 @@
 	import { Drawer, createHashDrawer } from '#lib/components/ui/drawer/index.js';
 	import { confirm } from '#lib/components/ui/confirm/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
-	import { listParamsSchema, createFormSchema, updateFormSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, seedRecords, deleteSeedRecords } from './page.remote';
+	import * as v from 'valibot';
+	import { DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
+	import { listParamsSchema, createFormSchema, updateFormSchema, cellEditSchema } from './page.shared';
+	import { getOne, getList, createForm, updateForm, deleteRecord, updateCell, seedRecords, deleteSeedRecords } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -20,13 +22,13 @@
 		{ field: '_select', type: 'select' },
 		{ field: '_actions', type: 'actions', label: 'dt_actions', sortable: false },
 		{ field: 'id', label: 'dt_id', width: 'minmax(50px,1fr)' },
-		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)' },
-		{ field: 'text_optional', label: 'dt_text_optional', width: 'minmax(50px,1fr)' },
-		{ field: 'number_optional', label: 'number_optional', type: 'number', width: '130px' },
-		{ field: 'select_optional_single', label: 'select_optional_single', width: '150px' },
+		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)', editable: true },
+		{ field: 'text_optional', label: 'dt_text_optional', width: 'minmax(50px,1fr)', editable: true },
+		{ field: 'number_optional', label: 'number_optional', type: 'number', width: '130px', editable: true },
+		{ field: 'select_optional_single', label: 'select_optional_single', width: '150px', editable: true, options: Object.values(DemoCrudSelectOptionalSingleOptions) },
 		{ field: 'select_optional_multiple', label: 'select_optional_multiple', type: 'list', width: '180px' },
-		{ field: 'date_optional', label: 'date_optional', type: 'date', width: '130px' },
-		{ field: 'bool_optional', label: 'bool_optional', type: 'bool', width: '120px' },
+		{ field: 'date_optional', label: 'date_optional', type: 'date', width: '130px', editable: true },
+		{ field: 'bool_optional', label: 'bool_optional', type: 'bool', width: '120px', editable: true },
 		{ field: 'updated', label: 'updated', type: 'datetime', width: '170px' }
 	];
 
@@ -36,6 +38,29 @@
 			if (!(await submit())) return toaster.error(null, t('invalid_data'));
 			drawer.closeClean();
 			toaster.success(t('toast_saved_title'), t('toast_saved_description'));
+		} catch (error) {
+			toaster.error(error);
+		}
+	};
+
+	// Tablo içinde hücre düzenleme.
+	// validateCell: kaydetmeden önce (preflight gibi) aynı şemayla doğrular; mesaj dönerse düzenleyici açık kalır.
+	// editCell: kaydeder; withOverride (list.updatesWith) yeni değeri hemen gösterir, sunucu listeyi tazeleyince
+	// gerçek veri gelir, hata olursa SvelteKit override'ı geri alır.
+	const cellArgs = ({ row, field, value }: dt.CellEditEvent<Item>) => ({ id: row.id, field, value });
+	const validateCell = (e: dt.CellEditEvent<Item>) => {
+		const result = v.safeParse(cellEditSchema, cellArgs(e));
+		return result.success ? undefined : result.issues[0].message;
+	};
+	const editCell = async (e: dt.CellEditEvent<Item>) => {
+		const args = v.parse(cellEditSchema, cellArgs(e));
+		try {
+			await updateCell(args).updates(
+				...list.updatesWith((result) => ({
+					...result,
+					items: result.items.map((item) => (item.id === args.id ? { ...item, [args.field]: args.value } : item))
+				}))
+			);
 		} catch (error) {
 			toaster.error(error);
 		}
@@ -136,6 +161,8 @@
 				selection="multiple"
 				bind:selected
 				persist="grapes-crud-simple"
+				onCellEdit={editCell}
+				{validateCell}
 				onRowActivate={(row) => drawer.show('update', row.id)}
 			>
 				{#snippet actions(row)}
