@@ -50,6 +50,7 @@
 <style>
 	[data-slc-table-footercell] {
 		display: flex;
+		font-variant-numeric: tabular-nums; /* rakamlar eşit genişlikte: alt alta karşılaştırma kolay */
 		align-items: center;
 		padding: 8px 12px;
 		font-weight: 500;
@@ -62,11 +63,12 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	/* 2px freeze çizgisi yalnızca veri hücrelerinde (DataCell); başlık/alt satırda sticky hücrelerde 1px kaymalar yaratıyordu */
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);
+		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
 		box-shadow: var(--_dt-freeze-shadow-right);
+		border-left: var(--_dt-freeze-line);
 	}
 </style>

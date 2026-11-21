@@ -2,12 +2,13 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
-	import { getTableContext, type Borders } from '../context.svelte';
+	import { getTableContext, type Borders, type Density } from '../context.svelte';
 	import type { Row } from '../types';
 
 	const context = getTableContext<TData>();
 
 	const borderOptions: Borders[] = ['none', 'horizontal', 'vertical', 'both'];
+	const densityOptions: Density[] = ['compact', 'normal', 'relaxed'];
 
 	// Sol + sağ sabit kolon toplamı görünür kolon sayısını aşamaz
 	const freezeFull = $derived(context.freezeLeft + context.freezeRight >= context.visibleColumns.length);
@@ -23,6 +24,14 @@
 		{#if option === 'vertical' || option === 'both'}
 			<path d="M7.67 1v14M14.33 1v14" />
 		{/if}
+	</svg>
+{/snippet}
+
+<!-- Yoğunluk önizlemesi: satır aralığı seçeneğe göre açılan 3 çizgi -->
+{#snippet densityPreview(option: Density)}
+	{@const gap = option === 'compact' ? 3.5 : option === 'normal' ? 5 : 6.5}
+	<svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+		<path d="M3 {8 - gap}h16M3 8h16M3 {8 + gap}h16" />
 	</svg>
 {/snippet}
 
@@ -67,6 +76,25 @@
 					>
 						{@render borderPreview(option)}
 						<span>{t(`dt_borders_${option}`)}</span>
+					</button>
+				{/each}
+			</div>
+		</section>
+
+		<section>
+			<p class="slc-settings-label">{t('dt_density')}</p>
+			<div class="slc-segmented" style:grid-template-columns="repeat(3, 1fr)" role="radiogroup" aria-label={t('dt_density')}>
+				{#each densityOptions as option (option)}
+					<button
+						type="button"
+						role="radio"
+						aria-checked={context.density === option}
+						class:selected={context.density === option}
+						onclick={() => context.helpers.setDensity(option)}
+						title={t(`dt_density_${option}`)}
+					>
+						{@render densityPreview(option)}
+						<span>{t(`dt_density_${option}`)}</span>
 					</button>
 				{/each}
 			</div>

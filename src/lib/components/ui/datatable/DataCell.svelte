@@ -52,6 +52,7 @@
 <style>
 	[data-slc-table-datacell] {
 		display: flex;
+		font-variant-numeric: tabular-nums; /* rakamlar eşit genişlikte: alt alta karşılaştırma kolay */
 		align-items: center;
 		padding: 8px 12px;
 		border-bottom: var(--_dt-row-line);

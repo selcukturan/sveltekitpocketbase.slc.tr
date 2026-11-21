@@ -8,6 +8,21 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
 export type Borders = 'none' | 'horizontal' | 'vertical' | 'both';
+export type Density = 'compact' | 'normal' | 'relaxed';
+
+// Veri satırı yüksekliği (px). Değerler makaledeki öneriden: sık 40, normal 48, rahat 56.
+export const DENSITY_ROW_HEIGHTS: Record<Density, number> = { compact: 40, normal: 48, relaxed: 56 };
+
+// Kullanıcının tablo içinde yaptığı değişiklikler; `persist` verilirse localStorage'da saklanır
+type UiState<TData> = {
+	columns: Record<string, Partial<Pick<Column<TData>, 'width' | 'hidden'>>>;
+	freezeLeft?: number;
+	freezeRight?: number;
+	borders?: Borders;
+	density?: Density;
+};
+
+const STORAGE_PREFIX = 'slc-dt:';
 
 // Kolona `width` verilmezse tipine göre bu değer kullanılır (tip yoksa 'text').
 // minmax: en az Npx, kalan alan fr oranıyla paylaşılır; tablo genişledikçe kolonlar da genişler.
@@ -67,8 +82,12 @@ export interface MainProps<TData extends Row> {
 	settings?: boolean; // alt bardaki tablo ayarları popup'ı (varsayılan: true)
 	// UI State & Styling
 	borders?: Borders; // hücre çizgileri (varsayılan: 'horizontal'); kullanıcı ayarlar popup'ından değiştirebilir
+	density?: Density; // satır yoğunluğu (varsayılan: 'compact'); kullanıcı ayarlar popup'ından değiştirebilir
+	// Verilirse kullanıcı ayarları (genişlik, gizleme, freeze, kenarlık, yoğunluk) bu anahtarla localStorage'da saklanır.
+	// Uygulamada tekil olmalı, örn: persist="grapes-crud-simple"
+	persist?: string;
 	headerRowHeight?: number;
-	dataRowHeight?: number;
+	dataRowHeight?: number; // verilirse density'nin yerine geçer (kullanıcı yoğunluk seçerse o geçerli olur)
 	footerRowHeight?: number;
 	freezeLeft?: number;
 	freezeRight?: number;
@@ -88,15 +107,10 @@ class TableContext<TData extends Row> {
 	// Props doğrudan okunur (reaktif): sayfa columns/footers/freeze vb. değiştirirse tablo da değişir.
 	#props!: MainProps<TData>;
 
-	// Kullanıcının tablo içinde yaptığı değişiklikler (kolon genişletme/gizleme, freeze +/-).
+	// Kullanıcının tablo içinde yaptığı değişiklikler (kolon genişletme/gizleme, freeze +/-, kenarlık, yoğunluk).
 	// Props salt okunur olduğu için ayrı tutulur; kolonlar `field` ile eşlenir, böylece sayfa kolon ekleyip
-	// çıkarsa ya da sırasını değiştirse de ayarlar doğru kolonda kalır. (İleride localStorage'a yazılabilir.)
-	#ui = $state<{
-		columns: Record<string, Partial<Pick<Column<TData>, 'width' | 'hidden'>>>;
-		freezeLeft?: number;
-		freezeRight?: number;
-		borders?: Borders;
-	}>({ columns: {} });
+	// çıkarsa ya da sırasını değiştirse de ayarlar doğru kolonda kalır. `persist` verilirse localStorage'da saklanır.
+	#ui = $state<UiState<TData>>({ columns: {} });
 
 	#currentData = $state<ListResult<TData> | undefined>(undefined); // watchCurrentChanged ile değişir
 
@@ -125,11 +139,16 @@ class TableContext<TData extends Row> {
 	readonly borders = $derived(this.#ui.borders ?? this.#props.borders ?? 'horizontal');
 	// Kullanıcı props'tan farklı bir ayar yaptı mı ("Varsayılana dön" butonu için)
 	readonly isLayoutChanged = $derived(
-		Object.keys(this.#ui.columns).length > 0 || this.#ui.freezeLeft !== undefined || this.#ui.freezeRight !== undefined || this.#ui.borders !== undefined
+		Object.keys(this.#ui.columns).length > 0 ||
+			this.#ui.freezeLeft !== undefined ||
+			this.#ui.freezeRight !== undefined ||
+			this.#ui.borders !== undefined ||
+			this.#ui.density !== undefined
 	);
-	readonly headerRowHeight = $derived(this.#props.headerRowHeight ?? 42);
-	readonly dataRowHeight = $derived(this.#props.dataRowHeight ?? 35);
-	readonly footerRowHeight = $derived(this.#props.footerRowHeight ?? 35);
+	readonly density = $derived(this.#ui.density ?? this.#props.density ?? 'compact');
+	readonly headerRowHeight = $derived(this.#props.headerRowHeight ?? 44); // en sık veri satırından (40) yüksek
+	readonly dataRowHeight = $derived(this.#ui.density ? DENSITY_ROW_HEIGHTS[this.#ui.density] : (this.#props.dataRowHeight ?? DENSITY_ROW_HEIGHTS[this.density]));
+	readonly footerRowHeight = $derived(this.#props.footerRowHeight ?? 40);
 	readonly freezeLeft = $derived(this.#ui.freezeLeft ?? this.#props.freezeLeft ?? 0);
 	readonly freezeRight = $derived(this.#ui.freezeRight ?? this.#props.freezeRight ?? 0);
 	// Özel Class Tanımları
@@ -143,6 +162,28 @@ class TableContext<TData extends Row> {
 
 	constructor(props: MainProps<TData>) {
 		this.#props = props;
+
+		// Kalıcı ayarlar: ilk açılışta okunur, her değişiklikte yazılır. (SSR kapalı; yine de localStorage
+		// gizli pencerede/engelliyken hata verebileceği için try/catch.) Varsayılan hâldeyse kayıt silinir.
+		const key = props.persist ? STORAGE_PREFIX + props.persist : undefined;
+		if (key) {
+			try {
+				const saved = JSON.parse(localStorage.getItem(key) ?? 'null');
+				if (saved && typeof saved === 'object' && saved.columns && typeof saved.columns === 'object') this.#ui = saved;
+			} catch {
+				// bozuk kayıt ya da erişim yok: varsayılanla devam
+			}
+			$effect(() => {
+				const snapshot = $state.snapshot(this.#ui);
+				const changed = this.isLayoutChanged;
+				try {
+					if (changed) localStorage.setItem(key, JSON.stringify(snapshot));
+					else localStorage.removeItem(key);
+				} catch {
+					// kota dolu ya da erişim yok: ayarlar yalnızca bu oturumda kalır
+				}
+			});
+		}
 	}
 
 	// ############### END PROPS ###############
@@ -549,6 +590,9 @@ class TableContext<TData extends Row> {
 		},
 		setFreeze: (key: 'freezeLeft' | 'freezeRight', value: number) => {
 			this.#ui[key] = this.#clampFreeze(value);
+		},
+		setDensity: (value: Density) => {
+			this.#ui.density = value;
 		},
 		setBorders: (value: Borders) => {
 			this.#ui.borders = value;

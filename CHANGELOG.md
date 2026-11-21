@@ -42,7 +42,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.162` oldu.
+- Uygulama sürümü `v0.2.0-alpha.163` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -68,6 +68,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 - DataTable (performans): kolon yerleşimi (freeze, ofset, hizalama) kolon başına
   bir kez hesaplanıyor (`columnLayout`); hücre başına derived sayısı ~10'dan 2'ye
   indi. Satır tıklaması hücre başına dinleyici yerine grid'de tek dinleyiciyle.
+- DataTable: `persist="anahtar"` prop'u ile kullanıcı ayarları (genişlik,
+  gizleme, freeze, kenarlık, yoğunluk) localStorage'da saklanıyor; varsayılana
+  dönünce kayıt siliniyor. Simple CRUD tablosunda açık.
+- DataTable: yoğunluk seçimi (sık 40px / normal 48px / rahat 56px); ayarlar
+  popup'ında ve `density` prop'u ile. Varsayılan "sık" (satır 35px → 40px).
+  Başlık yüksekliği 42px → 44px (en sık satırdan yüksek kalsın diye), alt
+  satır 35px → 40px.
+- DataTable: sıralama ikonu başlık hizasını bozmuyor (sağa dayalı kolonda
+  ikon solda, ortalıda absolute); hücre ve alt satırda `tabular-nums`.
 
 ### Düzeltildi
 
@@ -91,8 +100,6 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   oluşuyordu. Sınıf `slc-toggler` oldu. Kapsayıcı artık tetikleyici kadar
   geniş; tam genişlik için `--container-width="100%"` (Select bunu kullanıyor,
   açılır liste yine kutuyla aynı genişlikte).
-- DataTable: 2px freeze çizgisi başlık ve alt satırdan kaldırıldı (sticky
-  hücrelerde 1px kaymalar yaratıyordu); yalnızca veri hücrelerinde.
 
 ### Kaldırıldı
 

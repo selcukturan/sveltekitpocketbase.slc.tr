@@ -59,6 +59,7 @@
 	role="columnheader"
 	aria-sort={!isSortable ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'}
 	data-coi={col.originalIndex}
+	data-align={layout?.textAlignHeader}
 	data-header-index={hr.headerIndex}
 	style:position="sticky"
 	style:top="0"
@@ -128,7 +129,10 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	/* Sıralama ikonu başlık metninin hizasını bozmamalı: metin kolonun içeriğiyle aynı kenarda durur.
+	   sol: ikon sağ uçta | sağ: ikon sol uçta (row-reverse) | orta: ikon absolute, metin gerçekten ortada */
 	.slc-table-sort-icon {
+		flex: none;
 		margin-left: 6px;
 		color: var(--_dt-muted);
 		opacity: 0.35; /* sıralanmamış: soluk; başlığın üzerine gelince belirginleşir */
@@ -140,6 +144,21 @@
 	}
 	.slc-table-headercell-sortable:hover .slc-table-sort-icon {
 		opacity: 0.8;
+	}
+	.slc-table-headercell[data-align='right'] {
+		flex-direction: row-reverse;
+	}
+	.slc-table-headercell[data-align='right'] .slc-table-sort-icon {
+		margin-left: 0;
+		margin-right: 6px;
+	}
+	.slc-table-headercell-sortable[data-align='center'] {
+		padding-inline: 32px; /* iki yanda eşit boşluk: ikon metni kaydırmaz */
+	}
+	.slc-table-headercell[data-align='center'] .slc-table-sort-icon {
+		position: absolute;
+		right: 12px;
+		margin-left: 0;
 	}
 	.slc-table-sort-icon.active {
 		color: var(--_dt-accent);
@@ -180,11 +199,12 @@
 		opacity: 1;
 		background-color: var(--_dt-accent);
 	}
-	/* 2px freeze çizgisi yalnızca veri hücrelerinde (DataCell); başlık/alt satırda sticky hücrelerde 1px kaymalar yaratıyordu */
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);
+		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
 		box-shadow: var(--_dt-freeze-shadow-right);
+		border-left: var(--_dt-freeze-line);
 	}
 </style>
