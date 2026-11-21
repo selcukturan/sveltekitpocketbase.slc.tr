@@ -11,9 +11,13 @@ import { tick } from 'svelte';
  *   hücresi DOM'da hep vardır ve scrollIntoView ile kaydırılabilir.
  * - Kaydırma tamamen CSS'e bırakılır: grid'deki scroll-padding (başlık, footer, sabit kolonlar) ile
  *   scrollIntoView({ block/inline: 'nearest' }) hücreyi sticky alanların altında bırakmaz.
+ * - Aralık seçimi: Shift ile hareket (ya da Shift+tıklama, sürükleme) sabit ucu (anchor) yerinde bırakıp aktif
+ *   hücreyi taşır; aralık ikisinin dikdörtgenidir. Shiftsiz her hareket aralığı kapatır.
  */
 
 export type CellPos = { row: number; col: number };
+// Hücre aralığı (dahil sınırlar): sabit uç (anchor) ile aktif hücrenin oluşturduğu dikdörtgen
+export type CellRange = { top: number; bottom: number; left: number; right: number };
 
 // Tablo bağlamının imlece verdiği bilgiler (fonksiyonlar çağrıldıkları yerde reaktif okunur)
 export interface CursorHost {
@@ -34,6 +38,7 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 export class GridCursor {
 	readonly #host: CursorHost;
 	#active = $state<CellPos | undefined>(undefined);
+	#anchor = $state<CellPos | undefined>(undefined);
 
 	constructor(host: CursorHost) {
 		this.#host = host;
@@ -45,6 +50,25 @@ export class GridCursor {
 
 	// Hücreler bu anahtarı kendi konumlarıyla karşılaştırır ("satır:kolon"); değişince yalnızca 2 hücrenin DOM'u değişir
 	readonly key = $derived(this.#active ? `${this.#active.row}:${this.#active.col}` : '');
+
+	// Aktif hücre ile sabit uç farklıysa aralık; tek hücrede aralık yoktur (yalnızca aktif hücre)
+	readonly range = $derived.by((): CellRange | undefined => {
+		const a = this.#active;
+		const b = this.#anchor;
+		if (!a || !b || (a.row === b.row && a.col === b.col)) return undefined;
+		return { top: Math.min(a.row, b.row), bottom: Math.max(a.row, b.row), left: Math.min(a.col, b.col), right: Math.max(a.col, b.col) };
+	});
+
+	readonly inRange = (row: number, col: number) => {
+		const r = this.range;
+		return r !== undefined && row >= r.top && row <= r.bottom && col >= r.left && col <= r.right;
+	};
+
+	readonly clearRange = () => {
+		if (!this.#anchor) return false;
+		this.#anchor = undefined;
+		return true;
+	};
 
 	// Tam görünen veri satırı sayısı (PageUp/PageDown adımı): başlık ve footer düşülür
 	get pageSize() {
@@ -62,11 +86,17 @@ export class GridCursor {
 	 * Aktif hücreyi değiştirir. Konum tablo sınırlarına kırpılır; tablo boşsa imleç kalkar.
 	 * scroll: true → hücre görünür alana getirilir (klavye). Farede kaydırılmaz: çift tıklamanın
 	 * ikinci tıklaması kayan içeriğe denk gelmesin.
+	 * extend: true → aralık genişletilir (sabit uç yoksa şimdiki aktif hücre sabit uç olur); false → aralık kapanır.
 	 */
-	readonly set = (pos: CellPos | undefined, { scroll = false }: { scroll?: boolean } = {}) => {
+	readonly set = (pos: CellPos | undefined, { scroll = false, extend = false }: { scroll?: boolean; extend?: boolean } = {}) => {
 		const h = this.#host;
 		const next = pos && h.rowCount() > 0 && h.colCount() > 0 ? { row: clamp(pos.row, 0, h.rowCount() - 1), col: clamp(pos.col, 0, h.colCount() - 1) } : undefined;
 		const current = this.#active;
+		if (extend && next) {
+			if (!this.#anchor && current) this.#anchor = current;
+		} else if (this.#anchor) {
+			this.#anchor = undefined;
+		}
 		if (current?.row !== next?.row || current?.col !== next?.col) {
 			this.#active = next;
 			h.onChange(next);
@@ -103,6 +133,8 @@ export class GridCursor {
 			this.set({ row: this.firstVisibleRow, col: 0 }, { scroll: true });
 			return true;
 		}
+
+		if (e.key === 'Escape') return this.clearRange(); // aralık yoksa false: Esc satır seçimine geçer
 
 		let next: CellPos;
 		switch (e.key) {
@@ -152,7 +184,8 @@ export class GridCursor {
 				return false;
 		}
 
-		this.set(next, { scroll: true });
+		// Shift + yön/Home/End/PageUp/PageDown aralığı genişletir; Shift+Tab geri gider (aralık kapanır)
+		this.set(next, { scroll: true, extend: e.shiftKey && e.key !== 'Tab' });
 		return true;
 	};
 }

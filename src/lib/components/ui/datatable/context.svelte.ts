@@ -465,6 +465,82 @@ class TableContext<TData extends Row> {
 		colIndex: pos.col
 	});
 
+	// Basılı sürüklemede aralık: imlecin altındaki hücre aralığın ucu olur. İmleç veri alanının kenarına (başlık/footer/
+	// sabit kolonların sınırına) yaklaşınca ya da dışına çıkınca tablo o yöne kaydırılır (karede bir kez, mesafeyle hızlanır).
+	static readonly #DRAG_EDGE = 32; // px: kenara bu kadar yaklaşınca kaydırma başlar
+	static readonly #DRAG_MAX_SPEED = 40; // px/kare
+
+	#dragRange = (node: HTMLElement, down: PointerEvent) => {
+		let x = down.clientX;
+		let y = down.clientY;
+		let rafId = 0;
+		const edge = TableContext.#DRAG_EDGE;
+		const speed = (d: number) => Math.sign(d) * Math.min(TableContext.#DRAG_MAX_SPEED, Math.abs(d) / 2);
+
+		const frame = () => {
+			rafId = 0;
+			const rect = node.getBoundingClientRect();
+			const pad = this.scrollPadding;
+			const top = rect.top + pad.top;
+			const bottom = rect.top + node.clientHeight - pad.bottom;
+			const left = rect.left + pad.left;
+			const right = rect.left + node.clientWidth - pad.right;
+
+			const dy = y < top + edge ? y - (top + edge) : y > bottom - edge ? y - (bottom - edge) : 0;
+			const dx = x < left + edge ? x - (left + edge) : x > right - edge ? x - (right - edge) : 0;
+			if (dx || dy) node.scrollBy(speed(dx), speed(dy));
+
+			// Hücre: nokta dikeyde veri alanına (başlık/footer hariç), yatayda grid'e kırpılır (sabit kolonlar seçilebilsin)
+			const px = Math.max(rect.left + 1, Math.min(x, rect.left + node.clientWidth - 1));
+			const py = Math.max(top + 1, Math.min(y, bottom - 1));
+			const cell = document.elementFromPoint(px, py)?.closest<HTMLElement>('[data-slc-table-datacell]');
+			if (cell && node.contains(cell)) {
+				const pos = { row: Number(cell.dataset.row), col: Number(cell.dataset.col) };
+				if (this.visibleColumns[pos.col]?.data.type !== 'select') this.cursor.set(pos, { extend: true });
+			}
+			if (dx || dy) rafId = requestAnimationFrame(frame); // kenarda beklerken kaydırma sürsün
+		};
+
+		const offMove = on(window, 'pointermove', (e: PointerEvent) => {
+			x = e.clientX;
+			y = e.clientY;
+			if (!rafId) rafId = requestAnimationFrame(frame);
+		});
+		const stop = () => {
+			cancelAnimationFrame(rafId);
+			offMove();
+			offUp();
+			offCancel();
+		};
+		const offUp = on(window, 'pointerup', stop);
+		const offCancel = on(window, 'pointercancel', stop);
+	};
+
+	// Aralığı (yoksa aktif hücreyi) sekmeyle ayrılmış metin (TSV) olarak panoya kopyalar; Excel'e yapıştırılabilir.
+	// Seçim ve işlem kolonları atlanır. Değerler ham hâliyle (tarih PocketBase biçiminde, liste virgülle).
+	readonly copyRange = (): boolean => {
+		const active = this.cursor.active;
+		if (!active) return false;
+		const r = this.cursor.range ?? { top: active.row, bottom: active.row, left: active.col, right: active.col };
+		const fields = this.visibleColumns
+			.slice(r.left, r.right + 1)
+			.filter((col) => col.data.type !== 'select' && col.data.type !== 'actions')
+			.map((col) => col.data.field);
+		if (fields.length === 0) return false;
+
+		const text = (value: unknown) => {
+			if (value === null || value === undefined) return '';
+			if (Array.isArray(value)) return value.join(', ');
+			if (typeof value === 'object') return JSON.stringify(value);
+			return String(value).replace(/[\t\r\n]+/g, ' '); // hücre içi sekme/satır sonu TSV'yi bozmasın
+		};
+		const lines = this.items.slice(r.top, r.bottom + 1).map((row) => fields.map((f) => text((row as Record<string, unknown>)[f])).join('\t'));
+		navigator.clipboard?.writeText(lines.join('\n')).catch(() => {
+			// izin yok ya da güvenli bağlam değil: sessizce geç
+		});
+		return true;
+	};
+
 	readonly trackInteractions: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
 
@@ -486,12 +562,18 @@ class TableContext<TData extends Row> {
 		};
 
 		// Tıklama ile çift tıklama ayrılmaz (gecikme olmasın): tıklamanın işi (hücreyi aktif yapmak) iki kez çalışsa da aynı sonucu verir
+		const isSelectColumn = (col: number) => this.visibleColumns[col]?.data.type === 'select';
+
+		// Hücreye basınca aktif olur; Shift ile aktif hücreden buraya aralık. Farede basılı sürükleme aralık seçer.
+		// Seçim kolonu ve hücre içi butonlar aralığa katılmaz.
 		const offPointerDown = on(node, 'pointerdown', (e: PointerEvent) => {
 			if (e.button !== 0) return;
 			const hit = hitCell(e);
-			if (hit) this.cursor.set(hit.pos);
+			if (!hit) return;
+			const rangeable = !hit.interactive && !isSelectColumn(hit.pos.col);
+			this.cursor.set(hit.pos, { extend: e.shiftKey && rangeable });
+			if (rangeable && e.pointerType === 'mouse') this.#dragRange(node, e);
 		});
-		const isSelectColumn = (col: number) => this.visibleColumns[col]?.data.type === 'select';
 
 		const offClick = on(node, 'click', (e: MouseEvent) => {
 			const hit = hitCell(e);
@@ -526,7 +608,12 @@ class TableContext<TData extends Row> {
 				node.focus({ preventScroll: true });
 				if (!e.key.startsWith('Arrow')) return; // oklar ayrıca hareket ettirir
 			}
-			if (this.selection.handleKey(e, this.cursor.active?.row) || this.cursor.handleKey(e)) e.preventDefault();
+			// Ctrl/⌘+C aralığı (yoksa aktif hücreyi) kopyalar. Sıra: imleç (Esc önce aralığı kapatır), sonra satır seçimi.
+			if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C') && !e.shiftKey && !e.altKey) {
+				if (this.copyRange()) e.preventDefault();
+				return;
+			}
+			if (this.cursor.handleKey(e) || this.selection.handleKey(e, this.cursor.active?.row)) e.preventDefault();
 		});
 
 		// Odak koruma: tabloda odaklı eleman (örn. silinen satırdaki Sil butonu) DOM'dan kalkarsa odak body'ye düşer;

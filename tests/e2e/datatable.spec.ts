@@ -118,3 +118,72 @@ test('silinen satırla kaybolan odak gride geri verilir (toast sonrasında da)',
 	await deleteFirstRow(page);
 	await expect(grid(page).getByText(`${stamp}-2`, { exact: true })).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------- 3. aşama: hücre aralığı
+const rangeCells = (page: Page) => grid(page).locator('[data-slc-table-datacell][data-in-range]');
+
+test('Shift + oklar aralık seçer, Esc önce aralığı kapatır', async ({ page }) => {
+	await openTable(page);
+	await cell(page, 0, 2).click();
+	await page.keyboard.press('Shift+ArrowDown');
+	await page.keyboard.press('Shift+ArrowDown');
+	await page.keyboard.press('Shift+ArrowRight');
+	await expect(rangeCells(page)).toHaveCount(6); // 3 satır × 2 kolon
+	await expect(activeCell(page)).toHaveAttribute('data-row', '2');
+	await expect(activeCell(page)).toHaveAttribute('data-col', '3');
+
+	await page.keyboard.press('ArrowDown'); // Shift'siz hareket aralığı kapatır
+	await expect(rangeCells(page)).toHaveCount(0);
+
+	await page.keyboard.press('Shift+ArrowUp');
+	await expect(rangeCells(page)).toHaveCount(2);
+	await page.keyboard.press('Escape');
+	await expect(rangeCells(page)).toHaveCount(0);
+});
+
+test('Shift + tıklama aktif hücreden tıklanana aralık seçer', async ({ page }) => {
+	await openTable(page);
+	await cell(page, 1, 2).click();
+	await cell(page, 3, 4).click({ modifiers: ['Shift'] });
+	await expect(rangeCells(page)).toHaveCount(9); // 3 × 3
+});
+
+test('fareyle sürükleme aralık seçer, kenarda otomatik kaydırır', async ({ page }) => {
+	await openTable(page);
+	const from = await cell(page, 0, 2).boundingBox();
+	const to = await cell(page, 2, 3).boundingBox();
+	await page.mouse.move(from!.x + 5, from!.y + 5);
+	await page.mouse.down();
+	await page.mouse.move(to!.x + 5, to!.y + 5, { steps: 5 });
+	await page.mouse.up();
+	await expect(rangeCells(page)).toHaveCount(6);
+
+	// Alt kenarın dışına sürükleyip beklemek tabloyu aşağı kaydırır
+	const box = (await grid(page).boundingBox())!;
+	const scrollBefore = await grid(page).evaluate((el) => el.scrollTop);
+	await page.mouse.move(from!.x + 5, from!.y + 5);
+	await page.mouse.down();
+	await page.mouse.move(from!.x + 5, box.y + box.height + 40, { steps: 5 });
+	await page.waitForTimeout(600);
+	await page.mouse.up();
+	expect(await grid(page).evaluate((el) => el.scrollTop)).toBeGreaterThan(scrollBefore);
+	expect(Number(await activeCell(page).getAttribute('data-row'))).toBeGreaterThan(2);
+});
+
+test('Ctrl+C aralığı sekmeyle ayrılmış metin olarak kopyalar', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await openTable(page);
+	await cell(page, 0, 2).click();
+	await page.keyboard.press('Shift+ArrowDown');
+	await page.keyboard.press('Shift+ArrowRight');
+	await page.keyboard.press('Control+c');
+
+	const expected = [0, 1].map((r) => [2, 3].map((c) => cell(page, r, c)));
+	const rows = await Promise.all(expected.map((cells) => Promise.all(cells.map(async (c) => ((await c.textContent()) ?? '').trim()))));
+	const clip = await page.evaluate(() => navigator.clipboard.readText());
+	const lines = clip.split('\n').map((line) => line.split('\t'));
+	expect(lines).toHaveLength(2);
+	expect(lines.map((l) => l.length)).toEqual([2, 2]);
+	expect(lines[0][0]).toBe(rows[0][0]); // ID kolonu: ham değer = görünen metin
+	expect(lines[1][0]).toBe(rows[1][0]);
+});

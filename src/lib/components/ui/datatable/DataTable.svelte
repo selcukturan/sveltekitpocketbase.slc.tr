@@ -210,6 +210,7 @@
 		--_dt-header-hover: var(--dt-header-hover, var(--color-surface-300));
 		--_dt-row-hover: var(--dt-row-hover, color-mix(in srgb, var(--color-primary-500) 7%, var(--_dt-bg)));
 		--_dt-row-selected: var(--dt-row-selected, color-mix(in srgb, var(--color-primary-500) 15%, var(--_dt-bg)));
+		--_dt-range: var(--dt-range, color-mix(in srgb, var(--color-primary-500) 26%, var(--_dt-bg)));
 		--_dt-border: var(--dt-border, var(--color-surface-200));
 		--_dt-border-strong: var(--dt-border-strong, var(--color-surface-300));
 		/* freeze sınırı: koyu temada gölge görünmediği için ayrımı 2px çizgi sağlar */
@@ -358,8 +359,12 @@
 	:global(.slc-table [data-slc-table-datacell][data-selected]) {
 		background-color: var(--_dt-row-selected) !important;
 	}
-	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell][data-selected]) {
+	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell][data-selected]:not([data-in-range])) {
 		background-color: color-mix(in srgb, var(--_dt-accent) 22%, var(--_dt-bg)) !important;
+	}
+	/* Hücre aralığı (Shift/sürükleme): seçili satır ve hover'ın üzerinde (aynı özgüllük, sonra tanımlı) */
+	:global(.slc-table [data-slc-table-datarow] [data-slc-table-datacell][data-in-range]) {
+		background-color: var(--_dt-range) !important;
 	}
 	.slc-table-selected {
 		font-weight: 600;

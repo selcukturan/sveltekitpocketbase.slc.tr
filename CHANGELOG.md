@@ -32,6 +32,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   odağı aktif hücreye döndürür; silinen satırla birlikte kaybolan odak grid'e
   geri verilir (`MutationObserver`; async modda DOM güncellemesi ertelendiği
   için `tick()` güvenilir değil). Seçim kolonu `selection` kapalıyken gizlenir.
+- DataTable: hücre aralığı seçimi (3. aşama). Shift + oklar / Home / End /
+  PageUp / PageDown / Ctrl+Home / Ctrl+End, Shift + tıklama ve fareyle
+  sürükleme (veri alanının kenarında otomatik kaydırma). Esc önce aralığı,
+  sonra satır seçimini temizler. Ctrl/⌘+C aralığı (yoksa aktif hücreyi)
+  sekmeyle ayrılmış metin olarak kopyalar (Excel'e yapıştırılabilir; seçim ve
+  işlem kolonları atlanır). Aralık rengi `--dt-range`; hücrede `aria-selected`.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -64,7 +70,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.166` oldu.
+- Uygulama sürümü `v0.2.0-alpha.167` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

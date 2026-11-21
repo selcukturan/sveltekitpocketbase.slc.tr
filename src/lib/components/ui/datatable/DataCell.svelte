@@ -24,6 +24,7 @@
 	// Aktif hücre (klavye imleci): her hücre yalnızca bir string karşılaştırır, DOM'da değişen 2 hücredir
 	const isActive = $derived(context.cursor.key === `${dr.rowOriginalIndex}:${dc.colVisibleIndex}`);
 	const isSelected = $derived(context.selection.enabled && context.selection.has(dr.row.id));
+	const inRange = $derived(context.cursor.inRange(dr.rowOriginalIndex, dc.colVisibleIndex));
 </script>
 
 <div
@@ -32,6 +33,8 @@
 	data-col={dc.colVisibleIndex}
 	data-active={isActive || undefined}
 	data-selected={isSelected || undefined}
+	data-in-range={inRange || undefined}
+	aria-selected={inRange || undefined}
 	id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })}
 	role="gridcell"
 	class={classes}
