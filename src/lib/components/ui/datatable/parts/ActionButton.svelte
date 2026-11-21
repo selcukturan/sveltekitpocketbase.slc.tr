@@ -18,6 +18,7 @@
 
 <button
 	type="button"
+	tabindex={-1}
 	{@attach tooltip({
 		text: label,
 		position: 'top',

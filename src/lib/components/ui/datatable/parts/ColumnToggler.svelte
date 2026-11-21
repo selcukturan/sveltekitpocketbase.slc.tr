@@ -40,10 +40,13 @@
 	<div class="slc-dt-menu">
 		{#each context.columns as col, originalIndex (col.field)}
 			{@const label = col.label ?? String(col.field)}
-			<label class="slc-dt-menu-item">
-				<input type="checkbox" checked={col.hidden !== true} onchange={() => context.toggleColumnVisibility(originalIndex)} />
-				<span>{t(label, undefined, label)}</span>
-			</label>
+			<!-- seçim kolonu gizlenmez (selection prop'una bağlı) -->
+			{#if col.type !== 'select'}
+				<label class="slc-dt-menu-item">
+					<input type="checkbox" checked={col.hidden !== true} onchange={() => context.toggleColumnVisibility(originalIndex)} />
+					<span>{t(label, undefined, label)}</span>
+				</label>
+			{/if}
 		{/each}
 	</div>
 </Toggler>

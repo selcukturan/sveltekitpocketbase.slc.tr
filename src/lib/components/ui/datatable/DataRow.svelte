@@ -17,7 +17,14 @@
 	const context = getTableContext<TData>();
 </script>
 
-<div data-slc-table-datarow role="row" style:display="contents" class={classes} {...attributes}>
+<div
+	data-slc-table-datarow
+	role="row"
+	aria-selected={context.selection.enabled ? context.selection.has(dr.row.id) : undefined}
+	style:display="contents"
+	class={classes}
+	{...attributes}
+>
 	{#each context.visibleColumns as col, colVisibleIndex (col.data.field)}
 		{@const value = (dr.row as Record<string, unknown>)[col.data.field]}
 		{@render dataCell?.({ value, col, colVisibleIndex })}

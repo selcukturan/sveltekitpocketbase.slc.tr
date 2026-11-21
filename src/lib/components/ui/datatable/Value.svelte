@@ -10,7 +10,7 @@
 	 * Not: Çalışma anında yalnızca JS değeri görülür. Boş metin, ID ya da '5' gibi metinler 'text' sayılır;
 	 * kesin sonuç için kolona `type` verin.
 	 */
-	export function inferType(value: unknown): Exclude<ColumnType, 'actions'> {
+	export function inferType(value: unknown): Exclude<ColumnType, 'actions' | 'select'> {
 		if (typeof value === 'boolean') return 'bool';
 		if (typeof value === 'number') return 'number';
 		if (Array.isArray(value)) return 'list';
@@ -37,7 +37,7 @@
 	// wrap: false → tablo hücresi (tek satır, taşan kısım …); true → detay görünümü (satır kaydırır, liste etiket olur)
 	let { value, type, wrap = false }: { value: unknown; type?: ColumnType; wrap?: boolean } = $props();
 
-	const kind = $derived(type && type !== 'actions' ? type : inferType(value));
+	const kind = $derived(type && type !== 'actions' && type !== 'select' ? type : inferType(value));
 	const locale = $derived(getSelectedLang());
 
 	const text = $derived.by(() => {

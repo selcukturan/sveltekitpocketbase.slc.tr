@@ -20,6 +20,21 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `scrollIntoView`. Yeni olaylar: `onRowActivate` (çift tıklama/Enter),
   `onCellClick`, `onCellDblClick`, `onActiveCellChange`. Tazelemede aktif hücre
   aynı kayıtta kalır, yeni sayfada ilk satıra geçer.
+- DataTable: satır seçimi (2. aşama). `selection="single" | "multiple"`,
+  `bind:selected` (satır id'leri; sayfalar arası korunur), `onSelectionChange`.
+  Seçim kolonu `{ field: '_select', type: 'select' }`; başlıkta sayfayı seçen
+  üç durumlu onay kutusu. Fare: seçim kolonunda tıklama/Shift+tıklama (aralık),
+  Ctrl/⌘+tıklama; single modda satıra tıklamak seçer. Klavye: Space,
+  Shift+Space (aralık), Ctrl/⌘+A, Esc. Alt barda "N seçili · Seçimi temizle".
+- DataTable: hücre içindeki işlem butonları Tab sırasından çıkarıldı
+  (`tabindex=-1`); klavyeyle grid üzerinden gezinilir.
+  Odak hücredeki bir butondayken (örn. drawer kapanınca) Tab / Esc / oklar
+  odağı aktif hücreye döndürür; silinen satırla birlikte kaybolan odak grid'e
+  geri verilir (`MutationObserver`; async modda DOM güncellemesi ertelendiği
+  için `tick()` güvenilir değil). Seçim kolonu `selection` kapalıyken gizlenir.
+- Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
+  DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
+  Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
 - DataTable: `dt.createList()` (`ListState`) ile filtre, sayfalama, sıralama
   ve sorgu tek yerden yönetiliyor; `autoLoad: false` ile ilk yüklemede istek
   atılmıyor. Tablo `list={list}` ile bağlanıyor.
@@ -49,7 +64,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.165` oldu.
+- Uygulama sürümü `v0.2.0-alpha.166` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

@@ -23,6 +23,7 @@
 	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
 	// Aktif hücre (klavye imleci): her hücre yalnızca bir string karşılaştırır, DOM'da değişen 2 hücredir
 	const isActive = $derived(context.cursor.key === `${dr.rowOriginalIndex}:${dc.colVisibleIndex}`);
+	const isSelected = $derived(context.selection.enabled && context.selection.has(dr.row.id));
 </script>
 
 <div
@@ -30,6 +31,7 @@
 	data-row={dr.rowOriginalIndex}
 	data-col={dc.colVisibleIndex}
 	data-active={isActive || undefined}
+	data-selected={isSelected || undefined}
 	id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })}
 	role="gridcell"
 	class={classes}
@@ -49,6 +51,11 @@
 >
 	{#if children}
 		{@render children()}
+	{:else if dc.col.data.type === 'select'}
+		<!-- Görsel: tıklama grid'deki dinleyiciyle (seçim kolonu) işlenir; durum satırın aria-selected'ında -->
+		{#if context.selection.enabled}
+			<input class="slc-table-check" type={context.selection.mode === 'single' ? 'radio' : 'checkbox'} checked={isSelected} tabindex="-1" aria-hidden="true" />
+		{/if}
 	{:else}
 		<Value value={dc.value} type={dc.col.data.type} />
 	{/if}
@@ -72,12 +79,18 @@
 	[data-slc-table-datacell].clickable {
 		cursor: pointer;
 	}
-	/* Aktif hücre: tablo odaktayken vurgu rengi, değilken soluk (seçim yeri kaybolmasın) */
+	.slc-table-check {
+		width: 15px;
+		height: 15px;
+		accent-color: var(--_dt-accent);
+		pointer-events: none;
+	}
+	/* Aktif hücre: odak tablodayken (grid ya da hücredeki bir buton) vurgu rengi, değilken soluk (yeri kaybolmasın) */
 	[data-slc-table-datacell][data-active] {
 		outline: 2px solid var(--_dt-border-strong);
 		outline-offset: -2px;
 	}
-	:global(.slc-table:focus) [data-slc-table-datacell][data-active] {
+	:global(.slc-table:focus-within) [data-slc-table-datacell][data-active] {
 		outline-color: var(--_dt-accent);
 	}
 	.slc-table-freeze-left-boundary {

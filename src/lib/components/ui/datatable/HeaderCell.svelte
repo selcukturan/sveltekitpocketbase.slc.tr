@@ -25,7 +25,16 @@
 	const label = $derived(col.data.label ?? field);
 	const layout = $derived(context.columnLayout[hc.colVisibleIndex]);
 
-	const isSortable = $derived(col.data.sortable !== false);
+	// Seçim ve işlem kolonları sıralanmaz/genişletilmez
+	const isSelectColumn = $derived(col.data.type === 'select');
+	const isSortable = $derived(col.data.sortable !== false && !isSelectColumn && col.data.type !== 'actions');
+	const isResizeable = $derived(col.data.resizeable !== false && !isSelectColumn);
+	const pageState = $derived(context.selection.pageState);
+
+	// Başlık onay kutusunun "yarım" durumu yalnızca JS property'si ile verilebilir
+	const indeterminate = (checked: boolean) => (node: HTMLInputElement) => {
+		node.indeterminate = checked;
+	};
 	const sortDir = $derived(context.getColumnSortDirection(col.data.field));
 
 	const sortableAttach = (node: HTMLElement) => {
@@ -78,6 +87,20 @@
 	<div class="slc-table-header-content" style:text-align={layout?.textAlignHeader}>
 		{#if children}
 			{@render children()}
+		{:else if isSelectColumn}
+			{#if context.selection.mode === 'multiple'}
+				<!-- Yüklü sayfanın tamamını seçer/kaldırır; diğer sayfalardaki seçim korunur. pointerdown: odak grid'de kalsın (oklar çalışmaya devam etsin) -->
+				<input
+					class="slc-table-check"
+					type="checkbox"
+					tabindex="-1"
+					checked={pageState === 'all'}
+					{@attach indeterminate(pageState === 'some')}
+					onchange={context.selection.toggleAll}
+					onpointerdown={(e) => e.preventDefault()}
+					aria-label={t('dt_select_page')}
+				/>
+			{/if}
 		{:else}
 			{t(label, undefined, label)}
 		{/if}
@@ -89,7 +112,7 @@
 		</span>
 	{/if}
 
-	{#if col.data.resizeable !== false}
+	{#if isResizeable}
 		<div
 			class="slc-table-resizer"
 			onclick={(e) => e.stopPropagation()}
@@ -126,6 +149,13 @@
 	.slc-table-headercell-sortable:focus-visible {
 		outline: 2px solid var(--_dt-accent);
 		outline-offset: -2px;
+	}
+	.slc-table-check {
+		width: 15px;
+		height: 15px;
+		accent-color: var(--_dt-accent);
+		vertical-align: middle;
+		cursor: pointer;
 	}
 	.slc-table-header-content {
 		flex: 1 1 0%;

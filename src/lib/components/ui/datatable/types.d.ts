@@ -13,7 +13,8 @@ export type Width = `${number}px` | `minmax(${number}px,${number}fr)` | `minmax(
 
 // Hücrenin nasıl gösterileceği. Verilmezse değerden tahmin edilir (bkz. Value.svelte).
 // 'actions': satır işlem butonları; DataTable'ın `actions` snippet'i ile çizilir.
-export type ColumnType = 'text' | 'number' | 'bool' | 'date' | 'datetime' | 'list' | 'json' | 'actions';
+// 'select': satır seçim kolonu (onay kutusu); `selection` prop'u 'single' | 'multiple' iken. Sıralanmaz, genişletilmez.
+export type ColumnType = 'text' | 'number' | 'bool' | 'date' | 'datetime' | 'list' | 'json' | 'actions' | 'select';
 
 export type Align = 'left' | 'center' | 'right';
 

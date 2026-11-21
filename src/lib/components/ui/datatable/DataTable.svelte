@@ -13,10 +13,18 @@
 	import FooterRow from './FooterRow.svelte';
 	import FooterCell from './FooterCell.svelte';
 
-	let props: MainProps<TData> = $props();
+	// selected: seçili satır id'leri (bind:selected). Sayfa bağlamazsa yerel değer olarak yazılır.
+	let { selected = $bindable([]), ...props }: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
-	const context = createTableContext<TData>(props); // init
+	const context = createTableContext<TData>(props, {
+		get selected() {
+			return selected;
+		},
+		set selected(ids) {
+			selected = ids;
+		}
+	}); // init
 
 	// Parent kullanımı: tableRef?.helpers.setFreeze('freezeLeft', 2) | tableRef?.helpers.resetLayout()
 	export const helpers = context.helpers;
@@ -155,6 +163,10 @@
 				{#if context.paginable}
 					<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
 				{/if}
+				{#if context.selection.mode === 'multiple' && context.selection.count > 0}
+					<span class="slc-table-selected">{t('dt_selected', { count: context.selection.count })}</span>
+					<button type="button" class="slc-table-clear" onclick={context.selection.clear}>{t('dt_clear_selection')}</button>
+				{/if}
 			</div>
 			<div class="slc-table-bar-center">
 				{#if context.paginable && context.totalPages > 1}
@@ -197,6 +209,7 @@
 		--_dt-header-text: var(--dt-header-text, var(--color-surface-700));
 		--_dt-header-hover: var(--dt-header-hover, var(--color-surface-300));
 		--_dt-row-hover: var(--dt-row-hover, color-mix(in srgb, var(--color-primary-500) 7%, var(--_dt-bg)));
+		--_dt-row-selected: var(--dt-row-selected, color-mix(in srgb, var(--color-primary-500) 15%, var(--_dt-bg)));
 		--_dt-border: var(--dt-border, var(--color-surface-200));
 		--_dt-border-strong: var(--dt-border-strong, var(--color-surface-300));
 		/* freeze sınırı: koyu temada gölge görünmediği için ayrımı 2px çizgi sağlar */
@@ -340,5 +353,25 @@
 	/* Satır üzerine gelince tüm hücreler (sticky olanlar dahil) vurgulanır */
 	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell]) {
 		background-color: var(--_dt-row-hover) !important;
+	}
+	/* Seçili satır: sticky hücreler altını örtmeye devam etsin diye opak karışım */
+	:global(.slc-table [data-slc-table-datacell][data-selected]) {
+		background-color: var(--_dt-row-selected) !important;
+	}
+	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell][data-selected]) {
+		background-color: color-mix(in srgb, var(--_dt-accent) 22%, var(--_dt-bg)) !important;
+	}
+	.slc-table-selected {
+		font-weight: 600;
+		color: var(--_dt-accent);
+		white-space: nowrap;
+	}
+	.slc-table-clear {
+		color: var(--_dt-muted);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	.slc-table-clear:hover {
+		color: var(--_dt-text);
 	}
 </style>

@@ -15,7 +15,9 @@
 	const drawer = createHashDrawer(); // #cmd=update&id=... → drawer
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
+	let selected = $state<Item['id'][]>([]); // seçili satır id'leri (sayfalar arası korunur)
 	const columns: dt.Column<Item>[] = [
+		{ field: '_select', type: 'select' },
 		{ field: '_actions', type: 'actions', label: 'dt_actions', sortable: false },
 		{ field: 'id', label: 'dt_id', width: 'minmax(50px,1fr)' },
 		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)' },
@@ -130,7 +132,9 @@
 				{list}
 				{columns}
 				footers={[{ text_optional: 'Toplam' }, { text_optional: 'Toplam' }, { text_optional: 'Toplam' }]}
-				freezeLeft={1}
+				freezeLeft={2}
+				selection="multiple"
+				bind:selected
 				persist="grapes-crud-simple"
 				onRowActivate={(row) => drawer.show('update', row.id)}
 			>

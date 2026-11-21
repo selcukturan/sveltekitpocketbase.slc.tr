@@ -15,15 +15,15 @@ import { tick } from 'svelte';
 
 export type CellPos = { row: number; col: number };
 
-// Tablo bağlamının imlece verdiği bilgiler (getter'lar reaktif okunur)
+// Tablo bağlamının imlece verdiği bilgiler (fonksiyonlar çağrıldıkları yerde reaktif okunur)
 export interface CursorHost {
-	readonly el: HTMLElement | undefined;
-	readonly rowCount: number;
-	readonly colCount: number;
-	readonly dataRowHeight: number;
-	readonly headerHeight: number; // sticky başlık satırları toplamı
-	readonly footerHeight: number; // sticky footer satırları toplamı
-	readonly clientHeight: number;
+	el(): HTMLElement | undefined;
+	rowCount(): number;
+	colCount(): number;
+	dataRowHeight(): number;
+	headerHeight(): number; // sticky başlık satırları toplamı
+	footerHeight(): number; // sticky footer satırları toplamı
+	clientHeight(): number;
 	cellId(pos: CellPos): string;
 	onChange(pos: CellPos | undefined): void;
 	onActivate(pos: CellPos): void; // Enter
@@ -49,13 +49,13 @@ export class GridCursor {
 	// Tam görünen veri satırı sayısı (PageUp/PageDown adımı): başlık ve footer düşülür
 	get pageSize() {
 		const h = this.#host;
-		return Math.max(1, Math.floor((h.clientHeight - h.headerHeight - h.footerHeight) / h.dataRowHeight));
+		return Math.max(1, Math.floor((h.clientHeight() - h.headerHeight() - h.footerHeight()) / h.dataRowHeight()));
 	}
 
 	// Görünen ilk satır (henüz aktif hücre yokken klavyeyle başlanacak yer)
 	get firstVisibleRow() {
 		const h = this.#host;
-		return clamp(Math.ceil((h.el?.scrollTop ?? 0) / h.dataRowHeight), 0, Math.max(0, h.rowCount - 1));
+		return clamp(Math.ceil((h.el()?.scrollTop ?? 0) / h.dataRowHeight()), 0, Math.max(0, h.rowCount() - 1));
 	}
 
 	/**
@@ -65,7 +65,7 @@ export class GridCursor {
 	 */
 	readonly set = (pos: CellPos | undefined, { scroll = false }: { scroll?: boolean } = {}) => {
 		const h = this.#host;
-		const next = pos && h.rowCount > 0 && h.colCount > 0 ? { row: clamp(pos.row, 0, h.rowCount - 1), col: clamp(pos.col, 0, h.colCount - 1) } : undefined;
+		const next = pos && h.rowCount() > 0 && h.colCount() > 0 ? { row: clamp(pos.row, 0, h.rowCount() - 1), col: clamp(pos.col, 0, h.colCount() - 1) } : undefined;
 		const current = this.#active;
 		if (current?.row !== next?.row || current?.col !== next?.col) {
 			this.#active = next;
@@ -89,10 +89,10 @@ export class GridCursor {
 	 */
 	readonly handleKey = (e: KeyboardEvent): boolean => {
 		const h = this.#host;
-		if (h.rowCount === 0 || h.colCount === 0) return false;
+		if (h.rowCount() === 0 || h.colCount() === 0) return false;
 
-		const lastRow = h.rowCount - 1;
-		const lastCol = h.colCount - 1;
+		const lastRow = h.rowCount() - 1;
+		const lastCol = h.colCount() - 1;
 		const mod = e.ctrlKey || e.metaKey;
 		const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'];
 

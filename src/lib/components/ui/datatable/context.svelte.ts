@@ -3,6 +3,7 @@ import type { RemoteQuery } from '$app/server';
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
 import { GridCursor, type CellPos } from './navigation.svelte.js';
+import { RowSelection, type SelectionMode, type RowId } from './selection.svelte.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
@@ -48,7 +49,8 @@ export const DEFAULT_COLUMN_WIDTHS: Record<ColumnType, Width> = {
 	datetime: 'minmax(160px,1fr)',
 	list: 'minmax(140px,1fr)',
 	json: 'minmax(160px,1.25fr)',
-	actions: 'minmax(100px,0.5fr)'
+	actions: 'minmax(100px,0.5fr)',
+	select: '44px'
 };
 
 // Kolonun geçerli genişlik tanımı: kullanıcı/props değeri, yoksa tip varsayılanı
@@ -117,7 +119,14 @@ export interface MainProps<TData extends Row> {
 	onCellDblClick?: (e: CellEvent<TData>) => void;
 	onActiveCellChange?: (cell: ActiveCell<TData> | undefined) => void;
 	onSort?: (sort: string) => void;
+	// Satır seçimi: 'single' | 'multiple' (varsayılan 'none'). Onay kutuları için kolonlara { field: '_select', type: 'select' } eklenir.
+	selection?: SelectionMode;
+	selected?: RowId[]; // bind:selected (DataTable'da $bindable)
+	onSelectionChange?: (ids: RowId[]) => void;
 }
+
+// DataTable'ın $bindable `selected` prop'una erişim (okuma/yazma)
+export type SelectedBinding = { selected: RowId[] };
 
 class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
@@ -185,34 +194,28 @@ class TableContext<TData extends Row> {
 
 	// Aktif hücre ve klavye gezinmesi (bkz. navigation.svelte.ts)
 	readonly cursor: GridCursor;
+	// Satır seçimi (bkz. selection.svelte.ts)
+	readonly selection: RowSelection<TData>;
 	readonly activeCellId = $derived.by(() => (this.cursor.active ? this.cellId(this.cursor.active) : undefined));
 
-	constructor(props: MainProps<TData>) {
+	constructor(props: MainProps<TData>, binding: SelectedBinding) {
 		this.#props = props;
 
-		const ctx = this;
+		this.selection = new RowSelection<TData>({
+			mode: () => this.#props.selection ?? 'none',
+			items: () => this.items as TData[],
+			value: () => binding.selected,
+			setValue: (ids) => (binding.selected = ids),
+			onChange: (ids) => this.#props.onSelectionChange?.(ids)
+		});
 		this.cursor = new GridCursor({
-			get el() {
-				return ctx.el;
-			},
-			get rowCount() {
-				return ctx.dataLength;
-			},
-			get colCount() {
-				return ctx.visibleColumns.length;
-			},
-			get dataRowHeight() {
-				return ctx.dataRowHeight;
-			},
-			get headerHeight() {
-				return ctx.headerLength * ctx.headerRowHeight;
-			},
-			get footerHeight() {
-				return ctx.dataLength > 0 ? ctx.footerLength * ctx.footerRowHeight : 0;
-			},
-			get clientHeight() {
-				return ctx.clientHeight;
-			},
+			el: () => this.el,
+			rowCount: () => this.dataLength,
+			colCount: () => this.visibleColumns.length,
+			dataRowHeight: () => this.dataRowHeight,
+			headerHeight: () => this.headerLength * this.headerRowHeight,
+			footerHeight: () => (this.dataLength > 0 ? this.footerLength * this.footerRowHeight : 0),
+			clientHeight: () => this.clientHeight,
 			cellId: this.cellId,
 			onChange: (pos) => this.#props.onActiveCellChange?.(pos ? this.#activeCell(pos) : undefined),
 			onActivate: (pos) => {
@@ -488,29 +491,67 @@ class TableContext<TData extends Row> {
 			const hit = hitCell(e);
 			if (hit) this.cursor.set(hit.pos);
 		});
+		const isSelectColumn = (col: number) => this.visibleColumns[col]?.data.type === 'select';
+
 		const offClick = on(node, 'click', (e: MouseEvent) => {
 			const hit = hitCell(e);
 			if (!hit) return;
+			const selection = this.selection;
+			// Seçim kolonu: tıklama değiştirir, Shift aralık seçer (satır tıklaması sayılmaz)
+			if (isSelectColumn(hit.pos.col)) {
+				if (e.shiftKey) selection.selectRange(hit.row.id);
+				else selection.toggle(hit.row.id);
+				return;
+			}
 			this.#props.onCellClick?.(cellEvent(hit.pos, hit.row, e));
-			if (!hit.interactive) this.onRowClick?.(hit.row);
+			if (hit.interactive) return;
+			if (e.ctrlKey || e.metaKey) selection.toggle(hit.row.id);
+			else if (selection.mode === 'single') selection.select(hit.row.id);
+			this.onRowClick?.(hit.row);
 		});
 		const offDblClick = on(node, 'dblclick', (e: MouseEvent) => {
 			const hit = hitCell(e);
-			if (!hit || hit.interactive) return;
+			if (!hit || hit.interactive || isSelectColumn(hit.pos.col)) return;
 			this.#props.onCellDblClick?.(cellEvent(hit.pos, hit.row, e));
 			this.#props.onRowActivate?.(hit.row);
 		});
-		// Yalnızca grid'in kendisi odaktayken (başlıktaki sıralama butonu ya da hücredeki bir buton odaktaysa onların tuşları)
 		const offKeyDown = on(node, 'keydown', (e: KeyboardEvent) => {
-			if (e.target !== node) return;
-			if (this.cursor.handleKey(e)) e.preventDefault();
+			if (e.target !== node) {
+				// Odak hücre içindeki bir butonda (örn. drawer kapanınca tarayıcı odağı Düzenle butonuna geri verir):
+				// Tab / Esc / oklar odağı grid'e, yani aktif hücreye döndürür. Enter/Space butonun kendisinde kalır.
+				const inCell = e.target instanceof Element && e.target.closest('[data-slc-table-datacell]') !== null;
+				const back = e.key === 'Tab' || e.key === 'Escape' || e.key.startsWith('Arrow');
+				if (!inCell || !back) return;
+				e.preventDefault();
+				node.focus({ preventScroll: true });
+				if (!e.key.startsWith('Arrow')) return; // oklar ayrıca hareket ettirir
+			}
+			if (this.selection.handleKey(e, this.cursor.active?.row) || this.cursor.handleKey(e)) e.preventDefault();
 		});
+
+		// Odak koruma: tabloda odaklı eleman (örn. silinen satırdaki Sil butonu) DOM'dan kalkarsa odak body'ye düşer;
+		// grid'e, yani aktif hücreye geri verilir. MutationObserver zamanlamadan bağımsızdır: Svelte'in async modunda
+		// DOM güncellemesi remote sorgular bitene kadar ertelenebildiği için tick()/$effect.pre güvenilir değil.
+		// Firefox kaldırılan eleman için focusout göndermediği için focusout'a da dayanılmaz.
+		let lastFocused: Element | null = null;
+		const offFocusIn = on(node, 'focusin', (e: FocusEvent) => {
+			lastFocused = e.target instanceof Element ? e.target : null;
+		});
+		const observer = new MutationObserver(() => {
+			if (!lastFocused || lastFocused === node || lastFocused.isConnected) return;
+			lastFocused = null;
+			const active = document.activeElement;
+			if (!active || active === document.body) node.focus({ preventScroll: true });
+		});
+		observer.observe(node, { childList: true, subtree: true });
 
 		return () => {
 			offPointerDown();
 			offClick();
 			offDblClick();
 			offKeyDown();
+			offFocusIn();
+			observer.disconnect();
 		};
 	};
 
@@ -524,7 +565,8 @@ class TableContext<TData extends Row> {
 
 		for (let i = 0; i < this.columns.length; i++) {
 			const col = this.columns[i];
-			if (col && col.hidden !== true) {
+			// Seçim kolonu yalnızca selection 'single' | 'multiple' iken görünür
+			if (col && col.hidden !== true && !(col.type === 'select' && !this.selection.enabled)) {
 				processedColumns.push({ data: col, originalIndex: i });
 			}
 		}
@@ -696,7 +738,7 @@ class TableContext<TData extends Row> {
 		if (explicit ?? col.align) return (explicit ?? col.align) as Align;
 		// sayı ve tarihler sabit biçimli: sağa dayalıyken basamaklar alt alta gelir, karşılaştırması kolay olur
 		if (col.type === 'number' || col.type === 'date' || col.type === 'datetime') return 'right';
-		if (col.type === 'bool' || col.type === 'actions') return 'center';
+		if (col.type === 'bool' || col.type === 'actions' || col.type === 'select') return 'center';
 		return 'left';
 	};
 
@@ -754,8 +796,8 @@ class TableContext<TData extends Row> {
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
 
-export function createTableContext<TData extends Row>(initialProps: MainProps<TData>) {
-	return setContext(key, new TableContext<TData>(initialProps));
+export function createTableContext<TData extends Row>(initialProps: MainProps<TData>, binding: SelectedBinding) {
+	return setContext(key, new TableContext<TData>(initialProps, binding));
 }
 
 export function getTableContext<TData extends Row>() {
