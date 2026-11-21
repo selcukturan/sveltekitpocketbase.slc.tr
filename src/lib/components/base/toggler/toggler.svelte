@@ -102,7 +102,7 @@
 
 <div
 	bind:this={container}
-	class="container"
+	class="slc-toggler"
 	style:--anchor={anchorname}
 	onfocusout={(e: FocusEvent) => {
 		if (e.relatedTarget && container?.contains(e.relatedTarget as Node)) return;
@@ -135,7 +135,8 @@
 </div>
 
 <style>
-	.container {
+	/* "container" adı Tailwind'in .container sınıfıyla (width: 100%) çakışıyordu */
+	.slc-toggler {
 		--default-background-color: var(--slc-system-bg-surface);
 		--default-box-shadow: 0px 0px 16px -1px var(--slc-system-color-shadow);
 		--default-border: solid 1px var(--slc-system-border);
@@ -143,6 +144,9 @@
 		--default-overflow: auto;
 		--default-display: inline-block;
 		display: inline-block;
+		/* Kapsayıcı varsayılan olarak tetikleyici kadar geniştir. Form alanı gibi tam genişlik için:
+		   <Toggler --container-width="100%" /> (Select bunu kullanır) */
+		width: var(--container-width, auto);
 	}
 
 	.popover {

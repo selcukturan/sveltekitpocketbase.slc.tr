@@ -20,23 +20,10 @@
 	const context = getTableContext<TData>();
 
 	const gridRowStart = 1;
-	const gridColumn = $derived(`${hc.colVisibleIndex + 1} / ${hc.colVisibleIndex + 2}`);
-
 	const col = $derived(hc.col);
 	const field = $derived(col.data.field as string);
 	const label = $derived(col.data.label ?? field);
-	const textAlign = $derived(context.alignOf(col.data, 'header'));
-
-	const isFreezeLeft = $derived(hc.colVisibleIndex < context.freezeLeft);
-	const isFreezeRight = $derived(hc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
-	const isSticky = $derived(isFreezeLeft || isFreezeRight);
-
-	const leftOffset = $derived(isFreezeLeft ? context.stickyOffsets[field]?.left : undefined);
-	const rightOffset = $derived(isFreezeRight ? context.stickyOffsets[field]?.right : undefined);
-
-	// Boundary check
-	const isLastFreezeLeft = $derived(isFreezeLeft && hc.colVisibleIndex === context.freezeLeft - 1);
-	const isFirstFreezeRight = $derived(isFreezeRight && hc.colVisibleIndex === context.visibleColumns.length - context.freezeRight);
+	const layout = $derived(context.columnLayout[hc.colVisibleIndex]);
 
 	const isSortable = $derived(col.data.sortable !== false);
 	const sortDir = $derived(context.getColumnSortDirection(col.data.field));
@@ -63,10 +50,11 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	class:slc-table-headercell={true}
-	class:slc-table-freeze-left={isFreezeLeft}
-	class:slc-table-freeze-right={isFreezeRight}
-	class:slc-table-freeze-left-boundary={isLastFreezeLeft}
-	class:slc-table-freeze-right-boundary={isFirstFreezeRight}
+	class:slc-table-freeze-left={layout?.freezeLeft}
+	class:slc-table-freeze-right={layout?.freezeRight}
+	class:slc-table-freeze-left-boundary={layout?.boundaryLeft}
+	class:slc-table-freeze-right-boundary={layout?.boundaryRight}
+	class:slc-table-headercell-resizing={context.resizingField === field}
 	class:slc-table-headercell-sortable={isSortable}
 	role="columnheader"
 	aria-sort={!isSortable ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'}
@@ -74,18 +62,18 @@
 	data-header-index={hr.headerIndex}
 	style:position="sticky"
 	style:top="0"
-	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
-	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
-	style:z-index={isSticky ? 3 : 2}
+	style:left={layout?.left}
+	style:right={layout?.right}
+	style:z-index={layout?.sticky ? 3 : 2}
 	style:grid-row-start={gridRowStart}
-	style:grid-column={gridColumn}
+	style:grid-column={layout?.gridColumn}
 	class={classes}
 	{@attach isSortable && sortableAttach}
 	{@attach context.measureColumn(field)}
 	tabindex={isSortable ? 0 : undefined}
 	{...attributes}
 >
-	<div class="slc-table-header-content" style:text-align={textAlign}>
+	<div class="slc-table-header-content" style:text-align={layout?.textAlignHeader}>
 		{#if children}
 			{@render children()}
 		{:else}
@@ -103,7 +91,7 @@
 		<div
 			class="slc-table-resizer"
 			onclick={(e) => e.stopPropagation()}
-			{@attach context.colResizePointerAttach((e: PointerEvent) => context.colResizeUpdate(e, col.originalIndex, col.data.field))}
+			{@attach context.colResizeAttach(col.originalIndex)}
 			role="separator"
 			aria-label={t('dt_resize_column')}
 		></div>
@@ -188,16 +176,15 @@
 		opacity: 0.6;
 	}
 	.slc-table-resizer:hover::after,
-	.slc-table-resizer:active::after {
+	.slc-table-headercell-resizing .slc-table-resizer::after {
 		opacity: 1;
 		background-color: var(--_dt-accent);
 	}
+	/* 2px freeze çizgisi yalnızca veri hücrelerinde (DataCell); başlık/alt satırda sticky hücrelerde 1px kaymalar yaratıyordu */
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);
-		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
 		box-shadow: var(--_dt-freeze-shadow-right);
-		border-left: var(--_dt-freeze-line);
 	}
 </style>

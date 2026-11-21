@@ -17,41 +17,27 @@
 	const context = getTableContext<TData>();
 
 	const gridRowStart = $derived(context.dataLength + context.headerLength + fr.footerIndex + 1);
-	const gridColumn = $derived(`${fc.colVisibleIndex + 1} / ${fc.colVisibleIndex + 2}`);
 	const bottom = $derived(`${(context.footerLength - fr.footerIndex - 1) * context.footerRowHeight}px`);
 
-	const col = $derived(fc.col);
-	const field = $derived(col.data.field as string);
-	const justify = $derived({ left: 'flex-start', center: 'center', right: 'flex-end' }[context.alignOf(col.data, 'footer')]);
-
-	const isFreezeLeft = $derived(fc.colVisibleIndex < context.freezeLeft);
-	const isFreezeRight = $derived(fc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
-	const isSticky = $derived(isFreezeLeft || isFreezeRight);
-
-	const leftOffset = $derived(isFreezeLeft ? context.stickyOffsets[field]?.left : undefined);
-	const rightOffset = $derived(isFreezeRight ? context.stickyOffsets[field]?.right : undefined);
-
-	// Boundary check
-	const isLastFreezeLeft = $derived(isFreezeLeft && fc.colVisibleIndex === context.freezeLeft - 1);
-	const isFirstFreezeRight = $derived(isFreezeRight && fc.colVisibleIndex === context.visibleColumns.length - context.freezeRight);
+	const layout = $derived(context.columnLayout[fc.colVisibleIndex]);
 </script>
 
 <div
 	data-slc-table-footercell
 	role="gridcell"
 	class={classes}
-	class:slc-table-freeze-left={isFreezeLeft}
-	class:slc-table-freeze-right={isFreezeRight}
-	class:slc-table-freeze-left-boundary={isLastFreezeLeft}
-	class:slc-table-freeze-right-boundary={isFirstFreezeRight}
+	class:slc-table-freeze-left={layout?.freezeLeft}
+	class:slc-table-freeze-right={layout?.freezeRight}
+	class:slc-table-freeze-left-boundary={layout?.boundaryLeft}
+	class:slc-table-freeze-right-boundary={layout?.boundaryRight}
 	style:position="sticky"
 	style:bottom
-	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
-	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
-	style:z-index={isSticky ? 3 : 2}
+	style:left={layout?.left}
+	style:right={layout?.right}
+	style:z-index={layout?.sticky ? 3 : 2}
 	style:grid-row-start={gridRowStart}
-	style:grid-column={gridColumn}
-	style:justify-content={justify}
+	style:grid-column={layout?.gridColumn}
+	style:justify-content={layout?.justifyFooter}
 	{...attributes}
 >
 	{#if children}
@@ -76,12 +62,11 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	/* 2px freeze çizgisi yalnızca veri hücrelerinde (DataCell); başlık/alt satırda sticky hücrelerde 1px kaymalar yaratıyordu */
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);
-		border-right: var(--_dt-freeze-line);
 	}
 	.slc-table-freeze-right-boundary {
 		box-shadow: var(--_dt-freeze-shadow-right);
-		border-left: var(--_dt-freeze-line);
 	}
 </style>

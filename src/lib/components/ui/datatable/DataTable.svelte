@@ -25,6 +25,9 @@
 	const rangeFrom = $derived(context.totalItems === 0 ? 0 : (context.page - 1) * context.perPage + 1);
 	const rangeTo = $derived(Math.min(context.page * context.perPage, context.totalItems));
 
+	// Sorgu var ama ilk veri henüz gelmedi (hata da yok): alt bar iskelet gösterir
+	const barPending = $derived(!context.loaded && context.query !== undefined && context.query.error === undefined);
+
 	// Parent kullanımı: {tableRef?.states.loading}
 	export const states = {
 		get loading() {
@@ -96,6 +99,7 @@
 			bind:clientHeight={context.clientHeight}
 			{@attach context.watchCurrentChanged}
 			{@attach context.trackTableScroll}
+			{@attach context.trackRowClick}
 			class={context.tableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
@@ -125,27 +129,41 @@
 		</div>
 	</div>
 
-	<div class="slc-table-bar">
-		<div class="slc-table-bar-start">
-			{#if context.paginable}
-				<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
-			{/if}
+	<!-- İlk veri gelene kadar iskelet: kontroller hep birlikte gelir, yükseklik değişmez (kontroller 2rem, bkz. min-height) -->
+	{#if barPending}
+		<div class="slc-table-bar" aria-busy="true" aria-label={t('loading')}>
+			<div class="slc-table-bar-start"><span class="slc-table-skeleton" style:width="7.5rem" style:height="1rem"></span></div>
+			<div class="slc-table-bar-center"><span class="slc-table-skeleton" style:width="16rem"></span></div>
+			<div class="slc-table-bar-end">
+				<!-- sayfa başına, kolonlar, ayarlar -->
+				<span class="slc-table-skeleton" style:width="6.5rem"></span>
+				<span class="slc-table-skeleton" style:width="7.25rem"></span>
+				<span class="slc-table-skeleton" style:width="2.25rem"></span>
+			</div>
 		</div>
-		<div class="slc-table-bar-center">
-			{#if context.paginable && context.totalPages > 1}
-				<Pagination page={context.page} perPage={context.perPage} totalPages={context.totalPages} onChange={(data) => context.onPagination?.(data)} />
-			{/if}
+	{:else}
+		<div class="slc-table-bar">
+			<div class="slc-table-bar-start">
+				{#if context.paginable}
+					<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
+				{/if}
+			</div>
+			<div class="slc-table-bar-center">
+				{#if context.paginable && context.totalPages > 1}
+					<Pagination page={context.page} perPage={context.perPage} totalPages={context.totalPages} onChange={(data) => context.onPagination?.(data)} />
+				{/if}
+			</div>
+			<div class="slc-table-bar-end">
+				{#if context.paginable}
+					<PerPage perPage={context.perPage} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
+				{/if}
+				<ColumnToggler />
+				{#if context.settings}
+					<TableSettings />
+				{/if}
+			</div>
 		</div>
-		<div class="slc-table-bar-end">
-			{#if context.paginable}
-				<PerPage perPage={context.perPage} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
-			{/if}
-			<ColumnToggler />
-			{#if context.settings}
-				<TableSettings />
-			{/if}
-		</div>
-	</div>
+	{/if}
 
 	{@render context.statusbar?.()}
 </div>
@@ -257,6 +275,26 @@
 		padding: 0.375rem 0.75rem;
 		border-top: 1px solid var(--_dt-border);
 		background-color: var(--_dt-bar-bg);
+	}
+	.slc-table-bar > div {
+		min-height: 2rem; /* kontrol yüksekliği: iskelet ↔ kontroller geçişinde bar zıplamaz */
+	}
+	.slc-table-skeleton {
+		display: inline-block;
+		height: 2rem;
+		border-radius: 0.375rem;
+		background-color: var(--_dt-header-bg);
+		animation: slc-table-pulse 1.2s ease-in-out infinite;
+	}
+	@keyframes slc-table-pulse {
+		50% {
+			opacity: 0.45;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.slc-table-skeleton {
+			animation: none;
+		}
 	}
 	.slc-table-bar-start,
 	.slc-table-bar-end {

@@ -42,7 +42,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.161` oldu.
+- Uygulama sürümü `v0.2.0-alpha.162` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -59,6 +59,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   yuvarlak uçlu, üst/alt/sağdan 2px boşluklu, tutma alanı 8px.
 - DataTable: `date` ve `datetime` kolonlar da `number` gibi varsayılan olarak
   sağa dayalı (`align` ile değiştirilebilir).
+- DataTable: alt bar ilk veri gelene kadar iskelet gösteriyor; kayıt aralığı,
+  sayfalama, kolonlar ve ayarlar birlikte geliyor, bar yüksekliği değişmiyor.
+- DataTable (performans): kolon genişletme karede bir kez uygulanıyor ve
+  sürükleme boyunca yalnızca grid şablonu değişiyor (hücreler yeniden
+  hesaplanmıyor); genişlik bırakınca kaydediliyor. Pointer capture ile window
+  dinleyicileri kaldırıldı.
+- DataTable (performans): kolon yerleşimi (freeze, ofset, hizalama) kolon başına
+  bir kez hesaplanıyor (`columnLayout`); hücre başına derived sayısı ~10'dan 2'ye
+  indi. Satır tıklaması hücre başına dinleyici yerine grid'de tek dinleyiciyle.
 
 ### Düzeltildi
 
@@ -74,6 +83,16 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `$derived`; veri değişince ek `tick` zinciri olmadan yeniden hesaplanıyor.
 - DataTable: sayfa/sıralama/arama değişince tablo en üste kaydırılıyor;
   aynı sorgunun tazelenmesinde (silme sonrası vb.) konum korunuyor.
+- DataTable: genişletirken 50px'in altına inilince kolon son değerde
+  takılı kalıyordu; artık 50px'e sabitleniyor.
+- Toggler: kapsayıcının `container` sınıfı Tailwind'in `.container`
+  (`width: 100%`) sınıfıyla çakışıyordu; DataTable alt barında "sayfa başına",
+  "Kolonlar" ve ayarlar butonları sağa dayanmıyor, aralarında boşluk
+  oluşuyordu. Sınıf `slc-toggler` oldu. Kapsayıcı artık tetikleyici kadar
+  geniş; tam genişlik için `--container-width="100%"` (Select bunu kullanıyor,
+  açılır liste yine kutuyla aynı genişlikte).
+- DataTable: 2px freeze çizgisi başlık ve alt satırdan kaldırıldı (sticky
+  hücrelerde 1px kaymalar yaratıyordu); yalnızca veri hücrelerinde.
 
 ### Kaldırıldı
 

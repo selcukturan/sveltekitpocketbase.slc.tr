@@ -25,6 +25,22 @@ export const DEFAULT_COLUMN_WIDTHS: Record<ColumnType, Width> = {
 // Kolonun geçerli genişlik tanımı: kullanıcı/props değeri, yoksa tip varsayılanı
 export const widthOf = <TData>(col: Column<TData>): Width => col.width ?? DEFAULT_COLUMN_WIDTHS[col.type ?? 'text'];
 
+const JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' } as const;
+
+export type ColumnLayout = {
+	gridColumn: string;
+	freezeLeft: boolean;
+	freezeRight: boolean;
+	sticky: boolean;
+	boundaryLeft: boolean; // son sol sabit kolon (gölge + çizgi)
+	boundaryRight: boolean; // ilk sağ sabit kolon
+	left?: string;
+	right?: string;
+	justifyCell: (typeof JUSTIFY)[Align];
+	textAlignHeader: Align;
+	justifyFooter: (typeof JUSTIFY)[Align];
+};
+
 // Ölçüm henüz yokken (ilk çizim) tahmini px: '130px' → 130, 'minmax(50px,1fr)' → 50
 const estimatePx = (width: Width): number => {
 	const match = /^(?:minmax\()?(\d+(?:\.\d+)?)px/.exec(width);
@@ -88,6 +104,7 @@ class TableContext<TData extends Row> {
 	readonly list = $derived(this.#props.list);
 	readonly query = $derived(this.#props.list ? this.#props.list.query : this.#props.query);
 	readonly sort = $derived(this.#props.list?.sort ?? this.#props.sort);
+	readonly loaded = $derived(this.#currentData !== undefined); // ilk veri geldi mi (alt bar iskeleti için)
 	readonly items = $derived(this.#currentData?.items ?? []);
 	readonly totalItems = $derived(this.#currentData?.totalItems ?? 0);
 	readonly page = $derived(this.#currentData?.page ?? 1);
@@ -191,67 +208,71 @@ class TableContext<TData extends Row> {
 
 	// ################################## BEGIN Column Resize ##################################################################################################################
 
-	#colResizePointerDownClientX = 0;
-	#colResizePointerDownWidth = 0;
-	#colResizeIsAllWidth = false;
+	static readonly MIN_COLUMN_WIDTH = 50;
 
-	private setColumnWidth = (colIndex: number, width: number, field: Field<TData>) => {
-		const minWidth = 50;
-		if (width > minWidth) {
-			this.helpers.setColumnProp(colIndex, 'width', `${Math.max(minWidth, width)}px` as Width);
-		}
+	// Sürüklenen kolonun anlık genişliği. Sürükleme boyunca yalnızca grid şablonu (gridTemplateColumns) bunu okur;
+	// columns/visibleColumns değişmediği için hücreler her karede yeniden hesaplanmaz. Bırakınca #ui'ye yazılır.
+	#drag = $state<{ field: string; width: number } | undefined>(undefined);
+	readonly resizingField = $derived(this.#drag?.field);
+
+	// Sürükleme başlarken diğer minmax kolonlar o anki genişliklerinde px'e sabitlenir; böylece kaymazlar
+	#pinFlexibleColumns = (exceptIndex: number) => {
+		this.columns.forEach((column, index) => {
+			if (index !== exceptIndex && !column.hidden && widthOf(column).startsWith('minmax')) {
+				const width = Math.round(this.#measuredWidths[column.field] ?? estimatePx(widthOf(column)));
+				this.helpers.setColumnProp(index, 'width', `${Math.max(TableContext.MIN_COLUMN_WIDTH, width)}px` as Width);
+			}
+		});
 	};
 
-	readonly colResizeUpdate = (event: PointerEvent, originalIndex: number, field: Field<TData>) => {
-		const width = this.#colResizePointerDownWidth + (event.clientX - this.#colResizePointerDownClientX);
-		this.setColumnWidth(originalIndex, width, field);
-
-		if (!this.#colResizeIsAllWidth) {
-			// Diğer minmax kolonlar o anki genişliklerinde px'e sabitlenir; böylece sürüklerken kaymazlar
-			this.columns.forEach((column, index) => {
-				if (index !== originalIndex && !column.hidden && widthOf(column).startsWith('minmax')) {
-					const width = this.#measuredWidths[column.field] ?? estimatePx(widthOf(column));
-					this.setColumnWidth(index, width, field);
-				}
-			});
-			this.#colResizeIsAllWidth = true;
-		}
-	};
-
-	readonly colResizePointerAttach = (callback: (event: PointerEvent) => void): Attachment => {
+	// HeaderCell'deki tutamağa bağlanır. Pointer capture ile olaylar tutamakta kalır (window dinleyicisi gerekmez);
+	// pointermove karede en fazla bir kez uygulanır.
+	readonly colResizeAttach = (originalIndex: number): Attachment => {
 		return (node) => {
 			if (!(node instanceof HTMLElement)) return;
-			const pointerdown = (event: PointerEvent) => {
-				if ((event.pointerType === 'mouse' && event.button === 2) || (event.pointerType !== 'mouse' && !event.isPrimary)) return;
 
-				const parentNode = node.parentNode;
-				if (!parentNode || !(parentNode instanceof HTMLElement)) return;
+			return on(node, 'pointerdown', (event: PointerEvent) => {
+				if ((event.pointerType === 'mouse' && event.button !== 0) || !event.isPrimary) return;
+				const cell = node.parentElement;
+				const field = this.columns[originalIndex]?.field;
+				if (!cell || !field) return;
 
-				this.#colResizePointerDownClientX = event.clientX;
-				this.#colResizePointerDownWidth = parentNode.getBoundingClientRect().width;
-				this.#colResizeIsAllWidth = false;
-
-				node.setPointerCapture(event.pointerId);
 				event.preventDefault();
+				event.stopPropagation();
+				node.setPointerCapture(event.pointerId);
 
-				const onpointerup = () => {
-					node.releasePointerCapture(event.pointerId);
-					window.removeEventListener('pointermove', callback, false);
-					window.removeEventListener('pointerup', onpointerup, false);
+				const startX = event.clientX;
+				const startWidth = cell.getBoundingClientRect().width;
+				let lastX = startX;
+				let rafId = 0;
+				let moved = false;
+
+				const widthAt = (x: number) => Math.max(TableContext.MIN_COLUMN_WIDTH, Math.round(startWidth + x - startX));
+				const apply = () => {
+					rafId = 0;
+					if (!moved) {
+						moved = true;
+						this.#pinFlexibleColumns(originalIndex); // yalnızca ilk harekette; tıklama genişlikleri değiştirmesin
+					}
+					this.#drag = { field, width: widthAt(lastX) };
 				};
 
-				window.addEventListener('pointermove', callback, false);
-				window.addEventListener('pointerup', onpointerup, false);
-			};
-
-			node.addEventListener('pointerdown', pointerdown, {
-				capture: true,
-				passive: false
+				const offMove = on(node, 'pointermove', (e: PointerEvent) => {
+					lastX = e.clientX;
+					if (!rafId && lastX !== startX) rafId = requestAnimationFrame(apply);
+				});
+				const finish = () => {
+					offMove();
+					offUp();
+					offCancel();
+					cancelAnimationFrame(rafId);
+					if (node.hasPointerCapture(event.pointerId)) node.releasePointerCapture(event.pointerId);
+					if (moved) this.helpers.setColumnProp(originalIndex, 'width', `${widthAt(lastX)}px` as Width);
+					this.#drag = undefined;
+				};
+				const offUp = on(node, 'pointerup', finish);
+				const offCancel = on(node, 'pointercancel', finish);
 			});
-
-			return () => {
-				node.removeEventListener('pointerdown', pointerdown);
-			};
 		};
 	};
 
@@ -308,6 +329,25 @@ class TableContext<TData extends Row> {
 			off();
 			cancelAnimationFrame(rafId);
 		};
+	};
+
+	// Satır tıklaması: her hücreye ayrı dinleyici yerine grid'de tek dinleyici (sanal kaydırmada hücreler sürekli
+	// oluşturulup silindiği için). Hücre içindeki buton/link/input tıklamaları satır tıklaması sayılmaz.
+	static readonly #INTERACTIVE =
+		'button, a, input, select, textarea, label, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="menuitem"], [role="option"]';
+
+	readonly trackRowClick: Attachment = (node) => {
+		if (!(node instanceof HTMLElement)) return;
+		return on(node, 'click', (e: MouseEvent) => {
+			const onRowClick = this.onRowClick;
+			if (!onRowClick || !(e.target instanceof Element)) return;
+			const cell = e.target.closest('[data-slc-table-datacell]');
+			if (!cell || !node.contains(cell)) return;
+			const interactive = e.target.closest(TableContext.#INTERACTIVE);
+			if (interactive && cell.contains(interactive)) return;
+			const row = this.items[Number(cell.getAttribute('data-row'))];
+			if (row) onRowClick(row);
+		});
 	};
 
 	// ################################## END Virtual Scroll ##################################################################################################################
@@ -427,8 +467,38 @@ class TableContext<TData extends Row> {
 	});
 
 	gridTemplateColumns = $derived.by(() => {
-		const columnsWidth = this.visibleColumns.map((col) => widthOf(col.data));
-		return columnsWidth.join(' ');
+		const drag = this.#drag;
+		return this.visibleColumns.map((col) => (drag && col.data.field === drag.field ? `${drag.width}px` : widthOf(col.data))).join(' ');
+	});
+
+	// Kolon başına yerleşim bilgisi; görünür sıra (colVisibleIndex) ile okunur. Hücre başına ~10 derived yerine
+	// kolon başına bir kez hesaplanır: sanal kaydırmada her yeni satırın hücreleri hazır değeri okur.
+	// Kolonlar, freeze ya da sabit kolonların genişliği değişince yeniden hesaplanır.
+	readonly columnLayout = $derived.by((): ColumnLayout[] => {
+		const cols = this.visibleColumns;
+		const n = cols.length;
+		const fl = this.freezeLeft;
+		const fr = this.freezeRight;
+		const offsets = this.stickyOffsets;
+
+		return cols.map((col, i) => {
+			const freezeLeft = i < fl;
+			const freezeRight = i >= n - fr;
+			const offset = offsets[col.data.field];
+			return {
+				gridColumn: `${i + 1} / ${i + 2}`,
+				freezeLeft,
+				freezeRight,
+				sticky: freezeLeft || freezeRight,
+				boundaryLeft: freezeLeft && i === fl - 1,
+				boundaryRight: freezeRight && i === n - fr,
+				left: freezeLeft && offset?.left !== undefined ? `${offset.left}px` : undefined,
+				right: freezeRight && offset?.right !== undefined ? `${offset.right}px` : undefined,
+				justifyCell: JUSTIFY[this.alignOf(col.data, 'cell')],
+				textAlignHeader: this.alignOf(col.data, 'header'),
+				justifyFooter: JUSTIFY[this.alignOf(col.data, 'footer')]
+			};
+		});
 	});
 
 	// ################################## END Grid Template ##################################################################################################################

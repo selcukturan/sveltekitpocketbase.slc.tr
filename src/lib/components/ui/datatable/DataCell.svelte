@@ -3,10 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import type { Row, DataRowType, DataCellType } from './types.js';
 	import { getTableContext } from './context.svelte.js';
-	import { on } from 'svelte/events';
 	import Value from './Value.svelte';
-
-	const JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' } as const;
 </script>
 
 <script lang="ts" generics="TData extends Row">
@@ -20,70 +17,35 @@
 
 	const context = getTableContext<TData>();
 
+	// Sanal kaydırmada hücreler sürekli oluşturulur: kolon bilgisi context'te kolon başına bir kez hesaplanır (columnLayout),
+	// satır tıklaması grid'deki tek dinleyiciyle yakalanır (trackRowClick, data-row ile).
+	const layout = $derived(context.columnLayout[dc.colVisibleIndex]);
 	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
-	const gridColumn = $derived(`${dc.colVisibleIndex + 1} / ${dc.colVisibleIndex + 2}`);
-
-	const col = $derived(dc.col);
-	const field = $derived(col.data.field as string);
-	const justify = $derived(JUSTIFY[context.alignOf(col.data)]);
-
-	const isFreezeLeft = $derived(dc.colVisibleIndex < context.freezeLeft);
-	const isFreezeRight = $derived(dc.colVisibleIndex >= context.visibleColumns.length - context.freezeRight);
-	const isSticky = $derived(isFreezeLeft || isFreezeRight);
-
-	const leftOffset = $derived(isFreezeLeft ? context.stickyOffsets[field]?.left : undefined);
-	const rightOffset = $derived(isFreezeRight ? context.stickyOffsets[field]?.right : undefined);
-
-	// Boundary check
-	const isLastFreezeLeft = $derived(isFreezeLeft && dc.colVisibleIndex === context.freezeLeft - 1);
-	const isFirstFreezeRight = $derived(isFreezeRight && dc.colVisibleIndex === context.visibleColumns.length - context.freezeRight);
-
-	const clickable = $derived(Boolean(context.onRowClick));
-
-	const cellClickAttach = (node: HTMLElement) => {
-		const destroyClick = on(node, 'click', (e: MouseEvent) => {
-			let target = e.target as HTMLElement | null;
-			while (target && target !== e.currentTarget) {
-				const tagName = target.tagName.toLowerCase();
-				const role = target.getAttribute('role');
-				if (
-					['button', 'a', 'input', 'select', 'textarea', 'label'].includes(tagName) ||
-					['button', 'link', 'checkbox', 'radio', 'menuitem', 'option'].includes(role || '')
-				) {
-					return;
-				}
-				target = target.parentElement;
-			}
-			context.onRowClick?.(dr.row);
-		});
-
-		return destroyClick;
-	};
 </script>
 
 <div
 	data-slc-table-datacell
+	data-row={dr.rowOriginalIndex}
 	role="gridcell"
 	class={classes}
-	class:slc-table-freeze-left={isFreezeLeft}
-	class:slc-table-freeze-right={isFreezeRight}
-	class:slc-table-freeze-left-boundary={isLastFreezeLeft}
-	class:slc-table-freeze-right-boundary={isFirstFreezeRight}
-	class:clickable
+	class:slc-table-freeze-left={layout?.freezeLeft}
+	class:slc-table-freeze-right={layout?.freezeRight}
+	class:slc-table-freeze-left-boundary={layout?.boundaryLeft}
+	class:slc-table-freeze-right-boundary={layout?.boundaryRight}
+	class:clickable={context.onRowClick !== undefined}
 	style:grid-row-start={gridRowStart}
-	style:grid-column={gridColumn}
-	style:justify-content={justify}
-	style:position={isSticky ? 'sticky' : undefined}
-	style:left={leftOffset !== undefined ? `${leftOffset}px` : undefined}
-	style:right={rightOffset !== undefined ? `${rightOffset}px` : undefined}
-	style:z-index={isSticky ? 1 : undefined}
-	{@attach clickable && cellClickAttach}
+	style:grid-column={layout?.gridColumn}
+	style:justify-content={layout?.justifyCell}
+	style:position={layout?.sticky ? 'sticky' : undefined}
+	style:left={layout?.left}
+	style:right={layout?.right}
+	style:z-index={layout?.sticky ? 1 : undefined}
 	{...attributes}
 >
 	{#if children}
 		{@render children()}
 	{:else}
-		<Value value={dc.value} type={col.data.type} />
+		<Value value={dc.value} type={dc.col.data.type} />
 	{/if}
 </div>
 

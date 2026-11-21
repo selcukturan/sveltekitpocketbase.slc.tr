@@ -408,6 +408,7 @@
 	bind:this={toggl}
 	{placement}
 	{matchTriggerWidth}
+	--container-width="100%"
 	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-400)'} "
 	--background-color="var(--color-surface-200)"
 	--box-shadow="0px 8px 5px -5px color-mix(in srgb, var(--color-surface-token-700) 30%, transparent)"
