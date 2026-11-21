@@ -56,6 +56,7 @@
 	class:slc-table-freeze-right-boundary={layout?.boundaryRight}
 	class:slc-table-headercell-resizing={context.resizingField === field}
 	class:slc-table-headercell-sortable={isSortable}
+	class:slc-table-headercell-busy={isSortable && context.busy}
 	role="columnheader"
 	aria-sort={!isSortable ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'}
 	data-coi={col.originalIndex}
@@ -115,6 +116,9 @@
 	}
 	.slc-table-headercell-sortable {
 		cursor: pointer;
+	}
+	.slc-table-headercell-busy {
+		cursor: progress; /* istek sürerken sıralama tıklaması yok sayılır */
 	}
 	.slc-table-headercell-sortable:hover {
 		background-color: var(--_dt-header-hover);

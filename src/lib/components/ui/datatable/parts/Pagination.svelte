@@ -6,9 +6,10 @@
 		perPage: number;
 		totalPages: number;
 		page: number;
+		disabled?: boolean; // istek sürerken true: art arda tıklamalar yeni istek başlatmasın
 		onChange?: ({ page, perPage }: { page: number; perPage: number }) => void;
 	};
-	let { perPage, totalPages, page, onChange }: Props = $props();
+	let { perPage, totalPages, page, disabled = false, onChange }: Props = $props();
 
 	// Kademeli komşu sayısı: uçlara yakınken daha çok sayfa gösterilir, toplam buton sayısı sabit kalır
 	let delta = $derived.by(() => {
@@ -27,13 +28,13 @@
 	});
 
 	function goToPage(target: number) {
-		if (target < 1 || target > totalPages || target === page) return;
+		if (disabled || target < 1 || target > totalPages || target === page) return;
 		onChange?.({ page: target, perPage });
 	}
 </script>
 
-<nav class="slc-pagination" aria-label={t('dt_pagination')}>
-	<button type="button" class="slc-page-btn" onclick={() => goToPage(page - 1)} disabled={page <= 1} aria-label={t('previous')} title={t('previous')}>
+<nav class="slc-pagination" aria-label={t('dt_pagination')} aria-busy={disabled}>
+	<button type="button" class="slc-page-btn" onclick={() => goToPage(page - 1)} disabled={disabled || page <= 1} aria-label={t('previous')} title={t('previous')}>
 		<Icon name="chevron_left" size={16} />
 	</button>
 
@@ -41,13 +42,20 @@
 		{#if item === '...'}
 			<span class="slc-page-ellipsis" aria-hidden="true">…</span>
 		{:else}
-			<button type="button" class="slc-page-btn" class:active={item === page} aria-current={item === page ? 'page' : undefined} onclick={() => goToPage(item)}>
+			<button
+				type="button"
+				class="slc-page-btn"
+				class:active={item === page}
+				aria-current={item === page ? 'page' : undefined}
+				disabled={disabled && item !== page}
+				onclick={() => goToPage(item)}
+			>
 				{item}
 			</button>
 		{/if}
 	{/each}
 
-	<button type="button" class="slc-page-btn" onclick={() => goToPage(page + 1)} disabled={page >= totalPages} aria-label={t('next')} title={t('next')}>
+	<button type="button" class="slc-page-btn" onclick={() => goToPage(page + 1)} disabled={disabled || page >= totalPages} aria-label={t('next')} title={t('next')}>
 		<Icon name="chevron_right" size={16} />
 	</button>
 </nav>
@@ -89,6 +97,10 @@
 	.slc-page-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
+	}
+	/* istek sürerken: kısa bekleme, "yasak" değil */
+	.slc-pagination[aria-busy='true'] .slc-page-btn:disabled {
+		cursor: progress;
 	}
 	.slc-page-ellipsis {
 		min-width: 1.25rem;

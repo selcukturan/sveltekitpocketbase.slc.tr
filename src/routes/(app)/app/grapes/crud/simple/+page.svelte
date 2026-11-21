@@ -103,8 +103,8 @@
 		<div class="w-56">
 			<input.Text bind:value={list.filter.filter_text_optional} placeholder={t('search_contains', { field: 'text_optional' })} onkeydown={list.searchOnEnter} />
 		</div>
-		<input.Button variant="filled" label={t('search')} onclick={list.search} disabled={list.loading} />
-		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} />
+		<input.Button variant="filled" label={t('search')} onclick={list.search} />
+		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 		<div class="ml-auto flex items-center gap-2">
 			<!-- GEÇİCİ: test butonları -->
 			<input.Button
@@ -126,7 +126,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<dt.DataTable {list} {columns} dataRowHeight={35} freezeLeft={1} persist="grapes-crud-simple" onRowClick={(row) => drawer.show('update', row.id)}>
+			<dt.DataTable {list} {columns} freezeLeft={1} persist="grapes-crud-simple" onRowClick={(row) => drawer.show('update', row.id)}>
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
 					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => remove(row.id)} />

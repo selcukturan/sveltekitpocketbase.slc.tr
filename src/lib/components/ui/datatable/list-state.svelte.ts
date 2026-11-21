@@ -73,9 +73,15 @@ export class ListState<TParams extends ListParams, TResult> {
 	// Aynı parametrelerle yeniden çeker; henüz yüklenmediyse ilk yüklemeyi yapar
 	readonly refresh = () => (this.query ? this.query.refresh() : this.#apply({}));
 
-	readonly paginate = ({ page, perPage }: { page: number; perPage: number }) => this.#apply({ page, perPage } as Partial<TParams>);
+	// Sayfalama/sıralama, önceki istek bitmeden yeni istek başlatmaz. Her çağrı yeni bir sorgu örneği üretir ve
+	// öncekiler iptal edilmeden sürer; art arda tıklamada N istek gidiyordu. (Arama ve refresh serbest.)
+	readonly paginate = ({ page, perPage }: { page: number; perPage: number }) => {
+		if (!this.loading) this.#apply({ page, perPage } as Partial<TParams>);
+	};
 
-	readonly setSort = (sort: string) => this.#apply({ options: { ...this.params.options, sort }, page: 1 } as Partial<TParams>);
+	readonly setSort = (sort: string) => {
+		if (!this.loading) this.#apply({ options: { ...this.params.options, sort }, page: 1 } as Partial<TParams>);
+	};
 }
 
 /**

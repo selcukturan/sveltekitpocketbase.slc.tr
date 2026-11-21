@@ -6,9 +6,10 @@
 	type Props = {
 		perPage: number;
 		options?: number[];
+		disabled?: boolean; // istek sürerken true
 		onChange?: (perPage: number) => void; // sayfa sayısı değişeceği için çağıran 1. sayfaya dönmeli
 	};
-	let { perPage, options = [30, 50, 100, 200, 500, 1000], onChange }: Props = $props();
+	let { perPage, options = [30, 50, 100, 200, 500, 1000], disabled = false, onChange }: Props = $props();
 </script>
 
 <Toggler
@@ -19,7 +20,7 @@
 	--border-radius="0.5rem"
 >
 	{#snippet trigger({ active, attr })}
-		<button {...attr} class="slc-dt-control" class:active aria-label={t('dt_per_page_label')}>
+		<button {...attr} class="slc-dt-control" class:active {disabled} aria-label={t('dt_per_page_label')}>
 			<span>{t('dt_per_page', { count: perPage })}</span>
 			<Icon name="chevron_down" size={14} />
 		</button>
@@ -64,6 +65,10 @@
 	.slc-dt-control:hover,
 	.slc-dt-control.active {
 		background-color: var(--_dt-header-bg);
+	}
+	.slc-dt-control:disabled {
+		opacity: 0.5;
+		cursor: progress;
 	}
 	.slc-dt-control:focus-visible {
 		outline: 2px solid var(--_dt-accent);

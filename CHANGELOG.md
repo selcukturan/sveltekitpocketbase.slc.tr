@@ -42,7 +42,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.163` oldu.
+- Uygulama sürümü `v0.2.0-alpha.164` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -94,6 +94,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   aynı sorgunun tazelenmesinde (silme sonrası vb.) konum korunuyor.
 - DataTable: genişletirken 50px'in altına inilince kolon son değerde
   takılı kalıyordu; artık 50px'e sabitleniyor.
+- DataTable: sayfalama butonlarına art arda tıklayınca her tıklama ayrı istek
+  atıyordu (öncekiler iptal edilmeden). İstek sürerken sayfalama, "sayfa
+  başına" ve sıralama kilitleniyor; `ListState.paginate`/`setSort` da istek
+  bitmeden yeni istek başlatmıyor.
+- Simple CRUD: "Ara" butonu istek sürerken de kullanılabiliyor; "Yenile"
+  butonu istek sürerken devre dışı.
 - Toggler: kapsayıcının `container` sınıfı Tailwind'in `.container`
   (`width: 100%`) sınıfıyla çakışıyordu; DataTable alt barında "sayfa başına",
   "Kolonlar" ve ayarlar butonları sağa dayanmıyor, aralarında boşluk

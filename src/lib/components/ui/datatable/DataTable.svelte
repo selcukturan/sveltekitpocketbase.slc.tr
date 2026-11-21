@@ -150,12 +150,18 @@
 			</div>
 			<div class="slc-table-bar-center">
 				{#if context.paginable && context.totalPages > 1}
-					<Pagination page={context.page} perPage={context.perPage} totalPages={context.totalPages} onChange={(data) => context.onPagination?.(data)} />
+					<Pagination
+						page={context.page}
+						perPage={context.perPage}
+						totalPages={context.totalPages}
+						disabled={context.busy}
+						onChange={(data) => context.onPagination?.(data)}
+					/>
 				{/if}
 			</div>
 			<div class="slc-table-bar-end">
 				{#if context.paginable}
-					<PerPage perPage={context.perPage} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
+					<PerPage perPage={context.perPage} disabled={context.busy} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
 				{/if}
 				<ColumnToggler />
 				{#if context.settings}

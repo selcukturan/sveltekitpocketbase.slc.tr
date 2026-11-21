@@ -119,6 +119,8 @@ class TableContext<TData extends Row> {
 	readonly query = $derived(this.#props.list ? this.#props.list.query : this.#props.query);
 	readonly sort = $derived(this.#props.list?.sort ?? this.#props.sort);
 	readonly loaded = $derived(this.#currentData !== undefined); // ilk veri geldi mi (alt bar iskeleti için)
+	// İstek sürüyor: sayfalama/sıralama kontrolleri kilitlenir, art arda tıklamalar yeni istek başlatmaz
+	readonly busy = $derived(this.query?.loading === true);
 	readonly items = $derived(this.#currentData?.items ?? []);
 	readonly totalItems = $derived(this.#currentData?.totalItems ?? 0);
 	readonly page = $derived(this.#currentData?.page ?? 1);
@@ -572,7 +574,7 @@ class TableContext<TData extends Row> {
 		const currentDir = this.getColumnSortDirection(field);
 		const nextSort = currentDir === undefined ? field : currentDir === 'asc' ? `-${field}` : '';
 
-		if (this.onSort) {
+		if (this.onSort && !this.busy) {
 			this.onSort(nextSort);
 		}
 	};
