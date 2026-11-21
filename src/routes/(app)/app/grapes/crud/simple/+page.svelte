@@ -126,7 +126,7 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<dt.DataTable {list} {columns} freezeLeft={1} persist="grapes-crud-simple" onRowClick={(row) => drawer.show('update', row.id)}>
+			<dt.DataTable {list} {columns} dataRowHeight={35} freezeLeft={1} persist="grapes-crud-simple" onRowClick={(row) => drawer.show('update', row.id)}>
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
 					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => remove(row.id)} />
