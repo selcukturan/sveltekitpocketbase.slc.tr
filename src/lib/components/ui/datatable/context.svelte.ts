@@ -2,6 +2,7 @@ import type { RemoteQuery } from '$app/server';
 
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
+import { GridCursor, type CellPos } from './navigation.svelte.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
@@ -23,6 +24,19 @@ type UiState<TData> = {
 };
 
 const STORAGE_PREFIX = 'slc-dt:';
+
+let tableUid = 0; // hücre id'leri için (aria-activedescendant): sayfada birden çok tablo olabilir
+
+// Hücre olaylarının parametresi
+export type CellEvent<TData> = {
+	row: TData;
+	rowIndex: number; // yüklü verideki sıra
+	field: Field<TData>;
+	colIndex: number; // görünür kolon sırası
+	value: unknown;
+	event: MouseEvent;
+};
+export type ActiveCell<TData> = Omit<CellEvent<TData>, 'event' | 'value'>;
 
 // Kolona `width` verilmezse tipine göre bu değer kullanılır (tip yoksa 'text').
 // minmax: en az Npx, kalan alan fr oranıyla paylaşılır; tablo genişledikçe kolonlar da genişler.
@@ -97,7 +111,11 @@ export interface MainProps<TData extends Row> {
 	mainClass?: string;
 	// events
 	onPagination?: ({ page, perPage }: { page: number; perPage: number }) => void;
-	onRowClick?: (row: TData) => void;
+	onRowClick?: (row: TData) => void; // tek tıklama (hücre içindeki buton/link hariç)
+	onRowActivate?: (row: TData) => void; // çift tıklama ya da Enter: satırı aç (örn. düzenleme drawer'ı)
+	onCellClick?: (e: CellEvent<TData>) => void;
+	onCellDblClick?: (e: CellEvent<TData>) => void;
+	onActiveCellChange?: (cell: ActiveCell<TData> | undefined) => void;
 	onSort?: (sort: string) => void;
 }
 
@@ -162,8 +180,46 @@ class TableContext<TData extends Row> {
 	readonly onRowClick = $derived(this.#props.onRowClick);
 	readonly onSort = $derived(this.#props.onSort ?? this.#props.list?.setSort);
 
+	readonly #uid = ++tableUid;
+	readonly cellId = (pos: CellPos) => `slc-dt${this.#uid}-r${pos.row}-c${pos.col}`;
+
+	// Aktif hücre ve klavye gezinmesi (bkz. navigation.svelte.ts)
+	readonly cursor: GridCursor;
+	readonly activeCellId = $derived.by(() => (this.cursor.active ? this.cellId(this.cursor.active) : undefined));
+
 	constructor(props: MainProps<TData>) {
 		this.#props = props;
+
+		const ctx = this;
+		this.cursor = new GridCursor({
+			get el() {
+				return ctx.el;
+			},
+			get rowCount() {
+				return ctx.dataLength;
+			},
+			get colCount() {
+				return ctx.visibleColumns.length;
+			},
+			get dataRowHeight() {
+				return ctx.dataRowHeight;
+			},
+			get headerHeight() {
+				return ctx.headerLength * ctx.headerRowHeight;
+			},
+			get footerHeight() {
+				return ctx.dataLength > 0 ? ctx.footerLength * ctx.footerRowHeight : 0;
+			},
+			get clientHeight() {
+				return ctx.clientHeight;
+			},
+			cellId: this.cellId,
+			onChange: (pos) => this.#props.onActiveCellChange?.(pos ? this.#activeCell(pos) : undefined),
+			onActivate: (pos) => {
+				const row = this.items[pos.row];
+				if (row) this.#props.onRowActivate?.(row);
+			}
+		});
 
 		// Kalıcı ayarlar: ilk açılışta okunur, her değişiklikte yazılır. (SSR kapalı; yine de localStorage
 		// gizli pencerede/engelliyken hata verebileceği için try/catch.) Varsayılan hâldeyse kayıt silinir.
@@ -213,12 +269,21 @@ class TableContext<TData extends Row> {
 
 		return untrack(() => {
 			if (query && query.ready) {
-				if (query !== this.#shownQuery) {
+				// Aktif hücre: yeni sorguda ilk satır (aynı kolon); tazelemede aynı id'li satır, yoksa aynı sıra (kırpılır)
+				const active = this.cursor.active;
+				const activeId = active ? this.items[active.row]?.id : undefined;
+				const isNewQuery = query !== this.#shownQuery;
+				if (isNewQuery) {
 					this.#shownQuery = query;
 					if (this.el) this.el.scrollTop = 0;
 					this.#currentScrollY = 0;
 					this.#rafY = 0;
 				}
+				queueMicrotask(() => {
+					if (!active) return;
+					const index = isNewQuery ? 0 : this.items.findIndex((row) => row.id === activeId);
+					this.cursor.set({ row: index >= 0 ? index : active.row, col: active.col });
+				});
 				if (current && typeof current === 'object' && 'items' in current) {
 					this.paginable = true;
 					this.#currentData = current as ListResult<TData>;
@@ -339,7 +404,15 @@ class TableContext<TData extends Row> {
 		Math.min(this.dataLength - 1, Math.ceil((this.#rafY + this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + TableContext.OVERSCAN)
 	);
 
-	// Aralık ya da veri değişince yeniden hesaplanır
+	// Aktif satır görünür aralığın dışındaysa (kaydırıldı) yine de çizilir: hücresi DOM'da kalır,
+	// aria-activedescendant boşa düşmez ve klavyeyle dönünce scrollIntoView edilebilir. Sayı derived'ı:
+	// imleç aralık içinde gezerken virtualData yeniden hesaplanmaz.
+	#pinnedRow = $derived.by(() => {
+		const row = this.cursor.active?.row;
+		return row !== undefined && row < this.dataLength && (row < this.#visibleStart || row > this.#visibleEnd) ? row : -1;
+	});
+
+	// Aralık, veri ya da sabitlenen satır değişince yeniden hesaplanır
 	virtualData = $derived.by(() => {
 		const items = this.items;
 		const processedData: { data: TData; originalIndex: number }[] = [];
@@ -348,6 +421,9 @@ class TableContext<TData extends Row> {
 			const row = items[i];
 			if (row) processedData.push({ data: row as TData, originalIndex: i });
 		}
+
+		const pinned = this.#pinnedRow;
+		if (pinned >= 0) processedData.push({ data: items[pinned] as TData, originalIndex: pinned }); // grid'de sıra önemsiz
 
 		return processedData;
 	});
@@ -374,23 +450,68 @@ class TableContext<TData extends Row> {
 		};
 	};
 
-	// Satır tıklaması: her hücreye ayrı dinleyici yerine grid'de tek dinleyici (sanal kaydırmada hücreler sürekli
-	// oluşturulup silindiği için). Hücre içindeki buton/link/input tıklamaları satır tıklaması sayılmaz.
+	// Hücre etkileşimleri: her hücreye ayrı dinleyici yerine grid'de tek dinleyici (sanal kaydırmada hücreler sürekli
+	// oluşturulup silindiği için). Hücrenin konumu data-row / data-col attribute'larından okunur.
 	static readonly #INTERACTIVE =
 		'button, a, input, select, textarea, label, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="menuitem"], [role="option"]';
 
-	readonly trackRowClick: Attachment = (node) => {
+	#activeCell = (pos: CellPos): ActiveCell<TData> => ({
+		row: this.items[pos.row] as TData,
+		rowIndex: pos.row,
+		field: this.visibleColumns[pos.col]?.data.field,
+		colIndex: pos.col
+	});
+
+	readonly trackInteractions: Attachment = (node) => {
 		if (!(node instanceof HTMLElement)) return;
-		return on(node, 'click', (e: MouseEvent) => {
-			const onRowClick = this.onRowClick;
-			if (!onRowClick || !(e.target instanceof Element)) return;
-			const cell = e.target.closest('[data-slc-table-datacell]');
+
+		// Olayın geldiği veri hücresi; hücre içindeki buton/link/input'tan geldiyse interactive: true
+		const hitCell = (e: Event) => {
+			if (!(e.target instanceof Element)) return;
+			const cell = e.target.closest<HTMLElement>('[data-slc-table-datacell]');
 			if (!cell || !node.contains(cell)) return;
+			const pos = { row: Number(cell.dataset.row), col: Number(cell.dataset.col) };
+			const row = this.items[pos.row];
+			if (!row || Number.isNaN(pos.col)) return;
 			const interactive = e.target.closest(TableContext.#INTERACTIVE);
-			if (interactive && cell.contains(interactive)) return;
-			const row = this.items[Number(cell.getAttribute('data-row'))];
-			if (row) onRowClick(row);
+			return { pos, row, interactive: interactive !== null && cell.contains(interactive) };
+		};
+
+		const cellEvent = (pos: CellPos, row: TData, event: MouseEvent): CellEvent<TData> => {
+			const field = this.visibleColumns[pos.col]?.data.field;
+			return { row, rowIndex: pos.row, field, colIndex: pos.col, value: (row as Record<string, unknown>)[field], event };
+		};
+
+		// Tıklama ile çift tıklama ayrılmaz (gecikme olmasın): tıklamanın işi (hücreyi aktif yapmak) iki kez çalışsa da aynı sonucu verir
+		const offPointerDown = on(node, 'pointerdown', (e: PointerEvent) => {
+			if (e.button !== 0) return;
+			const hit = hitCell(e);
+			if (hit) this.cursor.set(hit.pos);
 		});
+		const offClick = on(node, 'click', (e: MouseEvent) => {
+			const hit = hitCell(e);
+			if (!hit) return;
+			this.#props.onCellClick?.(cellEvent(hit.pos, hit.row, e));
+			if (!hit.interactive) this.onRowClick?.(hit.row);
+		});
+		const offDblClick = on(node, 'dblclick', (e: MouseEvent) => {
+			const hit = hitCell(e);
+			if (!hit || hit.interactive) return;
+			this.#props.onCellDblClick?.(cellEvent(hit.pos, hit.row, e));
+			this.#props.onRowActivate?.(hit.row);
+		});
+		// Yalnızca grid'in kendisi odaktayken (başlıktaki sıralama butonu ya da hücredeki bir buton odaktaysa onların tuşları)
+		const offKeyDown = on(node, 'keydown', (e: KeyboardEvent) => {
+			if (e.target !== node) return;
+			if (this.cursor.handleKey(e)) e.preventDefault();
+		});
+
+		return () => {
+			offPointerDown();
+			offClick();
+			offDblClick();
+			offKeyDown();
+		};
 	};
 
 	// ################################## END Virtual Scroll ##################################################################################################################
@@ -480,6 +601,27 @@ class TableContext<TData extends Row> {
 		}
 
 		return offsets;
+	});
+
+	// Grid'in scroll-padding'i: scrollIntoView aktif hücreyi sticky başlık/footer/sabit kolonların altında bırakmaz.
+	// Aktif hücre sabit bir kolondaysa yatay padding kalkar: sticky hücre zaten görünür, padding onu "örtülü" sayıp
+	// gereksiz yatay kaydırmaya yol açardı.
+	readonly scrollPadding = $derived.by(() => {
+		const layout = this.columnLayout;
+		let left = 0;
+		let right = 0;
+		this.visibleColumns.forEach((col, i) => {
+			if (layout[i]?.freezeLeft) left += this.#columnPx(col.data);
+			else if (layout[i]?.freezeRight) right += this.#columnPx(col.data);
+		});
+		const activeCol = this.cursor.active?.col;
+		const activeSticky = activeCol !== undefined && layout[activeCol]?.sticky === true;
+		return {
+			top: this.headerLength * this.headerRowHeight,
+			bottom: this.dataLength > 0 ? this.footerLength * this.footerRowHeight : 0,
+			left: activeSticky ? 0 : left,
+			right: activeSticky ? 0 : right
+		};
 	});
 
 	// Sınır: 0 ile görünür kolon sayısı arası

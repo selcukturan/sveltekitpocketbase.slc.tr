@@ -13,6 +13,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: hücre gezinmesi (1. aşama). Aktif hücre; ok tuşları, Tab /
+  Shift+Tab (satır sonunda alt satıra), Home/End, Ctrl+Home/End, PageUp/PageDown,
+  Enter. Odak grid'de kalır (`aria-activedescendant`); aktif satır kaydırılınca
+  da DOM'da tutulur. Başlık/footer/sabit kolonlar için `scroll-padding` ile
+  `scrollIntoView`. Yeni olaylar: `onRowActivate` (çift tıklama/Enter),
+  `onCellClick`, `onCellDblClick`, `onActiveCellChange`. Tazelemede aktif hücre
+  aynı kayıtta kalır, yeni sayfada ilk satıra geçer.
 - DataTable: `dt.createList()` (`ListState`) ile filtre, sayfalama, sıralama
   ve sorgu tek yerden yönetiliyor; `autoLoad: false` ile ilk yüklemede istek
   atılmıyor. Tablo `list={list}` ile bağlanıyor.
@@ -42,7 +49,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.164` oldu.
+- Uygulama sürümü `v0.2.0-alpha.165` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -100,6 +107,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   bitmeden yeni istek başlatmıyor.
 - Simple CRUD: "Ara" butonu istek sürerken de kullanılabiliyor; "Yenile"
   butonu istek sürerken devre dışı.
+- Simple CRUD: düzenleme drawer'ı tek tıklama yerine çift tıklama ya da Enter
+  ile açılıyor (tek tıklama hücreyi seçer).
 - Toggler: kapsayıcının `container` sınıfı Tailwind'in `.container`
   (`width: 100%`) sınıfıyla çakışıyordu; DataTable alt barında "sayfa başına",
   "Kolonlar" ve ayarlar butonları sağa dayanmıyor, aralarında boşluk

@@ -21,11 +21,16 @@
 	// satır tıklaması grid'deki tek dinleyiciyle yakalanır (trackRowClick, data-row ile).
 	const layout = $derived(context.columnLayout[dc.colVisibleIndex]);
 	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
+	// Aktif hücre (klavye imleci): her hücre yalnızca bir string karşılaştırır, DOM'da değişen 2 hücredir
+	const isActive = $derived(context.cursor.key === `${dr.rowOriginalIndex}:${dc.colVisibleIndex}`);
 </script>
 
 <div
 	data-slc-table-datacell
 	data-row={dr.rowOriginalIndex}
+	data-col={dc.colVisibleIndex}
+	data-active={isActive || undefined}
+	id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })}
 	role="gridcell"
 	class={classes}
 	class:slc-table-freeze-left={layout?.freezeLeft}
@@ -62,9 +67,18 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		user-select: none; /* çift/shift tıklamada metin seçilmesin; kopyalama Ctrl+C ile (3. aşama) */
 	}
 	[data-slc-table-datacell].clickable {
 		cursor: pointer;
+	}
+	/* Aktif hücre: tablo odaktayken vurgu rengi, değilken soluk (seçim yeri kaybolmasın) */
+	[data-slc-table-datacell][data-active] {
+		outline: 2px solid var(--_dt-border-strong);
+		outline-offset: -2px;
+	}
+	:global(.slc-table:focus) [data-slc-table-datacell][data-active] {
+		outline-color: var(--_dt-accent);
 	}
 	.slc-table-freeze-left-boundary {
 		box-shadow: var(--_dt-freeze-shadow-left);

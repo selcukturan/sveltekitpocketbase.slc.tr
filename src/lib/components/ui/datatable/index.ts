@@ -8,7 +8,7 @@ export { default as HeaderRow } from './HeaderRow.svelte';
 export { default as Value } from './Value.svelte';
 
 export type { Column, ColumnType, Footer } from './types.js';
-export { DEFAULT_COLUMN_WIDTHS, DENSITY_ROW_HEIGHTS, widthOf, type Borders, type Density } from './context.svelte.js';
+export { DEFAULT_COLUMN_WIDTHS, DENSITY_ROW_HEIGHTS, widthOf, type Borders, type Density, type CellEvent, type ActiveCell } from './context.svelte.js';
 export { createList, ListState, type ListOptions } from './list-state.svelte.js';
 
 export { default as ActionButton } from './parts/ActionButton.svelte';

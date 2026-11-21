@@ -99,10 +99,18 @@
 			bind:clientHeight={context.clientHeight}
 			{@attach context.watchCurrentChanged}
 			{@attach context.trackTableScroll}
-			{@attach context.trackRowClick}
+			{@attach context.trackInteractions}
 			class={context.tableClass}
 			style:grid-template-rows={context.gridTemplateRows}
 			style:grid-template-columns={context.gridTemplateColumns}
+			style:scroll-padding-block-start="{context.scrollPadding.top}px"
+			style:scroll-padding-block-end="{context.scrollPadding.bottom}px"
+			style:scroll-padding-inline-start="{context.scrollPadding.left}px"
+			style:scroll-padding-inline-end="{context.scrollPadding.right}px"
+			tabindex="0"
+			aria-activedescendant={context.activeCellId}
+			aria-rowcount={context.headerLength + context.dataLength + context.footerLength}
+			aria-colcount={context.visibleColumns.length}
 		>
 			{#if context.headerLength > 0}
 				{@render (context.headerRow ?? defaultHeaderRow)({ headerIndex: 0 })}
@@ -238,6 +246,14 @@
 		overflow: auto;
 		overscroll-behavior: none;
 		background-color: var(--_dt-bg);
+	}
+	/* Odak grid'de; görünür odak aktif hücrenin çerçevesi (DataCell). Aktif hücre yokken grid'in kendisi çerçevelenir. */
+	.slc-table:focus {
+		outline: none;
+	}
+	.slc-table:focus-visible:not([aria-activedescendant]) {
+		outline: 2px solid var(--_dt-accent);
+		outline-offset: -2px;
 	}
 	.slc-table:before {
 		content: '';
