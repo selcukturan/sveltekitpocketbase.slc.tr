@@ -84,3 +84,5 @@ export const cellEditSchema = v.variant('field', [
 	v.object({ ...cellId, field: v.literal('select_optional_single'), value: v.nullable(v.picklist(Object.values(DemoCrudSelectOptionalSingleOptions))) })
 ]);
 export type CellEditSchemaType = v.InferOutput<typeof cellEditSchema>;
+// Toplu düzenleme (tabloya Ctrl+V ile yapıştırma); bir istekte en fazla 1000 hücre
+export const cellsEditSchema = v.pipe(v.array(cellEditSchema), v.minLength(1), v.maxLength(1000));

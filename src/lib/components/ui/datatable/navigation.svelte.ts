@@ -64,6 +64,12 @@ export class GridCursor {
 		return r !== undefined && row >= r.top && row <= r.bottom && col >= r.left && col <= r.right;
 	};
 
+	// Alanı seçili yapar (örn. yapıştırılan blok): aktif hücre sol üstte kalır, sabit uç sağ altta
+	readonly selectRange = (range: CellRange) => {
+		this.set({ row: range.top, col: range.left });
+		if (range.bottom !== range.top || range.right !== range.left) this.#anchor = { row: range.bottom, col: range.right };
+	};
+
 	readonly clearRange = () => {
 		if (!this.#anchor) return false;
 		this.#anchor = undefined;

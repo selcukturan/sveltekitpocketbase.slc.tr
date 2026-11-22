@@ -1,7 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { getSelectedLang, t } from '#lib/app/localization/index.js';
 import type { Column, Field, Row } from './types.js';
-import type { CellPos } from './navigation.svelte.js';
+import type { CellPos, CellRange } from './navigation.svelte.js';
 import type { Attachment } from 'svelte/attachments';
 
 /**
@@ -34,6 +34,9 @@ export interface EditorHost<TData extends Row> {
 	column(col: number): Column<TData> | undefined;
 	canSave(): boolean; // onCellEdit verildi mi
 	save(e: CellEditEvent<TData>): void | Promise<void>;
+	// Toplu kayıt (yapıştırma): verilmediyse (undefined) her hücre için save çağrılır. invalid: kaydedilmeyen geçersiz hücre sayısı
+	saveMany(edits: CellEditEvent<TData>[], info: { invalid: number }): void | Promise<void> | undefined;
+	canSaveMany(): boolean;
 	validate(e: CellEditEvent<TData>): string | undefined; // mesaj → geçersiz
 	focusGrid(): void;
 	move(pos: CellPos): void; // kaydettikten sonra imleci taşı (görünür alana kaydırarak)
@@ -96,6 +99,49 @@ const fromDraft = (kind: EditorKind, draft: string): { ok: true; value: unknown 
 		default:
 			return { ok: true, value: draft };
 	}
+};
+
+// Panodaki sekmeyle ayrılmış metin (Excel, Google Sheets, bu tablonun Ctrl+C'si) → satırlar × hücreler.
+// Excel'in tırnaklı hücreleri ("a""b" ya da içinde satır sonu olan) çözülür; sondaki boş satır atılır.
+const parseTsv = (text: string): string[][] => {
+	const rows: string[][] = [];
+	let row: string[] = [];
+	let cell = '';
+	let quoted = false;
+	for (let i = 0; i < text.length; i++) {
+		const ch = text[i];
+		if (quoted) {
+			if (ch === '"' && text[i + 1] === '"') {
+				cell += '"';
+				i++;
+			} else if (ch === '"') quoted = false;
+			else cell += ch;
+		} else if (ch === '"' && cell === '') quoted = true;
+		else if (ch === '\t') {
+			row.push(cell);
+			cell = '';
+		} else if (ch === '\n' || ch === '\r') {
+			if (ch === '\r' && text[i + 1] === '\n') i++;
+			row.push(cell);
+			rows.push(row);
+			row = [];
+			cell = '';
+		} else cell += ch;
+	}
+	if (cell !== '' || row.length > 0) {
+		row.push(cell);
+		rows.push(row);
+	}
+	return rows;
+};
+
+const TRUE_TEXT = ['true', '1', 'evet', 'yes', '✓', 'x'];
+const FALSE_TEXT = ['false', '0', 'hayır', 'hayir', 'no', '—', '-', ''];
+const parseBool = (text: string): { ok: true; value: boolean } | { ok: false } => {
+	const t = text.trim().toLocaleLowerCase('tr');
+	if (TRUE_TEXT.includes(t)) return { ok: true, value: true };
+	if (FALSE_TEXT.includes(t)) return { ok: true, value: false };
+	return { ok: false };
 };
 
 type Editing = { row: number; col: number; kind: EditorKind; draft: string; initial: string; selectAll: boolean; error?: string };
@@ -214,18 +260,80 @@ export class CellEditor<TData extends Row> {
 
 	// onCellEdit eşzamanlı çağrılır: sayfanın withOverride'ı düzenleyici kapanmadan uygulanır (eski değer bir an görünmez)
 	#save = (e: CellEditEvent<TData>) => {
-		const key = this.#key(e.row.id, e.field);
-		this.#saving.set(key, (this.#saving.get(key) ?? 0) + 1);
-		const done = () => {
-			const n = (this.#saving.get(key) ?? 1) - 1;
-			if (n > 0) this.#saving.set(key, n);
-			else this.#saving.delete(key);
-		};
+		let result: unknown;
 		try {
-			Promise.resolve(this.#host.save(e)).then(done, done); // hata: sayfa gösterir, override SvelteKit'çe geri alınır
+			result = this.#host.save(e); // hata: sayfa gösterir, override SvelteKit'çe geri alınır
 		} catch {
-			done();
+			// eşzamanlı hata: işaret hemen kalkar
 		}
+		this.#track([e], result);
+	};
+
+	/**
+	 * Yapıştırma: area'nın sol üstünden başlayarak metin bloğunu yazar. Tek değer + birden çok hücreli aralık → aralığı
+	 * doldurur. Düzenlenemeyen hücreler sessizce atlanır; çözümlenemeyen ya da validateCell'den geçmeyen değerler
+	 * kaydedilmez ve `invalid` olarak sayılır. Yazılan alanı döndürür (seçili gösterilir); hiçbir şey yoksa undefined.
+	 */
+	readonly paste = (text: string, area: CellRange): CellRange | undefined => {
+		if (!this.#host.canSave() || this.#editing) return undefined;
+		const block = parseTsv(text);
+		if (block.length === 0) return undefined;
+		const single = block.length === 1 && block[0].length === 1;
+		const fill = single && (area.bottom > area.top || area.right > area.left);
+		const height = fill ? area.bottom - area.top + 1 : block.length;
+		const width = fill ? area.right - area.left + 1 : Math.max(...block.map((r) => r.length));
+
+		const items = this.#host.items();
+		const edits: CellEditEvent<TData>[] = [];
+		let invalid = 0;
+		let bottom = area.top;
+		let right = area.left;
+		for (let r = 0; r < height && area.top + r < items.length; r++) {
+			const row = items[area.top + r];
+			for (let c = 0; c < width; c++) {
+				const pos = { row: area.top + r, col: area.left + c };
+				const column = this.#host.column(pos.col);
+				if (!column) break;
+				const cellText = fill ? block[0][0] : block[r]?.[c];
+				if (cellText === undefined) continue;
+				bottom = Math.max(bottom, pos.row);
+				right = Math.max(right, pos.col);
+				const kind = this.kindAt(pos);
+				if (!kind) continue; // düzenlenemez
+				const parsed = kind === 'bool' ? parseBool(cellText) : fromDraft(kind, cellText);
+				if (!parsed.ok) {
+					invalid++;
+					continue;
+				}
+				const e = { row, field: column.field, value: parsed.value, oldValue: this.#valueOf(row, column.field) };
+				if (this.#host.validate(e) !== undefined) {
+					invalid++;
+					continue;
+				}
+				if (e.value !== e.oldValue) edits.push(e);
+			}
+		}
+
+		if (this.#host.canSaveMany()) {
+			if (edits.length > 0 || invalid > 0) this.#track(edits, this.#host.saveMany(edits, { invalid }));
+		} else {
+			for (const e of edits) this.#save(e);
+		}
+		return { top: area.top, left: area.left, bottom, right };
+	};
+
+	// İstek sürerken hücreleri "kaydediliyor" işaretler
+	#track = (edits: CellEditEvent<TData>[], result: unknown) => {
+		const keys = edits.map((e) => this.#key(e.row.id, e.field));
+		for (const key of keys) this.#saving.set(key, (this.#saving.get(key) ?? 0) + 1);
+		const done = () => {
+			for (const key of keys) {
+				const n = (this.#saving.get(key) ?? 1) - 1;
+				if (n > 0) this.#saving.set(key, n);
+				else this.#saving.delete(key);
+			}
+		};
+		Promise.resolve(result).then(done, done);
 	};
 
 	/** Grid tuşları (düzenleme kapalıyken). İşlenirse true. */

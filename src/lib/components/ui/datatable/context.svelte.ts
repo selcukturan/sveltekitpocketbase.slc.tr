@@ -128,6 +128,11 @@ export interface MainProps<TData extends Row> {
 	// Yeni değeri hemen göstermek için `.updates(...list.updatesWith(...))` (SvelteKit withOverride) kullanılır;
 	// istek hata verirse override kendiliğinden geri alınır (hatayı göstermek sayfanın işi, örn. toast).
 	onCellEdit?: (e: CellEditEvent<TData>) => void | Promise<void>;
+	// Ctrl/⌘+C panoya yazıldıktan sonra (kullanıcıya bildirmek için, örn. toast)
+	onCopy?: (info: { rows: number; cols: number }) => void;
+	// Toplu kayıt (Ctrl+V ile yapıştırma): tek istekte kaydetmek için. Verilmezse her hücre için onCellEdit çağrılır.
+	// invalid: çözümlenemeyen ya da validateCell'den geçmeyip kaydedilmeyen hücre sayısı (kullanıcıya bildirmek için).
+	onCellsEdit?: (edits: CellEditEvent<TData>[], info: { invalid: number }) => void | Promise<void>;
 	// Kaydetmeden önce doğrulama (forms'taki preflight gibi): mesaj döndürürse kaydedilmez, düzenleyici açık kalır.
 	validateCell?: (e: CellEditEvent<TData>) => string | undefined;
 }
@@ -223,6 +228,8 @@ class TableContext<TData extends Row> {
 			canSave: () => this.#props.onCellEdit !== undefined,
 			save: (e) => this.#props.onCellEdit?.(e),
 			validate: (e) => this.#props.validateCell?.(e),
+			saveMany: (edits, info) => this.#props.onCellsEdit?.(edits, info),
+			canSaveMany: () => this.#props.onCellsEdit !== undefined,
 			focusGrid: () => this.el?.focus({ preventScroll: true }),
 			move: (pos) => this.cursor.set(pos, { scroll: true })
 		});
@@ -304,6 +311,8 @@ class TableContext<TData extends Row> {
 					if (isNewQuery) this.editor.cancel();
 					if (!active) return;
 					const index = isNewQuery ? 0 : this.items.findIndex((row) => row.id === activeId);
+					// Tazelemede aktif kayıt yerinde kaldıysa dokunulmaz: hücre aralığı (örn. yapıştırılan alan) korunur
+					if (index === active.row && index < this.items.length) return;
 					this.cursor.set({ row: index >= 0 ? index : active.row, col: active.col });
 				});
 				if (current && typeof current === 'object' && 'items' in current) {
@@ -554,9 +563,12 @@ class TableContext<TData extends Row> {
 			return String(value).replace(/[\t\r\n]+/g, ' '); // hücre içi sekme/satır sonu TSV'yi bozmasın
 		};
 		const lines = this.items.slice(r.top, r.bottom + 1).map((row) => fields.map((f) => text((row as Record<string, unknown>)[f])).join('\t'));
-		navigator.clipboard?.writeText(lines.join('\n')).catch(() => {
-			// izin yok ya da güvenli bağlam değil: sessizce geç
-		});
+		navigator.clipboard
+			?.writeText(lines.join('\n'))
+			.then(() => this.#props.onCopy?.({ rows: lines.length, cols: fields.length }))
+			.catch(() => {
+				// izin yok ya da güvenli bağlam değil: sessizce geç
+			});
 		return true;
 	};
 
@@ -610,6 +622,18 @@ class TableContext<TData extends Row> {
 			else if (selection.mode === 'single') selection.select(hit.row.id);
 			this.onRowClick?.(hit.row);
 		});
+		// Ctrl/⌘+V: tarayıcının paste olayı (pano izni gerekmez). Düzenleyici açıkken olay input'tan gelir, ona karışılmaz.
+		const offPaste = on(node, 'paste', (e: ClipboardEvent) => {
+			if (e.target !== node) return;
+			const active = this.cursor.active;
+			const text = e.clipboardData?.getData('text/plain');
+			if (!active || !text) return;
+			const area = this.cursor.range ?? { top: active.row, bottom: active.row, left: active.col, right: active.col };
+			const pasted = this.editor.paste(text, area);
+			if (!pasted) return;
+			e.preventDefault();
+			this.cursor.selectRange(pasted);
+		});
 		const offDblClick = on(node, 'dblclick', (e: MouseEvent) => {
 			const hit = hitCell(e);
 			if (!hit || hit.interactive || isSelectColumn(hit.pos.col)) return;
@@ -657,6 +681,7 @@ class TableContext<TData extends Row> {
 			offPointerDown();
 			offClick();
 			offDblClick();
+			offPaste();
 			offKeyDown();
 			offFocusIn();
 			observer.disconnect();

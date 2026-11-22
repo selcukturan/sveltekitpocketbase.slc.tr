@@ -6,7 +6,7 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, cellEditSchema } from './page.shared';
+import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, cellEditSchema, cellsEditSchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -116,6 +116,25 @@ export const updateCell = command(cellEditSchema, async ({ id, field, value }) =
 	await requested(getList, 1).refreshAll();
 
 	return updatedResult.value;
+});
+
+// Toplu hücre düzenleme (yapıştırma): hücreler kayıt bazında birleştirilir, her kayıt tek istekle güncellenir.
+export const updateCells = command(cellsEditSchema, async (edits) => {
+	await checkAuthenticated(); // 🔒
+
+	const { locals } = getRequestEvent();
+	const collection = locals.pb.collection(Collections.DemoCrud);
+
+	const patches: Record<string, Record<string, unknown>> = {};
+	for (const { id, field, value } of edits) patches[id] = { ...patches[id], [field]: value ?? '' };
+
+	const results = await Promise.all(Object.entries(patches).map(([id, patch]) => ResultAsync.fromPromise(collection.update(id, patch), mapUnknownToError)));
+	const failed = results.find((result) => result.isErr());
+	if (failed?.isErr()) {
+		throwError(failed.error);
+	}
+
+	await requested(getList, 1).refreshAll();
 });
 
 // ######################################################################################################################

@@ -51,6 +51,17 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `editable` satır bazında fonksiyon olabilir (`(row) => boolean`); kendi
   `dataRow` snippet'inde `<DataCell editable={…}>` kolondakini o hücre için
   geçersiz kılar.
+- DataTable: Ctrl/⌘+V ile yapıştırma (tarayıcının `paste` olayı, pano izni
+  gerekmez). Sekmeyle ayrılmış blok (Excel/Sheets, Excel'in tırnaklı hücreleri
+  dahil) aktif hücreden ya da aralığın sol üstünden yazılır; tek değer +
+  aralık → aralık doldurulur. Düzenlenemeyen hücreler atlanır, geçersiz
+  değerler kaydedilmez ve sayısı bildirilir; yapıştırılan alan seçili kalır.
+  Toplu kayıt için `onCellsEdit` (verilmezse hücre başına `onCellEdit`).
+  Tazelemede aktif kayıt yerinde kaldıysa hücre aralığı korunur.
+- DataTable: `onCopy({ rows, cols })` panoya yazıldıktan sonra çağrılır;
+  Simple CRUD "N hücre panoya kopyalandı." toast'ı gösterir.
+- Simple CRUD: `updateCells` komutu (`cellsEditSchema`, en fazla 1000 hücre;
+  kayıt bazında birleştirilip her kayıt tek istekle güncellenir).
 - Simple CRUD: `updateCell` komutu ve `cellEditSchema` (alan bazında doğrulama;
   istemcide `validateCell`, sunucuda komut şeması); metin, sayı, liste, tarih
   ve bool kolonları tabloda düzenlenebilir.
@@ -86,7 +97,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.168` oldu.
+- Uygulama sürümü `v0.2.0-alpha.169` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

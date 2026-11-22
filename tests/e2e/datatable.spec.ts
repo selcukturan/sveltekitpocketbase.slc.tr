@@ -180,6 +180,7 @@ test('Ctrl+C aralığı sekmeyle ayrılmış metin olarak kopyalar', async ({ pa
 
 	const expected = [0, 1].map((r) => [2, 3].map((c) => cell(page, r, c)));
 	const rows = await Promise.all(expected.map((cells) => Promise.all(cells.map(async (c) => ((await c.textContent()) ?? '').trim()))));
+	await expect(page.getByText('4 hücre panoya kopyalandı.')).toBeVisible();
 	const clip = await page.evaluate(() => navigator.clipboard.readText());
 	const lines = clip.split('\n').map((line) => line.split('\t'));
 	expect(lines).toHaveLength(2);
@@ -261,6 +262,57 @@ test('hücre düzenleme: yazma/F2/Enter/Esc, sayı, liste, tarih, bool ve doğru
 	await page.keyboard.press('Escape');
 	await expect(editor).toHaveCount(0);
 	await expect(cell(page, 0, 3)).toHaveText('aaa yeni');
+
+	// temizlik
+	await deleteFirstRow(page);
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(1);
+	await deleteFirstRow(page);
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(0);
+});
+
+test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizleri bildirir', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	const clip = (text: string) => page.evaluate((t) => navigator.clipboard.writeText(t), text);
+	await openTable(page);
+	const stamp = `seed-e2e-${Date.now().toString(36)}`;
+	await createRecord(page, `${stamp}-1`);
+	await createRecord(page, `${stamp}-2`);
+	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	await search.fill(stamp);
+	await search.press('Enter');
+	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(2);
+
+	// 2×2 blok: sayı + liste (Excel'den kopyalanmış gibi, sondaki satır sonu dahil)
+	await cell(page, 0, 5).click();
+	await clip('10\tlinux\r\n20,5\twindows\r\n');
+	await page.keyboard.press('Control+v');
+	await expect(rangeCells(page)).toHaveCount(4); // yapıştırılan alan seçili
+	await expect(cell(page, 0, 5)).toHaveText('10');
+	await expect(cell(page, 0, 6)).toHaveText('linux');
+	await expect(cell(page, 1, 5)).toHaveText('20,5');
+	await expect(cell(page, 1, 6)).toHaveText('windows');
+
+	// Tek değer + aralık: aralığı doldurur (bool)
+	await cell(page, 0, 9).click();
+	await page.keyboard.press('Shift+ArrowDown');
+	await clip('evet');
+	await page.keyboard.press('Control+v');
+	await expect(cell(page, 0, 9).locator('span')).toHaveAttribute('aria-label', 'true');
+	await expect(cell(page, 1, 9).locator('span')).toHaveAttribute('aria-label', 'true');
+
+	// Geçersiz değer kaydedilmez, bildirilir
+	await cell(page, 0, 5).click();
+	await clip('abc');
+	await page.keyboard.press('Control+v');
+	await expect(page.getByText('1 hücre yapıştırılamadı').first()).toBeVisible();
+	await expect(cell(page, 0, 5)).toHaveText('10');
+
+	// Düzenlenemeyen hücre (id) sessizce atlanır
+	const id = await cell(page, 0, 2).textContent();
+	await cell(page, 0, 2).click();
+	await clip('xyz');
+	await page.keyboard.press('Control+v');
+	await expect(cell(page, 0, 2)).toHaveText(id!);
 
 	// temizlik
 	await deleteFirstRow(page);

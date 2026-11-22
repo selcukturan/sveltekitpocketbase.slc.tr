@@ -9,8 +9,8 @@
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import * as v from 'valibot';
 	import { DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
-	import { listParamsSchema, createFormSchema, updateFormSchema, cellEditSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, updateCell, seedRecords, deleteSeedRecords } from './page.remote';
+	import { listParamsSchema, createFormSchema, updateFormSchema, cellEditSchema, cellsEditSchema } from './page.shared';
+	import { getOne, getList, createForm, updateForm, deleteRecord, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -52,15 +52,32 @@
 		const result = v.safeParse(cellEditSchema, cellArgs(e));
 		return result.success ? undefined : result.issues[0].message;
 	};
+	// Optimistik görünüm: listede ilgili kayıtlara alanları uygular (withOverride)
+	const applyEdits = (edits: v.InferOutput<typeof cellEditSchema>[]) =>
+		list.updatesWith((result) => ({
+			...result,
+			items: result.items.map((item) => {
+				const own = edits.filter((edit) => edit.id === item.id);
+				return own.length ? { ...item, ...Object.fromEntries(own.map((edit) => [edit.field, edit.value])) } : item;
+			})
+		}));
+
 	const editCell = async (e: dt.CellEditEvent<Item>) => {
 		const args = v.parse(cellEditSchema, cellArgs(e));
 		try {
-			await updateCell(args).updates(
-				...list.updatesWith((result) => ({
-					...result,
-					items: result.items.map((item) => (item.id === args.id ? { ...item, [args.field]: args.value } : item))
-				}))
-			);
+			await updateCell(args).updates(...applyEdits([args]));
+		} catch (error) {
+			toaster.error(error);
+		}
+	};
+
+	// Ctrl+V ile yapıştırma: tek istek. Geçersiz hücreler tabloda elendi, sayısı bildirilir.
+	const editCells = async (edits: dt.CellEditEvent<Item>[], { invalid }: { invalid: number }) => {
+		if (invalid > 0) toaster.error(null, t('dt_paste_invalid', { count: invalid }));
+		if (edits.length === 0) return;
+		const args = v.parse(cellsEditSchema, edits.map(cellArgs));
+		try {
+			await updateCells(args).updates(...applyEdits(args));
 		} catch (error) {
 			toaster.error(error);
 		}
@@ -162,6 +179,8 @@
 				bind:selected
 				persist="grapes-crud-simple"
 				onCellEdit={editCell}
+				onCellsEdit={editCells}
+				onCopy={({ rows, cols }) => toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
 				{validateCell}
 				onRowActivate={(row) => drawer.show('update', row.id)}
 			>
