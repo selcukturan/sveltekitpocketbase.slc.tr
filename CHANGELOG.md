@@ -105,6 +105,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `isValidSort`): formda olmayan iç alana göre sıralayarak bilgi sızdırılamaz.
   Liste elle yazılmaz; `createFormSchema` alanları + `id`, `created`,
   `updated`'tan türetilir.
+- Dokümantasyon: `docs/d01_datatable_2026-11-22.md` (DataTable: özellikler,
+  kullanım örnekleri, kritik bilgiler, tarifler). Belge adları tarihli:
+  `d00_core.md` → `d00_core_2026-10-27.md`; her belgenin başında tarih, sürüm,
+  commit ve sonraki değişiklikler için `git` komutları. README belge tablosu
+  güncellendi.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -137,7 +142,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.173` oldu.
+- Uygulama sürümü `v0.2.0-alpha.174` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
