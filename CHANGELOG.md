@@ -102,7 +102,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   kolonda okun yanında öncelik numarası; `aria-sort` birincil kolonda, diğerleri
   ekran okuyucu metniyle. `dt.parseSort/formatSort/nextSort/isValidSort`.
 - Simple CRUD: `sort` yalnızca izin verilen alanlarla (`SORTABLE_FIELDS`,
-  `isValidSort`): gösterilmeyen alana göre sıralayarak bilgi sızdırılamaz.
+  `isValidSort`): formda olmayan iç alana göre sıralayarak bilgi sızdırılamaz.
+  Liste elle yazılmaz; `createFormSchema` alanları + `id`, `created`,
+  `updated`'tan türetilir.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -135,7 +137,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.172` oldu.
+- Uygulama sürümü `v0.2.0-alpha.173` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

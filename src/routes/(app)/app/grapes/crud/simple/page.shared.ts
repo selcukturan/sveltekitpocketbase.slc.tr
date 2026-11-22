@@ -5,21 +5,42 @@ import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOpti
 import { isValidSort } from '#lib/components/ui/datatable/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
-// Sıralanabilecek alanlar (tablodaki sıralanabilir kolonlar). İstemci başka alan gönderemez: gösterilmeyen bir alana göre
-// sıralayarak değeri hakkında dolaylı bilgi edinilmesini önler. Çoklu sıralama: '-number_optional,text_required'.
-export const SORTABLE_FIELDS = [
-	'id',
-	'text_required',
-	'text_optional',
-	'number_optional',
-	'select_optional_single',
-	'select_optional_multiple',
-	'date_optional',
-	'bool_optional',
-	'created',
-	'updated'
-] as const;
+export const oneParamsSchema = v.object({
+	id: v.optional(v.fallback(v.string(), ''), ''),
+	options: v.object({
+		expand: v.optional(v.string()),
+		fields: v.optional(v.string())
+	}),
+	timestamp: v.optional(v.fallback(v.number(), 0), 0)
+});
+export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
+export const createFormSchema = v.object({
+	...input.Text('text_required'),
+	...input.Text('text_optional', { required: false }),
+	...input.Select('select_optional_multiple', { required: false, multiple: true, values: Object.values(DemoCrudSelectOptionalMultipleOptions) }),
+	...input.Select('select_optional_single', { required: false, values: Object.values(DemoCrudSelectOptionalSingleOptions) }),
+	...input.Relation('relation_optional_multiple', { collection: Collections.DemoRelationInputMultiple, required: false, multiple: true }),
+	...input.Relation('relation_optional_single', { collection: Collections.DemoRelationInputSingle, required: false }),
+	...input.File('file_optional_multiple', { required: false, multiple: true }),
+	...input.File('file_optional_single', { required: false, multiple: false }),
+	...input.Bool('bool_optional'),
+	...input.Date('date_optional', { required: false }),
+	...input.Datetime('datetime_optional', { required: false }),
+	...input.Email('email_optional', { required: false }),
+	...input.Number('number_optional', { required: false }),
+	...input.Textarea('textarea_optional', { required: false }),
+	...input.Url('url_optional', { required: false })
+});
+export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
+
+// Sıralanabilecek alanlar: form şemasındaki alanlar + PocketBase sistem alanları. Kolonları yeniden tanımlamaya gerek yok;
+// form alanları kullanıcının zaten gördüğü alanlar olduğu için sıralamak bilgi sızdırmaz. Formda olmayan (iç) alanlara göre
+// sıralama reddedilir. Çoklu sıralama: '-number_optional,text_required'.
+export const SORTABLE_FIELDS: readonly string[] = [...Object.keys(createFormSchema.entries), 'id', 'created', 'updated'];
+
+// Liste (tablo) parametreleri: SORTABLE_FIELDS'ten sonra, çünkü sıralama onunla doğrulanır
 export const listParamsSchema = v.object({
 	filter: v.optional(v.string()),
 	page: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 1), 1),
@@ -43,37 +64,6 @@ export const listParamsSchema = v.object({
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
-// --------------------------------------------------------------------------------------------------------------------------------------------
-export const oneParamsSchema = v.object({
-	id: v.optional(v.fallback(v.string(), ''), ''),
-	options: v.object({
-		expand: v.optional(v.string()),
-		fields: v.optional(v.string())
-	}),
-	timestamp: v.optional(v.fallback(v.number(), 0), 0)
-});
-export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;
-// --------------------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
-export const createFormSchema = v.object({
-	...input.Text('text_required'),
-	...input.Text('text_optional', { required: false }),
-	...input.Select('select_optional_multiple', { required: false, multiple: true, values: Object.values(DemoCrudSelectOptionalMultipleOptions) }),
-	...input.Select('select_optional_single', { required: false, values: Object.values(DemoCrudSelectOptionalSingleOptions) }),
-	...input.Relation('relation_optional_multiple', { collection: Collections.DemoRelationInputMultiple, required: false, multiple: true }),
-	...input.Relation('relation_optional_single', { collection: Collections.DemoRelationInputSingle, required: false }),
-	...input.File('file_optional_multiple', { required: false, multiple: true }),
-	...input.File('file_optional_single', { required: false, multiple: false }),
-	...input.Bool('bool_optional'),
-	...input.Date('date_optional', { required: false }),
-	...input.Datetime('datetime_optional', { required: false }),
-	...input.Email('email_optional', { required: false }),
-	...input.Number('number_optional', { required: false }),
-	...input.Textarea('textarea_optional', { required: false }),
-	...input.Url('url_optional', { required: false })
-});
-export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 
 export const updateFormSchema = v.object({
 	...input.Hidden('id'),
