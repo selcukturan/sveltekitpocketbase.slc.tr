@@ -44,11 +44,16 @@ export type ActiveCell<TData> = Omit<CellEvent<TData>, 'event' | 'value'>;
 // 'refresh': aynı sorgunun tazelenmesi (mutasyon sonrası, withOverride ile optimistik güncelleme dahil)
 export type LoadEvent<TData> = ListResult<TData> & { reason: 'query' | 'refresh' };
 
-// Seçili hücre aralığı ve özeti (bind:range, onRangeChange, alt bar). Sayısal toplam yalnızca number değerlerden.
-export type RangeInfo = CellRange & { count: number; numericCount: number; sum: number; average: number | undefined };
+// Seçili hücre alanları ve özeti (bind:range, onRangeChange, alt bar). ranges: Ctrl ile çoklu seçimde birden çok alan
+// (son eleman şu anki). Örtüşen hücreler bir kez sayılır; sayısal toplam yalnızca number değerlerden.
+export type RangeInfo = { ranges: CellRange[]; count: number; numericCount: number; sum: number; average: number | undefined };
+
+// onVisibleRowsChange: ekranda (en az bir kısmı) görünen veri satırları; sticky başlık/footer altındakiler sayılmaz.
+// Veri yoksa first 0, last -1. Örn. sonsuz kaydırma (last sona yaklaşınca sonraki sayfa), görünenler için ek veri.
+export type VisibleRows = { first: number; last: number; total: number };
 
 // onKeyDown'a verilen bağlam: tuş anındaki aktif hücre, aralık ve seçili satırlar
-export type KeyContext<TData extends Row> = { cell: ActiveCell<TData> | undefined; range: CellRange | undefined; selected: TData['id'][] };
+export type KeyContext<TData extends Row> = { cell: ActiveCell<TData> | undefined; ranges: CellRange[]; selected: TData['id'][] };
 
 // Kolona `width` verilmezse tipine göre bu değer kullanılır (tip yoksa 'text').
 // minmax: en az Npx, kalan alan fr oranıyla paylaşılır; tablo genişledikçe kolonlar da genişler.
@@ -147,12 +152,15 @@ export interface MainProps<TData extends Row> {
 	onKeyDown?: (e: KeyboardEvent, ctx: KeyContext<TData>) => void;
 	// Hücrede sağ tık. Verilirse tarayıcının menüsü açılmaz; hücre aralık dışındaysa aktif olur. Menüyü sayfa çizer.
 	onContextMenu?: (e: CellEvent<TData>) => void;
+	// Görünen satırlar değişti (kaydırma, boyut, veri); her karede değil, yalnızca aralık değişince
+	onVisibleRowsChange?: (rows: VisibleRows) => void;
 	// Seçili hücre aralığı değişti (bind:range ile de okunur)
 	onRangeChange?: (range: RangeInfo | undefined) => void;
 	// Koşullu satır görünümü: satırın tüm hücrelerine eklenecek class (örn. vadesi geçen satır)
 	rowClass?: (row: TData) => string | undefined;
-	// Ctrl/⌘+C panoya yazıldıktan sonra (kullanıcıya bildirmek için, örn. toast)
-	onCopy?: (info: { rows: number; cols: number }) => void;
+	// Ctrl/⌘+C panoya yazıldıktan sonra (kullanıcıya bildirmek için, örn. toast). partial: çoklu seçim tek blok
+	// hâline getirilemedi (alanlar ne aynı kolonlarda ne aynı satırlarda), yalnızca son alan kopyalandı.
+	onCopy?: (info: { rows: number; cols: number; partial: boolean }) => void;
 	// Toplu kayıt (Ctrl+V ile yapıştırma): tek istekte kaydetmek için. Verilmezse her hücre için onCellEdit çağrılır.
 	// invalid: çözümlenemeyen ya da validateCell'den geçmeyip kaydedilmeyen hücre sayısı (kullanıcıya bildirmek için).
 	onCellsEdit?: (edits: CellEditEvent<TData>[], info: { invalid: number }) => void | Promise<void>;
@@ -477,6 +485,23 @@ class TableContext<TData extends Row> {
 		return row !== undefined && row < this.dataLength && (row < this.#visibleStart || row > this.#visibleEnd) ? row : -1;
 	});
 
+	// Gerçekten görünen satırlar (overscan'siz). i. satırın üstü: başlık + i × satır; veri alanı başlık ile footer arası.
+	#firstVisible = $derived(Math.min(Math.floor(this.#rafY / this.dataRowHeight), this.dataLength - 1));
+	#lastVisible = $derived(
+		Math.min(
+			this.dataLength - 1,
+			Math.ceil(
+				(this.#rafY + this.clientHeight - this.headerLength * this.headerRowHeight - (this.dataLength > 0 ? this.footerLength * this.footerRowHeight : 0)) /
+					this.dataRowHeight
+			) - 1
+		)
+	);
+	// Sayı derived'larından: yalnızca aralık ya da veri sayısı değişince yeni nesne (onVisibleRowsChange)
+	readonly visibleRows = $derived.by((): VisibleRows => {
+		const total = this.dataLength;
+		return total === 0 ? { first: 0, last: -1, total } : { first: Math.max(0, this.#firstVisible), last: Math.max(0, this.#lastVisible), total };
+	});
+
 	// Aralık, veri ya da sabitlenen satır değişince yeniden hesaplanır
 	virtualData = $derived.by(() => {
 		const items = this.items;
@@ -578,43 +603,52 @@ class TableContext<TData extends Row> {
 		const offCancel = on(window, 'pointercancel', stop);
 	};
 
-	// Seçili aralığın özeti (Excel'in durum çubuğu gibi). Seçim ve işlem kolonları sayılmaz.
+	// Kopyalanabilir/sayılabilir kolon mu (seçim ve işlem kolonları değil)
+	#isDataColumn = (col: number) => {
+		const type = this.visibleColumns[col]?.data.type;
+		return type !== undefined ? type !== 'select' && type !== 'actions' : this.visibleColumns[col] !== undefined;
+	};
+
+	// Seçili alanların özeti (Excel'in durum çubuğu gibi). Örtüşen hücreler bir kez sayılır.
 	readonly rangeInfo = $derived.by((): RangeInfo | undefined => {
-		const r = this.cursor.range;
-		if (!r) return undefined;
-		const fields = this.visibleColumns
-			.slice(r.left, r.right + 1)
-			.filter((col) => col.data.type !== 'select' && col.data.type !== 'actions')
-			.map((col) => col.data.field);
+		const ranges = this.cursor.ranges;
+		if (ranges.length === 0) return undefined;
+		const seen: Record<string, true> = {};
 		let count = 0;
 		let numericCount = 0;
 		let sum = 0;
-		for (let i = r.top; i <= r.bottom; i++) {
-			const row = this.items[i] as Record<string, unknown> | undefined;
-			if (!row) continue;
-			for (const field of fields) {
-				count++;
-				const value = row[field];
-				if (typeof value === 'number' && Number.isFinite(value)) {
-					numericCount++;
-					sum += value;
+		for (const r of ranges) {
+			for (let i = r.top; i <= r.bottom; i++) {
+				const row = this.items[i] as Record<string, unknown> | undefined;
+				if (!row) continue;
+				for (let c = r.left; c <= r.right; c++) {
+					if (!this.#isDataColumn(c) || seen[`${i}:${c}`]) continue;
+					seen[`${i}:${c}`] = true;
+					count++;
+					const value = row[this.visibleColumns[c].data.field];
+					if (typeof value === 'number' && Number.isFinite(value)) {
+						numericCount++;
+						sum += value;
+					}
 				}
 			}
 		}
-		return { ...r, count, numericCount, sum, average: numericCount > 0 ? sum / numericCount : undefined };
+		return { ranges, count, numericCount, sum, average: numericCount > 0 ? sum / numericCount : undefined };
 	});
 
-	// Aralığı (yoksa aktif hücreyi) sekmeyle ayrılmış metin (TSV) olarak panoya kopyalar; Excel'e yapıştırılabilir.
+	// Seçimi (yoksa aktif hücreyi) sekmeyle ayrılmış metin (TSV) olarak panoya kopyalar; Excel'e yapıştırılabilir.
 	// Seçim ve işlem kolonları atlanır. Değerler ham hâliyle (tarih PocketBase biçiminde, liste virgülle).
+	// Çoklu seçim (Excel gibi): alanlar aynı kolonlardaysa satırlar alt alta, aynı satırlardaysa kolonlar yan yana
+	// birleştirilir; ikisi de değilse yalnızca son alan kopyalanır (partial).
 	readonly copyRange = (): boolean => {
 		const active = this.cursor.active;
 		if (!active) return false;
-		const r = this.cursor.range ?? { top: active.row, bottom: active.row, left: active.col, right: active.col };
-		const fields = this.visibleColumns
-			.slice(r.left, r.right + 1)
-			.filter((col) => col.data.type !== 'select' && col.data.type !== 'actions')
-			.map((col) => col.data.field);
-		if (fields.length === 0) return false;
+		const selected = this.cursor.ranges.length > 0 ? this.cursor.ranges : [{ top: active.row, bottom: active.row, left: active.col, right: active.col }];
+		const first = selected[0];
+		const sameCols = selected.every((r) => r.left === first.left && r.right === first.right);
+		const sameRows = selected.every((r) => r.top === first.top && r.bottom === first.bottom);
+		const partial = !sameCols && !sameRows;
+		const ranges = partial ? [selected[selected.length - 1]] : selected;
 
 		const text = (value: unknown) => {
 			if (value === null || value === undefined) return '';
@@ -622,10 +656,42 @@ class TableContext<TData extends Row> {
 			if (typeof value === 'object') return JSON.stringify(value);
 			return String(value).replace(/[\t\r\n]+/g, ' '); // hücre içi sekme/satır sonu TSV'yi bozmasın
 		};
-		const lines = this.items.slice(r.top, r.bottom + 1).map((row) => fields.map((f) => text((row as Record<string, unknown>)[f])).join('\t'));
+		const colsOf = (r: CellRange) => {
+			const cols: number[] = [];
+			for (let c = r.left; c <= r.right; c++) if (this.#isDataColumn(c)) cols.push(c);
+			return cols;
+		};
+		const valueAt = (row: number, col: number) => text((this.items[row] as Record<string, unknown> | undefined)?.[this.visibleColumns[col].data.field]);
+
+		let lines: string[];
+		let cols: number;
+		if (sameRows && !sameCols) {
+			// Yan yana: kolonlar soldan sağa (aynı kolon bir kez)
+			const all = [...ranges]
+				.sort((a, b) => a.left - b.left)
+				.flatMap(colsOf)
+				.filter((c, i, list) => list.indexOf(c) === i);
+			cols = all.length;
+			lines = [];
+			for (let row = first.top; row <= first.bottom; row++) lines.push(all.map((c) => valueAt(row, c)).join('\t'));
+		} else {
+			// Alt alta (tek alan da bu yol): satırlar yukarıdan aşağı, örtüşen satır bir kez
+			const all = colsOf(ranges[0]);
+			cols = all.length;
+			const rows: number[] = [];
+			const seen: Record<number, true> = {};
+			for (const r of ranges)
+				for (let row = r.top; row <= r.bottom; row++)
+					if (!seen[row]) {
+						seen[row] = true;
+						rows.push(row);
+					}
+			lines = rows.sort((a, b) => a - b).map((row) => all.map((c) => valueAt(row, c)).join('\t'));
+		}
+		if (cols === 0) return false;
 		navigator.clipboard
 			?.writeText(lines.join('\n'))
-			.then(() => this.#props.onCopy?.({ rows: lines.length, cols: fields.length }))
+			.then(() => this.#props.onCopy?.({ rows: lines.length, cols, partial }))
 			.catch(() => {
 				// izin yok ya da güvenli bağlam değil: sessizce geç
 			});
@@ -662,7 +728,9 @@ class TableContext<TData extends Row> {
 			const hit = hitCell(e);
 			if (!hit) return;
 			const rangeable = !hit.interactive && !isSelectColumn(hit.pos.col);
-			this.cursor.set(hit.pos, { extend: e.shiftKey && rangeable });
+			// Ctrl/⌘: seçime yeni alan ekler (sürüklenirse bu alan genişler); Shift: son alanı genişletir
+			if (rangeable && (e.ctrlKey || e.metaKey) && !e.shiftKey) this.cursor.addRange(hit.pos);
+			else this.cursor.set(hit.pos, { extend: e.shiftKey && rangeable });
 			if (rangeable && e.pointerType === 'mouse') this.#dragRange(node, e);
 		});
 
@@ -678,8 +746,8 @@ class TableContext<TData extends Row> {
 			}
 			this.#props.onCellClick?.(cellEvent(hit.pos, hit.row, e));
 			if (hit.interactive) return;
-			if (e.ctrlKey || e.metaKey) selection.toggle(hit.row.id);
-			else if (selection.mode === 'single') selection.select(hit.row.id);
+			// Satır seçimi: seçim kolonu, klavye (Space/Ctrl+A) ya da single modda düz tıklama. Ctrl+tıklama hücre seçer.
+			if (selection.mode === 'single' && !e.ctrlKey && !e.metaKey && !e.shiftKey) selection.select(hit.row.id);
 			this.onRowClick?.(hit.row);
 		});
 		// Ctrl/⌘+V: tarayıcının paste olayı (pano izni gerekmez). Düzenleyici açıkken olay input'tan gelir, ona karışılmaz.
@@ -688,11 +756,11 @@ class TableContext<TData extends Row> {
 			const active = this.cursor.active;
 			const text = e.clipboardData?.getData('text/plain');
 			if (!active || !text) return;
-			const area = this.cursor.range ?? { top: active.row, bottom: active.row, left: active.col, right: active.col };
-			const pasted = this.editor.paste(text, area);
+			const areas = this.cursor.ranges.length > 0 ? this.cursor.ranges : [{ top: active.row, bottom: active.row, left: active.col, right: active.col }];
+			const pasted = this.editor.paste(text, areas);
 			if (!pasted) return;
 			e.preventDefault();
-			this.cursor.selectRange(pasted);
+			if (pasted.select) this.cursor.selectRange(pasted.select); // doldurmada seçim olduğu gibi kalır
 		});
 		const offContextMenu = on(node, 'contextmenu', (e: MouseEvent) => {
 			const onContextMenu = this.#props.onContextMenu;
@@ -723,7 +791,7 @@ class TableContext<TData extends Row> {
 			const onKeyDown = this.#props.onKeyDown;
 			if (onKeyDown) {
 				const active = this.cursor.active;
-				onKeyDown(e, { cell: active ? this.#activeCell(active) : undefined, range: this.cursor.range, selected: this.selection.ids as TData['id'][] });
+				onKeyDown(e, { cell: active ? this.#activeCell(active) : undefined, ranges: this.cursor.ranges, selected: this.selection.ids as TData['id'][] });
 				if (e.defaultPrevented) return;
 			}
 			// Ctrl/⌘+C aralığı (yoksa aktif hücreyi) kopyalar. Sıra: imleç (Esc önce aralığı kapatır), sonra satır seçimi.

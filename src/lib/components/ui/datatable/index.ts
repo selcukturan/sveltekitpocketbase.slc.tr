@@ -18,7 +18,8 @@ export {
 	type ActiveCell,
 	type LoadEvent,
 	type RangeInfo,
-	type KeyContext
+	type KeyContext,
+	type VisibleRows
 } from './context.svelte.js';
 export type { SelectionMode, RowId } from './selection.svelte.js';
 export type { CellEditEvent, EditorKind } from './editing.svelte.js';

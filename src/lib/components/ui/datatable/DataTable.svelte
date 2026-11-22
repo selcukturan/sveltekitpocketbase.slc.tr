@@ -36,6 +36,12 @@
 	const rangeFrom = $derived(context.totalItems === 0 ? 0 : (context.page - 1) * context.perPage + 1);
 	const rangeTo = $derived(Math.min(context.page * context.perPage, context.totalItems));
 
+	// Görünen satırlar → onVisibleRowsChange (visibleRows yalnızca aralık değişince yeni nesne üretir)
+	$effect(() => {
+		const rows = context.visibleRows;
+		untrack(() => props.onVisibleRowsChange?.(rows));
+	});
+
 	// Aralık → bind:range ve onRangeChange
 	$effect(() => {
 		const info = context.rangeInfo;

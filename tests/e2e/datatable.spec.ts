@@ -384,3 +384,70 @@ test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalış�
 	await page.locator('dialog[open]').getByRole('button', { name: 'Sil' }).click();
 	await expect(rows).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------- çoklu seçim (Ctrl/⌘)
+test('Ctrl + tıklama/sürükleme hücre ekler; özet, kopyalama ve satır seçimi', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await openTable(page);
+	const summary = page.locator('.slc-table-range-info');
+
+	// Ctrl+tıklama: iki ayrı hücre seçili (önceki aktif hücre de seçime girer); satır seçimi değişmez
+	await cell(page, 0, 5).click();
+	await cell(page, 2, 5).click({ modifiers: ['Control'] });
+	await expect(rangeCells(page)).toHaveCount(2);
+	await expect(summary).toContainText('2 hücre');
+	await expect(grid(page).locator('[role="row"][aria-selected="true"]')).toHaveCount(0);
+
+	// Seçili hücreye Ctrl+tıklama: çıkarmaz, yalnızca aktif yapar
+	await cell(page, 0, 5).click({ modifiers: ['Control'] });
+	await expect(rangeCells(page)).toHaveCount(2);
+	await expect(activeCell(page)).toHaveAttribute('data-row', '0');
+
+	// Ctrl+sürükleme yeni alan ekler; Shift son alanı genişletir
+	const from = await cell(page, 4, 5).boundingBox();
+	const to = await cell(page, 5, 5).boundingBox();
+	await page.keyboard.down('Control');
+	await page.mouse.move(from!.x + 5, from!.y + 5);
+	await page.mouse.down();
+	await page.mouse.move(to!.x + 5, to!.y + 5, { steps: 4 });
+	await page.mouse.up();
+	await page.keyboard.up('Control');
+	await expect(rangeCells(page)).toHaveCount(4);
+	await page.keyboard.press('Shift+ArrowDown');
+	await expect(rangeCells(page)).toHaveCount(5);
+
+	// Aynı kolondaki alanlar alt alta kopyalanır (satır sırasıyla)
+	await page.keyboard.press('Control+c');
+	await expect(page.getByText('5 hücre panoya kopyalandı.')).toBeVisible();
+	const lines = (await page.evaluate(() => navigator.clipboard.readText())).split('\n');
+	expect(lines).toHaveLength(5);
+	expect(lines[0]).toBe(((await cell(page, 0, 5).textContent()) ?? '').trim().replace('.', '').replace(',', '.'));
+
+	// Farklı kolon ve satırlar: yalnızca son alan kopyalanır, uyarı verilir
+	await cell(page, 0, 3).click();
+	await cell(page, 2, 5).click({ modifiers: ['Control'] });
+	await page.keyboard.press('Control+c');
+	await expect(page.getByText('yalnızca son alan (1 hücre) kopyalandı', { exact: false })).toBeVisible();
+
+	// Esc hepsini kapatır
+	await page.keyboard.press('Escape');
+	await expect(rangeCells(page)).toHaveCount(0);
+});
+
+test('onVisibleRowsChange: görünen satırlar kaydırmayla değişir', async ({ page }) => {
+	await openTable(page);
+	const status = page.locator('.slc-visible-rows');
+	await expect(status).toContainText('Görünen satırlar: 1–');
+	const text = (await status.textContent()) ?? '';
+	const [, from, to, total] = text.match(/(\d+)–(\d+) \/ (\d+)/)!.map(Number);
+	expect(from).toBe(1);
+	// Görünen satır sayısı veri alanının yüksekliğiyle tutarlı (başlık 44, footer 3×40, satır 40)
+	const height = await grid(page).evaluate((el) => el.clientHeight);
+	expect(to - from + 1).toBe(Math.ceil((height - 44 - 3 * 40) / 40));
+
+	await cell(page, 0, 2).click();
+	await page.keyboard.press('Control+End');
+	await expect(status).toContainText(`–${total} / ${total}`);
+	await page.keyboard.press('Control+Home');
+	await expect(status).toContainText('Görünen satırlar: 1–');
+});

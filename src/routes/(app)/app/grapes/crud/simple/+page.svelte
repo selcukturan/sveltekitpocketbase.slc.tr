@@ -136,6 +136,9 @@
 		menu = undefined;
 	};
 
+	// Görünen satırlar (onVisibleRowsChange): durum çubuğunda gösterilir. Sonsuz kaydırma gibi işler için de kullanılabilir.
+	let visibleRows = $state<dt.VisibleRows>();
+
 	// Arama sonucu boş: bilgi ver (yalnızca yeni sorguda, tazelemede değil)
 	const onTableLoad = ({ reason, totalItems }: dt.LoadEvent<Item>) => {
 		if (reason === 'query' && totalItems === 0) toaster.add({ type: 'info', title: t('dt_no_data') });
@@ -229,7 +232,10 @@
 				persist="grapes-crud-simple"
 				onCellEdit={editCell}
 				onCellsEdit={editCells}
-				onCopy={({ rows, cols }) => toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
+				onCopy={({ rows, cols, partial }) =>
+					partial
+						? toaster.add({ type: 'warning', title: t('dt_copied_title'), description: t('dt_copied_partial', { count: rows * cols }) })
+						: toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
 				{validateCell}
 				onRowActivate={(row) => drawer.show('update', row.id)}
 				onLoad={onTableLoad}
@@ -237,7 +243,13 @@
 				onKeyDown={onTableKeyDown}
 				onContextMenu={({ row, event }) => (menu = { x: event.clientX, y: event.clientY, row })}
 				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
+				onVisibleRowsChange={(rows) => (visibleRows = rows)}
 			>
+				{#snippet statusbar()}
+					{#if visibleRows && visibleRows.total > 0}
+						<p class="slc-visible-rows">{t('dt_visible_rows', { from: visibleRows.first + 1, to: visibleRows.last + 1, total: visibleRows.total })}</p>
+					{/if}
+				{/snippet}
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
 					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => remove(row.id)} />
@@ -355,6 +367,11 @@
 	.slc-context-menu button:focus-visible {
 		background-color: var(--color-surface-200);
 		outline: none;
+	}
+	.slc-visible-rows {
+		padding: 0.125rem 0.75rem 0.25rem;
+		font-size: 0.75rem;
+		color: var(--color-surface-500);
 	}
 	.slc-context-menu .danger {
 		color: var(--color-error-600);

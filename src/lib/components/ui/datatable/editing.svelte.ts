@@ -270,48 +270,59 @@ export class CellEditor<TData extends Row> {
 	};
 
 	/**
-	 * Yapıştırma: area'nın sol üstünden başlayarak metin bloğunu yazar. Tek değer + birden çok hücreli aralık → aralığı
-	 * doldurur. Düzenlenemeyen hücreler sessizce atlanır; çözümlenemeyen ya da validateCell'den geçmeyen değerler
-	 * kaydedilmez ve `invalid` olarak sayılır. Yazılan alanı döndürür (seçili gösterilir); hiçbir şey yoksa undefined.
+	 * Yapıştırma. areas: seçili alanlar (son eleman şu anki). Tek değer + birden çok hücre (ya da çoklu seçim) → tüm
+	 * alanlar doldurulur, seçim korunur. Blok → son alanın sol üstünden yazılır ve yazılan alan seçili olur.
+	 * Düzenlenemeyen hücreler sessizce atlanır; çözümlenemeyen ya da validateCell'den geçmeyen değerler kaydedilmez ve
+	 * `invalid` olarak sayılır. Hiçbir şey yapılmadıysa undefined; { select } seçilecek alanı verir (doldurmada yok).
 	 */
-	readonly paste = (text: string, area: CellRange): CellRange | undefined => {
-		if (!this.#host.canSave() || this.#editing) return undefined;
+	readonly paste = (text: string, areas: CellRange[]): { select?: CellRange } | undefined => {
+		const last = areas.at(-1);
+		if (!last || !this.#host.canSave() || this.#editing) return undefined;
 		const block = parseTsv(text);
 		if (block.length === 0) return undefined;
 		const single = block.length === 1 && block[0].length === 1;
-		const fill = single && (area.bottom > area.top || area.right > area.left);
-		const height = fill ? area.bottom - area.top + 1 : block.length;
-		const width = fill ? area.right - area.left + 1 : Math.max(...block.map((r) => r.length));
+		const fill = single && (areas.length > 1 || last.bottom > last.top || last.right > last.left);
 
 		const items = this.#host.items();
 		const edits: CellEditEvent<TData>[] = [];
+		const seen: Record<string, true> = {}; // örtüşen alanlarda aynı hücre bir kez
 		let invalid = 0;
-		let bottom = area.top;
-		let right = area.left;
-		for (let r = 0; r < height && area.top + r < items.length; r++) {
-			const row = items[area.top + r];
-			for (let c = 0; c < width; c++) {
-				const pos = { row: area.top + r, col: area.left + c };
-				const column = this.#host.column(pos.col);
-				if (!column) break;
-				const cellText = fill ? block[0][0] : block[r]?.[c];
-				if (cellText === undefined) continue;
-				bottom = Math.max(bottom, pos.row);
-				right = Math.max(right, pos.col);
-				const kind = this.kindAt(pos);
-				if (!kind) continue; // düzenlenemez
-				const parsed = kind === 'bool' ? parseBool(cellText) : fromDraft(kind, cellText);
-				if (!parsed.ok) {
-					invalid++;
-					continue;
-				}
-				const e = { row, field: column.field, value: parsed.value, oldValue: this.#valueOf(row, column.field) };
-				if (this.#host.validate(e) !== undefined) {
-					invalid++;
-					continue;
-				}
-				if (e.value !== e.oldValue) edits.push(e);
+
+		// Bir hücreye metni yazar (atlanırsa false)
+		const write = (pos: CellPos, cellText: string) => {
+			const row = items[pos.row];
+			const column = this.#host.column(pos.col);
+			if (!row || !column) return false;
+			const key = this.#key(row.id, column.field);
+			if (seen[key]) return true;
+			seen[key] = true;
+			const kind = this.kindAt(pos);
+			if (!kind) return true; // düzenlenemez: atlanır ama alan içinde sayılır
+			const parsed = kind === 'bool' ? parseBool(cellText) : fromDraft(kind, cellText);
+			if (!parsed.ok) {
+				invalid++;
+				return true;
 			}
+			const e = { row, field: column.field, value: parsed.value, oldValue: this.#valueOf(row, column.field) };
+			if (this.#host.validate(e) !== undefined) invalid++;
+			else if (e.value !== e.oldValue) edits.push(e);
+			return true;
+		};
+
+		let select: CellRange | undefined;
+		if (fill) {
+			for (const area of areas) for (let row = area.top; row <= area.bottom; row++) for (let col = area.left; col <= area.right; col++) write({ row, col }, block[0][0]);
+		} else {
+			let bottom = last.top;
+			let right = last.left;
+			for (let r = 0; r < block.length; r++)
+				for (let c = 0; c < block[r].length; c++) {
+					const pos = { row: last.top + r, col: last.left + c };
+					if (!write(pos, block[r][c])) continue; // tablonun dışı
+					bottom = Math.max(bottom, pos.row);
+					right = Math.max(right, pos.col);
+				}
+			select = { top: last.top, left: last.left, bottom, right };
 		}
 
 		if (this.#host.canSaveMany()) {
@@ -319,7 +330,7 @@ export class CellEditor<TData extends Row> {
 		} else {
 			for (const e of edits) this.#save(e);
 		}
-		return { top: area.top, left: area.left, bottom, right };
+		return { select };
 	};
 
 	// İstek sürerken hücreleri "kaydediliyor" işaretler

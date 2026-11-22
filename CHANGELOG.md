@@ -75,6 +75,19 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   (`deleteRecords` toplu komutu), sağ tık menüsü (Güncelle, Kopyala, Sil),
   boş sorgu sonucunda bilgi toast'ı, sorgu hatasında toast,
   `bool_optional` işaretli satırlar kalın.
+- DataTable: çoklu hücre seçimi (Excel gibi). Ctrl/⌘ + tıklama ya da sürükleme
+  seçime yeni alan ekler; Shift son alanı genişletir; seçili hücreye Ctrl+tıklama
+  yalnızca aktif yapar. Özet tüm alanları (örtüşenler bir kez) sayar. Ctrl+C:
+  aynı kolonlardaki alanlar alt alta, aynı satırlardakiler yan yana birleşir;
+  değilse yalnızca son alan kopyalanır (`onCopy` `partial: true`). Ctrl+V: tek
+  değer tüm alanlara dolar, blok son alana yazılır. `RangeInfo` artık
+  `ranges: CellRange[]`; `KeyContext.range` → `ranges`.
+- DataTable: veri hücresinde Ctrl+tıklama artık satır seçimini değiştirmez
+  (satır seçimi: seçim kolonu, Space / Shift+Space / Ctrl+A, single modda tıklama).
+- DataTable: `onVisibleRowsChange({ first, last, total })`: ekranda görünen
+  veri satırları (overscan'siz; sticky başlık/footer altındakiler sayılmaz),
+  yalnızca aralık değişince çağrılır. Simple CRUD durum çubuğunda
+  "Görünen satırlar: 1–12 / 30" örneği.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -107,7 +120,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.170` oldu.
+- Uygulama sürümü `v0.2.0-alpha.171` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

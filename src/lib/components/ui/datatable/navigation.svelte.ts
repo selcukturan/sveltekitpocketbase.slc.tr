@@ -13,6 +13,8 @@ import { tick } from 'svelte';
  *   scrollIntoView({ block/inline: 'nearest' }) hücreyi sticky alanların altında bırakmaz.
  * - Aralık seçimi: Shift ile hareket (ya da Shift+tıklama, sürükleme) sabit ucu (anchor) yerinde bırakıp aktif
  *   hücreyi taşır; aralık ikisinin dikdörtgenidir. Shiftsiz her hareket aralığı kapatır.
+ * - Çoklu seçim (Ctrl/⌘ + tıklama/sürükleme): mevcut seçim listeye (#extra) eklenir, tıklanan hücreden yeni aralık
+ *   başlar. Shift son aralığı genişletir. Seçili bir hücreye Ctrl+tıklama onu çıkarmaz, yalnızca aktif yapar.
  */
 
 export type CellPos = { row: number; col: number };
@@ -39,6 +41,7 @@ export class GridCursor {
 	readonly #host: CursorHost;
 	#active = $state<CellPos | undefined>(undefined);
 	#anchor = $state<CellPos | undefined>(undefined);
+	#extra = $state<CellRange[]>([]); // Ctrl ile eklenmiş önceki aralıklar
 
 	constructor(host: CursorHost) {
 		this.#host = host;
@@ -59,9 +62,23 @@ export class GridCursor {
 		return { top: Math.min(a.row, b.row), bottom: Math.max(a.row, b.row), left: Math.min(a.col, b.col), right: Math.max(a.col, b.col) };
 	});
 
-	readonly inRange = (row: number, col: number) => {
-		const r = this.range;
-		return r !== undefined && row >= r.top && row <= r.bottom && col >= r.left && col <= r.right;
+	// Tüm seçili alanlar: Ctrl ile eklenenler + şu anki. Ek alan varken tek hücrelik aktif hücre de seçime dahildir.
+	readonly ranges = $derived.by((): CellRange[] => {
+		const extra = this.#extra;
+		const a = this.#active;
+		const current = this.range ?? (extra.length > 0 && a ? { top: a.row, bottom: a.row, left: a.col, right: a.col } : undefined);
+		return current ? [...extra, current] : extra;
+	});
+
+	readonly inRange = (row: number, col: number) => this.ranges.some((r) => row >= r.top && row <= r.bottom && col >= r.left && col <= r.right);
+
+	/** Ctrl/⌘ + tıklama: mevcut seçimi koruyup bu hücreden yeni aralık başlatır. */
+	readonly addRange = (pos: CellPos) => {
+		const current =
+			this.ranges.at(-1) ?? (this.#active ? { top: this.#active.row, bottom: this.#active.row, left: this.#active.col, right: this.#active.col } : undefined);
+		const extra = current ? [...this.#extra.filter((r) => r !== current), current] : this.#extra;
+		this.set(pos); // aralığı ve ek alanları kapatır
+		this.#extra = extra;
 	};
 
 	// Alanı seçili yapar (örn. yapıştırılan blok): aktif hücre sol üstte kalır, sabit uç sağ altta
@@ -71,8 +88,9 @@ export class GridCursor {
 	};
 
 	readonly clearRange = () => {
-		if (!this.#anchor) return false;
+		if (!this.#anchor && this.#extra.length === 0) return false;
 		this.#anchor = undefined;
+		this.#extra = [];
 		return true;
 	};
 
@@ -99,9 +117,10 @@ export class GridCursor {
 		const next = pos && h.rowCount() > 0 && h.colCount() > 0 ? { row: clamp(pos.row, 0, h.rowCount() - 1), col: clamp(pos.col, 0, h.colCount() - 1) } : undefined;
 		const current = this.#active;
 		if (extend && next) {
-			if (!this.#anchor && current) this.#anchor = current;
-		} else if (this.#anchor) {
-			this.#anchor = undefined;
+			if (!this.#anchor && current) this.#anchor = current; // Shift: son aralık genişler, ek alanlar kalır
+		} else {
+			if (this.#anchor) this.#anchor = undefined;
+			if (this.#extra.length > 0) this.#extra = [];
 		}
 		if (current?.row !== next?.row || current?.col !== next?.col) {
 			this.#active = next;
