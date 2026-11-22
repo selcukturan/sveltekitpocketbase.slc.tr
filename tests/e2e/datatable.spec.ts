@@ -451,3 +451,174 @@ test('onVisibleRowsChange: görünen satırlar kaydırmayla değişir', async ({
 	await page.keyboard.press('Control+Home');
 	await expect(status).toContainText('Görünen satırlar: 1–');
 });
+
+// ---------------------------------------------------------------- footer kısayolları ve fonksiyon
+test('footer: sum(2), avg(2), max(), count() ve fonksiyon yüklü satırlardan hesaplanır', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await openTable(page);
+	const stamp = `seed-e2e-${Date.now().toString(36)}`;
+	await createRecord(page, `${stamp}-1`);
+	await createRecord(page, `${stamp}-2`);
+	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	await search.fill(stamp);
+	await search.press('Enter');
+	const rows = grid(page).locator('[role="row"][aria-selected]');
+	await expect(rows).toHaveCount(2);
+
+	// Footer hücresi: satır × görünür kolon sırasıyla
+	const colCount = Number(await grid(page).getAttribute('aria-colcount'));
+	const footer = (row: number, col: number) =>
+		grid(page)
+			.locator('[data-slc-table-footercell]')
+			.nth(row * colCount + col);
+
+	// Sayıları yapıştır: 10 ve 20,5
+	await cell(page, 0, 5).click();
+	await page.evaluate(() => navigator.clipboard.writeText('10\n20,5'));
+	await page.keyboard.press('Control+v');
+	await expect(cell(page, 1, 5)).toHaveText('20,5');
+
+	await expect(footer(0, 4)).toHaveText('Toplam'); // metin olduğu gibi
+	await expect(footer(0, 5)).toHaveText('30,50'); // sum(2)
+	await expect(footer(1, 5)).toHaveText('15,25'); // avg(2)
+	await expect(footer(2, 5)).toHaveText('20,5'); // max(): en fazla 2 basamak, sondaki sıfır yok
+	await expect(footer(0, 8)).toHaveText('0'); // count(): boş tarih sayılmaz
+	await expect(footer(1, 9)).toHaveText('0 ✓'); // fonksiyon
+	await expect(footer(0, 5)).toHaveAttribute('title', 'Bu sayfadaki 2 kayıttan hesaplandı');
+
+	// Veri değişince footer güncellenir (bool işaretle → fonksiyon 1 ✓)
+	await cell(page, 0, 9).click();
+	await page.keyboard.press('Enter');
+	await expect(footer(1, 9)).toHaveText('1 ✓');
+
+	// temizlik
+	await deleteFirstRow(page);
+	await expect(rows).toHaveCount(1);
+	await deleteFirstRow(page);
+	await expect(rows).toHaveCount(0);
+});
+
+// ---------------------------------------------------------------- görünüm: dar kolonlar
+test('dar kolon: ortalı başlık taşmaz, tutamak görünür kalır; footer metni … ile kısalır', async ({ page }) => {
+	await openTable(page);
+	await page.evaluate(() => localStorage.clear()); // önceki testlerin kayıtlı genişlikleri karışmasın
+	await page.reload();
+	await expect(cell(page, 0, 9)).toBeVisible();
+
+	// bool_optional (ortalı, sıralanabilir) başlığını en dara sürükle
+	const header = grid(page).locator('[role="columnheader"]').nth(9);
+	const handle = header.locator('.slc-table-resizer');
+	await header.hover();
+	const box = (await handle.boundingBox())!;
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+	await page.mouse.down();
+	await page.mouse.move(box.x - 300, box.y + box.height / 2, { steps: 8 });
+	await page.mouse.up();
+
+	const headerBox = (await header.boundingBox())!;
+	const cellBox = (await cell(page, 0, 9).boundingBox())!;
+	expect(Math.round(headerBox.width)).toBe(50); // en küçük genişlik
+	expect(Math.abs(headerBox.width - cellBox.width)).toBeLessThan(1); // başlık kolonun dışına taşmıyor
+	await header.hover();
+	const handleBox = (await handle.boundingBox())!;
+	expect(handleBox.x + handleBox.width).toBeLessThanOrEqual(headerBox.x + headerBox.width + 0.5); // tutamak hücrenin içinde
+	await expect(handle).toBeInViewport();
+
+	// Footer: 'Ortalama' dar text_optional kolonunda … ile kısalır
+	const colCount = Number(await grid(page).getAttribute('aria-colcount'));
+	const footerText = grid(page)
+		.locator('[data-slc-table-footercell]')
+		.nth(colCount + 4)
+		.locator('.slc-table-footer-text');
+	await expect(footerText).toHaveText('Ortalama');
+	const truncated = await footerText.evaluate((el) => el.scrollWidth > el.clientWidth && getComputedStyle(el).textOverflow === 'ellipsis');
+	expect(truncated).toBe(true);
+
+	await page.evaluate(() => localStorage.clear()); // genişlik ayarını geri al
+});
+
+test.describe('dar ekran', () => {
+	test.use({ viewport: { width: 1100, height: 720 } });
+	test('alt bar: aralık özeti seçim bilgisinin arkasında kalmaz, … ile kısalır', async ({ page }) => {
+		await openTable(page);
+		await grid(page).locator('[role="columnheader"]').nth(0).locator('input').click(); // sayfadaki satırları seç
+		await cell(page, 0, 3).click();
+		await page.keyboard.press('Shift+End');
+		await page.keyboard.press('Shift+PageDown');
+		const info = page.locator('.slc-table-range-info');
+		await expect(info).toBeVisible();
+		await expect(page.locator('.slc-table-selected')).toContainText('seçili');
+
+		const clear = (await page.locator('.slc-table-clear').boundingBox())!;
+		const wrap = (await page.locator('.slc-table-range-info-wrap').boundingBox())!;
+		expect(wrap.x).toBeGreaterThanOrEqual(clear.x + clear.width); // özet seçim bilgisinden sonra, üstüne binmiyor
+		const truncated = await info.evaluate(
+			(el) => el.scrollWidth > el.clientWidth && getComputedStyle(el).textOverflow === 'ellipsis' && getComputedStyle(el).display === 'block'
+		);
+		expect(truncated).toBe(true);
+		await expect(info).toHaveAttribute('title', /hücre · Toplam:/); // tam metin title'da
+
+		await page.keyboard.press('Escape');
+		await page.keyboard.press('Escape');
+	});
+});
+
+// ---------------------------------------------------------------- çoklu sıralama (Ctrl/⌘ + başlık)
+test('başlıkta Ctrl + tıklama çoklu sıralar; PocketBase iki alana göre sıralar', async ({ page }) => {
+	await openTable(page);
+	const header = (col: number) => grid(page).locator('[role="columnheader"]').nth(col);
+	const idle = () => expect(grid(page).locator('.slc-table-headercell-busy')).toHaveCount(0); // istek sürerken sıralama kilitli
+	const sortIndex = (col: number) => header(col).locator('.slc-table-sort-index');
+
+	// Varsayılan: text_required artan, tek kolon → öncelik numarası yok
+	await expect(header(3)).toHaveAttribute('aria-sort', 'ascending');
+	await expect(sortIndex(3)).toHaveCount(0);
+
+	// Düz tıklama: yalnızca number_optional (iki kez → azalan)
+	await header(5).click();
+	await idle();
+	await header(5).click();
+	await idle();
+	await expect(header(5)).toHaveAttribute('aria-sort', 'descending');
+	await expect(header(3)).toHaveAttribute('aria-sort', 'none');
+
+	// Ctrl + tıklama: text_required ikinci sıralama olarak eklenir
+	await header(3).click({ modifiers: ['Control'] });
+	await idle();
+	await expect(sortIndex(5)).toHaveText('1');
+	await expect(sortIndex(3)).toHaveText('2');
+	await expect(header(3)).toHaveAttribute('title', '2. sıralama, artan');
+	await expect(header(3)).not.toHaveAttribute('aria-sort'); // aria-sort yalnızca birincil kolonda
+	await expect(header(5)).toHaveAttribute('aria-sort', 'descending');
+
+	// Sunucu birincil alana göre sıraladı: number_optional azalan (boşlar sonda)
+	const numbers = await grid(page)
+		.locator('[data-slc-table-datacell][data-col="5"]')
+		.evaluateAll((cells) =>
+			cells
+				.map((c) => ({ row: Number((c as HTMLElement).dataset.row), text: (c.textContent ?? '').trim() }))
+				.sort((a, b) => a.row - b.row)
+				.map((c) => c.text)
+		);
+	const values = numbers.filter((t) => t !== '—').map((t) => Number(t.replace(/\./g, '').replace(',', '.')));
+	expect(values.length).toBeGreaterThan(3);
+	expect(values).toEqual([...values].sort((a, b) => b - a));
+
+	// Ctrl + tıklama: ikincil azalana döner, sonra sıralamadan çıkar
+	await header(3).click({ modifiers: ['Control'] });
+	await idle();
+	await expect(header(3)).toHaveAttribute('title', '2. sıralama, azalan');
+	await header(3).click({ modifiers: ['Control'] });
+	await idle();
+	await expect(sortIndex(5)).toHaveCount(0); // tek kolon kaldı
+	await expect(header(3)).toHaveAttribute('aria-sort', 'none');
+
+	// Düz tıklama diğerlerini bırakır
+	await header(3).click({ modifiers: ['Control'] });
+	await idle();
+	await header(4).click();
+	await idle();
+	await expect(header(4)).toHaveAttribute('aria-sort', 'ascending');
+	await expect(header(5)).toHaveAttribute('aria-sort', 'none');
+	await expect(grid(page).locator('.slc-table-sort-index')).toHaveCount(0);
+});

@@ -88,6 +88,21 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   veri satırları (overscan'siz; sticky başlık/footer altındakiler sayılmaz),
   yalnızca aralık değişince çağrılır. Simple CRUD durum çubuğunda
   "Görünen satırlar: 1–12 / 30" örneği.
+- DataTable footer kısayolları: `sum(n)`, `avg(n)`, `min(n)`, `max(n)`,
+  `count()` — kolonun yüklü satırlarından (bu sayfa) hesaplanır; n verilirse tam
+  n basamak, verilmezse en fazla 2 (uygulamanın diline göre). Boş/sayı olmayan
+  değerler atlanır. Fonksiyon da verilebilir: `(items) => değer`. Diğer
+  değerler metin. Hesaplanan hücrede "Bu sayfadaki N kayıttan hesaplandı"
+  açıklaması; geliştirmede kısayola benzeyip uymayan değer için konsol uyarısı.
+  Simple CRUD footer'ında toplam, ortalama, en büyük, sayım ve fonksiyon örneği.
+- DataTable: çoklu sıralama. Başlıkta Ctrl/⌘ + tıklama (ya da Ctrl+Enter/Space)
+  diğer kolonların sıralamasını korur: yoksa sona ekler (artan) → azalan →
+  çıkarır; düz tıklama yalnızca o kolon. Sıralama metni PocketBase biçiminde
+  (`-number_optional,text_required`), sunucuda değişiklik gerekmez. Birden çok
+  kolonda okun yanında öncelik numarası; `aria-sort` birincil kolonda, diğerleri
+  ekran okuyucu metniyle. `dt.parseSort/formatSort/nextSort/isValidSort`.
+- Simple CRUD: `sort` yalnızca izin verilen alanlarla (`SORTABLE_FIELDS`,
+  `isValidSort`): gösterilmeyen alana göre sıralayarak bilgi sızdırılamaz.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -120,7 +135,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.171` oldu.
+- Uygulama sürümü `v0.2.0-alpha.172` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -170,6 +185,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   `$derived`; veri değişince ek `tick` zinciri olmadan yeniden hesaplanıyor.
 - DataTable: sayfa/sıralama/arama değişince tablo en üste kaydırılıyor;
   aynı sorgunun tazelenmesinde (silme sonrası vb.) konum korunuyor.
+- DataTable: daralan kolonda footer metni üç noktayla kısalmıyordu (flex
+  kutusundaki çıplak metne `text-overflow` uygulanmaz; metin kendi kutusunda).
+- DataTable: alt bardaki aralık özeti daralınca üç noktayla kısalmıyor ve
+  "N seçili" bilgisinin altına giriyordu. Özet blok kutu oldu (`…` çıkar) ve
+  seçim bilgisinden sonraya alındı; tam metin `title`'da.
+- DataTable: ortalı ve sıralanabilir başlık (örn. bool) daralınca hücre 64px'in
+  altına inmiyor, kolonun dışına taşıyor ve genişletme tutamağı görünmez
+  oluyordu. İkon boşluğu hücreden içeriğe alındı; dar hücrede CSS container
+  query ile boşluk kalkar, ikon metnin yanına geçer.
 - DataTable: genişletirken 50px'in altına inilince kolon son değerde
   takılı kalıyordu; artık 50px'e sabitleniyor.
 - DataTable: sayfalama butonlarına art arda tıklayınca her tıklama ayrı istek

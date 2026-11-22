@@ -36,16 +36,25 @@
 		node.indeterminate = checked;
 	};
 	const sortDir = $derived(context.getColumnSortDirection(col.data.field));
+	const sortIndex = $derived(context.getColumnSortIndex(col.data.field)); // çoklu sıralamada öncelik (1, 2, ...)
+	// aria-sort WAI-ARIA'ya göre tek başlıkta: birincil kolon. Diğerleri sıralarını açıklama ile bildirir.
+	const ariaSort = $derived(
+		!isSortable || (sortIndex !== undefined && sortIndex > 1) ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'
+	);
+	const sortDescription = $derived(
+		sortIndex !== undefined && sortDir ? t('dt_sort_priority', { index: sortIndex, dir: t(sortDir === 'asc' ? 'dt_sort_asc' : 'dt_sort_desc') }) : undefined
+	);
 
 	const sortableAttach = (node: HTMLElement) => {
+		// Ctrl/⌘ ile çoklu sıralama (diğer kolonlar korunur)
 		const destroyClick = on(node, 'click', (e: MouseEvent) => {
 			e.preventDefault();
-			context.toggleSort(col.data.field);
+			context.toggleSort(col.data.field, e.ctrlKey || e.metaKey);
 		});
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
-				context.toggleSort(col.data.field);
+				context.toggleSort(col.data.field, e.ctrlKey || e.metaKey);
 			}
 		});
 		return () => {
@@ -67,7 +76,8 @@
 	class:slc-table-headercell-sortable={isSortable}
 	class:slc-table-headercell-busy={isSortable && context.busy}
 	role="columnheader"
-	aria-sort={!isSortable ? undefined : sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none'}
+	aria-sort={ariaSort}
+	title={sortDescription}
 	data-coi={col.originalIndex}
 	data-align={layout?.textAlignHeader}
 	data-header-index={hr.headerIndex}
@@ -109,7 +119,10 @@
 	{#if isSortable}
 		<span class="slc-table-sort-icon" class:active={sortDir !== undefined} aria-hidden="true">
 			<Icon name={sortDir === 'asc' ? 'sort_asc' : sortDir === 'desc' ? 'sort_desc' : 'sort_none'} size={sortDir ? 15 : 13} />
+			{#if sortIndex !== undefined}<sup class="slc-table-sort-index">{sortIndex}</sup>{/if}
 		</span>
+		<!-- Çoklu sıralamada öncelik ekran okuyucuya (aria-sort yalnızca birincil kolonda) -->
+		{#if sortDescription}<span class="slc-table-sr-only">{sortDescription}</span>{/if}
 	{/if}
 
 	{#if isResizeable}
@@ -136,6 +149,9 @@
 		border-right: var(--_dt-col-line);
 		user-select: none;
 		box-sizing: border-box;
+		min-width: 0;
+		/* Hücre kendi genişliğine göre düzen değiştirir (ortalı başlık daralınca, aşağıdaki @container) */
+		container-type: inline-size;
 	}
 	.slc-table-headercell-sortable {
 		cursor: pointer;
@@ -186,13 +202,40 @@
 		margin-left: 0;
 		margin-right: 6px;
 	}
-	.slc-table-headercell-sortable[data-align='center'] {
-		padding-inline: 32px; /* iki yanda eşit boşluk: ikon metni kaydırmaz */
+	/* Ortalı ve sıralanabilir başlık: ikon akış dışında (sağda), metin gerçekten ortada kalsın diye içeriğe iki yandan
+	   ikon kadar boşluk. Boşluk hücrede değil içerikte: hücre daralınca boşluk kalkar (aşağıdaki @container), hücre
+	   kolonun dışına taşmaz ve genişletme tutamağı görünür kalır. */
+	.slc-table-headercell-sortable[data-align='center'] .slc-table-header-content {
+		padding-inline: 21px; /* ikon 15px + 6px */
 	}
 	.slc-table-headercell[data-align='center'] .slc-table-sort-icon {
 		position: absolute;
 		right: 12px;
 		margin-left: 0;
+	}
+	/* Dar: içerik boşluğu kalkar, ikon metnin yanına (akışa) döner */
+	@container (max-width: 66px) {
+		.slc-table-headercell-sortable[data-align='center'] .slc-table-header-content {
+			padding-inline: 0;
+		}
+		.slc-table-headercell[data-align='center'] .slc-table-sort-icon {
+			position: static;
+			margin-left: 4px;
+		}
+	}
+	.slc-table-sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+	.slc-table-sort-index {
+		font-size: 0.625rem;
+		font-weight: 700;
+		line-height: 1;
+		margin-left: 1px;
 	}
 	.slc-table-sort-icon.active {
 		color: var(--_dt-accent);

@@ -136,6 +136,13 @@
 		menu = undefined;
 	};
 
+	// Footer: kısayollar (sum/avg/min/max/count) ve fonksiyon; bu sayfadaki kayıtlardan hesaplanır, diğerleri metin
+	const footers: dt.Footer<Item>[] = [
+		{ text_optional: 'Toplam', number_optional: 'sum(2)', date_optional: 'count()' },
+		{ text_optional: 'Ortalama', number_optional: 'avg(2)', bool_optional: (items) => `${items.filter((item) => item.bool_optional).length} ✓` },
+		{ text_optional: 'En büyük', number_optional: 'max()' }
+	];
+
 	// Görünen satırlar (onVisibleRowsChange): durum çubuğunda gösterilir. Sonsuz kaydırma gibi işler için de kullanılabilir.
 	let visibleRows = $state<dt.VisibleRows>();
 
@@ -225,7 +232,7 @@
 				bind:this={table}
 				{list}
 				{columns}
-				footers={[{ text_optional: 'Toplam' }, { text_optional: 'Toplam' }, { text_optional: 'Toplam' }]}
+				{footers}
 				freezeLeft={2}
 				selection="multiple"
 				bind:selected

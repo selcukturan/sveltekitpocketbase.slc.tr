@@ -2,14 +2,36 @@ import * as v from 'valibot';
 import * as input from '#lib/app/schemas/inputs/index.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
+import { isValidSort } from '#lib/components/ui/datatable/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
+// Sıralanabilecek alanlar (tablodaki sıralanabilir kolonlar). İstemci başka alan gönderemez: gösterilmeyen bir alana göre
+// sıralayarak değeri hakkında dolaylı bilgi edinilmesini önler. Çoklu sıralama: '-number_optional,text_required'.
+export const SORTABLE_FIELDS = [
+	'id',
+	'text_required',
+	'text_optional',
+	'number_optional',
+	'select_optional_single',
+	'select_optional_multiple',
+	'date_optional',
+	'bool_optional',
+	'created',
+	'updated'
+] as const;
+
 export const listParamsSchema = v.object({
 	filter: v.optional(v.string()),
 	page: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 1), 1),
 	perPage: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 30), 30),
 	options: v.object({
-		sort: v.optional(v.string(), 'text_required'),
+		sort: v.optional(
+			v.pipe(
+				v.string(),
+				v.check((sort) => isValidSort(sort, SORTABLE_FIELDS), 'Geçersiz sıralama alanı.')
+			),
+			'text_required'
+		),
 		expand: v.optional(v.string()),
 		fields: v.optional(v.string()),
 		skipTotal: v.optional(v.fallback(v.boolean(), false), false)

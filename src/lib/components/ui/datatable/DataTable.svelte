@@ -193,9 +193,13 @@
 				{#if context.paginable}
 					<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
 				{/if}
+				{#if context.selection.mode === 'multiple' && context.selection.count > 0}
+					<span class="slc-table-selected">{t('dt_selected', { count: context.selection.count })}</span>
+					<button type="button" class="slc-table-clear" onclick={context.selection.clear}>{t('dt_clear_selection')}</button>
+				{/if}
 				{#if context.rangeInfo}
 					{@const info = context.rangeInfo}
-					<!-- Bar genişliğine katılmaz (absolute): aralık seçilince bar kaymaz, sığmazsa … ile kısalır -->
+					<!-- En sonda ve bar genişliğine katılmaz (absolute): aralık seçilince bar kaymaz, sığmazsa … ile kısalır -->
 					<span class="slc-table-range-info-wrap">
 						<span class="slc-table-range-info" aria-live="polite" title={rangeSummary}>
 							{t('dt_range_cells', { count: info.count })}
@@ -204,10 +208,6 @@
 							{/if}
 						</span>
 					</span>
-				{/if}
-				{#if context.selection.mode === 'multiple' && context.selection.count > 0}
-					<span class="slc-table-selected">{t('dt_selected', { count: context.selection.count })}</span>
-					<button type="button" class="slc-table-clear" onclick={context.selection.clear}>{t('dt_clear_selection')}</button>
 				{/if}
 			</div>
 			<div class="slc-table-bar-center">
@@ -414,11 +414,12 @@
 		min-width: 0;
 		align-self: stretch;
 	}
+	/* Blok kutu: flex kutusundaki çıplak metne text-overflow uygulanmaz (… çıkmazdı) */
 	.slc-table-range-info {
 		position: absolute;
 		inset: 0;
-		display: flex;
-		align-items: center;
+		display: block;
+		line-height: 2rem; /* bar yüksekliği (min-height 2rem): dikeyde ortalı */
 		color: var(--_dt-text);
 		white-space: nowrap;
 		overflow: hidden;

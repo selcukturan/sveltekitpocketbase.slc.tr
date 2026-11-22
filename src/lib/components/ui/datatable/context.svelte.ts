@@ -5,6 +5,7 @@ import type { ListSource } from './list-state.svelte.js';
 import { GridCursor, type CellPos, type CellRange } from './navigation.svelte.js';
 import { RowSelection, type SelectionMode, type RowId } from './selection.svelte.js';
 import { CellEditor, type CellEditEvent } from './editing.svelte.js';
+import { parseSort, nextSort } from './sort.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
@@ -1022,21 +1023,21 @@ class TableContext<TData extends Row> {
 
 	// ################################## BEGIN Sorting Helpers ##############################################################################################################
 
-	readonly getColumnSortDirection = (field: Field<TData>): 'asc' | 'desc' | undefined => {
-		const currentSort = this.sort;
-		if (!currentSort) return undefined;
-		if (currentSort === field) return 'asc';
-		if (currentSort === `-${field}`) return 'desc';
-		return undefined;
+	// Sıralama metni (PocketBase: '-a,b') ayrıştırılmış hâliyle; çoklu sıralamada sıra öncelik demek (bkz. sort.ts)
+	readonly sortEntries = $derived(parseSort(this.sort));
+
+	readonly getColumnSortDirection = (field: Field<TData>): 'asc' | 'desc' | undefined => this.sortEntries.find((e) => e.field === field)?.dir;
+
+	// Çoklu sıralamada önceliği (1'den); tek kolon sıralanıyorsa ya da kolon sıralamada değilse undefined
+	readonly getColumnSortIndex = (field: Field<TData>): number | undefined => {
+		if (this.sortEntries.length < 2) return undefined;
+		const index = this.sortEntries.findIndex((e) => e.field === field);
+		return index >= 0 ? index + 1 : undefined;
 	};
 
-	readonly toggleSort = (field: Field<TData>) => {
-		const currentDir = this.getColumnSortDirection(field);
-		const nextSort = currentDir === undefined ? field : currentDir === 'asc' ? `-${field}` : '';
-
-		if (this.onSort && !this.busy) {
-			this.onSort(nextSort);
-		}
+	// multi (Ctrl/⌘): diğer kolonların sıralaması korunur; değilse yalnızca bu kolon. İstek sürerken yok sayılır.
+	readonly toggleSort = (field: Field<TData>, multi = false) => {
+		if (this.onSort && !this.busy) this.onSort(nextSort(this.sort, field, multi));
 	};
 
 	// ################################## END Sorting Helpers ################################################################################################################

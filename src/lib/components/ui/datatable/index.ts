@@ -7,7 +7,9 @@ export { default as HeaderCell } from './HeaderCell.svelte';
 export { default as HeaderRow } from './HeaderRow.svelte';
 export { default as Value } from './Value.svelte';
 
-export type { Column, ColumnType, Footer } from './types.js';
+export type { Column, ColumnType, Footer, FooterValue } from './types.js';
+export { parseAggregate, aggregate, formatAggregate, type Aggregate, type AggregateFn } from './footer.js';
+export { parseSort, formatSort, nextSort, isValidSort, type SortEntry, type SortDir } from './sort.js';
 export {
 	DEFAULT_COLUMN_WIDTHS,
 	DENSITY_ROW_HEIGHTS,

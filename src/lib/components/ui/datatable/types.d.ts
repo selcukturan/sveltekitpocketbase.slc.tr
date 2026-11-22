@@ -62,9 +62,12 @@ export type DataCellType<TData> = {
 	colVisibleIndex: number;
 };
 // --------------------------------------------------------------------------------------------------------------------------------------------
+// Footer değeri: kısayol ('sum(2)', 'avg()', 'min(n)', 'max(n)', 'count()'), fonksiyon ((items) => değer) ya da metin.
+// Kısayollar ve fonksiyon yüklü satırlar (bu sayfa) üzerinden hesaplanır. Ayrıntı: footer.ts
+export type FooterValue<TData> = string | number | null | undefined | ((items: TData[]) => unknown);
 type FooterValueType = unknown;
 export type Footer<TData> = {
-	[K in keyof TData]?: FooterValueType;
+	[K in keyof TData]?: FooterValue<TData>;
 };
 export type FooterRowType<TData> = {
 	footerRow: Footer<TData>;
