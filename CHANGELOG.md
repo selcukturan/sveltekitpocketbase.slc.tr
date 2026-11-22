@@ -65,6 +65,16 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 - Simple CRUD: `updateCell` komutu ve `cellEditSchema` (alan bazında doğrulama;
   istemcide `validateCell`, sunucuda komut şeması); metin, sayı, liste, tarih
   ve bool kolonları tabloda düzenlenebilir.
+- DataTable olayları: `onLoad({ items, …, reason: 'query' | 'refresh' })`,
+  `onError(error)`, `onKeyDown(e, { cell, range, selected })` (yerleşik
+  davranıştan önce; `preventDefault` ile ezer), `onContextMenu(cellEvent)`
+  (tarayıcı menüsü açılmaz, aralık korunur), `bind:range` / `onRangeChange`
+  ve `rowClass(row)`. Alt barda aralık özeti (hücre · toplam · ortalama; bar
+  yüksekliğini değiştirmez). `helpers.copy()` ve `helpers.focus()`.
+- Simple CRUD: Delete ile seçili satırları ya da aktif satırı silme
+  (`deleteRecords` toplu komutu), sağ tık menüsü (Güncelle, Kopyala, Sil),
+  boş sorgu sonucunda bilgi toast'ı, sorgu hatasında toast,
+  `bool_optional` işaretli satırlar kalın.
 - Playwright uçtan uca testleri (`npm run test:e2e`, `tests/e2e`): giriş,
   DataTable hücre gezinmesi, seçim, drawer sonrası ve silme sonrası odak.
   Silme testi kendi `seed-e2e-…` kayıtlarını oluşturup siler.
@@ -97,7 +107,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.169` oldu.
+- Uygulama sürümü `v0.2.0-alpha.170` oldu.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları

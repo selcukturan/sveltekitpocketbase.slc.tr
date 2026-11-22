@@ -8,7 +8,18 @@ export { default as HeaderRow } from './HeaderRow.svelte';
 export { default as Value } from './Value.svelte';
 
 export type { Column, ColumnType, Footer } from './types.js';
-export { DEFAULT_COLUMN_WIDTHS, DENSITY_ROW_HEIGHTS, widthOf, type Borders, type Density, type CellEvent, type ActiveCell } from './context.svelte.js';
+export {
+	DEFAULT_COLUMN_WIDTHS,
+	DENSITY_ROW_HEIGHTS,
+	widthOf,
+	type Borders,
+	type Density,
+	type CellEvent,
+	type ActiveCell,
+	type LoadEvent,
+	type RangeInfo,
+	type KeyContext
+} from './context.svelte.js';
 export type { SelectionMode, RowId } from './selection.svelte.js';
 export type { CellEditEvent, EditorKind } from './editing.svelte.js';
 export { createList, ListState, type ListOptions } from './list-state.svelte.js';

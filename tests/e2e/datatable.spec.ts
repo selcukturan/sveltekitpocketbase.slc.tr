@@ -320,3 +320,67 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	await deleteFirstRow(page);
 	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------- olaylar: onLoad, onKeyDown, onContextMenu, aralık özeti, rowClass
+test('aralık özeti alt barda: hücre sayısı, toplam, ortalama', async ({ page }) => {
+	await openTable(page);
+	await cell(page, 0, 5).click(); // number_optional
+	await page.keyboard.press('Shift+ArrowDown');
+	await page.keyboard.press('Shift+ArrowDown');
+	const summary = page.locator('.slc-table-range-info');
+	await expect(summary).toContainText('3 hücre');
+	await expect(summary).toContainText('Toplam:');
+	await expect(summary).toContainText('Ort.:');
+	await page.keyboard.press('Escape');
+	await expect(summary).toHaveCount(0);
+});
+
+test('onLoad: yeni sorgu boş dönerse bilgi verilir', async ({ page }) => {
+	await openTable(page);
+	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	await search.fill(`yok-${Date.now()}`);
+	await search.press('Enter');
+	await expect(page.locator('h3', { hasText: 'Gösterilecek veri yok.' })).toBeVisible();
+});
+
+test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalışır', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await openTable(page);
+	const stamp = `seed-e2e-${Date.now().toString(36)}`;
+	for (const n of [1, 2, 3]) await createRecord(page, `${stamp}-${n}`);
+	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	await search.fill(stamp);
+	await search.press('Enter');
+	const rows = grid(page).locator('[role="row"][aria-selected]');
+	await expect(rows).toHaveCount(3);
+
+	// rowClass: bool_optional işaretli satır kalın
+	await cell(page, 0, 9).click();
+	await page.keyboard.press('Enter');
+	await expect(cell(page, 0, 3)).toHaveClass(/font-semibold/);
+	await expect(cell(page, 1, 3)).not.toHaveClass(/font-semibold/);
+
+	// Sağ tık menüsü → Kopyala
+	await cell(page, 0, 3).click({ button: 'right' });
+	const menu = page.getByRole('menu');
+	await expect(menu).toBeVisible();
+	await menu.getByRole('menuitem', { name: 'Kopyala' }).click();
+	await expect(menu).toHaveCount(0);
+	await expect(page.getByText('1 hücre panoya kopyalandı.')).toBeVisible();
+	await expect(grid(page)).toBeFocused();
+
+	// İki satırı seç, Delete → onay → ikisi silinir
+	await cell(page, 0, 0).click();
+	await cell(page, 1, 0).click();
+	await cell(page, 0, 3).click();
+	await page.keyboard.press('Delete');
+	await page.locator('dialog[open]').getByRole('button', { name: 'Sil' }).click();
+	await expect(page.getByText('2 kayıt silindi.')).toBeVisible();
+	await expect(rows).toHaveCount(1);
+
+	// Kalan satır: sağ tık → Sil
+	await cell(page, 0, 3).click({ button: 'right' });
+	await page.getByRole('menu').getByRole('menuitem', { name: /Sil/ }).click();
+	await page.locator('dialog[open]').getByRole('button', { name: 'Sil' }).click();
+	await expect(rows).toHaveCount(0);
+});

@@ -6,7 +6,16 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import { listParamsSchema, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, cellEditSchema, cellsEditSchema } from './page.shared';
+import {
+	listParamsSchema,
+	oneParamsSchema,
+	createFormSchema,
+	updateFormSchema,
+	deleteParamsSchema,
+	deleteManySchema,
+	cellEditSchema,
+	cellsEditSchema
+} from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -99,6 +108,22 @@ export const deleteRecord = command(deleteParamsSchema, async (params) => {
 	}
 
 	await requested(getList, 1).refreshAll();
+});
+
+export const deleteRecords = command(deleteManySchema, async ({ ids }) => {
+	await checkAuthenticated(); // 🔒
+
+	const { locals } = getRequestEvent();
+	const collection = locals.pb.collection(Collections.DemoCrud);
+
+	const results = await Promise.all(ids.map((id) => ResultAsync.fromPromise(collection.delete(id), mapUnknownToError)));
+	const failed = results.find((result) => result.isErr());
+	if (failed?.isErr()) {
+		throwError(failed.error);
+	}
+
+	await requested(getList, 1).refreshAll();
+	return { deleted: ids.length };
 });
 
 // Tablo içinde tek hücre düzenleme: yalnızca o alan güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).

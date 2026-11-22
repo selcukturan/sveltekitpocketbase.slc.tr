@@ -45,7 +45,7 @@
 	id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })}
 	{@attach editable !== undefined && context.editor.override(dr.row.id, dc.col.data.field as string, editable)}
 	role="gridcell"
-	class={classes}
+	class={[classes, context.rowClass?.(dr.row)]}
 	class:slc-table-freeze-left={layout?.freezeLeft}
 	class:slc-table-freeze-right={layout?.freezeRight}
 	class:slc-table-freeze-left-boundary={layout?.boundaryLeft}

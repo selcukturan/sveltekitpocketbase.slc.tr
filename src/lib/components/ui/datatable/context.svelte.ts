@@ -2,7 +2,7 @@ import type { RemoteQuery } from '$app/server';
 
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
-import { GridCursor, type CellPos } from './navigation.svelte.js';
+import { GridCursor, type CellPos, type CellRange } from './navigation.svelte.js';
 import { RowSelection, type SelectionMode, type RowId } from './selection.svelte.js';
 import { CellEditor, type CellEditEvent } from './editing.svelte.js';
 
@@ -39,6 +39,16 @@ export type CellEvent<TData> = {
 	event: MouseEvent;
 };
 export type ActiveCell<TData> = Omit<CellEvent<TData>, 'event' | 'value'>;
+
+// onLoad: tabloda yeni veri göründü. reason 'query': yeni sorgu (ilk yükleme, sayfa, sıralama, arama);
+// 'refresh': aynı sorgunun tazelenmesi (mutasyon sonrası, withOverride ile optimistik güncelleme dahil)
+export type LoadEvent<TData> = ListResult<TData> & { reason: 'query' | 'refresh' };
+
+// Seçili hücre aralığı ve özeti (bind:range, onRangeChange, alt bar). Sayısal toplam yalnızca number değerlerden.
+export type RangeInfo = CellRange & { count: number; numericCount: number; sum: number; average: number | undefined };
+
+// onKeyDown'a verilen bağlam: tuş anındaki aktif hücre, aralık ve seçili satırlar
+export type KeyContext<TData extends Row> = { cell: ActiveCell<TData> | undefined; range: CellRange | undefined; selected: TData['id'][] };
 
 // Kolona `width` verilmezse tipine göre bu değer kullanılır (tip yoksa 'text').
 // minmax: en az Npx, kalan alan fr oranıyla paylaşılır; tablo genişledikçe kolonlar da genişler.
@@ -128,6 +138,19 @@ export interface MainProps<TData extends Row> {
 	// Yeni değeri hemen göstermek için `.updates(...list.updatesWith(...))` (SvelteKit withOverride) kullanılır;
 	// istek hata verirse override kendiliğinden geri alınır (hatayı göstermek sayfanın işi, örn. toast).
 	onCellEdit?: (e: CellEditEvent<TData>) => void | Promise<void>;
+	// Tabloda yeni veri göründü (bkz. LoadEvent)
+	onLoad?: (e: LoadEvent<TData>) => void;
+	// Sorgu hata verdi (tablo ayrıca kendi mesaj kartını gösterir)
+	onError?: (error: App.Error) => void;
+	// Grid odaktayken basılan tuş; yerleşik davranıştan önce çağrılır. e.preventDefault() yerleşik davranışı engeller.
+	// Örn. Delete ile seçili satırları silmek. (Düzenleyici açıkken çağrılmaz.)
+	onKeyDown?: (e: KeyboardEvent, ctx: KeyContext<TData>) => void;
+	// Hücrede sağ tık. Verilirse tarayıcının menüsü açılmaz; hücre aralık dışındaysa aktif olur. Menüyü sayfa çizer.
+	onContextMenu?: (e: CellEvent<TData>) => void;
+	// Seçili hücre aralığı değişti (bind:range ile de okunur)
+	onRangeChange?: (range: RangeInfo | undefined) => void;
+	// Koşullu satır görünümü: satırın tüm hücrelerine eklenecek class (örn. vadesi geçen satır)
+	rowClass?: (row: TData) => string | undefined;
 	// Ctrl/⌘+C panoya yazıldıktan sonra (kullanıcıya bildirmek için, örn. toast)
 	onCopy?: (info: { rows: number; cols: number }) => void;
 	// Toplu kayıt (Ctrl+V ile yapıştırma): tek istekte kaydetmek için. Verilmezse her hücre için onCellEdit çağrılır.
@@ -199,6 +222,7 @@ class TableContext<TData extends Row> {
 	// Events
 	readonly onPagination = $derived(this.#props.onPagination ?? this.#props.list?.paginate);
 	readonly onRowClick = $derived(this.#props.onRowClick);
+	readonly rowClass = $derived(this.#props.rowClass);
 	readonly onSort = $derived(this.#props.onSort ?? this.#props.list?.setSort);
 
 	readonly #uid = ++tableUid;
@@ -247,6 +271,14 @@ class TableContext<TData extends Row> {
 				const row = this.items[pos.row];
 				if (row) this.#props.onRowActivate?.(row);
 			}
+		});
+
+		// onError: her yeni hata bir kez bildirilir
+		let reportedError: unknown;
+		$effect(() => {
+			const error = this.query?.error;
+			if (error && error !== reportedError) untrack(() => this.#props.onError?.(error));
+			reportedError = error;
 		});
 
 		// Kalıcı ayarlar: ilk açılışta okunur, her değişiklikte yazılır. (SSR kapalı; yine de localStorage
@@ -340,6 +372,8 @@ class TableContext<TData extends Row> {
 					this.paginable = false;
 					this.#currentData = undefined;
 				}
+				const data = this.#currentData;
+				if (data) queueMicrotask(() => this.#props.onLoad?.({ ...data, reason: isNewQuery ? 'query' : 'refresh' }));
 			}
 		});
 	};
@@ -544,6 +578,32 @@ class TableContext<TData extends Row> {
 		const offCancel = on(window, 'pointercancel', stop);
 	};
 
+	// Seçili aralığın özeti (Excel'in durum çubuğu gibi). Seçim ve işlem kolonları sayılmaz.
+	readonly rangeInfo = $derived.by((): RangeInfo | undefined => {
+		const r = this.cursor.range;
+		if (!r) return undefined;
+		const fields = this.visibleColumns
+			.slice(r.left, r.right + 1)
+			.filter((col) => col.data.type !== 'select' && col.data.type !== 'actions')
+			.map((col) => col.data.field);
+		let count = 0;
+		let numericCount = 0;
+		let sum = 0;
+		for (let i = r.top; i <= r.bottom; i++) {
+			const row = this.items[i] as Record<string, unknown> | undefined;
+			if (!row) continue;
+			for (const field of fields) {
+				count++;
+				const value = row[field];
+				if (typeof value === 'number' && Number.isFinite(value)) {
+					numericCount++;
+					sum += value;
+				}
+			}
+		}
+		return { ...r, count, numericCount, sum, average: numericCount > 0 ? sum / numericCount : undefined };
+	});
+
 	// Aralığı (yoksa aktif hücreyi) sekmeyle ayrılmış metin (TSV) olarak panoya kopyalar; Excel'e yapıştırılabilir.
 	// Seçim ve işlem kolonları atlanır. Değerler ham hâliyle (tarih PocketBase biçiminde, liste virgülle).
 	readonly copyRange = (): boolean => {
@@ -634,6 +694,14 @@ class TableContext<TData extends Row> {
 			e.preventDefault();
 			this.cursor.selectRange(pasted);
 		});
+		const offContextMenu = on(node, 'contextmenu', (e: MouseEvent) => {
+			const onContextMenu = this.#props.onContextMenu;
+			const hit = hitCell(e);
+			if (!onContextMenu || !hit || hit.interactive) return;
+			e.preventDefault();
+			if (!this.cursor.inRange(hit.pos.row, hit.pos.col)) this.cursor.set(hit.pos); // aralık içindeyse aralık korunur
+			onContextMenu(cellEvent(hit.pos, hit.row, e));
+		});
 		const offDblClick = on(node, 'dblclick', (e: MouseEvent) => {
 			const hit = hitCell(e);
 			if (!hit || hit.interactive || isSelectColumn(hit.pos.col)) return;
@@ -651,6 +719,12 @@ class TableContext<TData extends Row> {
 				e.preventDefault();
 				node.focus({ preventScroll: true });
 				if (!e.key.startsWith('Arrow')) return; // oklar ayrıca hareket ettirir
+			}
+			const onKeyDown = this.#props.onKeyDown;
+			if (onKeyDown) {
+				const active = this.cursor.active;
+				onKeyDown(e, { cell: active ? this.#activeCell(active) : undefined, range: this.cursor.range, selected: this.selection.ids as TData['id'][] });
+				if (e.defaultPrevented) return;
 			}
 			// Ctrl/⌘+C aralığı (yoksa aktif hücreyi) kopyalar. Sıra: imleç (Esc önce aralığı kapatır), sonra satır seçimi.
 			if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C') && !e.shiftKey && !e.altKey) {
@@ -682,6 +756,7 @@ class TableContext<TData extends Row> {
 			offClick();
 			offDblClick();
 			offPaste();
+			offContextMenu();
 			offKeyDown();
 			offFocusIn();
 			observer.disconnect();
@@ -916,6 +991,10 @@ class TableContext<TData extends Row> {
 		setBorders: (value: Borders) => {
 			this.#ui.borders = value;
 		},
+		// Aralığı (yoksa aktif hücreyi) panoya kopyalar (örn. sağ tık menüsünden)
+		copy: () => this.copyRange(),
+		// Odağı tabloya (aktif hücreye) verir
+		focus: () => this.el?.focus({ preventScroll: true }),
 		// Kullanıcı ayarlarını siler; tablo props'taki hâline döner
 		resetLayout: () => {
 			this.#ui = { columns: {} };

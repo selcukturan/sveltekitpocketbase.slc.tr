@@ -40,6 +40,7 @@ export class RowSelection<TData extends Row> {
 	readonly enabled = $derived.by(() => this.#host.mode() !== 'none');
 	readonly #set = $derived.by(() => idSet(this.#host.value() ?? []));
 	readonly count = $derived.by(() => this.#set.size);
+	readonly ids = $derived.by((): RowId[] => this.#host.value() ?? []);
 
 	readonly has = (id: RowId) => this.#set.has(id);
 

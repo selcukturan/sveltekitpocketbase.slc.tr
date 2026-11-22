@@ -5,7 +5,9 @@
 	import PerPage from './parts/PerPage.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
 	import TableSettings from './parts/TableSettings.svelte';
-	import { createTableContext, type MainProps } from './context.svelte';
+	import { createTableContext, type MainProps, type RangeInfo } from './context.svelte';
+	import { getSelectedLang } from '#lib/app/localization/index.js';
+	import { untrack } from 'svelte';
 	import HeaderRow from './HeaderRow.svelte';
 	import HeaderCell from './HeaderCell.svelte';
 	import DataRow from './DataRow.svelte';
@@ -14,7 +16,8 @@
 	import FooterCell from './FooterCell.svelte';
 
 	// selected: seçili satır id'leri (bind:selected). Sayfa bağlamazsa yerel değer olarak yazılır.
-	let { selected = $bindable([]), ...props }: MainProps<TData> = $props();
+	// range: seçili hücre aralığı ve özeti (bind:range, salt okunur: tablo yazar)
+	let { selected = $bindable([]), range = $bindable(), ...props }: MainProps<TData> & { range?: RangeInfo } = $props();
 
 	// svelte-ignore state_referenced_locally
 	const context = createTableContext<TData>(props, {
@@ -32,6 +35,27 @@
 	// "1–30 / 245" bilgisi
 	const rangeFrom = $derived(context.totalItems === 0 ? 0 : (context.page - 1) * context.perPage + 1);
 	const rangeTo = $derived(Math.min(context.page * context.perPage, context.totalItems));
+
+	// Aralık → bind:range ve onRangeChange
+	$effect(() => {
+		const info = context.rangeInfo;
+		untrack(() => {
+			if (info === range) return;
+			range = info;
+			props.onRangeChange?.(info);
+		});
+	});
+
+	// Alt bardaki aralık özeti: sayılar uygulamanın diline göre
+	const formatNumber = (n: number) => new Intl.NumberFormat(getSelectedLang(), { maximumFractionDigits: 2 }).format(n);
+	// Kısaldığında tam metin title'da
+	const rangeSummary = $derived.by(() => {
+		const info = context.rangeInfo;
+		if (!info) return undefined;
+		const parts = [t('dt_range_cells', { count: info.count })];
+		if (info.numericCount > 0) parts.push(t('dt_range_sum', { sum: formatNumber(info.sum) }), t('dt_range_avg', { avg: formatNumber(info.average ?? 0) }));
+		return parts.join(' · ');
+	});
 
 	// Sorgu var ama ilk veri henüz gelmedi (hata da yok): alt bar iskelet gösterir
 	const barPending = $derived(!context.loaded && context.query !== undefined && context.query.error === undefined);
@@ -162,6 +186,18 @@
 			<div class="slc-table-bar-start">
 				{#if context.paginable}
 					<span class="slc-table-range">{t('dt_range', { from: rangeFrom, to: rangeTo, total: context.totalItems })}</span>
+				{/if}
+				{#if context.rangeInfo}
+					{@const info = context.rangeInfo}
+					<!-- Bar genişliğine katılmaz (absolute): aralık seçilince bar kaymaz, sığmazsa … ile kısalır -->
+					<span class="slc-table-range-info-wrap">
+						<span class="slc-table-range-info" aria-live="polite" title={rangeSummary}>
+							{t('dt_range_cells', { count: info.count })}
+							{#if info.numericCount > 0}
+								· {t('dt_range_sum', { sum: formatNumber(info.sum) })} · {t('dt_range_avg', { avg: formatNumber(info.average ?? 0) })}
+							{/if}
+						</span>
+					</span>
 				{/if}
 				{#if context.selection.mode === 'multiple' && context.selection.count > 0}
 					<span class="slc-table-selected">{t('dt_selected', { count: context.selection.count })}</span>
@@ -365,6 +401,23 @@
 	/* Hücre aralığı (Shift/sürükleme): seçili satır ve hover'ın üzerinde (aynı özgüllük, sonra tanımlı) */
 	:global(.slc-table [data-slc-table-datarow] [data-slc-table-datacell][data-in-range]) {
 		background-color: var(--_dt-range) !important;
+	}
+	.slc-table-range-info-wrap {
+		position: relative;
+		flex: 1 1 0%;
+		min-width: 0;
+		align-self: stretch;
+	}
+	.slc-table-range-info {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		color: var(--_dt-text);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-variant-numeric: tabular-nums;
 	}
 	.slc-table-selected {
 		font-weight: 600;

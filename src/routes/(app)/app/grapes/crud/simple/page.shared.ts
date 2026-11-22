@@ -62,6 +62,8 @@ export type UpdateFormSchemaType = v.InferOutput<typeof updateFormSchema>;
 export const deleteParamsSchema = v.object({
 	...input.Hidden('id')
 });
+// Toplu silme (tabloda Delete / sağ tık menüsü); bir istekte en fazla 1000 kayıt
+export const deleteManySchema = v.object({ ids: v.pipe(v.array(v.pipe(v.string(), v.nonEmpty())), v.minLength(1), v.maxLength(1000)) });
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------------------------------------------------------------

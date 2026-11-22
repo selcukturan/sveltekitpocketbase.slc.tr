@@ -10,7 +10,7 @@
 	import * as v from 'valibot';
 	import { DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
 	import { listParamsSchema, createFormSchema, updateFormSchema, cellEditSchema, cellsEditSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
+	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -93,6 +93,54 @@
 		}
 	};
 
+	// Toplu silme: tek kayıt için remove'a düşer. Silinenler seçimden çıkarılır.
+	const removeMany = async (ids: Item['id'][]) => {
+		if (ids.length === 1) return remove(ids[0]);
+		if (!(await confirm({ message: t('delete_confirm_many', { count: ids.length }), yes: t('delete'), no: t('cancel'), danger: true }))) return;
+		try {
+			await deleteRecords({ ids }).updates(...list.updates);
+			selected = selected.filter((id) => !ids.includes(id));
+			toaster.success(t('toast_deleted_title'), t('toast_deleted_many', { count: ids.length }));
+		} catch (error) {
+			toaster.error(error);
+		}
+	};
+
+	// --- DataTable olay örnekleri ---------------------------------------------------------------------------------
+	let table = $state<ReturnType<typeof dt.DataTable<Item>>>(); // bind:this → table.helpers (copy, focus, ...)
+
+	// Silinecekler: seçili satırlar; yoksa (ya da hedef satır seçimde değilse) yalnızca o satır
+	const targetsOf = (rowId: Item['id']) => (selected.includes(rowId) ? selected : [rowId]);
+
+	// Delete: seçili satırları ya da aktif hücrenin satırını siler (yerleşik davranış olmadığı için preventDefault yalnızca işlenince)
+	const onTableKeyDown = (e: KeyboardEvent, { cell, selected: ids }: dt.KeyContext<Item>) => {
+		if (e.key !== 'Delete') return;
+		const target = ids.length > 0 ? ids : cell ? [cell.row.id] : [];
+		if (target.length === 0) return;
+		e.preventDefault();
+		removeMany(target);
+	};
+
+	// Sağ tık menüsü: hücrenin üzerinde açılır (popover + fixed konum); seçim/aralık korunur
+	let menu = $state<{ x: number; y: number; row: Item }>();
+	const menuPopover = (node: HTMLElement) => {
+		node.showPopover();
+		const off = () => (menu = undefined);
+		node.addEventListener('toggle', (e) => (e as ToggleEvent).newState === 'closed' && off());
+		return () => node.hidePopover();
+	};
+	// Sıra önemli: odak tabloya (onay penceresi açılırsa odağı o alır), işlem (menüdeki satırı okur), en son menü kapanır
+	const menuAction = (run: () => void) => () => {
+		table?.helpers.focus();
+		run();
+		menu = undefined;
+	};
+
+	// Arama sonucu boş: bilgi ver (yalnızca yeni sorguda, tazelemede değil)
+	const onTableLoad = ({ reason, totalItems }: dt.LoadEvent<Item>) => {
+		if (reason === 'query' && totalItems === 0) toaster.add({ type: 'info', title: t('dt_no_data') });
+	};
+
 	// GEÇİCİ: sayfalama/virtual scroll testi (page.remote.ts'teki seed bölümüyle birlikte silinecek)
 	let seeding = $state(false);
 	const seed = async (message: string, run: () => Promise<{ count?: number; deleted?: number }>) => {
@@ -171,6 +219,7 @@
 	<Page.Main>
 		<Page.Main.Table>
 			<dt.DataTable
+				bind:this={table}
 				{list}
 				{columns}
 				footers={[{ text_optional: 'Toplam' }, { text_optional: 'Toplam' }, { text_optional: 'Toplam' }]}
@@ -183,6 +232,11 @@
 				onCopy={({ rows, cols }) => toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
 				{validateCell}
 				onRowActivate={(row) => drawer.show('update', row.id)}
+				onLoad={onTableLoad}
+				onError={(error) => toaster.error(error)}
+				onKeyDown={onTableKeyDown}
+				onContextMenu={({ row, event }) => (menu = { x: event.clientX, y: event.clientY, row })}
+				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
 			>
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
@@ -190,6 +244,16 @@
 					<dt.ActionButton label={t('view')} icon="view" onclick={() => drawer.show('view', row.id)} />
 				{/snippet}
 			</dt.DataTable>
+			{#if menu}
+				{@const row = menu.row}
+				<div class="slc-context-menu" role="menu" popover="auto" style:left="{menu.x}px" style:top="{menu.y}px" {@attach menuPopover}>
+					<button type="button" role="menuitem" onclick={menuAction(() => drawer.show('update', row.id))}>{t('update')}</button>
+					<button type="button" role="menuitem" onclick={menuAction(() => table?.helpers.copy())}>{t('dt_copy')}</button>
+					<button type="button" role="menuitem" class="danger" onclick={menuAction(() => removeMany(targetsOf(row.id)))}>
+						{t('delete')}{targetsOf(row.id).length > 1 ? ` (${targetsOf(row.id).length})` : ''}
+					</button>
+				</div>
+			{/if}
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Drawer>
@@ -265,3 +329,34 @@
 		</Drawer>
 	</Page.Drawer>
 </Page>
+
+<style>
+	/* Sağ tık menüsü: imlecin olduğu yerde (popover üst katmanda; fixed konum) */
+	.slc-context-menu {
+		position: fixed;
+		inset: auto;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		min-width: 10rem;
+		padding: 0.25rem;
+		border: 1px solid var(--color-surface-300);
+		border-radius: 0.5rem;
+		background-color: var(--color-surface-50);
+		box-shadow: 0 8px 24px -6px color-mix(in srgb, black 25%, transparent);
+	}
+	.slc-context-menu button {
+		padding: 0.375rem 0.625rem;
+		border-radius: 0.25rem;
+		text-align: left;
+		cursor: pointer;
+	}
+	.slc-context-menu button:hover,
+	.slc-context-menu button:focus-visible {
+		background-color: var(--color-surface-200);
+		outline: none;
+	}
+	.slc-context-menu .danger {
+		color: var(--color-error-600);
+	}
+</style>
