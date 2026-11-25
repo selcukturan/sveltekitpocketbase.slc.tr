@@ -148,51 +148,94 @@ function showTooltip(node: HTMLElement, data: TooltipOptionType) {
 	);
 }
 
+// ---------------------------------------------------------------------------
+// Olay dinleyicileri: eleman başına 4 dinleyici yerine belge düzeyinde TEK set (olay delegasyonu).
+// Attachment yalnızca elemanı ve seçeneklerini kaydeder; sayfada yüzlerce tooltip'li eleman (örn. tablo satırlarındaki
+// işlem butonları) olsa da dinleyici sayısı sabit kalır. Capture fazında dinlenir: uygulamadaki stopPropagation etkilemez.
+// mouseenter/mouseleave/blur'ün karşılığı: mouseover/mouseout (relatedTarget ile)/focusout; bunlar kabarcıklanır.
+// ---------------------------------------------------------------------------
+
+type Registered = { data: TooltipOptionType; hideOnClick: boolean };
+const registry = new WeakMap<Element, Registered>();
+let listening = false;
+let hovered: HTMLElement | undefined; // farenin içinde olduğu tooltip'li eleman (mouseenter/leave durumu)
+
+// Hedeften yukarı doğru tooltip'i olan en yakın eleman (iç içe tooltip'te içteki kazanır)
+function registeredFrom(target: EventTarget | null): HTMLElement | undefined {
+	for (let el = target instanceof Element ? target : null; el; el = el.parentElement) {
+		if (registry.has(el)) return el as HTMLElement;
+	}
+	return undefined;
+}
+
+function listen() {
+	if (listening) return;
+	listening = true;
+	const options = { capture: true, passive: true };
+
+	document.addEventListener(
+		'mouseover',
+		(e) => {
+			const node = registeredFrom(e.target);
+			// Aynı elemanın çocukları arasında gezinme yeni giriş değildir (mouseenter gibi): tıklamayla gizlenen
+			// tooltip, fare ikonun üzerine geçince yeniden açılmaz
+			if (node === hovered) return;
+			hovered = node;
+			if (node) showTooltip(node, registry.get(node)!.data);
+		},
+		options
+	);
+	document.addEventListener(
+		'mouseout',
+		(e) => {
+			// mouseleave karşılığı: fare elemandan (ve çocuklarından) tamamen çıktı
+			if (!hovered || registeredFrom(e.target) !== hovered || hovered.contains(e.relatedTarget as Node | null)) return;
+			hovered = undefined;
+			hideTooltip();
+		},
+		options
+	);
+	document.addEventListener(
+		'focusout',
+		(e) => {
+			if (e.target instanceof Element && registry.has(e.target)) hideTooltip();
+		},
+		options
+	);
+	document.addEventListener(
+		'click',
+		(e) => {
+			const node = registeredFrom(e.target);
+			if (node && registry.get(node)!.hideOnClick) hideTooltip();
+		},
+		options
+	);
+}
+
 export function tooltip(tooltipData: string | TooltipOptionType): Attachment {
-	// console.log(`Started. ${new Date().getTime()}`);
 	const data: TooltipOptionType = normalize(tooltipData);
 
 	return (node) => {
-		// console.log(`Element DOM'a monte edildi. ${new Date().getTime()}`);
 		if (!(node instanceof HTMLElement)) {
 			throw new Error('Node is not an HTMLElement');
 		}
+		listen();
 
-		function showEventHandler() {
-			if (node instanceof HTMLElement) {
-				showTooltip(node, data);
-			} else {
-				console.error('Node is not an HTMLElement');
-			}
-		}
+		registry.set(node, { data, hideOnClick: data.hideOnClick === true || (data.hideOnClick === null && isFocusable(node)) });
 
-		function hideEventHandler() {
-			hideTooltip();
-		}
-
-		// getTooltip() ile ilk tooltip oluşturmayı tetikler (zaten eklenmemişse)
-		// refreshTooltip(node, data);
+		// Seçenekler değişti (örn. dil) ve tooltip bu elemanda açık: yeni metinle yenile
 		if (getTooltip()?.activeNode?.contains(node)) {
 			refreshTooltip(node, data);
 		}
 
-		//console.log(`Element'in kurulumu yapıldı. ${new Date().getTime()}`);
-		node.addEventListener('mouseenter', showEventHandler);
-		node.addEventListener('mouseleave', hideEventHandler);
-		node.addEventListener('blur', hideEventHandler);
-		if (data.hideOnClick === true || (data.hideOnClick === null && isFocusable(node))) {
-			node.addEventListener('click', hideEventHandler);
-		}
-
 		return () => {
-			// console.log(`Element DOM'dan söküldü. ${new Date().getTime()}`);
-			// if (getTooltip()?.activeNode?.contains(element)) {
-			//	hideTooltip();
-			// }
-			node.removeEventListener('mouseenter', showEventHandler);
-			node.removeEventListener('mouseleave', hideEventHandler);
-			node.removeEventListener('blur', hideEventHandler);
-			node.removeEventListener('click', hideEventHandler);
+			registry.delete(node);
+			// Eleman DOM'dan kalktıysa ve tooltip'i açıksa gizle; yoksa ekranda takılı kalırdı. (Seçenekler değişince de
+			// temizlik çalışır ama eleman DOM'dadır: attachment hemen yeniden kaydeder ve açık tooltip'i yeniler.)
+			if (!node.isConnected) {
+				if (hovered === node) hovered = undefined;
+				if (getTooltip().activeNode === node) hideTooltip();
+			}
 		};
 	};
 }

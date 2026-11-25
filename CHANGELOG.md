@@ -142,7 +142,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.177` oldu.
+- Uygulama sürümü `v0.2.0-alpha.178` oldu.
+- `tooltip` attachment: eleman başına 4 dinleyici yerine belge düzeyinde tek
+  dinleyici seti (olay delegasyonu, `WeakMap` kaydı). API aynı. 30 satırlık
+  tablo sayfasında dinleyici sayısı 427 → 124.
 - DataTable: Intl biçimlendiricileri önbellekte (`format.ts`: `numberFormat`,
   `dateFormat`); `toLocaleString` ve `new Intl.…` her hücrede yeni
   biçimlendirici kuruyordu. Kaydırma adımı başına script %10–17 azaldı.
@@ -199,6 +202,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- `tooltip`: eleman DOM'dan kalkarken tooltip'i açıksa gizleniyor (ekranda
+  takılı kalabiliyordu).
 - e2e: `createRecord` çekmecenin kapanmasını da bekliyor (kapanma animasyonu
   sırasında sayfa inert olduğu için arama kutusuna yazılan metin kayboluyordu).
 - DataTable: satır silinince, silinen kaydın yuvasına geçen sonraki kaydın
