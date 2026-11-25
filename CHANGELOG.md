@@ -142,7 +142,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.175` oldu.
+- Uygulama sürümü `v0.2.0-alpha.176` oldu.
+- DataTable: sanal kaydırmada değişmeyen satırlar önceki nesnelerini koruyor;
+  yalnızca yuvaya giren satır güncelleniyor (önceden her adımda penceredeki tüm
+  satırların hücreleri yeniden hesaplanıyordu). Kaydırma adımı başına script
+  süresi ~10,6 → ~2,6 ms (dev ölçümü).
 - DataTable: sanal kaydırmada satırlar yeniden kullanılıyor. Satırlar kayıt
   id'si yerine pencere içindeki yuvayla anahtarlanıyor ve pencere hep aynı boyda.
   Kaydırırken satır bileşenleri ve DOM düğümleri yeniden oluşturulmuyor, yalnızca
@@ -188,6 +192,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- e2e: `createRecord` çekmecenin kapanmasını da bekliyor (kapanma animasyonu
+  sırasında sayfa inert olduğu için arama kutusuna yazılan metin kayboluyordu).
 - DataTable: satır silinince, silinen kaydın yuvasına geçen sonraki kaydın
   butonunda odak kalmıyor; odak grid'e dönüyor (yanlış kaydı silme riski).
 - DataTable: arama ve "sayfa başına" değişince 1. sayfaya dönülmüyordu.

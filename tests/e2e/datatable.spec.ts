@@ -86,6 +86,8 @@ async function createRecord(page: Page, text: string) {
 	await dialog.getByLabel('text_optional').fill(text);
 	await dialog.getByRole('button', { name: 'Oluştur' }).click();
 	await expect(page).not.toHaveURL(/cmd=create/);
+	// URL önce değişir, çekmece kapanma animasyonu (~150 ms) boyunca modal kalır: sayfa inert, fill boşa gider
+	await expect(page.locator('dialog[open]')).toHaveCount(0);
 }
 
 async function deleteFirstRow(page: Page) {

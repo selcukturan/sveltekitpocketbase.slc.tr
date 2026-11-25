@@ -53,6 +53,10 @@ export type RangeInfo = { ranges: CellRange[]; count: number; numericCount: numb
 // Veri yoksa first 0, last -1. Örn. sonsuz kaydırma (last sona yaklaşınca sonraki sayfa), görünenler için ek veri.
 export type VisibleRows = { first: number; last: number; total: number };
 
+// Sanal kaydırmada çizilen satır: key, satırın yuvası (bkz. virtualData)
+type VirtualKey = number | 'spare';
+type VirtualEntry<TData> = { data: TData; originalIndex: number; key: VirtualKey };
+
 // onKeyDown'a verilen bağlam: tuş anındaki aktif hücre, aralık ve seçili satırlar
 export type KeyContext<TData extends Row> = { cell: ActiveCell<TData> | undefined; ranges: CellRange[]; selected: TData['id'][] };
 
@@ -521,17 +525,29 @@ class TableContext<TData extends Row> {
 		const slots = this.#windowSize;
 		const pinned = this.#pinnedRow;
 		const pinnedSlot = pinned >= 0 ? pinned % slots : -1;
-		const processedData: { data: TData; originalIndex: number; key: number | 'spare' }[] = [];
+		const prev = this.#prevEntries;
+		const next = new Map<VirtualKey, VirtualEntry<TData>>();
+		const processedData: VirtualEntry<TData>[] = [];
 
+		// Değişmeyen satır önceki nesnesini korur: {#each} o yuvayı güncellemez, hücreleri yeniden hesaplanmaz.
+		// Yeni nesne yalnızca yuvaya giren (ya da verisi değişen) satır için üretilir.
+		const add = (data: TData, originalIndex: number, key: VirtualKey) => {
+			const old = prev.get(key);
+			const entry = old && old.data === data && old.originalIndex === originalIndex ? old : { data, originalIndex, key };
+			next.set(key, entry);
+			processedData.push(entry);
+		};
 		for (let i = start; i <= end; i++) {
 			const row = items[i];
-			if (row) processedData.push({ data: row as TData, originalIndex: i, key: i % slots === pinnedSlot ? 'spare' : i % slots });
+			if (row) add(row as TData, i, i % slots === pinnedSlot ? 'spare' : i % slots);
 		}
-		if (pinned >= 0) processedData.push({ data: items[pinned] as TData, originalIndex: pinned, key: pinnedSlot });
+		if (pinned >= 0) add(items[pinned] as TData, pinned, pinnedSlot);
+		this.#prevEntries = next;
 
-		const order = (key: number | 'spare') => (key === 'spare' ? slots : key);
+		const order = (key: VirtualKey) => (key === 'spare' ? slots : key);
 		return processedData.sort((a, b) => order(a.key) - order(b.key));
 	});
+	#prevEntries = new Map<VirtualKey, VirtualEntry<TData>>(); // reaktif değil: yalnızca virtualData'nın önceki sonucu
 
 	// Scroll takibi: kaydırma olduğunda tek bir requestAnimationFrame planlanır (boştayken döngü çalışmaz)
 	readonly trackTableScroll = (node: HTMLElement) => {
