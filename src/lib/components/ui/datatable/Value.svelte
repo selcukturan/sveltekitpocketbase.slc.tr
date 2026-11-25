@@ -80,5 +80,6 @@
 {:else if kind === 'json'}
 	<pre class="bg-surface-100 max-h-60 overflow-auto rounded p-2 text-xs break-all whitespace-pre-wrap">{text}</pre>
 {:else}
-	<span class="block [overflow-wrap:anywhere] break-words whitespace-pre-wrap">{text}</span>
+	<!-- break-words -->
+	<span class="block wrap-anywhere whitespace-pre-wrap">{text}</span>
 {/if}
