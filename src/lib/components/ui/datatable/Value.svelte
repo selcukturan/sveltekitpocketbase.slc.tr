@@ -61,18 +61,19 @@
 
 {#if kind === 'bool'}
 	<span class={value ? 'text-success-600' : 'text-surface-400'} aria-label={String(Boolean(value))}>{value ? '✓' : '—'}</span>
+{:else if !wrap}
+	<!-- Tablo hücresi: boş ve dolu aynı span (satır geri dönüşümünde dal değişip düğüm yeniden kurulmasın) -->
+	<span class={['block min-w-0 truncate', text === '' && 'text-surface-400']} title={text || undefined}>{text || '—'}</span>
 {:else if text === ''}
 	<span class="text-surface-400">—</span>
-{:else if wrap && kind === 'list' && Array.isArray(value)}
+{:else if kind === 'list' && Array.isArray(value)}
 	<span class="flex flex-wrap gap-1">
 		{#each value as item, i (i)}
 			<span class="bg-surface-200 text-surface-800 max-w-full rounded px-1.5 py-0.5 text-xs break-all">{String(item)}</span>
 		{/each}
 	</span>
-{:else if wrap && kind === 'json'}
+{:else if kind === 'json'}
 	<pre class="bg-surface-100 max-h-60 overflow-auto rounded p-2 text-xs break-all whitespace-pre-wrap">{text}</pre>
-{:else if wrap}
-	<span class="block [overflow-wrap:anywhere] break-words whitespace-pre-wrap">{text}</span>
 {:else}
-	<span class="block min-w-0 truncate" title={text}>{text}</span>
+	<span class="block [overflow-wrap:anywhere] break-words whitespace-pre-wrap">{text}</span>
 {/if}

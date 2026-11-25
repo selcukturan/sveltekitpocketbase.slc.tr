@@ -452,6 +452,83 @@ test('onVisibleRowsChange: görünen satırlar kaydırmayla değişir', async ({
 	await expect(status).toContainText('Görünen satırlar: 1–');
 });
 
+// ---------------------------------------------------------------- satır geri dönüşümü
+const nextFrames = (page: Page, n = 3) =>
+	page.evaluate(
+		(n) =>
+			new Promise<void>((res) => {
+				let i = 0;
+				const f = () => (++i >= n ? res() : requestAnimationFrame(f));
+				requestAnimationFrame(f);
+			}),
+		n
+	);
+
+async function openPerPage(page: Page, perPage: number) {
+	await openTable(page);
+	await page.getByRole('button', { name: /sayfa/i }).last().click();
+	await page.getByRole('menuitemradio', { name: String(perPage) }).click();
+	await expect.poll(() => grid(page).evaluate((el) => Number(el.getAttribute('aria-rowcount')))).toBeGreaterThan(100);
+}
+
+// Görünen hücreler: data-row → [metin|grid satırı] (sütun sırasıyla); satırın aria-rowindex'i grid satırıyla aynı olmalı
+const renderedRows = (page: Page) =>
+	grid(page).evaluate((el) => {
+		const rows: Record<string, string[]> = {};
+		for (const c of el.querySelectorAll<HTMLElement>('[data-slc-table-datacell]')) {
+			const gridRow = c.style.gridRowStart;
+			if (c.closest('[role=row]')!.getAttribute('aria-rowindex') !== gridRow) throw new Error(`aria-rowindex ≠ ${gridRow}`);
+			(rows[c.dataset.row!] ??= [])[Number(c.dataset.col)] = `${(c.textContent ?? '').trim()}|${gridRow}`;
+		}
+		return rows;
+	});
+
+test('sanal kaydırma satırları yeniden kullanır: düğüm oluşturmaz, içerik doğru, aktif satır korunur', async ({ page }) => {
+	await openPerPage(page, 500);
+	await grid(page).evaluate((el) => {
+		const w = window as unknown as { __added: number };
+		w.__added = 0;
+		new MutationObserver((ms) => {
+			for (const m of ms) for (const n of m.addedNodes) if (n instanceof Element) w.__added += 1 + n.querySelectorAll('*').length;
+		}).observe(el, { childList: true, subtree: true });
+	});
+
+	// Aktif hücre: kaydırınca pencereden çıkar (sabitlenir), dönünce aynı DOM düğümü olmalı
+	await cell(page, 2, 3).click();
+	await cell(page, 2, 3).evaluate((el) => el.setAttribute('data-mark', ''));
+
+	const max = await grid(page).evaluate((el) => el.scrollHeight - el.clientHeight);
+	for (let y = 0; y <= max; y += Math.ceil(max / 40)) {
+		await grid(page).evaluate((el, y) => (el.scrollTop = y), y);
+		await nextFrames(page, 2);
+	}
+	// Yalnızca aktif satır pencereden çıkarken, aynı yuvaya düşen satır bir kez ('spare') kurulur: en fazla bir satırlık düğüm
+	const rowNodes = await grid(page).evaluate((el) => {
+		const row = el.querySelector('[data-slc-table-datarow]')!;
+		return row.querySelectorAll('*').length + 1;
+	});
+	expect(await page.evaluate(() => (window as unknown as { __added: number }).__added)).toBeLessThanOrEqual(rowNodes);
+
+	// Kaydırarak gelinen içerik = doğrudan o konumda açılan içerik
+	const mid = Math.floor(max / 2);
+	await grid(page).evaluate((el, y) => (el.scrollTop = y), mid);
+	await nextFrames(page);
+	const viaScroll = await renderedRows(page);
+
+	await grid(page).evaluate((el) => (el.scrollTop = 0));
+	await nextFrames(page);
+	await expect(cell(page, 2, 3)).toHaveAttribute('data-mark', '');
+	await expect(grid(page)).toBeFocused();
+
+	await openPerPage(page, 500);
+	await grid(page).evaluate((el, y) => (el.scrollTop = y), mid);
+	await nextFrames(page);
+	const direct = await renderedRows(page);
+	expect(Object.keys(direct).length).toBeGreaterThan(10);
+	// Kaydırarak gelinen görünümde ayrıca sabitlenen aktif satır (2) vardır; ortak satırlar aynı olmalı
+	expect(Object.fromEntries(Object.keys(direct).map((r) => [r, viaScroll[r]]))).toEqual(direct);
+});
+
 // ---------------------------------------------------------------- footer kısayolları ve fonksiyon
 test('footer: sum(2), avg(2), max(), count() ve fonksiyon yüklü satırlardan hesaplanır', async ({ page, context }) => {
 	await context.grantPermissions(['clipboard-read', 'clipboard-write']);

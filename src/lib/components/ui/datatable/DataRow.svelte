@@ -20,6 +20,8 @@
 <div
 	data-slc-table-datarow
 	role="row"
+	data-row-id={dr.row.id}
+	aria-rowindex={dr.rowOriginalIndex + context.headerLength + 1}
 	aria-selected={context.selection.enabled ? context.selection.has(dr.row.id) : undefined}
 	style:display="contents"
 	class={classes}

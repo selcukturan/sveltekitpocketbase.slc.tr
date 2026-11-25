@@ -16,7 +16,7 @@
 	const context = getTableContext<TData>();
 </script>
 
-<div data-slc-table-headerrow role="row" style:display="contents" class={classes} {...attributes}>
+<div data-slc-table-headerrow role="row" aria-rowindex={hr.headerIndex + 1} style:display="contents" class={classes} {...attributes}>
 	{#each context.visibleColumns as col, colVisibleIndex (col.data.field)}
 		{@const label = col.data.label}
 		{@render headerCell?.({ label, col, colVisibleIndex })}

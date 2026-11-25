@@ -17,7 +17,11 @@
 	const context = getTableContext<TData>();
 </script>
 
-<div data-slc-table-footerrow role="row" style:display="contents" class={classes} {...attributes}>
+<div
+	data-slc-table-footerrow
+	role="row"
+	aria-rowindex={context.headerLength + context.dataLength + fr.footerIndex + 1}
+	style:display="contents" class={classes} {...attributes}>
 	{#each context.visibleColumns as col, colVisibleIndex (col.data.field)}
 		{@const value = (fr.footerRow as Record<string, unknown>)[col.data.field]}
 		{@render footerCell?.({ value, col, colVisibleIndex })}

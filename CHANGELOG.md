@@ -142,7 +142,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.174` oldu.
+- Uygulama sürümü `v0.2.0-alpha.175` oldu.
+- DataTable: sanal kaydırmada satırlar yeniden kullanılıyor. Satırlar kayıt
+  id'si yerine pencere içindeki yuvayla anahtarlanıyor ve pencere hep aynı boyda.
+  Kaydırırken satır bileşenleri ve DOM düğümleri yeniden oluşturulmuyor, yalnızca
+  gösterdikleri kayıt değişiyor. 1000 satırı baştan sona kaydırmak eskiden
+  yaklaşık 35 bin düğüm oluşturuyordu, şimdi hiç oluşturmuyor (bellek
+  dalgalanması ve GC yükü düştü). Aktif satır pencereden çıkınca kendi yuvasında
+  sabitleniyor. Satırlarda `data-row-id`, satır/başlık/footer'da `aria-rowindex`
+  var. Kendi `dataRow` snippet'inde satır içinde `$state` tutulmamalı.
 - `.claude` klasörü artık git ile takip edilmiyor.
 - Simple CRUD sayfası bileşenlere taşındı (319 → ~200 satır, script ~60 satır).
 - DataTable: kolonlar props'tan reaktif okunuyor; kullanıcı ayarları
@@ -180,6 +188,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- DataTable: satır silinince, silinen kaydın yuvasına geçen sonraki kaydın
+  butonunda odak kalmıyor; odak grid'e dönüyor (yanlış kaydı silme riski).
 - DataTable: arama ve "sayfa başına" değişince 1. sayfaya dönülmüyordu.
 - DataTable: `requestAnimationFrame` döngüsü boştayken de sürekli çalışıyordu.
 - DataTable: `align` ayarları uygulanmıyordu; koyu temada freeze gölgesi

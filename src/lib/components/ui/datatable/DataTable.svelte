@@ -155,7 +155,8 @@
 			{/if}
 
 			{#if context.dataLength > 0}
-				{#each context.virtualData as row, virtualIndex (row.data.id)}
+				<!-- Anahtar kayıt id'si değil yuva: satırlar kaydırırken yeniden kullanılır (bkz. context.virtualData) -->
+				{#each context.virtualData as row, virtualIndex (row.key)}
 					{@render (context.dataRow ?? defaultDataRow)({
 						row: row.data,
 						rowVirtualIndex: virtualIndex,

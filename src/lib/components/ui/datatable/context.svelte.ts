@@ -473,10 +473,13 @@ class TableContext<TData extends Row> {
 	// Başlık sticky olduğu için veri alanı scrollTop + başlık yüksekliğinden başlar; i. satır başlık + i * satır yüksekliğinde.
 	// Bu yüzden ilk görünen satır floor(scrollTop / satır yüksekliği). Footer'lar sticky olup alttan örter, overscan karşılar.
 	// start/end ayrı sayı derived'ları: scroll her karede değişse de virtualData yalnızca aralık değişince yeniden hesaplanır.
-	#visibleStart = $derived(Math.max(0, Math.min(Math.floor(this.#rafY / this.dataRowHeight) - TableContext.OVERSCAN, this.dataLength - 1)));
-	#visibleEnd = $derived(
-		Math.min(this.dataLength - 1, Math.ceil((this.#rafY + this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + TableContext.OVERSCAN)
+	// Pencere hep aynı boyda (#windowSize satır): görünen alan en fazla ceil(alan / satır) + 1 satıra değer, üstüne her iki
+	// yandan OVERSCAN. Listenin uçlarında pencere kayar ama kısalmaz; satır geri dönüşümü bu sabit boya dayanır (virtualData).
+	#windowSize = $derived(
+		Math.ceil(Math.max(0, this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + 2 + 2 * TableContext.OVERSCAN
 	);
+	#visibleStart = $derived(Math.max(0, Math.min(Math.floor(this.#rafY / this.dataRowHeight) - TableContext.OVERSCAN, this.dataLength - this.#windowSize)));
+	#visibleEnd = $derived(Math.min(this.dataLength - 1, this.#visibleStart + this.#windowSize - 1));
 
 	// Aktif satır görünür aralığın dışındaysa (kaydırıldı) yine de çizilir: hücresi DOM'da kalır,
 	// aria-activedescendant boşa düşmez ve klavyeyle dönünce scrollIntoView edilebilir. Sayı derived'ı:
@@ -503,20 +506,31 @@ class TableContext<TData extends Row> {
 		return total === 0 ? { first: 0, last: -1, total } : { first: Math.max(0, this.#firstVisible), last: Math.max(0, this.#lastVisible), total };
 	});
 
-	// Aralık, veri ya da sabitlenen satır değişince yeniden hesaplanır
+	// Satır geri dönüşümü: {#each} satırları kayıt id'si yerine pencere içindeki "yuva" ile anahtarlanır (key = i % windowSize).
+	// Pencere ardışık ve sabit boyda olduğu için yuvalar benzersizdir ve hep aynı kümedir. Kaydırınca yukarıdan çıkan
+	// satırın yuvasını aşağıdan giren alır: bileşenler ve DOM düğümleri silinip yeniden oluşturulmaz, yalnızca props (dr)
+	// değişir. Yuva sayısı yalnızca yükseklik/yoğunluk değişince değişir (o zaman satırlar bir kez yeniden kurulur).
+	// Not: sayfanın kendi dataRow snippet'inde yerel $state tutulursa satırla değil yuvayla kalır (bkz. belge).
+	// Sabitlenen (aktif, pencere dışındaki) satır kendi yuvasını korur: pencereden çıkarken yeniden kurulmaz (düzenleyici
+	// ve odak yerinde kalır). Penceredeki aynı yuvaya düşen tek satır 'spare' anahtarını alır.
+	// Dizi yuva sırasındadır: kaydırırken {#each} düğüm de taşımaz (görsel sıra grid-row-start'tan gelir, DOM sırası önemsiz).
 	virtualData = $derived.by(() => {
 		const items = this.items;
-		const processedData: { data: TData; originalIndex: number }[] = [];
-
-		for (let i = this.#visibleStart; i <= this.#visibleEnd; i++) {
-			const row = items[i];
-			if (row) processedData.push({ data: row as TData, originalIndex: i });
-		}
-
+		const start = this.#visibleStart;
+		const end = this.#visibleEnd;
+		const slots = this.#windowSize;
 		const pinned = this.#pinnedRow;
-		if (pinned >= 0) processedData.push({ data: items[pinned] as TData, originalIndex: pinned }); // grid'de sıra önemsiz
+		const pinnedSlot = pinned >= 0 ? pinned % slots : -1;
+		const processedData: { data: TData; originalIndex: number; key: number | 'spare' }[] = [];
 
-		return processedData;
+		for (let i = start; i <= end; i++) {
+			const row = items[i];
+			if (row) processedData.push({ data: row as TData, originalIndex: i, key: i % slots === pinnedSlot ? 'spare' : i % slots });
+		}
+		if (pinned >= 0) processedData.push({ data: items[pinned] as TData, originalIndex: pinned, key: pinnedSlot });
+
+		const order = (key: number | 'spare') => (key === 'spare' ? slots : key);
+		return processedData.sort((a, b) => order(a.key) - order(b.key));
 	});
 
 	// Scroll takibi: kaydırma olduğunda tek bir requestAnimationFrame planlanır (boştayken döngü çalışmaz)
@@ -808,17 +822,25 @@ class TableContext<TData extends Row> {
 		// grid'e, yani aktif hücreye geri verilir. MutationObserver zamanlamadan bağımsızdır: Svelte'in async modunda
 		// DOM güncellemesi remote sorgular bitene kadar ertelenebildiği için tick()/$effect.pre güvenilir değil.
 		// Firefox kaldırılan eleman için focusout göndermediği için focusout'a da dayanılmaz.
+		// Satırlar yeniden kullanıldığı için (virtualData) eleman DOM'da kalıp başka bir kaydı gösterebilir (örn. silinen
+		// satırın yuvasına sonraki kayıt geçer): satırın kaydı (data-row-id) değişince de odak grid'e döner. Yoksa odak
+		// başka kaydın Sil butonunda kalırdı.
 		let lastFocused: Element | null = null;
+		let lastRowId: string | null = null;
+		const rowIdOf = (el: Element) => el.closest('[data-row-id]')?.getAttribute('data-row-id') ?? null;
 		const offFocusIn = on(node, 'focusin', (e: FocusEvent) => {
 			lastFocused = e.target instanceof Element ? e.target : null;
+			lastRowId = lastFocused ? rowIdOf(lastFocused) : null;
 		});
 		const observer = new MutationObserver(() => {
-			if (!lastFocused || lastFocused === node || lastFocused.isConnected) return;
+			if (!lastFocused || lastFocused === node) return;
+			if (lastFocused.isConnected && (lastRowId === null || rowIdOf(lastFocused) === lastRowId)) return;
+			const stale = lastFocused;
 			lastFocused = null;
 			const active = document.activeElement;
-			if (!active || active === document.body) node.focus({ preventScroll: true });
+			if (!active || active === document.body || active === stale) node.focus({ preventScroll: true });
 		});
-		observer.observe(node, { childList: true, subtree: true });
+		observer.observe(node, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-row-id'] });
 
 		return () => {
 			offPointerDown();
