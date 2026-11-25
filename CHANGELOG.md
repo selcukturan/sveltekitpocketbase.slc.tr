@@ -142,7 +142,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.176` oldu.
+- Uygulama sürümü `v0.2.0-alpha.177` oldu.
+- DataTable: Intl biçimlendiricileri önbellekte (`format.ts`: `numberFormat`,
+  `dateFormat`); `toLocaleString` ve `new Intl.…` her hücrede yeni
+  biçimlendirici kuruyordu. Kaydırma adımı başına script %10–17 azaldı.
+- DataTable: `DataCell` artık ek HTML attribute'u (spread) almıyor; yalnızca
+  `dr`, `dc`, `class`, `editable`, `children`. Spread her güncellemede hücrenin
+  tüm attribute'larını yeniden kurduruyordu (script %4–14, bellek ayırma %15
+  daha az).
 - DataTable: sanal kaydırmada değişmeyen satırlar önceki nesnelerini koruyor;
   yalnızca yuvaya giren satır güncelleniyor (önceden her adımda penceredeki tüm
   satırların hücreleri yeniden hesaplanıyordu). Kaydırma adımı başına script

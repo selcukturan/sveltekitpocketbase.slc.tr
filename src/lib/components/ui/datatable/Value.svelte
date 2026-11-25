@@ -33,6 +33,7 @@
 
 <script lang="ts">
 	import { getSelectedLang } from '#lib/app/localization/index.js';
+	import { numberFormat, dateFormat, DATETIME } from './format.js';
 
 	// wrap: false → tablo hücresi (tek satır, taşan kısım …); true → detay görünümü (satır kaydırır, liste etiket olur)
 	let { value, type, wrap = false }: { value: unknown; type?: ColumnType; wrap?: boolean } = $props();
@@ -44,11 +45,15 @@
 		if (isEmpty(value)) return '';
 		switch (kind) {
 			case 'number':
-				return typeof value === 'number' ? value.toLocaleString(locale) : String(value);
-			case 'date':
-				return toDate(value)?.toLocaleDateString(locale) ?? String(value);
-			case 'datetime':
-				return toDate(value)?.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' }) ?? String(value);
+				return typeof value === 'number' ? numberFormat(locale).format(value) : String(value);
+			case 'date': {
+				const d = toDate(value);
+				return d ? dateFormat(locale).format(d) : String(value);
+			}
+			case 'datetime': {
+				const d = toDate(value);
+				return d ? dateFormat(locale, DATETIME).format(d) : String(value);
+			}
 			case 'list':
 				return Array.isArray(value) ? value.join(', ') : String(value);
 			case 'json':

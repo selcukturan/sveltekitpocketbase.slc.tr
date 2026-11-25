@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, DataRowType, DataCellType } from './types.js';
 	import { getTableContext } from './context.svelte.js';
@@ -8,14 +7,16 @@
 </script>
 
 <script lang="ts" generics="TData extends Row">
-	type Props = HTMLAttributes<HTMLDivElement> & {
+	// Ek HTML attribute'u (spread) alınmaz: spread, hücrenin tüm attribute'larını her güncellemede tek bir nesneyle
+	// yeniden kurdurur (kaydırmada hücre başına gereksiz iş ve çöp). Görünüm için class, içerik için children kullanın.
+	type Props = {
 		children?: Snippet; // verilmezse değer kolon tipine göre <Value> ile gösterilir
 		editable?: boolean; // verilirse kolondaki editable'ı bu hücre için geçersiz kılar (kendi dataRow snippet'inde)
 		class?: string;
 		dr: DataRowType<TData>;
 		dc: DataCellType<TData>;
 	};
-	const { children, class: classes, dr, dc, editable, ...attributes }: Props = $props();
+	const { children, class: classes, dr, dc, editable }: Props = $props();
 
 	const context = getTableContext<TData>();
 
@@ -58,7 +59,6 @@
 	style:left={layout?.left}
 	style:right={layout?.right}
 	style:z-index={layout?.sticky ? 1 : undefined}
-	{...attributes}
 >
 	{#if isEditing}
 		<CellInput id={context.cellId({ row: dr.rowOriginalIndex, col: dc.colVisibleIndex })} options={dc.col.data.options} align={context.alignOf(dc.col.data)} />

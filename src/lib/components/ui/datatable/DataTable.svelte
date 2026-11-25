@@ -7,6 +7,7 @@
 	import TableSettings from './parts/TableSettings.svelte';
 	import { createTableContext, type MainProps, type RangeInfo } from './context.svelte';
 	import { getSelectedLang } from '#lib/app/localization/index.js';
+	import { numberFormat, NUMBER_2 } from './format.js';
 	import { untrack } from 'svelte';
 	import HeaderRow from './HeaderRow.svelte';
 	import HeaderCell from './HeaderCell.svelte';
@@ -53,7 +54,7 @@
 	});
 
 	// Alt bardaki aralık özeti: sayılar uygulamanın diline göre
-	const formatNumber = (n: number) => new Intl.NumberFormat(getSelectedLang(), { maximumFractionDigits: 2 }).format(n);
+	const formatNumber = (n: number) => numberFormat(getSelectedLang(), NUMBER_2).format(n);
 	// Kısaldığında tam metin title'da
 	const rangeSummary = $derived.by(() => {
 		const info = context.rangeInfo;

@@ -1,4 +1,5 @@
 import { dev } from '$app/env';
+import { numberFormat, fixedDigitsOptions, NUMBER_2 } from './format.js';
 
 /**
  * Footer değerleri.
@@ -53,4 +54,4 @@ export const aggregate = (fn: AggregateFn, items: readonly Record<string, unknow
 };
 
 export const formatAggregate = (value: number, digits: number | undefined, locale: string) =>
-	new Intl.NumberFormat(locale, digits === undefined ? { maximumFractionDigits: 2 } : { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+	numberFormat(locale, digits === undefined ? NUMBER_2 : fixedDigitsOptions(digits)).format(value);

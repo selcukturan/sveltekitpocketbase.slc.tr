@@ -1,6 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { getSelectedLang, t } from '#lib/app/localization/index.js';
 import type { Column, Field, Row } from './types.js';
+import { numberFormat, NUMBER_RAW } from './format.js';
 import type { CellPos, CellRange } from './navigation.svelte.js';
 import type { Attachment } from 'svelte/attachments';
 
@@ -69,7 +70,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const toDraft = (kind: EditorKind, value: unknown): string => {
 	if (value === null || value === undefined || value === '') return '';
 	// Sayı tabloda nasıl görünüyorsa öyle (tr: 747,44); gruplama yok. fromDraft virgülü de noktayı da kabul eder.
-	if (kind === 'number' && typeof value === 'number') return new Intl.NumberFormat(getSelectedLang(), { useGrouping: false, maximumFractionDigits: 20 }).format(value);
+	if (kind === 'number' && typeof value === 'number') return numberFormat(getSelectedLang(), NUMBER_RAW).format(value);
 	if (kind === 'date') return String(value).slice(0, 10); // PocketBase '2026-11-17 00:00:00.000Z' → '2026-11-17'
 	if (kind === 'datetime') {
 		const d = new Date(String(value).replace(' ', 'T'));
