@@ -13,6 +13,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- `/app/data-table`: DataTable'ın en temel hali; başlık, veri ve footer
+  snippet'leri açıkça yazılmış (veri: Simple CRUD remote fonksiyonları).
 - DataTable: hücre gezinmesi (1. aşama). Aktif hücre; ok tuşları, Tab /
   Shift+Tab (satır sonunda alt satıra), Home/End, Ctrl+Home/End, PageUp/PageDown,
   Enter. Odak grid'de kalır (`aria-activedescendant`); aktif satır kaydırılınca
@@ -142,7 +144,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.178` oldu.
+- Uygulama sürümü `v0.2.0-alpha.179` oldu.
 - `tooltip` attachment: eleman başına 4 dinleyici yerine belge düzeyinde tek
   dinleyici seti (olay delegasyonu, `WeakMap` kaydı). API aynı. 30 satırlık
   tablo sayfasında dinleyici sayısı 427 → 124.
