@@ -229,6 +229,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: DataTable belgesi alpha.213 / `e15b67d`; çekirdek belgede
+  güncelleme notu alpha.213 ve gönderim akışı testleri (`form-inputs.spec.ts`,
+  `settings.spec.ts`).
 - Belgeler: çekirdek belgeye kural: `formInput.Form` kullanan sunucu `form`
   fonksiyonları başarıda bir değer döndürmeli (`form.result` → `markClean`);
   kalıcı çözüm (`onsave`, enhance Form'da) ertelendi, `Form.svelte`'de not.
