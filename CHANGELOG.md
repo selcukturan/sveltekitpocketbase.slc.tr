@@ -13,6 +13,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: kopyalamadan sonra tablonun sağ üstünde "Kopyalandı"
+  bildirimi (yukarıdan kayarak gelir, 2,5 sn sonra gider; kısmi kopyada uyarı
+  renginde, 5 sn; `role="status"`). Simple CRUD sayfasındaki `onCopy` toast'ı
+  kaldırıldı; `onCopy` ek iş için duruyor.
 - Test: uygulama ayarları sayfası (`settings.spec.ts`): değişince düğmeler
   açılır, Sıfırla geri alır, kayıttan sonra form temiz (`markClean`), değer
   yenilemede kalıcı; eski ad geri yazılır. Yanlışlıkla eklenmiş geçici

@@ -10,6 +10,7 @@
 	import { getSelectedLang } from '#lib/app/localization/index.js';
 	import { numberFormat, NUMBER_2 } from './utils/format.js';
 	import { untrack } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import HeaderRow from './HeaderRow.svelte';
 	import HeaderCell from './HeaderCell.svelte';
 	import DataRow from './DataRow.svelte';
@@ -114,6 +115,15 @@
 <div class:slc-table-main={true} class={context.mainClass} data-borders={context.borders} style:width="100%" style:height="100%">
 	{@render context.toolbar?.()}
 	<div class:slc-table-container={true} class={context.containerClass}>
+		<!-- Kopyalandı bildirimi: sağ üstten aşağı kayarak gelir, birkaç saniye sonra gider (context.copyNotice) -->
+		{#if context.copyNotice}
+			{#key context.copyNotice.id}
+				<div class="slc-table-notice" data-warning={context.copyNotice.warning || undefined} role="status" transition:fly={{ y: -12, duration: 180 }}>
+					<strong>{t('dt_copied_title')}</strong>
+					<span>{context.copyNotice.text}</span>
+				</div>
+			{/key}
+		{/if}
 		{#if !context.query}
 			<div class="slc-table-message"><p>{t('dt_not_loaded')}</p></div>
 		{:else if context.query?.loading === true}
@@ -291,6 +301,27 @@
 		contain: inline-size;
 		block-size: 100%;
 		position: relative;
+	}
+	.slc-table-notice {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.75rem;
+		z-index: 20;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		max-width: min(22rem, calc(100% - 1.5rem));
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--_dt-border-strong);
+		border-left: 3px solid var(--_dt-accent);
+		border-radius: 0.375rem;
+		background-color: var(--_dt-bg);
+		box-shadow: 0 6px 16px -6px var(--_dt-shadow);
+		font-size: 0.8125rem;
+		pointer-events: none;
+	}
+	.slc-table-notice[data-warning] {
+		border-left-color: var(--color-warning-500);
 	}
 	/******************************************************/
 	.slc-table {

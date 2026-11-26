@@ -87,10 +87,6 @@
 					{ text_optional: 'En büyük', number_optional: 'max()' }
 				]}
 				onKeyDown={rowDelete.onKeyDown}
-				onCopy={({ rows, cols, partial }) =>
-					partial
-						? toaster.add({ type: 'warning', title: t('dt_copied_title'), description: t('dt_copied_partial', { count: rows * cols }) })
-						: toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
 				onRowActivate={(row) => drawer.show('update', row.id)}
 				onLoad={({ reason, totalItems }) => reason === 'query' && totalItems === 0 && toaster.add({ type: 'info', title: t('dt_no_data') })}
 				onError={(error) => toaster.error(error)}

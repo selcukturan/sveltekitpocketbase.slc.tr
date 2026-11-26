@@ -199,7 +199,11 @@ test('Ctrl+C aralığı sekmeyle ayrılmış metin olarak kopyalar', async ({ pa
 
 	const expected = [0, 1].map((r) => [2, 3].map((c) => cell(page, r, c)));
 	const rows = await Promise.all(expected.map((cells) => Promise.all(cells.map(async (c) => ((await c.textContent()) ?? '').trim()))));
-	await expect(page.getByText('4 hücre panoya kopyalandı.')).toBeVisible();
+	// Bildirim tablonun içinde (sağ üst), sayfa toast'ı değil; birkaç saniye sonra kaybolur
+	const notice = page.locator('.slc-table-container [role=status]').filter({ hasText: '4 hücre panoya kopyalandı.' });
+	await expect(notice).toBeVisible();
+	await expect(notice).toContainText('Kopyalandı');
+	await expect(notice).toHaveCount(0, { timeout: 5000 });
 	const clip = await page.evaluate(() => navigator.clipboard.readText());
 	const lines = clip.split('\n').map((line) => line.split('\t'));
 	expect(lines).toHaveLength(2);

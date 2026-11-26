@@ -6,6 +6,7 @@ import { CellEditor, type CellEditEvent } from './editing.svelte.js';
 import { parseSort, nextSort } from '../utils/sort.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
+import { t } from '#lib/app/localization/index.js';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 
@@ -163,7 +164,7 @@ export interface MainProps<TData extends Row> {
 	onRangeChange?: (range: RangeInfo | undefined) => void;
 	// Koşullu satır görünümü: satırın tüm hücrelerine eklenecek class (örn. vadesi geçen satır)
 	rowClass?: (row: TData) => string | undefined;
-	// Ctrl/⌘+C panoya yazıldıktan sonra (kullanıcıya bildirmek için, örn. toast). partial: çoklu seçim tek blok
+	// Ctrl/⌘+C panoya yazıldıktan sonra. Tablo kendi "Kopyalandı" bildirimini gösterir; bu callback ek iş için. partial: çoklu seçim tek blok
 	// hâline getirilemedi (alanlar ne aynı kolonlarda ne aynı satırlarda), yalnızca son alan kopyalandı.
 	onCopy?: (info: { rows: number; cols: number; partial: boolean }) => void;
 	// Toplu kayıt (Ctrl+V ile yapıştırma): tek istekte kaydetmek için. Verilmezse her hücre için onCellEdit çağrılır.
@@ -662,6 +663,15 @@ class TableContext<TData extends Row> {
 	// Seçim ve işlem kolonları atlanır. Değerler ham hâliyle (tarih PocketBase biçiminde, liste virgülle).
 	// Çoklu seçim (Excel gibi): alanlar aynı kolonlardaysa satırlar alt alta, aynı satırlardaysa kolonlar yan yana
 	// birleştirilir; ikisi de değilse yalnızca son alan kopyalanır (partial).
+	// "Kopyalandı" bildirimi: tablonun sağ üstünde birkaç saniye görünür (DataTable çizer). id: art arda kopyada yeniden canlansın
+	copyNotice = $state<{ id: number; text: string; warning: boolean }>();
+	#copyNoticeTimer: ReturnType<typeof setTimeout> | undefined;
+	#showCopyNotice = (count: number, partial: boolean) => {
+		clearTimeout(this.#copyNoticeTimer);
+		this.copyNotice = { id: (this.copyNotice?.id ?? 0) + 1, text: t(partial ? 'dt_copied_partial' : 'dt_copied', { count }), warning: partial };
+		this.#copyNoticeTimer = setTimeout(() => (this.copyNotice = undefined), partial ? 5000 : 2500);
+	};
+
 	readonly copyRange = (): boolean => {
 		const active = this.cursor.active;
 		if (!active) return false;
@@ -713,7 +723,10 @@ class TableContext<TData extends Row> {
 		if (cols === 0) return false;
 		navigator.clipboard
 			?.writeText(lines.join('\n'))
-			.then(() => this.#props.onCopy?.({ rows: lines.length, cols, partial }))
+			.then(() => {
+				this.#showCopyNotice(lines.length * cols, partial);
+				this.#props.onCopy?.({ rows: lines.length, cols, partial });
+			})
 			.catch(() => {
 				// izin yok ya da güvenli bağlam değil: sessizce geç
 			});
