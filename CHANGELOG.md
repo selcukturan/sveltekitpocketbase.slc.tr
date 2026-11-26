@@ -164,7 +164,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.185` oldu.
+- Uygulama sürümü `v0.2.0-alpha.186` oldu.
+- `/app/data-table`: kolonlar `TABLE.columnsFor<Item>()` ile; seçim kolonları
+  `override` ile gizli (aynı 7 kolon görünür, etiketler çevrili).
 - Simple CRUD: kolonlar, sıralama, filtre ve hücre düzenleme izinleri
   `page.shared.ts`'teki tek `TABLE` tanımından (`SORTABLE_FIELDS`, `FILTERS`,
   elle yazılmış `listParamsSchema` / `cellEditSchema` kalktı). Sıralanabilir

@@ -11,15 +11,11 @@
 	const list = dt.createList(getList, TABLE.listParamsSchema); // filtre + sayfalama + sıralama + sorgu
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
-	const columns: dt.Column<Item>[] = [
-		{ field: 'id', label: 'dt_id', width: 'minmax(50px,1fr)' },
-		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)' },
-		{ field: 'text_optional', label: 'dt_text_optional', width: 'minmax(50px,1fr)' },
-		{ field: 'number_optional', label: 'number_optional', type: 'number', width: '130px' },
-		{ field: 'date_optional', label: 'date_optional', type: 'date', width: '130px' },
-		{ field: 'bool_optional', label: 'bool_optional', type: 'bool', width: '120px' },
-		{ field: 'updated', label: 'updated', type: 'datetime', width: '170px' }
-	];
+	// Kolonlar Simple CRUD'un TABLE tanımından; seçim kolonları bu sayfada gizli (kullanıcı "Kolonlar"dan açabilir).
+	// Düzenleme için DataTable'a onCellEdit verilmeli; bu sayfa yalnızca gösterir.
+	const columns = TABLE.columnsFor<Item>({
+		override: { select_optional_single: { hidden: true }, select_optional_multiple: { hidden: true } }
+	});
 
 	// Footer: kısayollar yüklü satırlardan (bu sayfa) hesaplanır; diğer değerler metin olarak gösterilir
 	const footers: dt.Footer<Item>[] = [
