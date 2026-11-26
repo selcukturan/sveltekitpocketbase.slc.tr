@@ -33,3 +33,4 @@ export { default as ActionButton } from './parts/ActionButton.svelte';
 export { default as MenuItem } from './parts/MenuItem.svelte';
 export { default as FilterBar } from './parts/FilterBar.svelte';
 export { default as ColumnToggler } from './parts/ColumnToggler.svelte';
+export { default as RecordView } from './parts/RecordView.svelte';

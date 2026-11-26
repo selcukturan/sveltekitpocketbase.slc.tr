@@ -13,6 +13,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Şablonlar: `Page.Header.Table` (`Page.Header` içinde; children solda,
+  `actions` snippet'i sağa yaslı), `Head` `title`/`description` alıyor,
+  `formInput.ButtonGroup` ve `dt.RecordView` (kaydın alanları anahtar–değer).
+  Simple CRUD sayfasında native HTML öğesi kalmadı.
 - `defineTable`: `defaultSort` derleme zamanında denetleniyor. Tanımda olmayan
   ya da `sortable: true` olmayan alan ve tekrar eden alan editörde okunur bir
   mesajla hata veriyor (`"Geçersiz defaultSort: 'nam' tanımda yok ya da

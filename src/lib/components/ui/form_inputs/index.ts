@@ -12,3 +12,4 @@ export { default as Textarea } from './Textarea.svelte';
 export { default as Url } from './Url.svelte';
 export { default as Number } from './Number.svelte';
 export { default as Bool } from './Bool.svelte';
+export { default as ButtonGroup } from './ButtonGroup.svelte';

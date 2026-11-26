@@ -152,21 +152,20 @@
 	<input.Button icon="close" iconOnly class="rounded-full!" variant="ghost" color="surface" onclick={drawer.close} />
 {/snippet}
 
-<Head>
-	<title>create-read-update-delete - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
+<Head title="create-read-update-delete" />
 
 <Toasts toasterName="page-toaster" />
 
 <Page>
 	<Page.Header>
-		<!-- Filtreler ve etiketleri TABLE tanımından -->
-		<dt.FilterBar {list} filters={TABLE.filters} />
-		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
-		<div class="ml-auto flex items-center gap-2">
-			<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
-		</div>
+		<Page.Header.Table>
+			<!-- Filtreler ve etiketleri TABLE tanımından -->
+			<dt.FilterBar {list} filters={TABLE.filters} />
+			<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
+			{#snippet actions()}
+				<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
+			{/snippet}
+		</Page.Header.Table>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
@@ -227,10 +226,10 @@
 							{/snippet}
 							{#snippet buttons({ isChanged } = {})}
 								<formInput.Button variant="ghost" color="surface" label={t('close')} onclick={drawer.close} />
-								<div class="flex gap-2">
+								<formInput.ButtonGroup>
 									<formInput.Button type="reset" variant="ghost" color="surface" label={t('form_reset')} disabled={!isChanged} />
 									<formInput.Button type="submit" label={t('create')} disabled={Boolean(form.pending)} />
-								</div>
+								</formInput.ButtonGroup>
 							{/snippet}
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
@@ -254,10 +253,10 @@
 							{/snippet}
 							{#snippet buttons({ isChanged } = {})}
 								<formInput.Button variant="ghost" color="surface" label={t('close')} onclick={drawer.close} />
-								<div class="flex gap-2">
+								<formInput.ButtonGroup>
 									<formInput.Button type="reset" variant="ghost" color="surface" label={t('form_reset')} disabled={!isChanged} />
 									<formInput.Button type="submit" variant="filled" color="surface" label={t('update')} disabled={Boolean(form.pending) || !isChanged} />
-								</div>
+								</formInput.ButtonGroup>
 							{/snippet}
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
@@ -267,13 +266,7 @@
 					<DrawerFormContent.Header label={`${t('view')} - ID: ${drawer.id}`}>{@render closeButton()}</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
 						{@const record = await getOne({ id: drawer.id, timestamp: Date.now() })}
-						<!-- minmax(0,1fr): değer kolonu içeriğe göre büyüyüp yatay scroll üretmez; uzun değerler satır kaydırır -->
-						<dl class="grid grid-cols-[minmax(7rem,max-content)_minmax(0,1fr)] content-start gap-x-6 gap-y-3 overflow-x-hidden overflow-y-auto p-6 text-sm">
-							{#each Object.entries(record) as [key, value] (key)}
-								<dt class="text-surface-500 font-medium break-all">{key}</dt>
-								<dd class="min-w-0"><dt.Value {value} wrap /></dd>
-							{/each}
-						</dl>
+						<dt.RecordView {record} />
 					</DrawerFormContent.Content>
 				</DrawerFormContent>
 			{/if}
