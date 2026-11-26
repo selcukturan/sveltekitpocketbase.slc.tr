@@ -1,18 +1,14 @@
 import type { Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
-import type { IconKey } from '#lib/components/icons/index.js';
-export type SidebarDataType = {
-	title: string;
-	href: string;
-	icon: IconKey;
-};
+import type { AppMenuNode } from '#lib/app/menu/menu.js';
 
 export type ChildrenPropsType = { children: Snippet };
 
-export type AppLayoutPropsType = SvelteHTMLElements['section'] & {
+export type AppLayoutPropsType = SvelteHTMLElements['div'] & {
 	children: ChildrenPropsType['children'];
 };
 
 export type PropsAppSidebarType = SvelteHTMLElements['section'] & {
-	sidebarData: SidebarDataType[];
+	modules: AppMenuNode[]; // menü kökleri
+	activeId: string | undefined; // aktif modül
 };

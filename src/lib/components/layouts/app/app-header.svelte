@@ -17,21 +17,22 @@
 
 	const global = getGlobalContext();
 
+	// Odak modu: modül rayı ve menü ağacı birlikte gizlenir. Menü ağacının kendi daralt/genişlet tercihi korunur.
 	const handleClick = () => {
-		global.hidePageSidebar = !global.hideSidebar;
 		global.hideSidebar = !global.hideSidebar;
 	};
 
-	const tooltipText = $derived(global.hidePageSidebar ? t('show_panel') : t('hide_panel'));
+	const tooltipText = $derived(global.hideSidebar ? t('show_panel') : t('hide_panel'));
 </script>
 
 <header class="{classes} border-b" {...attributes}>
-	<nav class="flex h-full w-full items-stretch">
+	<div class="flex h-full w-full items-stretch">
 		<div class="flex items-stretch gap-3">
 			<button
 				onclick={handleClick}
 				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 items-center justify-center rounded-md p-0.5 text-center select-none`}
 				aria-label={tooltipText}
+				aria-pressed={global.hideSidebar}
 				{@attach tooltip(tooltipText)}
 			>
 				<Icon name={global.hideSidebar ? 'panel_right_close' : 'panel_right_open'} />
@@ -74,5 +75,5 @@
 
 			<LangToggle />
 		</div>
-	</nav>
+	</div>
 </header>

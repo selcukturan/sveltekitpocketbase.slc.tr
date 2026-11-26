@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	/* eslint-disable svelte/no-navigation-without-resolve -- href'ler menü verisinden gelen uygulama içi tam yollar */
+	import { t } from '#lib/app/localization/index.js';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	import type { PropsAppSidebarType } from './types';
 	import { tooltip } from '#lib/attachments/index.js';
 	import { resolve } from '$app/paths';
 	import { Icon } from '#lib/components/icons/index.js';
 
-	let { sidebarData, class: classes, ...attributes }: PropsAppSidebarType = $props();
+	// Modül rayı: menü ağacının kökleri. Aktif modül adresten bulunur (app-layout → findActivePath).
+	let { modules, activeId, class: classes, ...attributes }: PropsAppSidebarType = $props();
 
 	const global = getGlobalContext();
 </script>
@@ -18,6 +20,7 @@
 		</a>
 	</header>
 	<nav
+		aria-label={t('menu_modules')}
 		class="flex
 			flex-1
 			flex-row
@@ -32,15 +35,15 @@
 			sm:overflow-x-hidden
 			sm:overflow-y-auto"
 	>
-		{#each sidebarData as d, i (i)}
+		{#each modules as d (d.id)}
 			<a
 				href={d.href}
-				aria-label={d.title}
+				aria-label={t(d.title)}
 				{@attach tooltip({
-					text: d.title,
+					text: t(d.title),
 					position: global.isMobileBreakpoint ? 'bottom' : 'right'
 				})}
-				aria-current={d.href === '/app' && page.url.pathname === '/app' ? 'page' : d.href !== '/app' && page.url.pathname.startsWith(`${d.href}`) ? 'page' : undefined}
+				aria-current={d.id === activeId ? 'page' : undefined}
 				class="hover:bg-surface-200
 					active:bg-surface-300
 					aria-[current]:border-primary-900
@@ -59,7 +62,7 @@
 					border-transparent
 					text-center select-none"
 			>
-				<Icon name={d.icon} />
+				{#if d.icon}<Icon name={d.icon} />{/if}
 			</a>
 		{/each}
 	</nav>

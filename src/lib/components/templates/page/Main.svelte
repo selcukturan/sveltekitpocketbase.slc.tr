@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	type Props = SvelteHTMLElements['main'] & {
+	type Props = SvelteHTMLElements['div'] & {
 		children?: Snippet;
 		boundary?: boolean;
 	};
@@ -13,8 +13,8 @@
 	const internalStyles = 'flex: 1 1 0%;overflow-x:hidden;overflow-y:auto;';
 </script>
 
-<!-- position:relative; -->
-<main class="{classes} bg-surface-100" style="{internalStyles} {style} " {...attributes}>
+<!-- Sayfanın kaydırılan içerik alanı. <main> değil: sayfadaki tek <main> uygulama iskeletinde (app-layout) -->
+<div class="{classes} bg-surface-100" style="{internalStyles} {style} " {...attributes}>
 	{#if boundary}
 		<svelte:boundary>
 			{#if children}
@@ -31,4 +31,4 @@
 	{:else}
 		<span>{t('no_content')}</span>
 	{/if}
-</main>
+</div>

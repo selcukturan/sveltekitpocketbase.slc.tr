@@ -2,4 +2,5 @@ export { default as AppSidebar } from './app-sidebar.svelte';
 export { default as AppHeader } from './app-header.svelte';
 export { default as AppFooter } from './app-footer.svelte';
 export { default as AppLayout } from './view/app-layout.svelte';
-export type { SidebarDataType, ChildrenPropsType, AppLayoutPropsType, PropsAppSidebarType } from './types';
+export { default as NavTree } from './nav-tree.svelte';
+export type { ChildrenPropsType, AppLayoutPropsType, PropsAppSidebarType } from './types';

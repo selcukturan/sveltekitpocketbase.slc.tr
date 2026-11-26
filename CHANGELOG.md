@@ -13,6 +13,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Menü: tek menü ağacı (`src/lib/app/menu/menu.ts`), ileride PocketBase
+  koleksiyonuyla aynı biçimde (düz kayıtlar, `parent_id`, çeviri anahtarı
+  başlıklar, `sort`). Kökler modül rayında, altı aktif modülün menü ağacında.
+  `tree.ts` (saf): `buildTree`, `findActivePath` (en uzun eşleşme). Ağaç
+  bileşeni `NavTree`: sınırsız derinlik, açılır/kapanır gruplar
+  (`aria-expanded`), tercih modül değişince korunur. Testler:
+  `menu-tree.spec.ts` (tarayıcısız; her menü bağlantısının sayfası var mı),
+  `navigation.spec.ts`.
 - DataTable: kopyalamadan sonra tablonun sağ üstünde "Kopyalandı"
   bildirimi (yukarıdan kayarak gelir, 2,5 sn sonra gider; kısmi kopyada uyarı
   renginde, 5 sn; `role="status"`). Simple CRUD sayfasındaki `onCopy` toast'ı
@@ -227,6 +235,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Layout: modüllerin dört `+layout.svelte` dosyası ve `layouts/page/`
+  kaldırıldı; tek iskelet `app-layout` (üst çubuk · ray · ağaç · içerik). Alt
+  menüsü olmayan modülde ağaç yok. Sayfada tek `<main>` (`Page.Main` artık
+  `<div>`); ray ve ağaç adlandırılmış `<nav>`, üst çubuk `<nav>` değil.
+  "Paneli Gizle" (odak modu) menü ağacının tercihine dokunmuyor; "Menüyü
+  Gizle" modül değişince sıfırlanmıyor. Menü başlıkları çevriliyor.
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
 - Belgeler: DataTable belgesi alpha.213 / `e15b67d`; çekirdek belgede
