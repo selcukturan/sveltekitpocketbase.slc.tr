@@ -387,6 +387,33 @@ test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalış�
 	await expect(rows).toHaveCount(0);
 });
 
+test('sağ tık menüsü: klavyeyle açılır, oklarla gezinilir, Esc ve kaydırma kapatır, odak tabloya döner', async ({ page }) => {
+	await openTable(page);
+	const menu = page.getByRole('menu');
+	await cell(page, 2, 3).click();
+
+	await page.keyboard.press('Shift+F10');
+	await expect(menu).toBeVisible();
+	const items = menu.getByRole('menuitem');
+	await expect(items.first()).toBeFocused();
+	await page.keyboard.press('ArrowDown');
+	await expect(items.nth(1)).toBeFocused();
+	await page.keyboard.press('ArrowUp');
+	await page.keyboard.press('ArrowUp'); // baştan sona döner
+	await expect(items.last()).toBeFocused();
+
+	await page.keyboard.press('Escape');
+	await expect(menu).toHaveCount(0);
+	await expect(grid(page)).toBeFocused();
+	await expect(activeCell(page)).toHaveAttribute('data-row', '2');
+
+	// Sağ tık ile açılır, tablo kaydırılınca kapanır
+	await cell(page, 1, 3).click({ button: 'right' });
+	await expect(menu).toBeVisible();
+	await grid(page).evaluate((el) => (el.scrollTop = 200));
+	await expect(menu).toHaveCount(0);
+});
+
 // ---------------------------------------------------------------- çoklu seçim (Ctrl/⌘)
 test('Ctrl + tıklama/sürükleme hücre ekler; özet, kopyalama ve satır seçimi', async ({ page, context }) => {
 	await context.grantPermissions(['clipboard-read', 'clipboard-write']);

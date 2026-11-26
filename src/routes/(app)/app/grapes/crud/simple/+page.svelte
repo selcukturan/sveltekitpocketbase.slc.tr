@@ -121,21 +121,6 @@
 		removeMany(target);
 	};
 
-	// Sağ tık menüsü: hücrenin üzerinde açılır (popover + fixed konum); seçim/aralık korunur
-	let menu = $state<{ x: number; y: number; row: Item }>();
-	const menuPopover = (node: HTMLElement) => {
-		node.showPopover();
-		const off = () => (menu = undefined);
-		node.addEventListener('toggle', (e) => (e as ToggleEvent).newState === 'closed' && off());
-		return () => node.hidePopover();
-	};
-	// Sıra önemli: odak tabloya (onay penceresi açılırsa odağı o alır), işlem (menüdeki satırı okur), en son menü kapanır
-	const menuAction = (run: () => void) => () => {
-		table?.helpers.focus();
-		run();
-		menu = undefined;
-	};
-
 	// Footer: kısayollar (sum/avg/min/max/count) ve fonksiyon; bu sayfadaki kayıtlardan hesaplanır, diğerleri metin
 	const footers: dt.Footer<Item>[] = [
 		{ text_optional: 'Toplam', number_optional: 'sum(2)', date_optional: 'count()' },
@@ -248,7 +233,6 @@
 				onLoad={onTableLoad}
 				onError={(error) => toaster.error(error)}
 				onKeyDown={onTableKeyDown}
-				onContextMenu={({ row, event }) => (menu = { x: event.clientX, y: event.clientY, row })}
 				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
 				onVisibleRowsChange={(rows) => (visibleRows = rows)}
 			>
@@ -257,22 +241,19 @@
 						<p class="slc-visible-rows">{t('dt_visible_rows', { from: visibleRows.first + 1, to: visibleRows.last + 1, total: visibleRows.total })}</p>
 					{/if}
 				{/snippet}
+				<!-- Sağ tık menüsü: konum, kapanma ve odağı tablo yönetir (ContextMenu tuşu / Shift+F10 da açar) -->
+				{#snippet contextMenu(row)}
+					{@const targets = targetsOf(row.id)}
+					<dt.MenuItem label={t('update')} onclick={() => drawer.show('update', row.id)} />
+					<dt.MenuItem label={t('dt_copy')} onclick={() => table?.helpers.copy()} />
+					<dt.MenuItem label={targets.length > 1 ? `${t('delete')} (${targets.length})` : t('delete')} danger onclick={() => removeMany(targets)} />
+				{/snippet}
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
 					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => remove(row.id)} />
 					<dt.ActionButton label={t('view')} icon="view" onclick={() => drawer.show('view', row.id)} />
 				{/snippet}
 			</dt.DataTable>
-			{#if menu}
-				{@const row = menu.row}
-				<div class="slc-context-menu" role="menu" popover="auto" style:left="{menu.x}px" style:top="{menu.y}px" {@attach menuPopover}>
-					<button type="button" role="menuitem" onclick={menuAction(() => drawer.show('update', row.id))}>{t('update')}</button>
-					<button type="button" role="menuitem" onclick={menuAction(() => table?.helpers.copy())}>{t('dt_copy')}</button>
-					<button type="button" role="menuitem" class="danger" onclick={menuAction(() => removeMany(targetsOf(row.id)))}>
-						{t('delete')}{targetsOf(row.id).length > 1 ? ` (${targetsOf(row.id).length})` : ''}
-					</button>
-				</div>
-			{/if}
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Drawer>
@@ -350,37 +331,9 @@
 </Page>
 
 <style>
-	/* Sağ tık menüsü: imlecin olduğu yerde (popover üst katmanda; fixed konum) */
-	.slc-context-menu {
-		position: fixed;
-		inset: auto;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		min-width: 10rem;
-		padding: 0.25rem;
-		border: 1px solid var(--color-surface-300);
-		border-radius: 0.5rem;
-		background-color: var(--color-surface-50);
-		box-shadow: 0 8px 24px -6px color-mix(in srgb, black 25%, transparent);
-	}
-	.slc-context-menu button {
-		padding: 0.375rem 0.625rem;
-		border-radius: 0.25rem;
-		text-align: left;
-		cursor: pointer;
-	}
-	.slc-context-menu button:hover,
-	.slc-context-menu button:focus-visible {
-		background-color: var(--color-surface-200);
-		outline: none;
-	}
 	.slc-visible-rows {
 		padding: 0.125rem 0.75rem 0.25rem;
 		font-size: 0.75rem;
 		color: var(--color-surface-500);
-	}
-	.slc-context-menu .danger {
-		color: var(--color-error-600);
 	}
 </style>

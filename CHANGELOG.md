@@ -13,6 +13,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: sağ tık menüsü tabloda. `contextMenu(row)` snippet'i ve
+  `dt.MenuItem` (`label`, `onclick`, `danger`, `disabled`). Konum (ekrana
+  sığdırma), popover, ↑ ↓ Home End gezinme, Esc/dışarı tıklama/kaydırma ile
+  kapanma ve odağın tabloya dönmesi tabloda. ContextMenu tuşu ya da Shift+F10
+  aktif hücrede açar. Simple CRUD sayfasından ~50 satır menü kodu ve CSS kalktı.
 - `/app/data-table`: DataTable'ın en temel hali; başlık, veri ve footer
   snippet'leri açıkça yazılmış (veri: Simple CRUD remote fonksiyonları).
 - DataTable: hücre gezinmesi (1. aşama). Aktif hücre; ok tuşları, Tab /
@@ -144,7 +149,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.181` oldu.
+- Uygulama sürümü `v0.2.0-alpha.182` oldu.
 - DataTable klasörü düzenlendi: temel bileşenler kökte; durum sınıfları
   `state/`, saf yardımcılar `utils/` (`sort`, `footer`, `format`), düzenleyici
   `parts/CellInput.svelte`. Sunucudan `sort.js` artık

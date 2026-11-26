@@ -28,4 +28,5 @@ export type { CellEditEvent, EditorKind } from './state/editing.svelte.js';
 export { createList, ListState, type ListOptions } from './state/list-state.svelte.js';
 
 export { default as ActionButton } from './parts/ActionButton.svelte';
+export { default as MenuItem } from './parts/MenuItem.svelte';
 export { default as ColumnToggler } from './parts/ColumnToggler.svelte';

@@ -5,6 +5,7 @@
 	import PerPage from './parts/PerPage.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
 	import TableSettings from './parts/TableSettings.svelte';
+	import ContextMenu from './parts/ContextMenu.svelte';
 	import { createTableContext, type MainProps, type RangeInfo } from './state/context.svelte.js';
 	import { getSelectedLang } from '#lib/app/localization/index.js';
 	import { numberFormat, NUMBER_2 } from './utils/format.js';
@@ -236,6 +237,9 @@
 	{/if}
 
 	{@render context.statusbar?.()}
+
+	<!-- Sağ tık menüsü (contextMenu snippet'i verildiyse): popover, temanın --dt-* değişkenlerini buradan alır -->
+	<ContextMenu />
 </div>
 
 <style>

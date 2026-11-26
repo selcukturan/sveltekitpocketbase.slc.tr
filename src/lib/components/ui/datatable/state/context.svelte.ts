@@ -112,6 +112,9 @@ export interface MainProps<TData extends Row> {
 	dataRow?: Snippet<[dr: DataRowType<TData>]>;
 	footerRow?: Snippet<[fr: FooterRowType<TData>]>;
 	actions?: Snippet<[row: TData]>; // type: 'actions' kolonunun içeriği (varsayılan dataRow'da)
+	// Sağ tık menüsünün öğeleri (<dt.MenuItem>). Verilirse menüyü tablo açar, konumlandırır ve kapatır; ContextMenu tuşu ya da
+	// Shift+F10 aktif hücrede açar. row: sağ tıklanan satır.
+	contextMenu?: Snippet<[row: TData]>;
 	statusbar?: Snippet;
 	settings?: boolean; // alt bardaki tablo ayarları popup'ı (varsayılan: true)
 	// UI State & Styling
@@ -150,7 +153,8 @@ export interface MainProps<TData extends Row> {
 	// Grid odaktayken basılan tuş; yerleşik davranıştan önce çağrılır. e.preventDefault() yerleşik davranışı engeller.
 	// Örn. Delete ile seçili satırları silmek. (Düzenleyici açıkken çağrılmaz.)
 	onKeyDown?: (e: KeyboardEvent, ctx: KeyContext<TData>) => void;
-	// Hücrede sağ tık. Verilirse tarayıcının menüsü açılmaz; hücre aralık dışındaysa aktif olur. Menüyü sayfa çizer.
+	// Hücrede sağ tık (contextMenu snippet'i yerine kendi menünüzü çizmek için). Verilirse tarayıcının menüsü açılmaz;
+	// hücre aralık dışındaysa aktif olur.
 	onContextMenu?: (e: CellEvent<TData>) => void;
 	// Görünen satırlar değişti (kaydırma, boyut, veri); her karede değil, yalnızca aralık değişince
 	onVisibleRowsChange?: (rows: VisibleRows) => void;
@@ -205,6 +209,7 @@ class TableContext<TData extends Row> {
 	readonly dataRow = $derived(this.#props.dataRow);
 	readonly footerRow = $derived(this.#props.footerRow);
 	readonly actions = $derived(this.#props.actions);
+	readonly contextMenu = $derived(this.#props.contextMenu);
 	readonly statusbar = $derived(this.#props.statusbar);
 	readonly settings = $derived(this.#props.settings ?? true);
 	// UI State & Styling
@@ -315,6 +320,7 @@ class TableContext<TData extends Row> {
 	// ################################## BEGIN Base Variables ##################################################################################################################
 
 	el: HTMLDivElement | undefined = $state(undefined); // context'in bağlı olduğu ana element
+	menu = $state<{ x: number; y: number; row: TData }>(); // açık sağ tık menüsü (konum: viewport, fixed)
 	paginable = $state(false);
 	headerLength = $state(1);
 	dataLength = $derived(this.items.length);
@@ -779,10 +785,11 @@ class TableContext<TData extends Row> {
 		const offContextMenu = on(node, 'contextmenu', (e: MouseEvent) => {
 			const onContextMenu = this.#props.onContextMenu;
 			const hit = hitCell(e);
-			if (!onContextMenu || !hit || hit.interactive) return;
+			if ((!onContextMenu && !this.contextMenu) || !hit || hit.interactive) return;
 			e.preventDefault();
 			if (!this.cursor.inRange(hit.pos.row, hit.pos.col)) this.cursor.set(hit.pos); // aralık içindeyse aralık korunur
-			onContextMenu(cellEvent(hit.pos, hit.row, e));
+			onContextMenu?.(cellEvent(hit.pos, hit.row, e));
+			if (this.contextMenu) this.menu = { x: e.clientX, y: e.clientY, row: hit.row };
 		});
 		const offDblClick = on(node, 'dblclick', (e: MouseEvent) => {
 			const hit = hitCell(e);
@@ -807,6 +814,17 @@ class TableContext<TData extends Row> {
 				const active = this.cursor.active;
 				onKeyDown(e, { cell: active ? this.#activeCell(active) : undefined, ranges: this.cursor.ranges, selected: this.selection.ids as TData['id'][] });
 				if (e.defaultPrevented) return;
+			}
+			// ContextMenu tuşu ya da Shift+F10: sağ tık menüsü aktif hücrenin üzerinde açılır
+			if (this.contextMenu && (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) {
+				const active = this.cursor.active;
+				const row = active ? this.items[active.row] : undefined;
+				const rect = active ? document.getElementById(this.cellId(active))?.getBoundingClientRect() : undefined;
+				if (row && rect) {
+					e.preventDefault();
+					this.menu = { x: rect.left + 8, y: rect.bottom, row: row as TData };
+				}
+				return;
 			}
 			// Ctrl/⌘+C aralığı (yoksa aktif hücreyi) kopyalar. Sıra: imleç (Esc önce aralığı kapatır), sonra satır seçimi.
 			if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C') && !e.shiftKey && !e.altKey) {
