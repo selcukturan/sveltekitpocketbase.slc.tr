@@ -13,6 +13,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Layout (Aşama 2): ekran boyutu `MediaQuery` ile (`global.screen`). Tablette
+  ağaç içeriğin üstünde panel (varsayılan kapalı; gezinme, Esc, dışarı
+  tıklama kapatır). Mobilde ray gizli, üst çubukta menü düğmesi, soldan
+  drawer (`<dialog>`: modüller + seçili modülün ağacı). İçerik her boyutta
+  aynı yerde: ekran boyutu değişince sayfa yeniden kurulmaz. Ağaç genişliği,
+  gizli/açık durumu ve açık gruplar `localStorage`'da (`slc:layout`). Split
+  pane bölücüsü klavyeyle (oklar, Shift, Home/End) taşınır, çift tık
+  varsayılana döner, `role="separator"`. Testler: `navigation.spec.ts`.
 - Menü: tek menü ağacı (`src/lib/app/menu/menu.ts`), ileride PocketBase
   koleksiyonuyla aynı biçimde (düz kayıtlar, `parent_id`, çeviri anahtarı
   başlıklar, `sort`). Kökler modül rayında, altı aktif modülün menü ağacında.
@@ -370,6 +378,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Split pane: sürükleme bitince pointer capture bırakılmıyordu (yeniden
+  alınıyordu).
 - Number: yazarken metin ara sıra siliniyordu ('12.5' → 5 ya da 125).
   Svelte'in `bind:value` işleyicisi async modda geç çalışıp eski değeri
   input'a yazıyordu; değer artık `oninput` ile elle yönetiliyor.

@@ -1,6 +1,5 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-navigation-without-resolve -- href'ler menü verisinden gelen uygulama içi tam yollar */
-	import type { SvelteMap } from 'svelte/reactivity';
 	import { t } from '#lib/app/localization/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import type { AppMenuNode } from '#lib/app/menu/menu.js';
@@ -11,13 +10,15 @@
 		module: AppMenuNode;
 		activeIds: ReadonlySet<string>; // kökten aktif sayfaya kadar olan düğümler
 		activeId: string | undefined; // aktif sayfanın düğümü (aria-current)
-		expanded: SvelteMap<string, boolean>; // kullanıcının açıp kapattığı gruplar (seçmediyse varsayılan)
+		expanded: ReadonlyMap<string, boolean>; // kullanıcının açıp kapattığı gruplar (seçmediyse varsayılan)
+		onToggle: (id: string, open: boolean) => void; // grup açıldı/kapandı (tercih kaydedilir: global.setExpanded)
+		heading?: boolean; // modül adını başlık olarak göster (mobil drawer kendi başlığını çizer)
 	};
-	let { module, activeIds, activeId, expanded }: Props = $props();
+	let { module, activeIds, activeId, expanded, onToggle, heading = true }: Props = $props();
 
 	// Kullanıcı seçmediyse: ilk seviye gruplar ve aktif sayfanın bulunduğu gruplar açık
 	const isOpen = (node: AppMenuNode, depth: number) => expanded.get(node.id) ?? (depth === 0 || activeIds.has(node.id));
-	const toggle = (node: AppMenuNode, depth: number) => expanded.set(node.id, !isOpen(node, depth));
+	const toggle = (node: AppMenuNode, depth: number) => onToggle(node.id, !isOpen(node, depth));
 </script>
 
 {#snippet branch(nodes: AppMenuNode[], depth: number)}
@@ -55,7 +56,9 @@
 {/snippet}
 
 <nav aria-label={t(module.title)} class="flex h-full w-full flex-col overflow-hidden">
-	<h2 class="text-surface-500 px-5 pt-4 pb-1 text-xs font-semibold tracking-wide uppercase">{t(module.title)}</h2>
+	{#if heading}
+		<h2 class="text-surface-500 px-5 pt-4 pb-1 text-xs font-semibold tracking-wide uppercase">{t(module.title)}</h2>
+	{/if}
 	<div class="flex-1 overflow-x-hidden overflow-y-auto px-4 pb-4">
 		{@render branch(module.children, 0)}
 	</div>

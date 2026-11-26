@@ -6,10 +6,8 @@
 
 	let { children } = $props();
 
-	const global = initGlobalContext();
+	initGlobalContext();
 </script>
-
-<svelte:window bind:innerWidth={global.windowWidth} />
 
 <ProgressBar navigate={navigating}>
 	<AppLayout>

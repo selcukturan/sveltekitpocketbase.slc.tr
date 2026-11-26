@@ -169,6 +169,7 @@ export const tr = {
 	menu_logs: 'Kayıtlar',
 	menu_developments: 'Geliştirme',
 	menu_settings: 'Ayarlar',
+	menu_resize: 'Menü genişliği',
 	menu_modules: 'Modüller',
 	menu_introduction: 'Giriş',
 	menu_grapes_crud: 'CRUD',

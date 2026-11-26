@@ -96,6 +96,11 @@
 		<path d="M18 6 6 18" />
 		<path d="m6 6 12 12" />
 	</symbol>
+	<symbol id={icons.menu} viewBox="0 0 24 24">
+		<path d="M4 6h16" />
+		<path d="M4 12h16" />
+		<path d="M4 18h16" />
+	</symbol>
 	<symbol id={icons.info} viewBox="0 0 24 24">
 		<circle cx="12" cy="12" r="10" />
 		<path d="M12 16v-4" />

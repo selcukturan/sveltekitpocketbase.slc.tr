@@ -18,6 +18,7 @@ export const icons = {
 	panel_right_close: 'panel-right-close',
 	panel_right_open: 'panel-right-open',
 	close: 'close',
+	menu: 'menu',
 	info: 'info',
 	circle_x: 'circle-x',
 	circle_check: 'circle-check',

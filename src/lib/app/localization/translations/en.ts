@@ -171,6 +171,7 @@ export const en = {
 	menu_logs: 'Logs',
 	menu_developments: 'Developments',
 	menu_settings: 'Settings',
+	menu_resize: 'Menu width',
 	menu_modules: 'Modules',
 	menu_introduction: 'Introduction',
 	menu_grapes_crud: 'CRUD',

@@ -12,8 +12,10 @@
 	import { getUser } from '#lib/remotes/guarded.remote.js';
 	import { Notifications } from '#lib/components/ui/notifications/index.js';
 
-	type Props = SvelteHTMLElements['header'];
-	let { class: classes, style, ...attributes }: Props = $props();
+	type Props = SvelteHTMLElements['header'] & {
+		onMenu?: () => void; // mobilde menü düğmesi (drawer'ı açar)
+	};
+	let { class: classes, style, onMenu, ...attributes }: Props = $props();
 
 	const global = getGlobalContext();
 
@@ -28,24 +30,38 @@
 <header class="{classes} border-b" {...attributes}>
 	<div class="flex h-full w-full items-stretch">
 		<div class="flex items-stretch gap-3">
-			<button
-				onclick={handleClick}
-				class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 items-center justify-center rounded-md p-0.5 text-center select-none`}
-				aria-label={tooltipText}
-				aria-pressed={global.hideSidebar}
-				{@attach tooltip(tooltipText)}
-			>
-				<Icon name={global.hideSidebar ? 'panel_right_close' : 'panel_right_open'} />
-			</button>
+			{#if global.isMobileBreakpoint}
+				<!-- Mobil: ray gizli; menü (modüller + ağaç) drawer'da -->
+				<button
+					type="button"
+					onclick={onMenu}
+					class="text-surface-600 hover:bg-surface-200 active:bg-surface-300 inline-flex items-center justify-center rounded-md p-1 select-none"
+					aria-label={t('menu')}
+					aria-haspopup="dialog"
+				>
+					<Icon name="menu" />
+				</button>
+			{:else}
+				<button
+					onclick={handleClick}
+					class={`${global.hideSidebar ? `bg-surface-200 ` : ``} text-surface-500 hover:bg-surface-200 active:bg-surface-300 items-center justify-center rounded-md p-0.5 text-center select-none`}
+					aria-label={tooltipText}
+					aria-pressed={global.hideSidebar}
+					{@attach tooltip(tooltipText)}
+				>
+					<Icon name={global.hideSidebar ? 'panel_right_close' : 'panel_right_open'} />
+				</button>
+			{/if}
 		</div>
-		<div class="flex flex-1 items-center justify-center gap-4">
+		<!-- Sürüm bilgisi: dar ekranda yer açmak için gizli -->
+		<div class="hidden flex-1 items-center justify-center gap-4 sm:flex">
 			{#if PUBLIC_ENV_TEST === 'public.env.development'}
 				<a href="http://localhost:8099/_" target="_blank">Local Database</a>
 				<p>-</p>
 			{/if}
 			<p>{config.version}</p>
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="ml-auto flex items-center gap-2 sm:gap-4">
 			<Notifications />
 			<form
 				{...logout.enhance(async ({ submit }) => {

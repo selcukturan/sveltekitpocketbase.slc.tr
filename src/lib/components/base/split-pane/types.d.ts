@@ -13,6 +13,10 @@ export type SplitPanePropsType = {
 	disabled?: boolean;
 	priority?: 'min' | 'max';
 	onchange?: (pos: Length) => void;
+	// Bölücünün erişilebilir adı (role="separator"); klavyeyle ok tuşları taşır, Home/End min/max, çift tık resetPos
+	dividerLabel?: string;
+	// Çift tıklamada dönülecek konum (verilmezse çift tık bir şey yapmaz)
+	resetPos?: Length;
 	slotA: Snippet;
 	slotB: Snippet;
 };
