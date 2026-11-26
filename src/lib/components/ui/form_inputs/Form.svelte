@@ -59,6 +59,8 @@
 
 	// Başarılı gönderimden sonra (form.result değişir) güncel değerler yeni ilk değer kabul edilir.
 	// Açık kalan formlarda (ör. ayarlar sayfası) "değişiklik var" durumu kendiliğinden temizlenir.
+	// Koşul: sunucudaki form fonksiyonu başarıda bir değer döndürmeli; döndürmezse result hep undefined kalır ve bu
+	// çalışmaz. Kalıcı çözüm (ertelendi): enhance'i Form üstlenir (onsave prop'u), başarıda doğrudan markClean çağrılır.
 	$effect(() => {
 		if (context.props.form.result !== undefined) untrack(() => context.markClean());
 	});

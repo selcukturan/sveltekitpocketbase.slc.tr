@@ -221,6 +221,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: çekirdek belgeye kural: `formInput.Form` kullanan sunucu `form`
+  fonksiyonları başarıda bir değer döndürmeli (`form.result` → `markClean`);
+  kalıcı çözüm (`onsave`, enhance Form'da) ertelendi, `Form.svelte`'de not.
+  Tarih kuralı güncellendi: `Datetime` uygulama saat diliminde girilir ve
+  gösterilir (`config.timezone`), `Date` UTC gece yarısı takvim günüdür.
 - Belgeler: DataTable belgesi alpha.209 / `ccb587b`; kırıcı değişiklikler
   listesine `bind:range` ve `bind:selected`; "`bind:` yok, başlangıç prop'u +
   helper + callback" ilkesi.
