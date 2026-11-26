@@ -221,6 +221,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: DataTable belgesi alpha.209 / `ccb587b`; kırıcı değişiklikler
+  listesine `bind:range` ve `bind:selected`; "`bind:` yok, başlangıç prop'u +
+  helper + callback" ilkesi.
 - DataTable (kırıcı): `bind:selected` kaldırıldı; seçimin sahibi tablo.
   `selected` yalnızca başlangıç seçimi; değişiklik `table.helpers`
   (`getSelected`, `setSelected`, `deselect`, `clearSelection`), izleme
