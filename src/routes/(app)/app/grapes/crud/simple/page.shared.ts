@@ -38,7 +38,7 @@ export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 // (sortable / filter / edit, hepsi opt-in). Sayfa kolonları TABLE.columnsFor<Item>() ile alır; sunumu ezebilir, izin veremez.
 const singleOptions = Object.values(DemoCrudSelectOptionalSingleOptions);
 export const TABLE = defineTable({
-	defaultSort: 'text_required',
+	defaultSort: '-number_optional,text_required',
 	columns: {
 		id: { label: 'dt_id', width: 'minmax(50px,1fr)', sortable: true },
 		text_required: {
@@ -71,10 +71,3 @@ export const deleteParamsSchema = v.object({
 // Toplu silme (tabloda Delete / sağ tık menüsü); bir istekte en fazla 1000 kayıt
 export const deleteManySchema = v.object({ ids: v.pipe(v.array(v.pipe(v.string(), v.nonEmpty())), v.minLength(1), v.maxLength(1000)) });
 // --------------------------------------------------------------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-export const relationListParamsSchema = v.object({
-	search: v.string(),
-	collection: v.picklist([...Object.values(Collections)])
-});
-export type RelationListParamsSchemaType = v.InferOutput<typeof relationListParamsSchema>;

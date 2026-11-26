@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
 
 // Simple CRUD sayfasındaki DataTable: hücre gezinmesi, seçim ve odak.
 const URL = '/app/grapes/crud/simple';
@@ -652,23 +652,31 @@ test.describe('dar ekran', () => {
 });
 
 // ---------------------------------------------------------------- çoklu sıralama (Ctrl/⌘ + başlık)
+// Düz tıklamayla kolonu tek başına (çoklu sıralama olmadan) istenen yöne getirir: varsayılan sıralamadan bağımsız.
+// Düz tıklama yalnızca o kolona göre sıralar; döngü: yok → artan → azalan → yok. Çoklu sıralamada öncelik numaraları görünür.
+async function sortOnly(header: Locator, dir: 'ascending' | 'descending', idle: () => Promise<void>) {
+	const multi = header.page().getByRole('grid').locator('.slc-table-sort-index');
+	for (let i = 0; i < 4 && ((await header.getAttribute('aria-sort')) !== dir || (await multi.count()) > 0); i++) {
+		await header.click();
+		await idle();
+	}
+	await expect(header).toHaveAttribute('aria-sort', dir);
+	await expect(multi).toHaveCount(0);
+}
+
 test('başlıkta Ctrl + tıklama çoklu sıralar; PocketBase iki alana göre sıralar', async ({ page }) => {
 	await openTable(page);
 	const header = (col: number) => grid(page).locator('[role="columnheader"]').nth(col);
 	const idle = () => expect(grid(page).locator('.slc-table-headercell-busy')).toHaveCount(0); // istek sürerken sıralama kilitli
 	const sortIndex = (col: number) => header(col).locator('.slc-table-sort-index');
 
-	// Varsayılan: text_required artan, tek kolon → öncelik numarası yok
-	await expect(header(3)).toHaveAttribute('aria-sort', 'ascending');
-	await expect(sortIndex(3)).toHaveCount(0);
+	// Varsayılan sıralama (TABLE.defaultSort, ne olursa olsun) başlıkta görünür: birincil kolonda aria-sort
+	await expect(grid(page).locator('[role="columnheader"][aria-sort="ascending"], [role="columnheader"][aria-sort="descending"]')).toHaveCount(1);
 
-	// Düz tıklama: yalnızca number_optional (iki kez → azalan)
-	await header(5).click();
-	await idle();
-	await header(5).click();
-	await idle();
-	await expect(header(5)).toHaveAttribute('aria-sort', 'descending');
+	// Düz tıklama yalnızca o kolona göre sıralar (yok → artan → azalan): number_optional azalan olana kadar
+	await sortOnly(header(5), 'descending', idle);
 	await expect(header(3)).toHaveAttribute('aria-sort', 'none');
+	await expect(sortIndex(5)).toHaveCount(0); // tek kolon → öncelik numarası yok
 
 	// Ctrl + tıklama: text_required ikinci sıralama olarak eklenir
 	await header(3).click({ modifiers: ['Control'] });

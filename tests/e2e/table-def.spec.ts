@@ -8,10 +8,13 @@ test('Simple CRUD: tanımdaki sortable kolonlar sıralanır, sayfanın eklediği
 	await page.goto('/app/grapes/crud/simple');
 	await expect(grid(page).locator('[data-slc-table-datacell]').first()).toBeVisible();
 
-	// Tanımdan: sıralama ikonu var, tıklayınca sıralanır
+	// Tanımdan: sıralama ikonu var, tıklayınca sıralanır (varsayılan sıralamadan bağımsız: artan olana kadar tıklanır)
 	const number = header(page, 'Sayı');
 	await expect(number.locator('.slc-table-sort-icon')).toHaveCount(1);
-	await number.click();
+	for (let i = 0; i < 3 && (await number.getAttribute('aria-sort')) !== 'ascending'; i++) {
+		await number.click();
+		await expect(grid(page).locator('.slc-table-headercell-busy')).toHaveCount(0);
+	}
 	await expect(number).toHaveAttribute('aria-sort', 'ascending');
 
 	// prepend ile eklenen işlem kolonu: sıralama ikonu yok, tıklamak sıralamayı değiştirmez

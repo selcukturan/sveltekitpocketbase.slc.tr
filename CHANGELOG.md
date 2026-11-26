@@ -169,7 +169,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.191` oldu.
+- Uygulama sürümü `v0.2.0-alpha.192` oldu.
+- Simple CRUD varsayılan sıralaması `-number_optional,text_required` (önce
+  sayı azalan, sonra metin artan); kullanılmayan `relationListParamsSchema`
+  kaldırıldı. Sıralama testleri varsayılan sıralamadan bağımsız hâle getirildi
+  (kolon, düz tıklamayla tek başına istenen yöne getirilir).
 - Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
   Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
   zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
