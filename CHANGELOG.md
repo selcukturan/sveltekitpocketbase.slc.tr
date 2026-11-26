@@ -13,6 +13,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: aktif satır (aktif hücrenin satırı) renkleniyor
+  (`--dt-row-active`, primary %11): işlem yapılan satır gözle izlenir. Seçili
+  satır ve hücre aralığı rengi bunun üzerinde.
 - Form: `formInput.createFormSave({ list | updates, drawer, onSuccess, onError })`
   kaydetmeyi sayfadan alır: gönderim, sorguları tazeleme, drawer'ı onay
   sormadan kapatma, bildirim. `form.enhance(save)` olarak verilir. Simple CRUD
@@ -61,8 +64,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   Simple CRUD sayfasında native HTML öğesi kalmadı.
 - `defineTable`: `defaultSort` derleme zamanında denetleniyor. Tanımda olmayan
   ya da `sortable: true` olmayan alan ve tekrar eden alan editörde okunur bir
-  mesajla hata veriyor (`"Geçersiz defaultSort: 'nam' tanımda yok ya da
-  sortable: true değil"`); `editable: (row) => …` fonksiyonu olsa da çalışır.
+  mesajla hata veriyor:
+  `"Geçersiz defaultSort: 'nam' tanımda yok ya da sortable: true değil"`.
+  `editable: (row) => …` fonksiyonu olsa da çalışır.
   Çalışma zamanı denetimi de sürüyor. Tip testleri eklendi.
 - DataTable: `defineTable` (`utils/table.ts`, saf). Kolonlar ve kolon başına
   izinler (`sortable`, `filter`, `edit` opt-in; satır kuralı `editable(row)`)
@@ -215,6 +219,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
+  seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: CHANGELOG'daki satıra bölünmüş kod parçası tek satıra alındı
+  (Prettier uyarısı).
 - Form Number: geçersiz ya da yarım metin (`123.`, `-`, `1-2`) yazarken hata
   göstermiyor; hata alandan çıkınca ya da gönderimde görünür, metin düzelince
   hemen kalkar. Gönderimde koruma aynı (`NaN` → "geçerli bir sayı girin").

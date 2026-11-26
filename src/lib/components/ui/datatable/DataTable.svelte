@@ -257,6 +257,7 @@
 		--_dt-header-text: var(--dt-header-text, var(--color-surface-700));
 		--_dt-header-hover: var(--dt-header-hover, var(--color-surface-300));
 		--_dt-row-hover: var(--dt-row-hover, color-mix(in srgb, var(--color-primary-500) 7%, var(--_dt-bg)));
+		--_dt-row-active: var(--dt-row-active, color-mix(in srgb, var(--color-primary-500) 11%, var(--_dt-bg)));
 		--_dt-row-selected: var(--dt-row-selected, color-mix(in srgb, var(--color-primary-500) 15%, var(--_dt-bg)));
 		--_dt-range: var(--dt-range, color-mix(in srgb, var(--color-primary-500) 26%, var(--_dt-bg)));
 		--_dt-border: var(--dt-border, var(--color-surface-200));
@@ -402,6 +403,10 @@
 	/* Satır üzerine gelince tüm hücreler (sticky olanlar dahil) vurgulanır */
 	:global(.slc-table [data-slc-table-datarow]:hover [data-slc-table-datacell]) {
 		background-color: var(--_dt-row-hover) !important;
+	}
+	/* Aktif satır (aktif hücrenin satırı): işlem yapılan satır gözle izlenir. Seçili satır ve aralık bunun üzerinde. */
+	:global(.slc-table [data-slc-table-datacell][data-active-row]) {
+		background-color: var(--_dt-row-active) !important;
 	}
 	/* Seçili satır: sticky hücreler altını örtmeye devam etsin diye opak karışım */
 	:global(.slc-table [data-slc-table-datacell][data-selected]) {

@@ -765,8 +765,7 @@ class TableContext<TData extends Row> {
 			}
 			this.#props.onCellClick?.(cellEvent(hit.pos, hit.row, e));
 			if (hit.interactive) return;
-			// Satır seçimi: seçim kolonu, klavye (Space/Ctrl+A) ya da single modda düz tıklama. Ctrl+tıklama hücre seçer.
-			if (selection.mode === 'single' && !e.ctrlKey && !e.metaKey && !e.shiftKey) selection.select(hit.row.id);
+			// Satır seçimi yalnızca seçim kolonu ve klavyeyle (Space/Ctrl+A): hücre tıklaması satırı seçmez (aktif satır ayrı renklenir)
 			this.onRowClick?.(hit.row);
 		});
 		// Ctrl/⌘+V: tarayıcının paste olayı (pano izni gerekmez). Düzenleyici açıkken olay input'tan gelir, ona karışılmaz.

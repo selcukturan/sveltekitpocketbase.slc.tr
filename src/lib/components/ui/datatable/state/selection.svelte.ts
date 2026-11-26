@@ -8,8 +8,8 @@ import type { Row } from '../types.js';
  * - Doğruluk kaynağı DataTable'ın `bind:selected` prop'udur (dizi). Hücreler hızlı arama için türetilmiş Set'i okur.
  *   Sayfa bağlamazsa prop yerel olarak yazılır (Svelte'te bağlanmamış prop'a yazmak yerel değer olur).
  *
- * Fare: seçim kolonunda tıklama değiştirir, Shift+tıklama aralık seçer. single modda satıra tıklamak seçer.
- * multiple modda Ctrl/⌘+tıklama değiştirir; düz tıklama yalnızca hücreyi aktif yapar (seçim bozulmasın).
+ * Fare: seçim kolonunda tıklama değiştirir, Shift+tıklama aralık seçer. Diğer hücrelere tıklamak satırı seçmez
+ * (single ve multiple), yalnızca hücreyi aktif yapar; aktif hücrenin satırı ayrıca renklenir (data-active-row).
  * Klavye: Space değiştirir, Shift+Space aralık, Ctrl/⌘+A sayfayı seçer, Esc temizler.
  */
 
@@ -56,13 +56,6 @@ export class RowSelection<TData extends Row> {
 	#commit = (ids: RowId[]) => {
 		this.#host.setValue(ids);
 		this.#host.onChange(ids);
-	};
-
-	// Yalnızca bu satır (single modda tıklama). Zaten tek seçiliyse değişmez: çift tıklamada iki kez çalışabilir.
-	readonly select = (id: RowId) => {
-		this.#anchor = id;
-		if (this.#set.size === 1 && this.#set.has(id)) return;
-		this.#commit([id]);
 	};
 
 	readonly toggle = (id: RowId) => {

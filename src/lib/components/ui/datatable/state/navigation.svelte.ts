@@ -54,6 +54,9 @@ export class GridCursor {
 	// Hücreler bu anahtarı kendi konumlarıyla karşılaştırır ("satır:kolon"); değişince yalnızca 2 hücrenin DOM'u değişir
 	readonly key = $derived(this.#active ? `${this.#active.row}:${this.#active.col}` : '');
 
+	// Aktif satır: hücreler kendi satır sırasıyla karşılaştırır; değişince yalnızca eski ve yeni satırın hücreleri güncellenir
+	readonly activeRow = $derived(this.#active?.row);
+
 	// Aktif hücre ile sabit uç farklıysa aralık; tek hücrede aralık yoktur (yalnızca aktif hücre)
 	readonly range = $derived.by((): CellRange | undefined => {
 		const a = this.#active;

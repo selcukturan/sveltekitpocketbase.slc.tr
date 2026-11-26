@@ -55,6 +55,23 @@ test('Ctrl+End son satıra gider ve görünür alana kaydırır, Ctrl+Home başa
 	await expect(activeCell(page)).toBeInViewport();
 });
 
+test('hücre tıklaması satırı seçmez; aktif satır renklenir, gezinince taşınır', async ({ page }) => {
+	await openTable(page);
+	const activeRowCells = grid(page).locator('[data-slc-table-datacell][data-active-row]');
+	await cell(page, 1, 3).click();
+	await expect(grid(page).locator('[role=row][aria-selected=true]')).toHaveCount(0);
+	await expect(activeRowCells.first()).toHaveAttribute('data-row', '1');
+	expect(await activeRowCells.evaluateAll((els) => new Set(els.map((el) => el.getAttribute('data-row'))).size)).toBe(1);
+	// Rengi seçili satırdan farklı, boş arka plandan farklı
+	const bg = (row: number) => cell(page, row, 3).evaluate((el) => getComputedStyle(el).backgroundColor);
+	await page.mouse.move(0, 0); // hover rengi karışmasın
+	expect(await bg(1)).not.toBe(await bg(2));
+
+	await page.keyboard.press('ArrowDown');
+	await expect(activeRowCells.first()).toHaveAttribute('data-row', '2');
+	await expect(cell(page, 1, 3)).not.toHaveAttribute('data-active-row');
+});
+
 test('Space satırı seçer, Esc seçimi temizler', async ({ page }) => {
 	await openTable(page);
 	await cell(page, 1, 2).click();

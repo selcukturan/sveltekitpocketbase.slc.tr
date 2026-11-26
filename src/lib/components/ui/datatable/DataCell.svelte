@@ -26,6 +26,7 @@
 	const gridRowStart = $derived(dr.rowOriginalIndex + context.headerLength + 1);
 	// Aktif hücre (klavye imleci): her hücre yalnızca bir string karşılaştırır, DOM'da değişen 2 hücredir
 	const isActive = $derived(context.cursor.key === `${dr.rowOriginalIndex}:${dc.colVisibleIndex}`);
+	const isActiveRow = $derived(context.cursor.activeRow === dr.rowOriginalIndex);
 	const isSelected = $derived(context.selection.enabled && context.selection.has(dr.row.id));
 	const inRange = $derived(context.cursor.inRange(dr.rowOriginalIndex, dc.colVisibleIndex));
 	// Düzenleme: düzenlenen hücre düzenleyiciyi çizer. Yeni değer (optimistik) sorgunun kendisinden gelir (withOverride);
@@ -39,6 +40,7 @@
 	data-row={dr.rowOriginalIndex}
 	data-col={dc.colVisibleIndex}
 	data-active={isActive || undefined}
+	data-active-row={isActiveRow || undefined}
 	data-selected={isSelected || undefined}
 	data-in-range={inRange || undefined}
 	data-saving={isSaving || undefined}
