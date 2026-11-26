@@ -139,7 +139,9 @@ export interface MainProps<TData extends Row> {
 	onActiveCellChange?: (cell: ActiveCell<TData> | undefined) => void;
 	// Satır seçimi: 'single' | 'multiple' (varsayılan 'none'). Onay kutuları için kolonlara { field: '_select', type: 'select' } eklenir.
 	selection?: SelectionMode;
-	selected?: RowId[]; // bind:selected (DataTable'da $bindable)
+	// Başlangıç seçimi (yalnızca kurulurken okunur). Sonrası tablonun kendi durumu: değiştirmek için table.helpers
+	// (setSelected, deselect, clearSelection), izlemek için onSelectionChange.
+	selected?: RowId[];
 	onSelectionChange?: (ids: RowId[]) => void;
 	// Hücre düzenleme: `editable: true` kolonlarda değişiklik buradan bildirilir; sayfa kaydeder ve sorguyu tazeler.
 	// Yeni değeri hemen göstermek için `.updates(...list.updatesWith(...))` (SvelteKit withOverride) kullanılır;
@@ -170,9 +172,6 @@ export interface MainProps<TData extends Row> {
 	// Kaydetmeden önce doğrulama (forms'taki preflight gibi): mesaj döndürürse kaydedilmez, düzenleyici açık kalır.
 	validateCell?: (e: CellEditEvent<TData>) => string | undefined;
 }
-
-// DataTable'ın $bindable `selected` prop'una erişim (okuma/yazma)
-export type SelectedBinding = { selected: RowId[] };
 
 class TableContext<TData extends Row> {
 	// ############### BEGIN PROPS ###############
@@ -246,14 +245,18 @@ class TableContext<TData extends Row> {
 	readonly editor: CellEditor<TData>;
 	readonly activeCellId = $derived.by(() => (this.cursor.active ? this.cellId(this.cursor.active) : undefined));
 
-	constructor(props: MainProps<TData>, binding: SelectedBinding) {
+	// Seçili satır id'leri: tablonun kendi durumu (başlangıç: props.selected)
+	#selected = $state<RowId[]>([]);
+
+	constructor(props: MainProps<TData>) {
 		this.#props = props;
+		this.#selected = props.selected ?? [];
 
 		this.selection = new RowSelection<TData>({
 			mode: () => this.#props.selection ?? 'none',
 			items: () => this.items as TData[],
-			value: () => binding.selected,
-			setValue: (ids) => (binding.selected = ids),
+			value: () => this.#selected,
+			setValue: (ids) => (this.#selected = ids),
 			onChange: (ids) => this.#props.onSelectionChange?.(ids)
 		});
 		this.editor = new CellEditor<TData>({
@@ -1101,6 +1104,11 @@ class TableContext<TData extends Row> {
 		copy: () => this.copyRange(),
 		// Odağı tabloya (aktif hücreye) verir
 		focus: () => this.el?.focus({ preventScroll: true }),
+		// Satır seçimi (değişiklikler onSelectionChange ile de bildirilir). Seçim sayfalar arası korunur.
+		getSelected: () => this.selection.ids as TData['id'][],
+		setSelected: (ids: TData['id'][]) => this.selection.set(ids),
+		deselect: (ids: TData['id'][]) => this.selection.deselect(ids),
+		clearSelection: () => this.selection.clear(),
 		// Kullanıcı ayarlarını siler; tablo props'taki hâline döner
 		resetLayout: () => {
 			this.#ui = { columns: {} };
@@ -1114,8 +1122,8 @@ class TableContext<TData extends Row> {
 
 const key = Symbol('SLC-DATATABLE-CONTEXT');
 
-export function createTableContext<TData extends Row>(initialProps: MainProps<TData>, binding: SelectedBinding) {
-	return setContext(key, new TableContext<TData>(initialProps, binding));
+export function createTableContext<TData extends Row>(initialProps: MainProps<TData>) {
+	return setContext(key, new TableContext<TData>(initialProps));
 }
 
 export function getTableContext<TData extends Row>() {

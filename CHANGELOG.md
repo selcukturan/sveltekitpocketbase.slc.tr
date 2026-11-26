@@ -221,6 +221,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- DataTable (kırıcı): `bind:selected` kaldırıldı; seçimin sahibi tablo.
+  `selected` yalnızca başlangıç seçimi; değişiklik `table.helpers`
+  (`getSelected`, `setSelected`, `deselect`, `clearSelection`), izleme
+  `onSelectionChange`. `list.selected` kaldırıldı. `createRowDelete` seçimi
+  tablodan okur: `createRowDelete({ list, table: () => table, … })`.
 - DataTable (kırıcı): `bind:range` kaldırıldı; hücre aralığı özeti yalnızca
   `onRangeChange(info)` ile okunur. Türetilmiş değer artık effect içinde prop'a
   kopyalanmıyor (Svelte: "When not to use `$effect`"). Projede kullanan sayfa

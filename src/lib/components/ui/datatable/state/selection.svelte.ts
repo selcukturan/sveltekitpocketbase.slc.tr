@@ -5,8 +5,8 @@ import type { Row } from '../types.js';
  *
  * - Seçim satır `id`'leriyle tutulur (index değil): tazeleme, sıralama ve sayfa değişiminde doğru kayıtlar seçili kalır.
  *   Sayfalar arası korunur; başlıktaki onay kutusu yalnızca yüklü sayfayı etkiler.
- * - Doğruluk kaynağı DataTable'ın `bind:selected` prop'udur (dizi). Hücreler hızlı arama için türetilmiş Set'i okur.
- *   Sayfa bağlamazsa prop yerel olarak yazılır (Svelte'te bağlanmamış prop'a yazmak yerel değer olur).
+ * - Doğruluk kaynağı tablonun kendi durumudur (dizi; başlangıç `selected` prop'u). Hücreler hızlı arama için türetilmiş
+ *   Set'i okur. Sayfa table.helpers ile değiştirir (setSelected, deselect, clearSelection), onSelectionChange ile izler.
  *
  * Fare: seçim kolonunda tıklama değiştirir, Shift+tıklama aralık seçer. Diğer hücrelere tıklamak satırı seçmez
  * (single ve multiple), yalnızca hücreyi aktif yapar; aktif hücrenin satırı ayrıca renklenir (data-active-row).
@@ -19,8 +19,8 @@ export type RowId = Row['id'];
 export interface SelectionHost<TData extends Row> {
 	mode(): SelectionMode;
 	items(): TData[];
-	value(): RowId[]; // bind:selected (okuma)
-	setValue(ids: RowId[]): void; // bind:selected (yazma)
+	value(): RowId[];
+	setValue(ids: RowId[]): void;
 	onChange(ids: RowId[]): void;
 }
 
@@ -56,6 +56,20 @@ export class RowSelection<TData extends Row> {
 	#commit = (ids: RowId[]) => {
 		this.#host.setValue(ids);
 		this.#host.onChange(ids);
+	};
+
+	// Dışarıdan (table.helpers): seçimi değiştirir. single modda en fazla bir satır, none modda seçim yok.
+	readonly set = (ids: RowId[]) => {
+		const next = this.mode === 'none' ? [] : this.mode === 'single' ? ids.slice(0, 1) : [...new Set(ids)];
+		this.#anchor = next.at(-1);
+		this.#commit(next);
+	};
+
+	// Verilen satırları seçimden çıkarır (örn. silinen kayıtlar); seçimde yoksa bir şey yapmaz
+	readonly deselect = (ids: RowId[]) => {
+		const remove = idSet(ids);
+		if (![...this.#set].some((id) => remove.has(id))) return;
+		this.#commit([...this.#set].filter((id) => !remove.has(id)));
 	};
 
 	readonly toggle = (id: RowId) => {

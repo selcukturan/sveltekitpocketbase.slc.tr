@@ -395,9 +395,11 @@ test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalış�
 	await cell(page, 1, 0).click();
 	await cell(page, 0, 3).click();
 	await page.keyboard.press('Delete');
+	await expect(page.getByText('2 seçili')).toBeVisible();
 	await page.locator('dialog[open]').getByRole('button', { name: 'Sil' }).click();
 	await expect(page.getByText('2 kayıt silindi.')).toBeVisible();
 	await expect(rows).toHaveCount(1);
+	await expect(page.getByText(/\d+ seçili/)).toHaveCount(0); // silinenler seçimden çıkarıldı (table.helpers.deselect)
 
 	// Kalan satır: sağ tık → Sil
 	await cell(page, 0, 3).click({ button: 'right' });

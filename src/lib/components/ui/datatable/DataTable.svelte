@@ -17,18 +17,10 @@
 	import FooterRow from './FooterRow.svelte';
 	import FooterCell from './FooterCell.svelte';
 
-	// selected: seçili satır id'leri (bind:selected). Sayfa bağlamazsa yerel değer olarak yazılır.
-	let { selected = $bindable([]), ...props }: MainProps<TData> = $props();
+	let props: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
-	const context = createTableContext<TData>(props, {
-		get selected() {
-			return selected;
-		},
-		set selected(ids) {
-			selected = ids;
-		}
-	}); // init
+	const context = createTableContext<TData>(props); // init
 
 	// Parent kullanımı: tableRef?.helpers.setFreeze('freezeLeft', 2) | tableRef?.helpers.resetLayout()
 	export const helpers = context.helpers;

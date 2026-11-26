@@ -10,7 +10,7 @@
 	import { getOne, getList, createForm, updateForm, deleteRecords, updateCells } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
-	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu + seçim
+	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
 	const drawer = createHashDrawer(); // #cmd=update&id=... → drawer
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
@@ -22,7 +22,7 @@
 	// Tablo içinde hücre düzenleme: doğrulama (TABLE şeması), anında gösterme, kaydetme ve hata bildirimi
 	const cellEdit = dt.createCellEdit({ list, table: TABLE, save: updateCells, onError: toaster.error });
 	// Satır silme: onay, silme, seçimden çıkarma, bildirim; Delete tuşu (onKeyDown) ve sağ tık hedefleri (targetsOf)
-	const rowDelete = dt.createRowDelete({ list, remove: deleteRecords, onSuccess: toaster.success, onError: toaster.error });
+	const rowDelete = dt.createRowDelete({ list, table: () => table, remove: deleteRecords, onSuccess: toaster.success, onError: toaster.error });
 </script>
 
 <!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
@@ -75,7 +75,6 @@
 				persist="grapes-crud-simple"
 				selection="multiple"
 				freezeLeft={2}
-				bind:selected={list.selected}
 				columns={TABLE.columnsFor<Item>({
 					prepend: [
 						{ field: '_select', type: 'select' },
