@@ -22,7 +22,14 @@
 		const label = f.label ?? columns.find((col) => col.field === f.field)?.label ?? f.field;
 		return t(label, undefined, label);
 	};
-	const onEnter = (e: KeyboardEvent, close?: () => void) => {
+	const optionsOf = (f: FilterField) =>
+		f.type === 'bool'
+			? [
+					{ value: 'true', label: t('yes') },
+					{ value: 'false', label: t('no') }
+				]
+			: (f.options ?? []).map((option) => ({ value: option, label: option }));
+	const onEnter =(e: KeyboardEvent, close?: () => void) => {
 		if (e.key !== 'Enter') return;
 		list.search();
 		close?.();
@@ -78,17 +85,13 @@
 						{#if f.type === 'number' || f.type === 'date'}
 							{@render range(f, close)}
 						{:else}
-							<select class={fieldClass} bind:value={draft[f.field]} aria-label={label}>
-								<option value="">{t('dt_filter_any')}</option>
-								{#if f.type === 'bool'}
-									<option value="true">{t('yes')}</option>
-									<option value="false">{t('no')}</option>
-								{:else}
-									{#each f.options ?? [] as option (option)}
-										<option value={option}>{option}</option>
-									{/each}
-								{/if}
-							</select>
+							<!-- "Tümü" = seçimi kaldır (boş değer); liste panelin içinde açılır (iç içe popover) -->
+							<input.Select
+								bind:value={() => draft[f.field] ?? '', (value) => (draft[f.field] = value)}
+								options={optionsOf(f)}
+								deSelectText={t('dt_filter_any')}
+								aria-label={label}
+							/>
 						{/if}
 					{/each}
 					<div class="slc-filter-buttons">

@@ -13,6 +13,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- FilterBar: evet/hayır ve seçim filtreleri native `<select>` yerine
+  `input.Select` kullanıyor (filtre panelinin içinde iç içe popover; seçim,
+  Esc, dışarı tıklama e2e testiyle doğrulandı). `input.Select` `aria-label`
+  alıyor.
+- `input.Select`: liste kapalıyken Esc'yi tüketmiyor; üstteki popover ya da
+  drawer Esc ile kapanabiliyor (önceden yutuluyordu).
 - Şablonlar: `Page.Header.Table` (`Page.Header` içinde; children solda,
   `actions` snippet'i sağa yaslı), `Head` `title`/`description` alıyor,
   `formInput.ButtonGroup` ve `dt.RecordView` (kaydın alanları anahtar–değer).

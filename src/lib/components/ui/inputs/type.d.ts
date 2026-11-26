@@ -50,6 +50,7 @@ type SelectBasePropsType = {
 	readonly?: boolean;
 	inform?: boolean;
 	deSelectText?: string;
+	'aria-label'?: string; // görünür etiket yoksa erişilebilir ad (verilmezse seçili değer okunur)
 };
 
 export type SelectValueTypeChoice<T extends boolean> = T extends true ? string[] : string;

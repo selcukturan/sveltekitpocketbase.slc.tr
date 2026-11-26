@@ -24,6 +24,7 @@
 		readonly = false,
 		inform = false,
 		deSelectText,
+		'aria-label': ariaLabel,
 		onValueChange
 	}: SelectPropsType<Tmultiple> = $props();
 
@@ -345,7 +346,8 @@
 				}
 
 				case 'Escape': {
-					if (!escClose) return;
+					// Liste kapalıyken Esc'ye dokunma: üstteki popover (ör. filtre paneli) ya da dialog kapanabilsin
+					if (!escClose || !isOpenPopup) return;
 					e.preventDefault();
 					toggl?.close();
 					triggerButtonElement?.focus();
@@ -435,7 +437,8 @@
 			aria-controls={listboxId}
 			aria-expanded={isOpenPopup}
 			aria-haspopup="listbox"
-			aria-labelledby={attr.id}
+			aria-label={ariaLabel}
+			aria-labelledby={ariaLabel ? undefined : attr.id}
 			aria-activedescendant={activeOptionId}
 			aria-invalid={!isValid}
 			aria-readonly={readonly}

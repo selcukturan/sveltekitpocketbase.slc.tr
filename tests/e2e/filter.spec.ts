@@ -49,7 +49,8 @@ test('filtreler: metin, sayı aralığı, evet/hayır birlikte uygulanır; Temiz
 
 	// + evet/hayır: Evet → iki filtre birlikte (VE): 500'lük kaydın bool değeri false → sonuç yok
 	await panelButton(page).click();
-	await page.getByRole('combobox', { name: 'Onay' }).selectOption('true');
+	await page.getByRole('combobox', { name: 'Onay' }).click();
+	await page.getByRole('option', { name: 'Evet' }).click();
 	await page.getByRole('spinbutton', { name: 'Sayı · En az' }).press('Enter');
 	await expect(rows(page)).toHaveCount(0);
 	await expect(panelButton(page)).toContainText('2');
@@ -67,4 +68,58 @@ test('filtreler: metin, sayı aralığı, evet/hayır birlikte uygulanır; Temiz
 	await page.keyboard.press('Delete');
 	await page.locator('dialog[open]').getByRole('button', { name: 'Sil' }).click();
 	await expect(rows(page)).toHaveCount(0);
+});
+
+// input.Select filtre panelinin (Toggler) içinde açılır: iç içe popover
+test('filtre paneli: iç içe Select seçimde, Esc ve dışarı tıklamada doğru kapanır', async ({ page }) => {
+	await page.goto(URL);
+	await expect(cell(page, 0, 3)).toBeVisible();
+	const panel = page.getByRole('group', { name: 'Filtreler' });
+	const onay = page.getByRole('combobox', { name: 'Onay' });
+	const options = page.getByRole('listbox').filter({ has: page.getByRole('option', { name: 'Evet' }) });
+
+	// Fareyle seçim: liste kapanır, panel açık kalır, değer görünür
+	await panelButton(page).click();
+	await onay.click();
+	await expect(options).toBeVisible();
+	await options.getByRole('option', { name: 'Evet' }).click();
+	await expect(options).toBeHidden();
+	await expect(panel).toBeVisible();
+	await expect(onay).toHaveText('Evet');
+	await expect(onay).toBeFocused();
+
+	// Esc: önce yalnızca liste, sonra panel kapanır
+	await onay.click();
+	await expect(options).toBeVisible();
+	await page.keyboard.press('Escape');
+	await expect(options).toBeHidden();
+	await expect(panel).toBeVisible();
+	await page.keyboard.press('Escape');
+	await expect(panel).toBeHidden();
+
+	// Klavye: oklarla aç, seç (Enter); panel açık kalır
+	await panelButton(page).click();
+	await onay.focus();
+	await page.keyboard.press('ArrowDown');
+	await expect(options).toBeVisible();
+	await page.keyboard.press('ArrowDown');
+	await page.keyboard.press('Enter');
+	await expect(options).toBeHidden();
+	await expect(panel).toBeVisible();
+	await expect(onay).toHaveText('Hayır');
+
+	// Liste açıkken dışarı tıklama: ikisi birden kapanır
+	await onay.click();
+	await expect(options).toBeVisible();
+	await page.mouse.click(5, 5);
+	await expect(options).toBeHidden();
+	await expect(panel).toBeHidden();
+
+	// Seçimi kaldırma ("Tümü") ve uygulama: filtre sayısı yok
+	await panelButton(page).click();
+	await onay.click();
+	await options.getByRole('option', { name: 'Tümü' }).click();
+	await expect(onay).toHaveText('Tümü');
+	await panel.getByRole('button', { name: 'Ara' }).click();
+	await expect(panelButton(page)).not.toContainText(/\d/);
 });
