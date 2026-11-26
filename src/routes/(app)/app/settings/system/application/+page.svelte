@@ -8,14 +8,8 @@
 
 	const toaster = createToaster({ name: 'settings-toaster', position: 'bottom-center' });
 
-	const save = async (submit: () => Promise<boolean>) => {
-		try {
-			if (await submit()) toaster.success(t('toast_saved_title'), t('toast_saved_description'));
-			else toaster.error(null, t('invalid_data'));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
+	// Kaydetme: gönderim, ayarları tazeleme, bildirim (form sayfada açık kalır; drawer yok)
+	const save = formInput.createFormSave({ updates: () => [getSettings()], onSuccess: toaster.success, onError: toaster.error });
 </script>
 
 <Head>
@@ -33,12 +27,7 @@
 			{@const settings = await getSettings()}
 			{#if settings}
 				<!-- Drawer'daki formla aynı bileşen; burada sayfa içinde açık kalır. Kayıttan sonra "değişiklik yok" durumuna döner. -->
-				<formInput.Form
-					schema={settingsFormSchema}
-					form={updateSettings}
-					formClass="overflow-visible!"
-					{...updateSettings.preflight(settingsFormSchema).enhance(({ submit }) => save(() => submit().updates(getSettings())))}
-				>
+				<formInput.Form schema={settingsFormSchema} form={updateSettings} formClass="overflow-visible!" {...updateSettings.preflight(settingsFormSchema).enhance(save)}>
 					{#snippet inputs()}
 						<formInput.Hidden field={updateSettings.fields.id} value={settings.id} />
 						<formInput.Text label={t('settings_application_name')} field={updateSettings.fields.application_name} value={settings.application_name} />

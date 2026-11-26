@@ -13,6 +13,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Form: `formInput.createFormSave({ list | updates, drawer, onSuccess, onError })`
+  kaydetmeyi sayfadan alır: gönderim, sorguları tazeleme, drawer'ı onay
+  sormadan kapatma, bildirim. `form.enhance(save)` olarak verilir. Simple CRUD
+  ve uygulama ayarları sayfası kullanıyor.
 - DataTable: `dt.createRowDelete({ list, remove, onSuccess, onError })` satır
   silmeyi sayfadan alır: onay sorusu, silme, listeyi tazeleme, silinenleri
   seçimden çıkarma, bildirim; `onKeyDown` (Delete tuşu) ve `targetsOf` (sağ
@@ -211,6 +215,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Number: nokta → yerel ondalık ayracı çevirme (`autoChangeDecimalSeparator`)
+  tutarsız çalıştığı için kaldırıldı; ayracı tarayıcı yönetir.
 - Belgeler: DataTable belgesine `createRowDelete` bölümü ve `list.selected`;
   örnekler yeni kullanıma göre; başlık alpha.202 / `78d08a8`. Çekirdek
   belgede `command` örneği `deleteRecords({ ids })`.
@@ -303,6 +309,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Number: yazarken metin ara sıra siliniyordu ('12.5' → 5 ya da 125).
+  Svelte'in `bind:value` işleyicisi async modda geç çalışıp eski değeri
+  input'a yazıyordu; değer artık `oninput` ile elle yönetiliyor.
 - DataTable: tarih-saat Türkçe'de günü tek haneli gösteriyordu
   (`2.09.2026 02:00`). Gün, ay, saat ve dakika her dilde iki haneli
   (`02.09.2026 02:00`).

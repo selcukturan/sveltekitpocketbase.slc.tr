@@ -13,3 +13,4 @@ export { default as Url } from './Url.svelte';
 export { default as Number } from './Number.svelte';
 export { default as Bool } from './Bool.svelte';
 export { default as ButtonGroup } from './ButtonGroup.svelte';
+export { createFormSave, type FormSaveOptions } from './form-save.js';

@@ -16,16 +16,8 @@
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
 	let table = $state<ReturnType<typeof dt.DataTable<Item>>>(); // bind:this → table.helpers (copy, focus, ...)
 
-	// create/update ortak gönderim: alan hataları inputların altında, genel sonuç toast ile
-	const save = async (submit: () => Promise<boolean>) => {
-		try {
-			if (!(await submit())) return toaster.error(null, t('invalid_data'));
-			drawer.closeClean();
-			toaster.success(t('toast_saved_title'), t('toast_saved_description'));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
+	// create/update ortak kaydetme: gönderim, listeyi tazeleme, drawer'ı kapatma, bildirim (alan hataları inputların altında)
+	const save = formInput.createFormSave({ list, drawer, onSuccess: toaster.success, onError: toaster.error });
 
 	// Tablo içinde hücre düzenleme: doğrulama (TABLE şeması), anında gösterme, kaydetme ve hata bildirimi
 	const cellEdit = dt.createCellEdit({ list, table: TABLE, save: updateCells, onError: toaster.error });
@@ -79,6 +71,11 @@
 			<dt.DataTable
 				bind:this={table}
 				{list}
+				{...cellEdit}
+				persist="grapes-crud-simple"
+				selection="multiple"
+				freezeLeft={2}
+				bind:selected={list.selected}
 				columns={TABLE.columnsFor<Item>({
 					prepend: [
 						{ field: '_select', type: 'select' },
@@ -90,11 +87,6 @@
 					{ text_optional: 'Ortalama', number_optional: 'avg(2)', bool_optional: (items) => `${items.filter((item) => item.bool_optional).length} ✓` },
 					{ text_optional: 'En büyük', number_optional: 'max()' }
 				]}
-				freezeLeft={2}
-				selection="multiple"
-				bind:selected={list.selected}
-				persist="grapes-crud-simple"
-				{...cellEdit}
 				onKeyDown={rowDelete.onKeyDown}
 				onCopy={({ rows, cols, partial }) =>
 					partial
@@ -133,7 +125,7 @@
 							schema={createFormSchema}
 							{form}
 							onIsChange={drawer.setChanged}
-							{...form.preflight(createFormSchema).enhance(({ submit }) => save(() => submit().updates(...list.updates)))}
+							{...form.preflight(createFormSchema).enhance(save)}
 						>
 							{#snippet inputs()}
 								{@render recordInputs(form.fields, {})}
@@ -159,7 +151,7 @@
 							schema={updateFormSchema}
 							{form}
 							onIsChange={drawer.setChanged}
-							{...form.preflight(updateFormSchema).enhance(({ submit }) => save(() => submit().updates(...list.updates)))}
+							{...form.preflight(updateFormSchema).enhance(save)}
 						>
 							{#snippet inputs()}
 								<formInput.Hidden field={form.fields.id} value={record.id} />

@@ -1,6 +1,6 @@
 <script lang="ts" generics="N extends boolean = false">
+	import { untrack } from 'svelte';
 	import { inputClasses } from './common.js';
-	import { on } from 'svelte/events';
 	import type { NumberProps, NumberValue, NumberValueChangeArgs } from './type.js';
 
 	let {
@@ -10,9 +10,9 @@
 		size = 'md',
 		disabled = false,
 		dev = false,
-		autoChangeDecimalSeparator = true,
 		nullable = false as N,
 		onValueChange,
+		oninput: userOnInput,
 		...rest
 	}: NumberProps<N> = $props();
 	// nullable: boş alan null (ör. filtre: boş = filtre yok, 0 = en az 0). Varsayılan: boş alan 0 (PocketBase sayı alanı)
@@ -32,11 +32,9 @@
 	const proxy = {
 		get value() {
 			// Dışarıdan null, undefined veya NaN atanırsa boş değere (0 ya da nullable ise null) çekiyoruz
-			if (value === null || value === undefined || Number.isNaN(value)) {
-				if (value !== empty()) value = empty();
-			}
-
-			let currentValue = value;
+			const missing = value === null || value === undefined || Number.isNaN(value);
+			if (missing && value !== empty()) value = empty();
+			const currentValue = missing ? empty() : value; // atama her zaman tutmayabilir (prop üstten yeniden gelebilir)
 
 			if (first) {
 				// İlk yüklemede çalışır
@@ -69,46 +67,46 @@
 	};
 	// ############################### END PROXY ###############################
 
-	// ############################### BEGIN decimalSeparator ###############################
-	const universalDecimalSeparator = '.';
-	const localDecimalSeparator = (1.1).toLocaleString()[1];
-	const needToConvert = $derived(autoChangeDecimalSeparator && universalDecimalSeparator !== localDecimalSeparator);
+	// ############################### BEGIN INPUT <-> DEĞER ###############################
+	// bind:value kullanılmaz: Svelte'in bağlaması her tuştan sonra `await tick()` bekleyip değeri yeniden yazar. Async
+	// modda (form doğrulaması sürerken) bu bekleme uzar; önceki tuşun işleyicisi sonradan çalışıp eski değeri görünce
+	// input'a '' yazıyor ve yazılan metin kayboluyordu ('12.5' → 5 ya da 125). Burada:
+	// - Yazarken (oninput): değer input'tan okunur. Geçersiz/yarım metinde tarayıcı '' verir → boş (null/0).
+	// - Dışarıdan değişince ($effect): input'a yalnızca gösterdiğinden farklıysa yazılır. Değer boşken input'ta yarım
+	//   metin varsa (badInput, örn. '12.' ya da '1-2') dokunulmaz: kullanıcı hâlâ yazıyordur.
+	let el = $state<HTMLInputElement>();
+	const parse = (node: HTMLInputElement) => (node.value === '' ? null : node.valueAsNumber);
 
-	// Yerel ayracı ekler. Başarısızsa (execCommand false döndürebilir) false: çağıran varsayılan davranışı engellemez,
-	// tarayıcının kendi girişi kalır (Chrome number input'ta nokta da ondalık ayracıdır). Önceden önce engellenip sonra
-	// ekleniyordu; ekleme başarısız olunca ayraç kayboluyordu ('12.5' → 125).
-	type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
-	const insertText = (text: string) => (document as unknown as CustomDoc).execCommand('insertText', false, text);
-
-	const decimalSeparator = (node: HTMLElement) => {
-		if (!needToConvert) return;
-
-		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
-			if (e.key === universalDecimalSeparator && insertText(localDecimalSeparator)) e.preventDefault();
-		});
-
-		const destroyPaste = on(node, 'paste', (e: ClipboardEvent) => {
-			const pastedText = e.clipboardData?.getData('text');
-			// Yapıştırılan metindeki noktalar yerel ayraca (virgül) çevrilir
-			if (pastedText?.includes(universalDecimalSeparator) && insertText(pastedText.replaceAll(universalDecimalSeparator, localDecimalSeparator))) {
-				e.preventDefault();
-			}
-		});
-
-		return () => {
-			destroyKeydown();
-			destroyPaste();
-		};
+	const onInput = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
+		proxy.value = parse(e.currentTarget) as NumberValue<N>;
+		userOnInput?.(e);
 	};
-	// ############################### END decimalSeparator ###############################
+
+	$effect(() => {
+		const next = proxy.value;
+		if (!el) return;
+		untrack(() => {
+			if (!el || next === parse(el) || (next === null && el.validity.badInput)) return;
+			el.value = next === null ? '' : String(next);
+		});
+	});
+
+	// Sunucu çiziminde (ve ilk karede) görünen metin
+	// svelte-ignore state_referenced_locally
+	const initialText = value === null || value === undefined || Number.isNaN(value) ? (nullable ? '' : '0') : String(value);
+	// ############################### END INPUT <-> DEĞER ###############################
+
+	// Ondalık ayracı tarayıcıya bırakılır (type="number"): değer her zaman sayıdır, gösterim tarayıcının yerel ayarına göre.
+	// Önceden nokta tuşu execCommand ile yerel ayraca (virgül) çevriliyordu; tutarsız çalıştığı için kaldırıldı.
 </script>
 
 <input
-	bind:value={proxy.value}
+	bind:this={el}
 	type="number"
+	value={initialText}
+	oninput={onInput}
 	{disabled}
 	class="{classes} {inputClasses.base} {inputClasses.variants[status]} {inputClasses.sizes[size]}"
-	{@attach needToConvert && decimalSeparator}
 	{...rest}
 />
 

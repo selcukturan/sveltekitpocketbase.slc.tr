@@ -306,25 +306,20 @@ test('Relation: seçici adlandırılmış, çoklu seçim eklenir/kaldırılır, 
 
 test.describe('Türkçe yerel ayar', () => {
 	test.use({ locale: 'tr-TR' });
-	test('Number: nokta tuşu yerel ondalık ayracına çevrilir, değer sayı olarak tutulur', async ({ page }) => {
+	// Ondalık ayracını tarayıcı yönetir (bileşen tuşları değiştirmez): nokta da virgül de ondalık kabul edilir
+	test('Number: nokta ve virgül ondalık olarak girilir, değer sayı olarak tutulur', async ({ page }) => {
 		const form = await openCreate(page);
 		const number = form.getByLabel('number_optional');
 		await number.click();
 		await page.keyboard.type('12.5');
 		await expect(number).toHaveJSProperty('valueAsNumber', 12.5);
 		await number.fill('');
+		await number.click();
+		await page.keyboard.type('7,25');
+		await expect(number).toHaveJSProperty('valueAsNumber', 7.25);
+		await number.fill('');
 		await expect(number).toHaveValue(''); // boş bırakılabilir (değer 0 kabul edilir)
 		await expect(form.getByRole('button', { name: 'Sıfırla' })).toBeDisabled(); // 0 = ilk değer
-	});
-	test('Number: ayraç eklenemezse (execCommand false) nokta kaybolmaz', async ({ page }) => {
-		const form = await openCreate(page);
-		await page.evaluate(() => {
-			(document as unknown as { execCommand: () => boolean }).execCommand = () => false;
-		});
-		const number = form.getByLabel('number_optional');
-		await number.click();
-		await page.keyboard.type('12.5');
-		await expect(number).toHaveJSProperty('valueAsNumber', 12.5);
 	});
 });
 
@@ -349,7 +344,11 @@ test('Number: geçersiz metin sessizce 0 olarak gönderilmez; negatif ve ondalı
 	await expect(num).not.toHaveAttribute('aria-invalid', 'true');
 
 	// Negatif ve ondalık: ara durumlar ('-', '-0.') geçersizdir ama yazılan silinmez
-	for (const [text, expected] of [['-5', -5], ['-0.5', -0.5], ['1e3', 1000]] as const) {
+	for (const [text, expected] of [
+		['-5', -5],
+		['-0.5', -0.5],
+		['1e3', 1000]
+	] as const) {
 		await num.fill('');
 		await num.click();
 		await page.keyboard.type(text, { delay: 30 });

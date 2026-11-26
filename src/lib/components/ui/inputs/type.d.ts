@@ -121,7 +121,6 @@ export type NumberProps<N extends boolean = false> = Omit<SvelteHTMLElements['in
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
-	autoChangeDecimalSeparator?: boolean;
 	onValueChange?: ({ value, beforeValue, initial }: NumberValueChangeArgs<N>) => void;
 };
 // ################# END Number.svelte Props ###############################
