@@ -9,7 +9,7 @@
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import * as v from 'valibot';
 	import { TABLE, createFormSchema, updateFormSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
+	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -127,21 +127,6 @@
 	const onTableLoad = ({ reason, totalItems }: dt.LoadEvent<Item>) => {
 		if (reason === 'query' && totalItems === 0) toaster.add({ type: 'info', title: t('dt_no_data') });
 	};
-
-	// GEÇİCİ: sayfalama/virtual scroll testi (page.remote.ts'teki seed bölümüyle birlikte silinecek)
-	let seeding = $state(false);
-	const seed = async (message: string, run: () => Promise<{ count?: number; deleted?: number }>) => {
-		if (!(await confirm({ title: 'Test verisi', message, danger: true }))) return;
-		seeding = true;
-		try {
-			const result = await run();
-			toaster.success('Tamamlandı', `${result.count ?? result.deleted} kayıt işlendi.`);
-		} catch (error) {
-			toaster.error(error);
-		} finally {
-			seeding = false;
-		}
-	};
 </script>
 
 <!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
@@ -180,21 +165,6 @@
 		<dt.FilterBar {list} filters={TABLE.filters} />
 		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 		<div class="ml-auto flex items-center gap-2">
-			<!-- GEÇİCİ: test butonları -->
-			<input.Button
-				variant="ghost"
-				color="warning"
-				label="+10.000 test"
-				disabled={seeding}
-				onclick={() => seed('10.000 rastgele kayıt eklensin mi? (1-2 dk sürebilir)', () => seedRecords({ count: 10000 }).updates(...list.updates))}
-			/>
-			<input.Button
-				variant="ghost"
-				color="error"
-				label="Testleri sil"
-				disabled={seeding}
-				onclick={() => seed('"seed-" ile işaretli tüm test kayıtları silinsin mi?', () => deleteSeedRecords().updates(...list.updates))}
-			/>
 			<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
 		</div>
 	</Page.Header>

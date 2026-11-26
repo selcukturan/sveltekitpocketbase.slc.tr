@@ -1,7 +1,6 @@
 import { getRequestEvent, query, form, command, requested } from '$app/server';
 import { error } from '@sveltejs/kit';
-import * as v from 'valibot';
-import { Collections, DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
+import { Collections } from '#lib/types/pocketbase-types.js';
 import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
 import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
@@ -171,81 +170,4 @@ export const updateCells = command(TABLE.cellsEditSchema, async (edits) => {
 	}
 
 	await requested(getList, 1).refreshAll();
-});
-
-// ######################################################################################################################
-// GEÇİCİ: Sayfalama ve virtual scroll testi için rastgele kayıtlar. Test bitince bu bölümü ve sayfadaki butonları silin.
-// Kayıtlar `text_optional = 'seed-…'` ile işaretlenir; `deleteSeedRecords` yalnızca bunları siler.
-// ######################################################################################################################
-const SEED_PREFIX = 'seed-';
-const SEED_CONCURRENCY = 25; // PocketBase'e aynı anda giden istek sayısı
-
-const pick = <T>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
-const words = ['alfa', 'beta', 'gama', 'delta', 'kalem', 'defter', 'masa', 'kitap', 'elma', 'armut', 'deniz', 'dag', 'nehir', 'bulut', 'yildiz'] as const;
-const randomDate = () =>
-	new Date(Date.UTC(2020 + Math.floor(Math.random() * 7), Math.floor(Math.random() * 12), 1 + Math.floor(Math.random() * 28), Math.floor(Math.random() * 24)));
-
-// Diziyi SEED_CONCURRENCY'lik gruplar hâlinde paralel işler
-async function inChunks<T>(items: T[], run: (item: T) => Promise<unknown>) {
-	for (let i = 0; i < items.length; i += SEED_CONCURRENCY) {
-		await Promise.all(items.slice(i, i + SEED_CONCURRENCY).map(run));
-	}
-}
-
-export const seedRecords = command(v.object({ count: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(10000)) }), async ({ count }) => {
-	await checkAuthenticated(); // 🔒
-
-	const { locals } = getRequestEvent();
-	const collection = locals.pb.collection(Collections.DemoCrud);
-	const stamp = Date.now().toString(36);
-
-	const rows = Array.from({ length: count }, (_, i) => {
-		const date = randomDate();
-		return {
-			text_required: `${pick(words)} ${pick(words)} ${i + 1}`,
-			text_optional: `${SEED_PREFIX}${stamp}-${i + 1}`,
-			bool_optional: Math.random() < 0.5,
-			number_optional: Math.round(Math.random() * 100000) / 100,
-			email_optional: Math.random() < 0.7 ? `${pick(words)}${i}@example.com` : '',
-			select_optional_single: pick(Object.values(DemoCrudSelectOptionalSingleOptions)),
-			select_optional_multiple: Object.values(DemoCrudSelectOptionalMultipleOptions).filter(() => Math.random() < 0.5),
-			date_optional: date.toISOString().slice(0, 10) + ' 00:00:00.000Z',
-			datetime_optional: date.toISOString().replace('T', ' ')
-		};
-	});
-
-	const result = await ResultAsync.fromPromise(
-		inChunks(rows, (row) => collection.create(row, { requestKey: null })),
-		mapUnknownToError
-	);
-	if (result.isErr()) throwError(result.error);
-
-	await requested(getList, 1).refreshAll();
-	return { count };
-});
-
-export const deleteSeedRecords = command(async () => {
-	await checkAuthenticated(); // 🔒
-
-	const { locals } = getRequestEvent();
-	const collection = locals.pb.collection(Collections.DemoCrud);
-	const filter = locals.pb.filter('text_optional ~ {:prefix}', { prefix: `${SEED_PREFIX}%` });
-
-	let deleted = 0;
-	const result = await ResultAsync.fromPromise(
-		(async () => {
-			// Silindikçe liste kısalır; her turda ilk 500 kayıt alınıp silinir
-			for (;;) {
-				const page = await collection.getList(1, 500, { filter, fields: 'id', skipTotal: true, requestKey: null });
-				if (page.items.length === 0) break;
-				await inChunks(page.items, (item) => collection.delete(item.id, { requestKey: null }));
-				deleted += page.items.length;
-			}
-		})(),
-		mapUnknownToError
-	);
-	if (result.isErr()) throwError(result.error);
-
-	await requested(getList, 1).refreshAll();
-	return { deleted };
 });

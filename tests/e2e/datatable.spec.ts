@@ -78,7 +78,7 @@ test('drawer kapanınca Tab odağı aktif hücreye döndürür', async ({ page }
 	await expect(grid(page)).toBeFocused();
 });
 
-// Test kendi kayıtlarını oluşturur ('seed-e2e-…'; yarıda kalırsa sayfadaki "Testleri sil" temizler) ve sonunda siler.
+// Test kendi kayıtlarını oluşturur ('seed-e2e-…') ve sonunda siler. Yarıda kalırsa kayıtlar text_optional'da 'seed-e2e-' ile aranıp silinebilir.
 async function createRecord(page: Page, text: string) {
 	await page.getByRole('button', { name: 'Oluştur' }).first().click();
 	const dialog = page.getByRole('dialog');

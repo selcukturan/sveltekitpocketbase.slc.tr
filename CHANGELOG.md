@@ -164,7 +164,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.187` oldu.
+- Uygulama sürümü `v0.2.0-alpha.188` oldu.
 - Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
   Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
   zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
@@ -294,6 +294,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Kaldırıldı
 
+- Simple CRUD: geçici test verisi butonları ("+10.000 test", "Testleri sil")
+  ve `seedRecords` / `deleteSeedRecords` komutları.
 - `pb.ts`: `beforeSend` içinde yorum satırına alınmış eski realtime
   (`/api/realtime`) istisnası ve açıklaması silindi.
 
