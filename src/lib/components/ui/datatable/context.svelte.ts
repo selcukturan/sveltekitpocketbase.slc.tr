@@ -1,4 +1,3 @@
-import type { RemoteQuery } from '$app/server';
 
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
 import type { ListSource } from './list-state.svelte.js';
@@ -101,10 +100,8 @@ const estimatePx = (width: Width): number => {
 
 export interface MainProps<TData extends Row> {
 	// Data structure
-	// `list` (createList) verilirse query, sort, onPagination ve onSort ondan okunur. Ayrı ayrı da verilebilir.
-	list?: ListSource<ListResult<TData>> | ListSource<TData[]>;
-	query?: RemoteQuery<ListResult<TData>> | RemoteQuery<TData[]> | RemoteQuery<TData>;
-	sort?: string;
+	// Tek veri kaynağı: createList sonucu (sorgu, sıralama, sayfalama). Sorgu ListResult (sayfalı) ya da dizi döndürebilir.
+	list: ListSource<ListResult<TData>> | ListSource<TData[]>; // required
 	// Table structure
 	columns: Column<TData>[]; // required
 	footers?: Footer<TData>[];
@@ -133,13 +130,11 @@ export interface MainProps<TData extends Row> {
 	containerClass?: string;
 	mainClass?: string;
 	// events
-	onPagination?: ({ page, perPage }: { page: number; perPage: number }) => void;
 	onRowClick?: (row: TData) => void; // tek tıklama (hücre içindeki buton/link hariç)
 	onRowActivate?: (row: TData) => void; // çift tıklama ya da Enter: satırı aç (örn. düzenleme drawer'ı)
 	onCellClick?: (e: CellEvent<TData>) => void;
 	onCellDblClick?: (e: CellEvent<TData>) => void;
 	onActiveCellChange?: (cell: ActiveCell<TData> | undefined) => void;
-	onSort?: (sort: string) => void;
 	// Satır seçimi: 'single' | 'multiple' (varsayılan 'none'). Onay kutuları için kolonlara { field: '_select', type: 'select' } eklenir.
 	selection?: SelectionMode;
 	selected?: RowId[]; // bind:selected (DataTable'da $bindable)
@@ -191,8 +186,8 @@ class TableContext<TData extends Row> {
 
 	// Data structure
 	readonly list = $derived(this.#props.list);
-	readonly query = $derived(this.#props.list ? this.#props.list.query : this.#props.query);
-	readonly sort = $derived(this.#props.list?.sort ?? this.#props.sort);
+	readonly query = $derived(this.list.query);
+	readonly sort = $derived(this.list.sort);
 	readonly loaded = $derived(this.#currentData !== undefined); // ilk veri geldi mi (alt bar iskeleti için)
 	// İstek sürüyor: sayfalama/sıralama kontrolleri kilitlenir, art arda tıklamalar yeni istek başlatmaz
 	readonly busy = $derived(this.query?.loading === true);
@@ -233,10 +228,8 @@ class TableContext<TData extends Row> {
 	readonly containerClass = $derived(this.#props.containerClass);
 	readonly mainClass = $derived(this.#props.mainClass);
 	// Events
-	readonly onPagination = $derived(this.#props.onPagination ?? this.#props.list?.paginate);
 	readonly onRowClick = $derived(this.#props.onRowClick);
 	readonly rowClass = $derived(this.#props.rowClass);
-	readonly onSort = $derived(this.#props.onSort ?? this.#props.list?.setSort);
 
 	readonly #uid = ++tableUid;
 	readonly cellId = (pos: CellPos) => `slc-dt${this.#uid}-r${pos.row}-c${pos.col}`;
@@ -372,15 +365,6 @@ class TableContext<TData extends Row> {
 						totalItems: current.length,
 						totalPages: 1
 					};
-				} else if (current) {
-					this.paginable = false;
-					this.#currentData = {
-						items: [current as TData],
-						page: 1,
-						perPage: 1,
-						totalItems: 1,
-						totalPages: 1
-					};
 				} else {
 					this.paginable = false;
 					this.#currentData = undefined;
@@ -479,9 +463,7 @@ class TableContext<TData extends Row> {
 	// start/end ayrı sayı derived'ları: scroll her karede değişse de virtualData yalnızca aralık değişince yeniden hesaplanır.
 	// Pencere hep aynı boyda (#windowSize satır): görünen alan en fazla ceil(alan / satır) + 1 satıra değer, üstüne her iki
 	// yandan OVERSCAN. Listenin uçlarında pencere kayar ama kısalmaz; satır geri dönüşümü bu sabit boya dayanır (virtualData).
-	#windowSize = $derived(
-		Math.ceil(Math.max(0, this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + 2 + 2 * TableContext.OVERSCAN
-	);
+	#windowSize = $derived(Math.ceil(Math.max(0, this.clientHeight - this.headerLength * this.headerRowHeight) / this.dataRowHeight) + 2 + 2 * TableContext.OVERSCAN);
 	#visibleStart = $derived(Math.max(0, Math.min(Math.floor(this.#rafY / this.dataRowHeight) - TableContext.OVERSCAN, this.dataLength - this.#windowSize)));
 	#visibleEnd = $derived(Math.min(this.dataLength - 1, this.#visibleStart + this.#windowSize - 1));
 
@@ -526,6 +508,7 @@ class TableContext<TData extends Row> {
 		const pinned = this.#pinnedRow;
 		const pinnedSlot = pinned >= 0 ? pinned % slots : -1;
 		const prev = this.#prevEntries;
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const next = new Map<VirtualKey, VirtualEntry<TData>>();
 		const processedData: VirtualEntry<TData>[] = [];
 
@@ -1075,7 +1058,7 @@ class TableContext<TData extends Row> {
 
 	// multi (Ctrl/⌘): diğer kolonların sıralaması korunur; değilse yalnızca bu kolon. İstek sürerken yok sayılır.
 	readonly toggleSort = (field: Field<TData>, multi = false) => {
-		if (this.onSort && !this.busy) this.onSort(nextSort(this.sort, field, multi));
+		if (!this.busy) this.list.setSort(nextSort(this.sort, field, multi));
 	};
 
 	// ################################## END Sorting Helpers ################################################################################################################

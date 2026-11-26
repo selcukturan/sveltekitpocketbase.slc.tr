@@ -144,7 +144,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.179` oldu.
+- Uygulama sürümü `v0.2.0-alpha.180` oldu.
+- DataTable: `list` zorunlu ve tek veri kaynağı. Eski `query`, `sort`, `onSort`,
+  `onPagination` prop'ları ve tek kayıt döndüren sorgu desteği kaldırıldı;
+  sıralama `list.setSort`, sayfalama `list.paginate` ile yapılıyor.
 - `tooltip` attachment: eleman başına 4 dinleyici yerine belge düzeyinde tek
   dinleyici seti (olay delegasyonu, `WeakMap` kaydı). API aynı. 30 satırlık
   tablo sayfasında dinleyici sayısı 427 → 124.

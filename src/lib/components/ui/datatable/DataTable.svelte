@@ -120,7 +120,7 @@
 <div class:slc-table-main={true} class={context.mainClass} data-borders={context.borders} style:width="100%" style:height="100%">
 	{@render context.toolbar?.()}
 	<div class:slc-table-container={true} class={context.containerClass}>
-		{#if !context.query && context.list}
+		{#if !context.query}
 			<div class="slc-table-message"><p>{t('dt_not_loaded')}</p></div>
 		{:else if context.query?.loading === true}
 			<div class="slc-table-message slc-table-message-loading"><p>{t('loading')}</p></div>
@@ -219,13 +219,13 @@
 						perPage={context.perPage}
 						totalPages={context.totalPages}
 						disabled={context.busy}
-						onChange={(data) => context.onPagination?.(data)}
+						onChange={(data) => context.list.paginate(data)}
 					/>
 				{/if}
 			</div>
 			<div class="slc-table-bar-end">
 				{#if context.paginable}
-					<PerPage perPage={context.perPage} disabled={context.busy} onChange={(perPage) => context.onPagination?.({ page: 1, perPage })} />
+					<PerPage perPage={context.perPage} disabled={context.busy} onChange={(perPage) => context.list.paginate({ page: 1, perPage })} />
 				{/if}
 				<ColumnToggler />
 				{#if context.settings}
