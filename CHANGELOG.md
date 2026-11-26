@@ -13,6 +13,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: `dt.createCellEdit({ list, table, save, onError })` hücre
+  düzenlemeyi sayfadan alır: doğrulama (`validateCell`), anında gösterme
+  (`list.updatesWith`), kaydetme, hata ve geçersiz yapıştırma bildirimi.
+  Sayfada `{...cellEdit}` ile DataTable'a yayılır. Simple CRUD tek komut
+  (`updateCells`) kullanıyor; `updateCell` kaldırıldı.
 - FilterBar: aralık filtreleri `inputs/` bileşenleriyle (`Number`, `Date`,
   `Datetime`); native input kalmadı. Tarih-saat filtresi saat alıyor
   (`'YYYY-MM-DDTHH:mm'`, uygulama saat diliminde, bitiş dakikası dahil).

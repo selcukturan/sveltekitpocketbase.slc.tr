@@ -129,25 +129,8 @@ async function assertEditable(edits: { id: string; field: string }[]) {
 	if (ruled.some((edit) => !TABLE.canEdit(records.get(edit.id)!, edit.field))) error(403, { message: 'dt_cell_not_editable', type: 'general', errorId: '' });
 }
 
-// Tablo içinde tek hücre düzenleme: yalnızca o alan güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).
-export const updateCell = command(TABLE.cellEditSchema, async ({ id, field, value }) => {
-	await checkAuthenticated(); // 🔒
-	await assertEditable([{ id, field }]);
-
-	const { locals } = getRequestEvent();
-
-	const updatedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).update(id, { [field]: value ?? '' }), mapUnknownToError);
-
-	if (updatedResult.isErr()) {
-		throwError(updatedResult.error);
-	}
-
-	await requested(getList, 1).refreshAll();
-
-	return updatedResult.value;
-});
-
-// Toplu hücre düzenleme (yapıştırma): hücreler kayıt bazında birleştirilir, her kayıt tek istekle güncellenir.
+// Hücre düzenleme (tek hücre de bir elemanlı liste olarak gelir; bkz. dt.createCellEdit). Hücreler kayıt bazında
+// birleştirilir, her kayıt tek istekle güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).
 export const updateCells = command(TABLE.cellsEditSchema, async (edits) => {
 	await checkAuthenticated(); // 🔒
 	await assertEditable(edits);

@@ -7,9 +7,8 @@
 	import { Drawer, createHashDrawer } from '#lib/components/ui/drawer/index.js';
 	import { confirm } from '#lib/components/ui/confirm/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
-	import * as v from 'valibot';
 	import { TABLE, createFormSchema, updateFormSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells } from './page.remote';
+	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCells } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -38,45 +37,8 @@
 		}
 	};
 
-	// Tablo içinde hücre düzenleme.
-	// validateCell: kaydetmeden önce (preflight gibi) aynı şemayla doğrular; mesaj dönerse düzenleyici açık kalır.
-	// editCell: kaydeder; withOverride (list.updatesWith) yeni değeri hemen gösterir, sunucu listeyi tazeleyince
-	// gerçek veri gelir, hata olursa SvelteKit override'ı geri alır.
-	const cellArgs = ({ row, field, value }: dt.CellEditEvent<Item>) => ({ id: row.id, field, value });
-	const validateCell = (e: dt.CellEditEvent<Item>) => {
-		const result = v.safeParse(TABLE.cellEditSchema, cellArgs(e));
-		return result.success ? undefined : result.issues[0].message;
-	};
-	// Optimistik görünüm: listede ilgili kayıtlara alanları uygular (withOverride)
-	const applyEdits = (edits: v.InferOutput<typeof TABLE.cellEditSchema>[]) =>
-		list.updatesWith((result) => ({
-			...result,
-			items: result.items.map((item) => {
-				const own = edits.filter((edit) => edit.id === item.id);
-				return own.length ? { ...item, ...Object.fromEntries(own.map((edit) => [edit.field, edit.value])) } : item;
-			})
-		}));
-
-	const editCell = async (e: dt.CellEditEvent<Item>) => {
-		const args = v.parse(TABLE.cellEditSchema, cellArgs(e));
-		try {
-			await updateCell(args).updates(...applyEdits([args]));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
-
-	// Ctrl+V ile yapıştırma: tek istek. Geçersiz hücreler tabloda elendi, sayısı bildirilir.
-	const editCells = async (edits: dt.CellEditEvent<Item>[], { invalid }: { invalid: number }) => {
-		if (invalid > 0) toaster.error(null, t('dt_paste_invalid', { count: invalid }));
-		if (edits.length === 0) return;
-		const args = v.parse(TABLE.cellsEditSchema, edits.map(cellArgs));
-		try {
-			await updateCells(args).updates(...applyEdits(args));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
+	// Tablo içinde hücre düzenleme: doğrulama (TABLE şeması), anında gösterme, kaydetme ve hata bildirimi
+	const cellEdit = dt.createCellEdit({ list, table: TABLE, save: updateCells, onError: toaster.error });
 
 	const remove = async (id: string) => {
 		if (!(await confirm({ message: t('delete_confirm_with_id', { id }), yes: t('delete'), no: t('cancel'), danger: true }))) return;
@@ -178,13 +140,11 @@
 				selection="multiple"
 				bind:selected
 				persist="grapes-crud-simple"
-				onCellEdit={editCell}
-				onCellsEdit={editCells}
+				{...cellEdit}
 				onCopy={({ rows, cols, partial }) =>
 					partial
 						? toaster.add({ type: 'warning', title: t('dt_copied_title'), description: t('dt_copied_partial', { count: rows * cols }) })
 						: toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
-				{validateCell}
 				onRowActivate={(row) => drawer.show('update', row.id)}
 				onLoad={onTableLoad}
 				onError={(error) => toaster.error(error)}
