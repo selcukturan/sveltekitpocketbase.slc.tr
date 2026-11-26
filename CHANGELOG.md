@@ -211,6 +211,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: DataTable belgesine `createRowDelete` bölümü ve `list.selected`;
+  örnekler yeni kullanıma göre; başlık alpha.202 / `78d08a8`. Çekirdek
+  belgede `command` örneği `deleteRecords({ ids })`.
+
 - Uygulama sürümü `v0.2.0-alpha.193` oldu.
 - Belgeler: DataTable belgesi `docs/d01_datatable_2026-11-26.md` oldu (tarih,
   sürüm, commit; örnek sayfalar, test listesi, `defineTable` yönlendirmesi,
