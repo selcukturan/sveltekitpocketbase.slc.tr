@@ -18,8 +18,7 @@
 	import FooterCell from './FooterCell.svelte';
 
 	// selected: seçili satır id'leri (bind:selected). Sayfa bağlamazsa yerel değer olarak yazılır.
-	// range: seçili hücre aralığı ve özeti (bind:range, salt okunur: tablo yazar)
-	let { selected = $bindable([]), range = $bindable(), ...props }: MainProps<TData> & { range?: RangeInfo } = $props();
+	let { selected = $bindable([]), ...props }: MainProps<TData> = $props();
 
 	// svelte-ignore state_referenced_locally
 	const context = createTableContext<TData>(props, {
@@ -44,12 +43,14 @@
 		untrack(() => props.onVisibleRowsChange?.(rows));
 	});
 
-	// Aralık → bind:range ve onRangeChange
+	// Aralık → onRangeChange. Yalnızca bildirim (state yazılmaz): özet hücre değerlerine de bağlı (veri tazelenince değişir),
+	// tek bir olay işleyicisinden çağrılamaz. bind:range yok: türetilmiş değeri effect'le prop'a kopyalamak gerekirdi.
+	let lastRange: RangeInfo | undefined;
 	$effect(() => {
 		const info = context.rangeInfo;
 		untrack(() => {
-			if (info === range) return;
-			range = info;
+			if (info === lastRange) return;
+			lastRange = info;
 			props.onRangeChange?.(info);
 		});
 	});

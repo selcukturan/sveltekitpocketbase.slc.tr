@@ -221,6 +221,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- DataTable (kırıcı): `bind:range` kaldırıldı; hücre aralığı özeti yalnızca
+  `onRangeChange(info)` ile okunur. Türetilmiş değer artık effect içinde prop'a
+  kopyalanmıyor (Svelte: "When not to use `$effect`"). Projede kullanan sayfa
+  yoktu.
 - Belgeler: DataTable belgesi alpha.206 / `2fa46c9`; aktif hücre ve satırın
   nasıl güncellendiği (`cursor.activeRow`, `data-active-row`), `onRowClick`
   satırı seçmez.

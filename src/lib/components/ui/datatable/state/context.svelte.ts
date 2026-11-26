@@ -43,7 +43,7 @@ export type ActiveCell<TData> = Omit<CellEvent<TData>, 'event' | 'value'>;
 // 'refresh': aynı sorgunun tazelenmesi (mutasyon sonrası, withOverride ile optimistik güncelleme dahil)
 export type LoadEvent<TData> = ListResult<TData> & { reason: 'query' | 'refresh' };
 
-// Seçili hücre alanları ve özeti (bind:range, onRangeChange, alt bar). ranges: Ctrl ile çoklu seçimde birden çok alan
+// Seçili hücre alanları ve özeti (onRangeChange, alt bar). ranges: Ctrl ile çoklu seçimde birden çok alan
 // (son eleman şu anki). Örtüşen hücreler bir kez sayılır; sayısal toplam yalnızca number değerlerden.
 export type RangeInfo = { ranges: CellRange[]; count: number; numericCount: number; sum: number; average: number | undefined };
 
@@ -157,7 +157,7 @@ export interface MainProps<TData extends Row> {
 	onContextMenu?: (e: CellEvent<TData>) => void;
 	// Görünen satırlar değişti (kaydırma, boyut, veri); her karede değil, yalnızca aralık değişince
 	onVisibleRowsChange?: (rows: VisibleRows) => void;
-	// Seçili hücre aralığı değişti (bind:range ile de okunur)
+	// Seçili hücre aralığı değişti (sayfa özeti saklamak isterse kendi $state'ine yazar)
 	onRangeChange?: (range: RangeInfo | undefined) => void;
 	// Koşullu satır görünümü: satırın tüm hücrelerine eklenecek class (örn. vadesi geçen satır)
 	rowClass?: (row: TData) => string | undefined;
