@@ -16,7 +16,7 @@
 	const draft = $derived(list.filter as FilterValues); // bind:value ile yazılır (list.filter reaktif proxy)
 	const inline = $derived(filters.fields.filter((f) => f.type === 'text'));
 	const panel = $derived(filters.fields.filter((f) => f.type !== 'text'));
-	const applied = $derived(filters.countActive(list.params.filterData as FilterValues, ['number', 'date', 'bool', 'select']));
+	const applied = $derived(filters.countActive(list.params.filterData as FilterValues, ['number', 'date', 'datetime', 'bool', 'select']));
 
 	const labelOf = (f: FilterField) => {
 		const label = f.label ?? columns.find((col) => col.field === f.field)?.label ?? f.field;
@@ -39,7 +39,7 @@
 
 {#snippet range(f: FilterField, close: () => void)}
 	{@const label = labelOf(f)}
-	{@const date = f.type === 'date'}
+	{@const date = f.type === 'date' || f.type === 'datetime'}
 	<div class="slc-filter-range">
 		{#each [MIN, MAX] as end (end)}
 			{@const hint = t(date ? (end === MIN ? 'dt_filter_from' : 'dt_filter_to') : end === MIN ? 'dt_filter_min' : 'dt_filter_max')}
@@ -82,7 +82,7 @@
 					{#each panel as f (f.field)}
 						{@const label = labelOf(f)}
 						<span class="slc-filter-label">{label}</span>
-						{#if f.type === 'number' || f.type === 'date'}
+						{#if f.type === 'number' || f.type === 'date' || f.type === 'datetime'}
 							{@render range(f, close)}
 						{:else}
 							<!-- "Tümü" = seçimi kaldır (boş değer); liste panelin içinde açılır (iç içe popover) -->

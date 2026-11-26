@@ -2,6 +2,8 @@ import { SvelteMap } from 'svelte/reactivity';
 import { getSelectedLang, t } from '#lib/app/localization/index.js';
 import type { Column, Field, Row } from '../types.js';
 import { numberFormat, NUMBER_RAW } from '../utils/format.js';
+import { config } from '#lib/app/config.js';
+import { parsePbDate, utcToWall, wallToUtc } from '#lib/utils/timezone.js';
 import type { CellPos, CellRange } from './navigation.svelte.js';
 import type { Attachment } from 'svelte/attachments';
 
@@ -64,7 +66,6 @@ export const editorOf = <TData>(col: Column<TData> | undefined): EditorKind | un
 	}
 };
 
-const pad = (n: number) => String(n).padStart(2, '0');
 
 // Değer → düzenleyicideki metin (input value)
 const toDraft = (kind: EditorKind, value: unknown): string => {
@@ -73,9 +74,8 @@ const toDraft = (kind: EditorKind, value: unknown): string => {
 	if (kind === 'number' && typeof value === 'number') return numberFormat(getSelectedLang(), NUMBER_RAW).format(value);
 	if (kind === 'date') return String(value).slice(0, 10); // PocketBase '2026-11-17 00:00:00.000Z' → '2026-11-17'
 	if (kind === 'datetime') {
-		const d = new Date(String(value).replace(' ', 'T'));
-		if (Number.isNaN(d.getTime())) return '';
-		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; // datetime-local (yerel saat)
+		const d = parsePbDate(value);
+		return d ? utcToWall(d, config.timezone) : ''; // datetime-local: uygulama saat diliminde
 	}
 	return String(value);
 };
@@ -94,8 +94,8 @@ const fromDraft = (kind: EditorKind, draft: string): { ok: true; value: unknown 
 			return { ok: true, value: text === '' ? null : text };
 		case 'datetime': {
 			if (text === '') return { ok: true, value: null };
-			const d = new Date(text); // yerel saat
-			return Number.isNaN(d.getTime()) ? { ok: false } : { ok: true, value: d.toISOString() };
+			const d = wallToUtc(text, config.timezone); // uygulama saat dilimindeki duvar saati → gerçek an
+			return d ? { ok: true, value: d.toISOString() } : { ok: false };
 		}
 		default:
 			return { ok: true, value: draft };

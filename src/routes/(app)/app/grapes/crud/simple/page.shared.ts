@@ -53,6 +53,7 @@ export const TABLE = defineTable({
 		select_optional_single: { label: 'dt_select_optional_single', width: '150px', options: singleOptions, sortable: true, filter: true, edit: true },
 		select_optional_multiple: { label: 'dt_select_optional_multiple', type: 'list', width: '180px', sortable: true },
 		date_optional: { label: 'dt_date_optional', type: 'date', width: '130px', sortable: true, filter: true, edit: true },
+		datetime_optional: { label: 'dt_datetime_optional', type: 'datetime', width: '170px', sortable: true, filter: true, edit: true },
 		bool_optional: { label: 'dt_bool_optional', type: 'bool', width: '120px', sortable: true, filter: true, edit: true },
 		updated: { label: 'dt_updated', type: 'datetime', width: '170px', sortable: true }
 	}

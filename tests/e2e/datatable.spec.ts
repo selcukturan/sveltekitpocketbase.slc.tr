@@ -246,11 +246,11 @@ test('hücre düzenleme: yazma/F2/Enter/Esc, sayı, liste, tarih, bool ve doğru
 	await expect(cell(page, 0, 8)).toHaveText('15.03.2026');
 
 	// Bool: Enter düzenleyici açmadan tersine çevirir
-	await cell(page, 0, 9).click();
-	const before = await cell(page, 0, 9).locator('span').getAttribute('aria-label');
+	await cell(page, 0, 10).click();
+	const before = await cell(page, 0, 10).locator('span').getAttribute('aria-label');
 	await page.keyboard.press('Enter');
 	await expect(editor).toHaveCount(0);
-	await expect(cell(page, 0, 9).locator('span')).not.toHaveAttribute('aria-label', before!);
+	await expect(cell(page, 0, 10).locator('span')).not.toHaveAttribute('aria-label', before!);
 
 	// Doğrulama (validateCell): zorunlu alan boşaltılamaz → kaydedilmez, düzenleyici açık kalır ve mesaj görünür
 	await cell(page, 0, 3).click();
@@ -295,12 +295,12 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	await expect(cell(page, 1, 6)).toHaveText('windows');
 
 	// Tek değer + aralık: aralığı doldurur (bool)
-	await cell(page, 0, 9).click();
+	await cell(page, 0, 10).click();
 	await page.keyboard.press('Shift+ArrowDown');
 	await clip('evet');
 	await page.keyboard.press('Control+v');
-	await expect(cell(page, 0, 9).locator('span')).toHaveAttribute('aria-label', 'true');
-	await expect(cell(page, 1, 9).locator('span')).toHaveAttribute('aria-label', 'true');
+	await expect(cell(page, 0, 10).locator('span')).toHaveAttribute('aria-label', 'true');
+	await expect(cell(page, 1, 10).locator('span')).toHaveAttribute('aria-label', 'true');
 
 	// Geçersiz değer kaydedilmez, bildirilir
 	await cell(page, 0, 5).click();
@@ -359,7 +359,7 @@ test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalış�
 	await expect(rows).toHaveCount(3);
 
 	// rowClass: bool_optional işaretli satır kalın
-	await cell(page, 0, 9).click();
+	await cell(page, 0, 10).click();
 	await page.keyboard.press('Enter');
 	await expect(cell(page, 0, 3)).toHaveClass(/font-semibold/);
 	await expect(cell(page, 1, 3)).not.toHaveClass(/font-semibold/);
@@ -573,13 +573,13 @@ test('footer: sum(2), avg(2), max(), count() ve fonksiyon yüklü satırlardan h
 	await expect(footer(1, 5)).toHaveText('15,25'); // avg(2)
 	await expect(footer(2, 5)).toHaveText('20,5'); // max(): en fazla 2 basamak, sondaki sıfır yok
 	await expect(footer(0, 8)).toHaveText('0'); // count(): boş tarih sayılmaz
-	await expect(footer(1, 9)).toHaveText('0 ✓'); // fonksiyon
+	await expect(footer(1, 10)).toHaveText('0 ✓'); // fonksiyon
 	await expect(footer(0, 5)).toHaveAttribute('title', 'Bu sayfadaki 2 kayıttan hesaplandı');
 
 	// Veri değişince footer güncellenir (bool işaretle → fonksiyon 1 ✓)
-	await cell(page, 0, 9).click();
+	await cell(page, 0, 10).click();
 	await page.keyboard.press('Enter');
-	await expect(footer(1, 9)).toHaveText('1 ✓');
+	await expect(footer(1, 10)).toHaveText('1 ✓');
 
 	// temizlik
 	await deleteFirstRow(page);
@@ -593,10 +593,10 @@ test('dar kolon: ortalı başlık taşmaz, tutamak görünür kalır; footer met
 	await openTable(page);
 	await page.evaluate(() => localStorage.clear()); // önceki testlerin kayıtlı genişlikleri karışmasın
 	await page.reload();
-	await expect(cell(page, 0, 9)).toBeVisible();
+	await expect(cell(page, 0, 10)).toBeVisible();
 
 	// bool_optional (ortalı, sıralanabilir) başlığını en dara sürükle
-	const header = grid(page).locator('[role="columnheader"]').nth(9);
+	const header = grid(page).locator('[role="columnheader"]').nth(10);
 	const handle = header.locator('.slc-table-resizer');
 	await header.hover();
 	const box = (await handle.boundingBox())!;
@@ -606,7 +606,7 @@ test('dar kolon: ortalı başlık taşmaz, tutamak görünür kalır; footer met
 	await page.mouse.up();
 
 	const headerBox = (await header.boundingBox())!;
-	const cellBox = (await cell(page, 0, 9).boundingBox())!;
+	const cellBox = (await cell(page, 0, 10).boundingBox())!;
 	expect(Math.round(headerBox.width)).toBe(50); // en küçük genişlik
 	expect(Math.abs(headerBox.width - cellBox.width)).toBeLessThan(1); // başlık kolonun dışına taşmıyor
 	await header.hover();

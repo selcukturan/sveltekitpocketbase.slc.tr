@@ -47,7 +47,7 @@ export type TableColumnDef = {
 	options?: readonly string[]; // seçim listesi: düzenleyici, seçim filtresi ve doğrulama
 	// izinler (opt-in; sunucu doğrular)
 	sortable?: boolean;
-	filter?: boolean | FilterType; // true: türü kolondan (options → select, number, date/datetime → date, bool, diğer → text)
+	filter?: boolean | FilterType; // true: türü kolondan (options → select, number, date, datetime, bool, diğer → text)
 	edit?: boolean | v.GenericSchema; // true: türe göre varsayılan şema; şema verilirse o (örn. zorunlu metin)
 	// satır kuralı (saf; sunucuda da çalışır)
 	editable?: (row: AnyRow) => boolean;
@@ -104,7 +104,8 @@ const filterTypeOf = (col: TableColumnDef): FilterType => {
 	if (typeof col.filter === 'string') return col.filter;
 	if (col.options) return 'select';
 	if (col.type === 'number') return 'number';
-	if (col.type === 'date' || col.type === 'datetime') return 'date';
+	if (col.type === 'date') return 'date';
+	if (col.type === 'datetime') return 'datetime'; // gün sınırları uygulama saat diliminde
 	if (col.type === 'bool') return 'bool';
 	return 'text';
 };

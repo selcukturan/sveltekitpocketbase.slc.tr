@@ -13,6 +13,16 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Saat dilimi: `config.timezone` (uygulama saat dilimi, varsayılan
+  `Europe/Istanbul`) ve saf `utils/timezone.ts` (duvar saati ↔ UTC, yaz saati
+  geçişleri, gün aralığı). Tarih-saat alanları gerçek an olarak tutulur (UTC);
+  form, tablo gösterimi, hücre düzenleme ve filtre bu saat dilimini kullanır,
+  tarayıcınınkini değil. Başka bölgede kurulum yalnızca bu ayarı değiştirir.
+- DataTable: `datetime` filtre türü (gün sınırları uygulama saat diliminde);
+  `type: 'datetime'` kolonda `filter: true` artık bunu seçer. Simple CRUD
+  tablosuna `datetime_optional` kolonu (sıralama, filtre, düzenleme).
+- Testler: `timezone.spec.ts` (saf), `datetime.spec.ts` (tarayıcı New York'ta,
+  sonuçlar İstanbul'a göre), `relation-value.spec.ts`.
 - Testler: `form-inputs.spec.ts` (tüm form alanları: erişilebilir adlar,
   doğrulama, kaydet → güncelleme formunda geri okuma, sıfırla, değişiklik
   takibi, dosya sil/geri al, Select klavye/Esc, Bool, kaydedilmemiş değişiklik
@@ -272,6 +282,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Tarih-saat formda UTC duvar saati olarak tutuluyordu (02:00 → `02:00Z`),
+  tablo ise yerel saate çevirip 05:00 gösteriyordu; hücre düzenleme de
+  tarayıcı saat dilimini kullanıyordu. Hepsi uygulama saat diliminde.
+- Tarih (date) tabloda tarayıcı saat dilimiyle biçimleniyordu; UTC'nin
+  gerisindeki bölgelerde bir gün önce görünürdü. Artık her yerde aynı gün.
+- `input.Relation`: dışarıdan atanan değerin etiketleri yüklenmiyordu ("veri
+  yok"); yalnızca önbellekte olmayan id'ler sunucudan okunuyor, bulunamayanlar
+  tekrar sorulmuyor.
 - `input.Select`: formda adını alan etiketinden alıyor (düğme kendine
   `aria-labelledby` veriyordu, ekran okuyucu seçili değeri okuyordu).
 - `input.Button`: `iconOnly` düğmede `label` ad ve ipucu olarak kullanılıyor;

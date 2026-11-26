@@ -50,6 +50,7 @@ export const tr = {
 	dt_select_optional_single: 'Seçim (Tekli)',
 	dt_select_optional_multiple: 'Seçim (Çoklu)',
 	dt_date_optional: 'Tarih',
+	dt_datetime_optional: 'Tarih-saat',
 	dt_bool_optional: 'Onay',
 	dt_updated: 'Güncellenme',
 	dt_no_data: 'Gösterilecek veri yok.',

@@ -6,7 +6,7 @@
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from '../common.js';
 
-	import { getMultipleRelationSelectedList, getSingleRelationSelectedList } from '#lib/remotes/relations.remote.js';
+	import { getMultipleRelationSelectedList } from '#lib/remotes/relations.remote.js';
 	import type { RelationValueTypeChoice, RelationPropsType, RelationValueChangeArgs } from '../type.js';
 	import RelationDialogContent from './dialog-content.svelte';
 	import { createRelationInputsContext } from './context.svelte.js';
@@ -88,28 +88,25 @@
 		}
 	}
 
-	// ######### BEGIN: Initial Selected List ###########
-	let selectedListPromiseTimestamp = $state(new Date().getTime());
-	let selectedListPromiseValue = $state.raw(value);
-	let selectedListPromise = $derived(
-		multiple
-			? selectedListPromiseValue.length > 0
-				? getMultipleRelationSelectedList({
-						ids: selectedListPromiseValue as RelationValueTypeChoice<true>,
-						collection,
-						timestamp: selectedListPromiseTimestamp
-					})
-				: undefined
-			: selectedListPromiseValue !== ''
-				? getSingleRelationSelectedList({
-						id: selectedListPromiseValue as RelationValueTypeChoice<false>,
-						collection,
-						timestamp: selectedListPromiseTimestamp
-					})
-				: undefined
-	);
-	const watchSelectedListPromise = () => selectedListPromise?.current?.forEach((item) => context.itemDetailCache.set(item.id, item));
-	// ######### END: Initial Selected List #############
+	// ######### BEGIN: Selected List (etiketler) ###########
+	// Etiketi önbellekte (itemDetailCache) olmayan id'ler sunucudan okunur: ilk değer, dışarıdan atanan değer (başka
+	// kayda geçiş vb.). Seçiciden seçilenler zaten önbellekte olduğu için tekrar okunmaz.
+	const ids = $derived((Array.isArray(value) ? value : value ? [value] : []) as string[]);
+	const missing = $derived(ids.filter((id) => !context.itemDetailCache.has(id)).slice(0, 100)); // sunucu sınırı: 100
+	const selected = $derived(missing.length > 0 ? { ids: missing, query: getMultipleRelationSelectedList({ ids: missing, collection }) } : undefined);
+	const watchSelectedListPromise = () => {
+		const current = selected;
+		const items = current?.query.current;
+		if (!current || !items) return;
+		untrack(() => {
+			items.forEach((item) => context.itemDetailCache.set(item.id, item));
+			// Bulunamayanlar (silinmiş kayıt): etiketi "veri yok" olarak önbelleğe yaz, aynı id tekrar sorulmasın
+			const found = new Set(items.map((item) => item.id));
+			for (const id of current.ids) if (!found.has(id)) context.itemDetailCache.set(id, { id, label: t('relation_no_data') });
+		});
+	};
+	const isPending = (id: string) => (selected?.query.loading ?? false) && !context.itemDetailCache.has(id);
+	// ######### END: Selected List #############
 
 	const defaultClasses = $derived(!inform ? inputClasses.base + ' ' + inputClasses.variants[status] + ' ' + inputClasses.sizes[size] : '');
 </script>
@@ -166,13 +163,14 @@
 {/snippet}
 
 {#snippet list()}
-	{@const isLoading = selectedListPromise?.loading ?? false}
+	{@const isLoading = ids.some(isPending)}
 	{@const listItems = (Array.isArray(value) ? [...value].reverse() : value ? [value] : []) as string[]}
 	{@const isEmpty = listItems.length === 0}
 	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
 		<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
 			{#each listItems as item (item)}
-				{@render listItem({ id: item, label: isLoading ? item : (context.itemDetailCache.get(item)?.label ?? t('relation_no_data')), isLoading })}
+				{@const pending = isPending(item)}
+				{@render listItem({ id: item, label: pending ? item : (context.itemDetailCache.get(item)?.label ?? t('relation_no_data')), isLoading: pending })}
 			{/each}
 		</div>
 		<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>

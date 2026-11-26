@@ -52,6 +52,7 @@ export const en = {
 	dt_select_optional_single: 'Select (single)',
 	dt_select_optional_multiple: 'Select (multiple)',
 	dt_date_optional: 'Date',
+	dt_datetime_optional: 'Date-time',
 	dt_bool_optional: 'Flag',
 	dt_updated: 'Updated',
 	dt_no_data: 'No data to display.',

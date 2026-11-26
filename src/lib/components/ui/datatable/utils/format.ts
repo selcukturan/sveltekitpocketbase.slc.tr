@@ -6,6 +6,8 @@
 // modül düzeyinde sabit olarak tanımlayıp onu verin. Her çağrıda yeni nesne verilirse önbellek işe yaramaz
 // (WeakMap olduğu için sızıntı da olmaz).
 
+import { config } from '#lib/app/config.js';
+
 type Formatter = Intl.NumberFormat | Intl.DateTimeFormat;
 
 const cache = new WeakMap<object, Map<string, Formatter>>();
@@ -22,8 +24,10 @@ function cached<T extends Formatter>(options: object, locale: string, create: ()
 export const NUMBER: Intl.NumberFormatOptions = {}; // = value.toLocaleString(locale)
 export const NUMBER_2: Intl.NumberFormatOptions = { maximumFractionDigits: 2 }; // özet ve footer (ondalık sabit değil)
 export const NUMBER_RAW: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 20 }; // düzenleyici metni
-export const DATE: Intl.DateTimeFormatOptions = {}; // = date.toLocaleDateString(locale)
-export const DATETIME: Intl.DateTimeFormatOptions = { dateStyle: 'short', timeStyle: 'short' };
+// date: takvim günü, UTC gece yarısı tutulur → UTC'de gösterilir (her saat diliminde aynı gün)
+export const DATE: Intl.DateTimeFormatOptions = { timeZone: 'UTC' };
+// datetime: gerçek an → uygulama saat diliminde (config.timezone; bkz. utils/timezone.ts)
+export const DATETIME: Intl.DateTimeFormatOptions = { dateStyle: 'short', timeStyle: 'short', timeZone: config.timezone };
 
 export const numberFormat = (locale: string, options: Intl.NumberFormatOptions = NUMBER) =>
 	cached(options, locale, () => new Intl.NumberFormat(locale, options));

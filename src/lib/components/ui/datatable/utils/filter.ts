@@ -1,4 +1,6 @@
 import * as v from 'valibot';
+import { config } from '#lib/app/config.js';
+import { dayRangeUtc, toPbDate } from '#lib/utils/timezone.js';
 
 /**
  * Liste filtreleri: tek tanımdan hem doğrulama şeması, hem güvenli PocketBase filtresi, hem de FilterBar arayüzü.
@@ -11,7 +13,9 @@ import * as v from 'valibot';
  * Değerler hep metindir, '' = filtre yok. Anahtarlar (list.filter / filterData):
  *   text   → alan             : içerir (~)
  *   number → alan__min/__max  : >= / <=
- *   date   → alan__min/__max  : 'YYYY-MM-DD', gün başı / gün sonu dahil
+ *   date     → alan__min/__max : 'YYYY-MM-DD', gün başı / gün sonu dahil (takvim günü: UTC gece yarısı tutulan alanlar)
+ *   datetime → alan__min/__max : 'YYYY-MM-DD', uygulama saat dilimindeki gün (config.timezone): İstanbul'da 2 Eylül
+ *                                = [1 Eylül 21:00Z, 2 Eylül 21:00Z). Tarayıcının saat dilimi kullanılmaz.
  *   bool   → alan             : 'true' | 'false'
  *   select → alan             : seçeneklerden biri (=)
  *
@@ -26,7 +30,7 @@ import * as v from 'valibot';
  * <dt.FilterBar {list} filters={FILTERS} {columns} />
  */
 
-export type FilterType = 'text' | 'number' | 'date' | 'bool' | 'select';
+export type FilterType = 'text' | 'number' | 'date' | 'datetime' | 'bool' | 'select';
 // Kısa yazım ('number') ya da nesne; select için options zorunlu. label: FilterBar'daki etiket (çeviri anahtarı olabilir)
 export type FilterDef = Exclude<FilterType, 'select'> | { type: FilterType; options?: readonly string[]; label?: string };
 export type FilterValues = Record<string, string>;
@@ -56,7 +60,8 @@ const matching = (re: RegExp, message: string) =>
 	);
 const oneOf = (values: readonly string[]) => v.optional(v.picklist(['', ...values]), '');
 
-export function defineFilters<const T extends Record<string, FilterDef>>(defs: T) {
+// timeZone: datetime filtrelerinin gün sınırları (varsayılan uygulama saat dilimi)
+export function defineFilters<const T extends Record<string, FilterDef>>(defs: T, { timeZone = config.timezone }: { timeZone?: string } = {}) {
 	const entries: Record<string, v.OptionalSchema<v.GenericSchema<string, string>, ''>> = {};
 	const fields: FilterField[] = [];
 
@@ -66,13 +71,13 @@ export function defineFilters<const T extends Record<string, FilterDef>>(defs: T
 		const options = typeof def === 'string' ? undefined : def.options;
 		const label = typeof def === 'string' ? undefined : def.label;
 		if (type === 'select' && !options?.length) throw new Error(`Seçim filtresi için options gerekli: ${field}`);
-		const range = type === 'number' || type === 'date';
+		const range = type === 'number' || type === 'date' || type === 'datetime';
 		const keys = range ? [field + MIN, field + MAX] : [field];
 		fields.push({ field, type, options, label, keys });
 
 		if (type === 'text') entries[field] = text();
 		else if (type === 'number') for (const key of keys) entries[key] = matching(NUMBER_RE, 'Geçersiz sayı.');
-		else if (type === 'date') for (const key of keys) entries[key] = matching(DATE_RE, 'Geçersiz tarih.');
+		else if (type === 'date' || type === 'datetime') for (const key of keys) entries[key] = matching(DATE_RE, 'Geçersiz tarih.');
 		else if (type === 'bool') entries[field] = oneOf(['true', 'false']);
 		else entries[field] = oneOf(options ?? []);
 	}
@@ -89,6 +94,14 @@ export function defineFilters<const T extends Record<string, FilterDef>>(defs: T
 			return `{:${key}}`;
 		};
 		for (const { field, type } of fields) {
+			if (type === 'datetime') {
+				// Gün başı dahil, ertesi gün başı hariç (yaz saati geçişinde gün 23/25 saat olabilir)
+				const min = dayRangeUtc(values[field + MIN] ?? '', timeZone);
+				const max = dayRangeUtc(values[field + MAX] ?? '', timeZone);
+				if (min) parts.push(`${field} >= ${param(toPbDate(min[0]))}`);
+				if (max) parts.push(`${field} < ${param(toPbDate(max[1]))}`);
+				continue;
+			}
 			if (type === 'number' || type === 'date') {
 				const min = values[field + MIN] ?? '';
 				const max = values[field + MAX] ?? '';
