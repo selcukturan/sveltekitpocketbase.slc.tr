@@ -10,7 +10,7 @@
 		label?: string;
 	};
 
-	let { label: componentLabel, field, onValueChange: userOnValueChange, ...restProps }: Props = $props();
+	let { label: componentLabel, field, onValueChange: userOnValueChange, oninput: userOnInput, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
@@ -28,11 +28,30 @@
 	let step = $derived(formField.meta.onlyInt ? 1 : formField.meta.decimals !== undefined ? 10 ** -formField.meta.decimals : 'any');
 
 	// ######### BEGIN: handle value change ###################
+	// Geçersiz metin (örn: '1-2', '5--'): tarayıcı değeri '' verir, Number bunu boş (0) sayar. Ekranda metin dururken
+	// forma sessizce 0 gitmesin diye gönderilen değer gizli input'tan gelir: geçersizse 'NaN' → şema "geçerli bir sayı
+	// girin" der (yazarken ve gönderirken). Görünen input'un adı yoktur.
+	let numberValue = $state(0);
+	let badInput = $state(false);
+	const sync = (initial = false) => {
+		const el = typeof document !== 'undefined' ? (document.getElementById(id) as HTMLInputElement | null) : null;
+		badInput = el?.validity.badInput ?? false;
+		const value = badInput ? NaN : numberValue;
+		formField.track(value, initial);
+		field.set(value);
+	};
+
 	const onValueChange = (args: NumberValueChangeArgs) => {
-		formField.track(args.value, args.initial);
-		field.set(args.value);
+		numberValue = args.value;
+		sync(args.initial);
 		userOnValueChange?.(args);
 		formField.validate();
+	};
+	// Değer değişmeden geçerlilik değişebilir ('1-2' → tümü silinir: değer 0 → 0)
+	const onInput = () => {
+		const wasBad = badInput;
+		sync();
+		if (wasBad !== badInput) formField.validate();
 	};
 	// ######### END: handle value change #####################
 </script>
@@ -40,14 +59,19 @@
 <Field issues={formField.issues} required={formField.required} label={formField.label} {id}>
 	<Number
 		{id}
-		name={attributes.name}
 		min={formField.meta.min}
 		max={formField.meta.max}
 		{step}
 		aria-invalid={attrAriaInvalid}
 		{onValueChange}
+		oninput={(e) => {
+			onInput();
+			userOnInput?.(e);
+		}}
 		{...restProps}
 		status="with-field"
 		size="sm"
 	/>
+	<!-- Gönderilen değer (bkz. yukarı) -->
+	<input type="hidden" name={attributes.name} value={badInput ? 'NaN' : String(numberValue)} />
 </Field>

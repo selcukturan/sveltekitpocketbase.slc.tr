@@ -287,6 +287,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- `formInput.Number`: geçersiz metin (`1-2`, `5--`) tarayıcıda boş değer
+  verdiği için forma sessizce 0 gidiyordu. Gönderilen değer gizli input'tan:
+  geçersizse `NaN` → "Lütfen geçerli bir sayı girin." (yazarken ve gönderirken).
+- `input.Number`: nokta → yerel ayraç dönüşümü önce engelleyip sonra
+  ekliyordu; ekleme (`execCommand`) başarısız olunca ayraç kayboluyordu
+  (`12.5` → 125). Artık yalnızca ekleme başarılıysa engelleniyor.
 - FilterBar: panelde Enter arıyor ama paneli kapatmıyordu (odak "Filtreler"
   düğmesine dönünce aynı Enter düğmeye basıp paneli yeniden açıyordu).
 - Tarih-saat formda UTC duvar saati olarak tutuluyordu (02:00 → `02:00Z`),

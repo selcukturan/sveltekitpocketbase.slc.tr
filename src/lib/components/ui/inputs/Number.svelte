@@ -74,30 +74,24 @@
 	const localDecimalSeparator = (1.1).toLocaleString()[1];
 	const needToConvert = $derived(autoChangeDecimalSeparator && universalDecimalSeparator !== localDecimalSeparator);
 
+	// Yerel ayracı ekler. Başarısızsa (execCommand false döndürebilir) false: çağıran varsayılan davranışı engellemez,
+	// tarayıcının kendi girişi kalır (Chrome number input'ta nokta da ondalık ayracıdır). Önceden önce engellenip sonra
+	// ekleniyordu; ekleme başarısız olunca ayraç kayboluyordu ('12.5' → 125).
+	type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
+	const insertText = (text: string) => (document as unknown as CustomDoc).execCommand('insertText', false, text);
+
 	const decimalSeparator = (node: HTMLElement) => {
 		if (!needToConvert) return;
 
 		const destroyKeydown = on(node, 'keydown', (e: KeyboardEvent) => {
-			if (e.key === universalDecimalSeparator) {
-				e.preventDefault();
-				type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
-				(document as unknown as CustomDoc).execCommand('insertText', false, localDecimalSeparator);
-			}
+			if (e.key === universalDecimalSeparator && insertText(localDecimalSeparator)) e.preventDefault();
 		});
 
 		const destroyPaste = on(node, 'paste', (e: ClipboardEvent) => {
-			const clipboardData = e.clipboardData;
-			if (!clipboardData) return;
-
-			const pastedText = clipboardData.getData('text');
-
-			// Eğer yerel ayar nokta değilse (örn: virgülse) ve yapıştırılan metinde nokta varsa
-			if (pastedText.includes(universalDecimalSeparator)) {
+			const pastedText = e.clipboardData?.getData('text');
+			// Yapıştırılan metindeki noktalar yerel ayraca (virgül) çevrilir
+			if (pastedText?.includes(universalDecimalSeparator) && insertText(pastedText.replaceAll(universalDecimalSeparator, localDecimalSeparator))) {
 				e.preventDefault();
-				// Noktaları yerel ayraç (virgül) ile değiştirip yapıştırıyoruz
-				const formattedText = pastedText.replaceAll(universalDecimalSeparator, localDecimalSeparator);
-				type CustomDoc = { execCommand: (commandId: string, showUI?: boolean, value?: string) => boolean };
-				(document as unknown as CustomDoc).execCommand('insertText', false, formattedText);
 			}
 		});
 

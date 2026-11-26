@@ -316,4 +316,48 @@ test.describe('Türkçe yerel ayar', () => {
 		await expect(number).toHaveValue(''); // boş bırakılabilir (değer 0 kabul edilir)
 		await expect(form.getByRole('button', { name: 'Sıfırla' })).toBeDisabled(); // 0 = ilk değer
 	});
+	test('Number: ayraç eklenemezse (execCommand false) nokta kaybolmaz', async ({ page }) => {
+		const form = await openCreate(page);
+		await page.evaluate(() => {
+			(document as unknown as { execCommand: () => boolean }).execCommand = () => false;
+		});
+		const number = form.getByLabel('number_optional');
+		await number.click();
+		await page.keyboard.type('12.5');
+		await expect(number).toHaveJSProperty('valueAsNumber', 12.5);
+	});
+});
+
+test('Number: geçersiz metin sessizce 0 olarak gönderilmez; negatif ve ondalık girilir', async ({ page }) => {
+	const form = await openCreate(page);
+	const num = form.getByLabel('number_optional');
+	const error = form.getByRole('status').filter({ hasText: 'Lütfen geçerli bir sayı girin.' });
+	await form.getByLabel('text_required').fill('seed-e2e-gonderilmemeli');
+
+	// Tarayıcı '1-2' için değeri '' verir (badInput); alan hatalı görünür, form gönderilmez
+	await num.click();
+	await page.keyboard.type('1-2', { delay: 30 });
+	await expect(error).toHaveCount(1);
+	await expect(num).toHaveAttribute('aria-invalid', 'true');
+	await form.getByRole('button', { name: 'Oluştur' }).click();
+	await expect(page).toHaveURL(/cmd=create/);
+	await expect(error).toHaveCount(1);
+
+	// Tümü silinince (değer 0 → 0 değişmese de) hata kalkar
+	await num.fill('');
+	await expect(error).toHaveCount(0);
+	await expect(num).not.toHaveAttribute('aria-invalid', 'true');
+
+	// Negatif ve ondalık: ara durumlar ('-', '-0.') geçersizdir ama yazılan silinmez
+	for (const [text, expected] of [['-5', -5], ['-0.5', -0.5], ['1e3', 1000]] as const) {
+		await num.fill('');
+		await num.click();
+		await page.keyboard.type(text, { delay: 30 });
+		await expect(num).toHaveJSProperty('valueAsNumber', expected);
+		await expect(error).toHaveCount(0);
+	}
+	// Değişiklik vardı; kapatırken sorulur → Evet (kayıt oluşturulmadı)
+	await form.getByRole('button', { name: 'Kapat' }).first().click();
+	await page.getByRole('button', { name: 'Evet' }).click();
+	await expect(page).not.toHaveURL(/cmd=create/);
 });
