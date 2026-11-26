@@ -25,9 +25,11 @@ export const NUMBER: Intl.NumberFormatOptions = {}; // = value.toLocaleString(lo
 export const NUMBER_2: Intl.NumberFormatOptions = { maximumFractionDigits: 2 }; // özet ve footer (ondalık sabit değil)
 export const NUMBER_RAW: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 20 }; // düzenleyici metni
 // date: takvim günü, UTC gece yarısı tutulur → UTC'de gösterilir (her saat diliminde aynı gün)
-export const DATE: Intl.DateTimeFormatOptions = { timeZone: 'UTC' };
+// Gün, ay, saat ve dakika her dilde iki haneli (dateStyle: 'short' tr'de günü tek hane yazar: 2.09.2026)
+const DAY_2: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+export const DATE: Intl.DateTimeFormatOptions = { ...DAY_2, timeZone: 'UTC' };
 // datetime: gerçek an → uygulama saat diliminde (config.timezone; bkz. utils/timezone.ts)
-export const DATETIME: Intl.DateTimeFormatOptions = { dateStyle: 'short', timeStyle: 'short', timeZone: config.timezone };
+export const DATETIME: Intl.DateTimeFormatOptions = { ...DAY_2, hour: '2-digit', minute: '2-digit', timeZone: config.timezone };
 
 export const numberFormat = (locale: string, options: Intl.NumberFormatOptions = NUMBER) =>
 	cached(options, locale, () => new Intl.NumberFormat(locale, options));

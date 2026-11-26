@@ -44,7 +44,7 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; filtre uyg
 	await expect(page).not.toHaveURL(/cmd=create/);
 
 	await search(page, stamp, 1);
-	await expect(cell(page, 0, COL.datetime)).toHaveText('2.09.2026 02:00');
+	await expect(cell(page, 0, COL.datetime)).toHaveText('02.09.2026 02:00');
 	await expect(cell(page, 0, COL.date)).toHaveText('09.09.2026');
 
 	// Güncelleme formu aynı duvar saatini gösterir
@@ -77,10 +77,10 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; filtre uyg
 	await expect(editor).toHaveValue('2026-09-02T02:00');
 	await editor.fill('2026-09-02T23:30');
 	await page.keyboard.press('Enter');
-	await expect(cell(page, 0, COL.datetime)).toHaveText('2.09.2026 23:30');
+	await expect(cell(page, 0, COL.datetime)).toHaveText('02.09.2026 23:30');
 	await page.reload();
 	await search(page, stamp, 1);
-	await expect(cell(page, 0, COL.datetime)).toHaveText('2.09.2026 23:30');
+	await expect(cell(page, 0, COL.datetime)).toHaveText('02.09.2026 23:30');
 	await applyDay(page, '2026-09-02');
 	await expect(rows(page)).toHaveCount(1);
 	await applyDay(page, '2026-09-03'); // UTC'de 2 Eylül 20:30 → 3 Eylül'de yok

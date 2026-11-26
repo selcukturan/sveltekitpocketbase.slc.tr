@@ -287,6 +287,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- DataTable: tarih-saat Türkçe'de günü tek haneli gösteriyordu
+  (`2.09.2026 02:00`). Gün, ay, saat ve dakika her dilde iki haneli
+  (`02.09.2026 02:00`).
 - `formInput.Number`: geçersiz metin (`1-2`, `5--`) tarayıcıda boş değer
   verdiği için forma sessizce 0 gidiyordu. Gönderilen değer gizli input'tan:
   geçersizse `NaN` → "Lütfen geçerli bir sayı girin." (yazarken ve gönderirken).
