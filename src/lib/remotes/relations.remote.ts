@@ -5,11 +5,22 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '#lib/server/error.js';
 import * as v from 'valibot';
 
-const filteredCollectionValues = Object.values(Collections).filter((value) => !value.startsWith('_')) as [string, ...string[]];
+// Kayıt seçicinin (Relation input) arayabileceği koleksiyonlar: yalnızca ilişki alanlarının hedefleri. Yeni bir ilişki
+// alanı eklenince hedef koleksiyonu buraya eklenmeli. (Önceden '_' ile başlamayan her koleksiyon açıktı: sys_users,
+// sys_settings, acl_roles dahil.)
+const RELATION_COLLECTIONS = [Collections.DemoRelationInputMultiple, Collections.DemoRelationInputSingle] as const;
+// Çıktı tipi string kalır (Relation bileşenleri koleksiyonu genel tutar); izin listesi çalışma zamanında denetlenir
+const collection = v.pipe(
+	v.string(),
+	v.check((value) => (RELATION_COLLECTIONS as readonly string[]).includes(value), 'Geçersiz koleksiyon.')
+);
+const id = v.pipe(v.string(), v.nonEmpty(), v.maxLength(64));
+
+// Değerler filtre metnine yazılmaz, pb.filter yer tutucularına ({:x}) verilir: tırnak vb. ile filtreden çıkılamaz.
 
 const relationListParamsSchema = v.object({
-	search: v.string(),
-	collection: v.picklist(filteredCollectionValues),
+	search: v.pipe(v.string(), v.maxLength(200)),
+	collection,
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type RelationListParamsType = v.InferOutput<typeof relationListParamsSchema>;
@@ -26,7 +37,7 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(params.collection).getList(1, 30, {
-			filter: `search_label ~ "${params.search}"`
+			filter: locals.pb.filter('search_label ~ {:search}', { search: params.search })
 		}),
 		mapUnknownToError
 	);
@@ -39,8 +50,8 @@ export const getRelationList = query(relationListParamsSchema, async (params) =>
 });
 
 const relationMultipleSelectedListParamsSchema = v.object({
-	ids: v.array(v.string()),
-	collection: v.picklist(filteredCollectionValues),
+	ids: v.pipe(v.array(id), v.maxLength(100)),
+	collection,
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export const getMultipleRelationSelectedList = query(relationMultipleSelectedListParamsSchema, async (params) => {
@@ -55,12 +66,13 @@ export const getMultipleRelationSelectedList = query(relationMultipleSelectedLis
 		return [];
 	}
 
-	// array to string => id = "1" || id = "2" || id = "3"
-	const idsString = params.ids.map((id) => `id = "${id}"`).join(' || ');
+	// id = {:id0} || id = {:id1} || …
+	const values = Object.fromEntries(params.ids.map((value, i) => [`id${i}`, value]));
+	const idsFilter = locals.pb.filter(params.ids.map((_, i) => `id = {:id${i}}`).join(' || '), values);
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(params.collection).getFullList({
-			filter: idsString
+			filter: idsFilter
 		}),
 		mapUnknownToError
 	);
@@ -73,8 +85,8 @@ export const getMultipleRelationSelectedList = query(relationMultipleSelectedLis
 });
 
 const relationSingleSelectedListParamsSchema = v.object({
-	id: v.string(),
-	collection: v.picklist(filteredCollectionValues),
+	id: v.union([v.literal(''), id]), // '' = seçim yok
+	collection,
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export const getSingleRelationSelectedList = query(relationSingleSelectedListParamsSchema, async (params) => {
@@ -91,7 +103,7 @@ export const getSingleRelationSelectedList = query(relationSingleSelectedListPar
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(params.collection).getFullList({
-			filter: `id = "${params.id}"`
+			filter: locals.pb.filter('id = {:id}', { id: params.id })
 		}),
 		mapUnknownToError
 	);
@@ -101,24 +113,4 @@ export const getSingleRelationSelectedList = query(relationSingleSelectedListPar
 	}
 
 	return listResult.value;
-});
-
-const relationViewParamsSchema = v.object({
-	id: v.string(),
-	collection: v.picklist(filteredCollectionValues)
-});
-
-export const getRelationView = query(relationViewParamsSchema, async (params) => {
-	// 🔒🔐
-	await checkAuthenticated();
-
-	const { locals } = getRequestEvent();
-
-	const recordResult = await ResultAsync.fromPromise(locals.pb.collection(params.collection).getOne(params.id), mapUnknownToError);
-
-	if (recordResult.isErr()) {
-		throwError(recordResult.error);
-	}
-
-	return recordResult.value;
 });

@@ -164,7 +164,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.189` oldu.
+- Uygulama sürümü `v0.2.0-alpha.190` oldu.
 - Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
   Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
   zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
@@ -243,6 +243,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- `relations.remote.ts` (kayıt seçici): filtre enjeksiyonu kapatıldı. Arama
+  ve id değerleri filtre metnine yazılıyordu (`search_label ~ "…"`); tırnakla
+  filtreden çıkılabiliyordu (örn. `" || id != "` tüm kayıtları döndürüyordu).
+  Değerler artık `pb.filter` yer tutucularıyla gidiyor. Koleksiyonlar yalnızca
+  ilişki hedefleriyle sınırlandı (önceden `sys_users`, `sys_settings`,
+  `acl_roles` dahil `_` ile başlamayan her koleksiyon açıktı); `ids` en fazla
+  100, id ve arama uzunluğu sınırlı. Kullanılmayan `getRelationView` uç
+  noktası kaldırıldı. e2e testi eklendi (`relation.spec.ts`).
 - Simple CRUD `getOne`: istemci `options.expand` / `options.fields`
   göndererek ilişkili koleksiyonları açabiliyordu; şema artık yalnızca `id`
   (boş olamaz) ve `timestamp` kabul ediyor.
