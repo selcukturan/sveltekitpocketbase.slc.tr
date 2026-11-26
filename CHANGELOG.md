@@ -164,7 +164,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.186` oldu.
+- Uygulama sürümü `v0.2.0-alpha.187` oldu.
+- Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
+  Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
+  zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
+  sıralanmaz, override ile gizlenen kolon menüden açılır).
 - `/app/data-table`: kolonlar `TABLE.columnsFor<Item>()` ile; seçim kolonları
   `override` ile gizli (aynı 7 kolon görünür, etiketler çevrili).
 - Simple CRUD: kolonlar, sıralama, filtre ve hücre düzenleme izinleri
