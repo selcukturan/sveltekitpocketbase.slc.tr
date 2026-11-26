@@ -169,7 +169,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.192` oldu.
+- Uygulama sürümü `v0.2.0-alpha.193` oldu.
+- Belgeler: DataTable belgesi `docs/d01_datatable_2026-11-26.md` oldu (tarih,
+  sürüm, commit; örnek sayfalar, test listesi, `defineTable` yönlendirmesi,
+  `sortable` varsayılanı, sınırlar). `d00_core` belgesine güncelleme notu ve
+  güvenlik kuralları (istemci parametreleri yayılmaz, `pb.filter` yer
+  tutucuları, ilişki koleksiyonu izin listesi) eklendi; README bağlantısı.
 - Simple CRUD varsayılan sıralaması `-number_optional,text_required` (önce
   sayı azalan, sonra metin artan); kullanılmayan `relationListParamsSchema`
   kaldırıldı. Sıralama testleri varsayılan sıralamadan bağımsız hâle getirildi

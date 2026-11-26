@@ -27,10 +27,10 @@ Kullanıcı girişi gerektiren (kapalı sistem) yönetim panelleri, iç araçlar
 
 Belge adındaki tarih, belgenin anlattığı hâlin tarihidir; her belgenin başında o günün commit'i ve sonraki değişiklikleri gösteren `git` komutları vardır.
 
-| Belge                                                                       | İçerik                                                                                                                                                                   |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Çekirdek Konsept (Core Concept)](docs/d00_core_2026-10-27.md) — 2026-10-27 | `page.shared.ts` / `page.remote.ts` / `+page.svelte` yapısı, input builder'ları, form sarmalayıcıları, doğrulama katmanları, hata mesajları ve yeni sayfa ekleme rehberi |
-| [DataTable](docs/d01_datatable_2026-11-22.md) — 2026-11-22                  | Veri tablosu: ListState, kolonlar, props ve olaylar, klavye/fare, seçim, kopyala/yapıştır, hücre düzenleme, çoklu sıralama, footer, tema, kritik bilgiler ve tarifler    |
+| Belge                                                                       | İçerik                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Çekirdek Konsept (Core Concept)](docs/d00_core_2026-10-27.md) — 2026-10-27 | `page.shared.ts` / `page.remote.ts` / `+page.svelte` yapısı, input builder'ları, form sarmalayıcıları, doğrulama katmanları, hata mesajları ve yeni sayfa ekleme rehberi                                                       |
+| [DataTable](docs/d01_datatable_2026-11-26.md) — 2026-11-26                  | Veri tablosu: tablo tanımı (`defineTable`), ListState, filtreler, kolonlar, props ve olaylar, klavye/fare, seçim, sağ tık menüsü, kopyala/yapıştır, hücre düzenleme, çoklu sıralama, footer, tema, kritik bilgiler ve tarifler |
 
 ## ⚠️ Önemli: PocketBase'in sunucu tarafında kullanımı
 
