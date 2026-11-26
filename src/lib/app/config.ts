@@ -4,7 +4,7 @@
 
 export const config = {
 	appName: 'SLC Web Applications',
-	version: 'v0.2.0-alpha.206',
+	version: 'v0.2.0-alpha.207',
 	copyright: `SLC Web Development © 2010-${new Date().getFullYear()}`,
 	// Uygulama saat dilimi (IANA). Tarih-saat alanları bu saat diliminde girilir ve gösterilir, tarih-saat filtrelerinin
 	// gün sınırları buna göre hesaplanır. Tarayıcının saat dilimi kullanılmaz: her kullanıcı ve sunucu aynı sonucu üretir.

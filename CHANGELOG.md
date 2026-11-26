@@ -221,6 +221,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: DataTable belgesi alpha.206 / `2fa46c9`; aktif hücre ve satırın
+  nasıl güncellendiği (`cursor.activeRow`, `data-active-row`), `onRowClick`
+  satırı seçmez.
 - Belgeler: CHANGELOG'daki satıra bölünmüş kod parçası tek satıra alındı
   (Prettier uyarısı).
 - Form Number: geçersiz ya da yarım metin (`123.`, `-`, `1-2`) yazarken hata
