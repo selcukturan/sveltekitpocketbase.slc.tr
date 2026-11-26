@@ -5,26 +5,16 @@
 	import * as formInput from '#lib/components/ui/form_inputs/index.js';
 	import * as dt from '#lib/components/ui/datatable/index.js';
 	import { Drawer, createHashDrawer } from '#lib/components/ui/drawer/index.js';
-	import { confirm } from '#lib/components/ui/confirm/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import { TABLE, createFormSchema, updateFormSchema } from './page.shared';
-	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCells } from './page.remote';
+	import { getOne, getList, createForm, updateForm, deleteRecords, updateCells } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
-	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
+	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu + seçim
 	const drawer = createHashDrawer(); // #cmd=update&id=... → drawer
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
-	let selected = $state<Item['id'][]>([]); // seçili satır id'leri (sayfalar arası korunur)
-	// Kolonlar page.shared.ts'teki TABLE tanımından (sıralama, filtre, düzenleme izinleri orada). Burada yalnızca
-	// sayfaya özgü kolonlar eklenir; override ile sunum değiştirilebilir (izin verilemez). TABLE'daki bir alan Item'da
-	// yoksa derleme hatası verir.
-	const columns = TABLE.columnsFor<Item>({
-		prepend: [
-			{ field: '_select', type: 'select' },
-			{ field: '_actions', type: 'actions', label: 'dt_actions' }
-		]
-	});
+	let table = $state<ReturnType<typeof dt.DataTable<Item>>>(); // bind:this → table.helpers (copy, focus, ...)
 
 	// create/update ortak gönderim: alan hataları inputların altında, genel sonuç toast ile
 	const save = async (submit: () => Promise<boolean>) => {
@@ -39,56 +29,8 @@
 
 	// Tablo içinde hücre düzenleme: doğrulama (TABLE şeması), anında gösterme, kaydetme ve hata bildirimi
 	const cellEdit = dt.createCellEdit({ list, table: TABLE, save: updateCells, onError: toaster.error });
-
-	const remove = async (id: string) => {
-		if (!(await confirm({ message: t('delete_confirm_with_id', { id }), yes: t('delete'), no: t('cancel'), danger: true }))) return;
-		try {
-			await deleteRecord({ id }).updates(...list.updates);
-			toaster.success(t('toast_deleted_title'), t('toast_deleted_description', { id }));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
-
-	// Toplu silme: tek kayıt için remove'a düşer. Silinenler seçimden çıkarılır.
-	const removeMany = async (ids: Item['id'][]) => {
-		if (ids.length === 1) return remove(ids[0]);
-		if (!(await confirm({ message: t('delete_confirm_many', { count: ids.length }), yes: t('delete'), no: t('cancel'), danger: true }))) return;
-		try {
-			await deleteRecords({ ids }).updates(...list.updates);
-			selected = selected.filter((id) => !ids.includes(id));
-			toaster.success(t('toast_deleted_title'), t('toast_deleted_many', { count: ids.length }));
-		} catch (error) {
-			toaster.error(error);
-		}
-	};
-
-	// --- DataTable olay örnekleri ---------------------------------------------------------------------------------
-	let table = $state<ReturnType<typeof dt.DataTable<Item>>>(); // bind:this → table.helpers (copy, focus, ...)
-
-	// Silinecekler: seçili satırlar; yoksa (ya da hedef satır seçimde değilse) yalnızca o satır
-	const targetsOf = (rowId: Item['id']) => (selected.includes(rowId) ? selected : [rowId]);
-
-	// Delete: seçili satırları ya da aktif hücrenin satırını siler (yerleşik davranış olmadığı için preventDefault yalnızca işlenince)
-	const onTableKeyDown = (e: KeyboardEvent, { cell, selected: ids }: dt.KeyContext<Item>) => {
-		if (e.key !== 'Delete') return;
-		const target = ids.length > 0 ? ids : cell ? [cell.row.id] : [];
-		if (target.length === 0) return;
-		e.preventDefault();
-		removeMany(target);
-	};
-
-	// Footer: kısayollar (sum/avg/min/max/count) ve fonksiyon; bu sayfadaki kayıtlardan hesaplanır, diğerleri metin
-	const footers: dt.Footer<Item>[] = [
-		{ text_optional: 'Toplam', number_optional: 'sum(2)', date_optional: 'count()' },
-		{ text_optional: 'Ortalama', number_optional: 'avg(2)', bool_optional: (items) => `${items.filter((item) => item.bool_optional).length} ✓` },
-		{ text_optional: 'En büyük', number_optional: 'max()' }
-	];
-
-	// Arama sonucu boş: bilgi ver (yalnızca yeni sorguda, tazelemede değil)
-	const onTableLoad = ({ reason, totalItems }: dt.LoadEvent<Item>) => {
-		if (reason === 'query' && totalItems === 0) toaster.add({ type: 'info', title: t('dt_no_data') });
-	};
+	// Satır silme: onay, silme, seçimden çıkarma, bildirim; Delete tuşu (onKeyDown) ve sağ tık hedefleri (targetsOf)
+	const rowDelete = dt.createRowDelete({ list, remove: deleteRecords, onSuccess: toaster.success, onError: toaster.error });
 </script>
 
 <!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
@@ -131,36 +73,48 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
+			<!-- Kolonlar TABLE tanımından (sıralama, filtre, düzenleme izinleri orada); burada yalnızca sayfaya özgü kolonlar
+				 eklenir, override ile sunum değişir (izin verilemez). Footer kısayolları (sum/avg/max/count) bu sayfadaki
+				 kayıtlardan hesaplanır. -->
 			<dt.DataTable
 				bind:this={table}
 				{list}
-				{columns}
-				{footers}
+				columns={TABLE.columnsFor<Item>({
+					prepend: [
+						{ field: '_select', type: 'select' },
+						{ field: '_actions', type: 'actions', label: 'dt_actions' }
+					]
+				})}
+				footers={[
+					{ text_optional: 'Toplam', number_optional: 'sum(2)', date_optional: 'count()' },
+					{ text_optional: 'Ortalama', number_optional: 'avg(2)', bool_optional: (items) => `${items.filter((item) => item.bool_optional).length} ✓` },
+					{ text_optional: 'En büyük', number_optional: 'max()' }
+				]}
 				freezeLeft={2}
 				selection="multiple"
-				bind:selected
+				bind:selected={list.selected}
 				persist="grapes-crud-simple"
 				{...cellEdit}
+				onKeyDown={rowDelete.onKeyDown}
 				onCopy={({ rows, cols, partial }) =>
 					partial
 						? toaster.add({ type: 'warning', title: t('dt_copied_title'), description: t('dt_copied_partial', { count: rows * cols }) })
 						: toaster.success(t('dt_copied_title'), t('dt_copied', { count: rows * cols }))}
 				onRowActivate={(row) => drawer.show('update', row.id)}
-				onLoad={onTableLoad}
+				onLoad={({ reason, totalItems }) => reason === 'query' && totalItems === 0 && toaster.add({ type: 'info', title: t('dt_no_data') })}
 				onError={(error) => toaster.error(error)}
-				onKeyDown={onTableKeyDown}
 				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
 			>
 				<!-- Sağ tık menüsü: konum, kapanma ve odağı tablo yönetir (ContextMenu tuşu / Shift+F10 da açar) -->
 				{#snippet contextMenu(row)}
-					{@const targets = targetsOf(row.id)}
+					{@const targets = rowDelete.targetsOf(row.id)}
 					<dt.MenuItem label={t('update')} onclick={() => drawer.show('update', row.id)} />
 					<dt.MenuItem label={t('dt_copy')} onclick={() => table?.helpers.copy()} />
-					<dt.MenuItem label={targets.length > 1 ? `${t('delete')} (${targets.length})` : t('delete')} danger onclick={() => removeMany(targets)} />
+					<dt.MenuItem label={targets.length > 1 ? `${t('delete')} (${targets.length})` : t('delete')} danger onclick={() => rowDelete.remove(targets)} />
 				{/snippet}
 				{#snippet actions(row)}
 					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
-					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => remove(row.id)} />
+					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => rowDelete.remove([row.id])} />
 					<dt.ActionButton label={t('view')} icon="view" onclick={() => drawer.show('view', row.id)} />
 				{/snippet}
 			</dt.DataTable>

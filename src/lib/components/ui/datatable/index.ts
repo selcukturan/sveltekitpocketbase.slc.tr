@@ -29,6 +29,7 @@ export type { SelectionMode, RowId } from './state/selection.svelte.js';
 export type { CellEditEvent, EditorKind } from './state/editing.svelte.js';
 export { createList, ListState, type ListOptions } from './state/list-state.svelte.js';
 export { createCellEdit, type CellEditOptions } from './state/cell-edit.js';
+export { createRowDelete, type RowDeleteOptions } from './state/row-delete.js';
 
 export { default as ActionButton } from './parts/ActionButton.svelte';
 export { default as MenuItem } from './parts/MenuItem.svelte';

@@ -1,4 +1,3 @@
-
 import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from '../types.js';
 import type { ListSource } from './list-state.svelte.js';
 import { GridCursor, type CellPos, type CellRange } from './navigation.svelte.js';

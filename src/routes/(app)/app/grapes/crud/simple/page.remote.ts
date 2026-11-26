@@ -6,7 +6,7 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import { TABLE, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, deleteManySchema } from './page.shared';
+import { TABLE, oneParamsSchema, createFormSchema, updateFormSchema, deleteManySchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -82,20 +82,7 @@ export const updateForm = form(updateFormSchema, async (params) => {
 	return updatedResult.value;
 });
 
-export const deleteRecord = command(deleteParamsSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
-
-	const { locals } = getRequestEvent();
-
-	const deletedResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).delete(params.id), mapUnknownToError);
-
-	if (deletedResult.isErr()) {
-		throwError(deletedResult.error);
-	}
-
-	await requested(getList, 1).refreshAll();
-});
-
+// Silme (tek kayıt da bir elemanlı liste olarak gelir; bkz. dt.createRowDelete)
 export const deleteRecords = command(deleteManySchema, async ({ ids }) => {
 	await checkAuthenticated(); // 🔒
 

@@ -66,7 +66,6 @@ export const editorOf = <TData>(col: Column<TData> | undefined): EditorKind | un
 	}
 };
 
-
 // Değer → düzenleyicideki metin (input value)
 const toDraft = (kind: EditorKind, value: unknown): string => {
 	if (value === null || value === undefined || value === '') return '';

@@ -13,6 +13,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: `dt.createRowDelete({ list, remove, onSuccess, onError })` satır
+  silmeyi sayfadan alır: onay sorusu, silme, listeyi tazeleme, silinenleri
+  seçimden çıkarma, bildirim; `onKeyDown` (Delete tuşu) ve `targetsOf` (sağ
+  tık hedefleri). `list.selected`: seçim listede tutulur
+  (`bind:selected={list.selected}`). Simple CRUD tek silme komutu
+  (`deleteRecords`) kullanıyor; `deleteRecord` kaldırıldı. Sayfada `columns`,
+  `footers`, `onLoad` DataTable özelliklerinde.
 - DataTable: `dt.createCellEdit({ list, table, save, onError })` hücre
   düzenlemeyi sayfadan alır: doğrulama (`validateCell`), anında gösterme
   (`list.updatesWith`), kaydetme, hata ve geçersiz yapıştırma bildirimi.

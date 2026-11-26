@@ -36,6 +36,8 @@ export class ListState<TParams extends ListParams, TResult> {
 	params = $state() as TParams;
 	filter = $state() as TParams['filterData'];
 	loaded = $state(false);
+	// Seçili satır id'leri (DataTable'da bind:selected={list.selected}); sayfalar arası korunur
+	selected = $state<string[]>([]);
 
 	readonly query: RemoteQuery<TResult> | undefined = $derived.by(() => (this.loaded ? this.#fetch(this.params) : undefined));
 	readonly sort = $derived(this.params.options.sort ?? '');
