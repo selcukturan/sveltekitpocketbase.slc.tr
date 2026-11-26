@@ -128,9 +128,6 @@
 		{ text_optional: 'En büyük', number_optional: 'max()' }
 	];
 
-	// Görünen satırlar (onVisibleRowsChange): durum çubuğunda gösterilir. Sonsuz kaydırma gibi işler için de kullanılabilir.
-	let visibleRows = $state<dt.VisibleRows>();
-
 	// Arama sonucu boş: bilgi ver (yalnızca yeni sorguda, tazelemede değil)
 	const onTableLoad = ({ reason, totalItems }: dt.LoadEvent<Item>) => {
 		if (reason === 'query' && totalItems === 0) toaster.add({ type: 'info', title: t('dt_no_data') });
@@ -229,13 +226,7 @@
 				onError={(error) => toaster.error(error)}
 				onKeyDown={onTableKeyDown}
 				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
-				onVisibleRowsChange={(rows) => (visibleRows = rows)}
 			>
-				{#snippet statusbar()}
-					{#if visibleRows && visibleRows.total > 0}
-						<p class="slc-visible-rows">{t('dt_visible_rows', { from: visibleRows.first + 1, to: visibleRows.last + 1, total: visibleRows.total })}</p>
-					{/if}
-				{/snippet}
 				<!-- Sağ tık menüsü: konum, kapanma ve odağı tablo yönetir (ContextMenu tuşu / Shift+F10 da açar) -->
 				{#snippet contextMenu(row)}
 					{@const targets = targetsOf(row.id)}
@@ -324,11 +315,3 @@
 		</Drawer>
 	</Page.Drawer>
 </Page>
-
-<style>
-	.slc-visible-rows {
-		padding: 0.125rem 0.75rem 0.25rem;
-		font-size: 0.75rem;
-		color: var(--color-surface-500);
-	}
-</style>
