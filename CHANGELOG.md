@@ -13,6 +13,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Test: uygulama ayarları sayfası (`settings.spec.ts`): değişince düğmeler
+  açılır, Sıfırla geri alır, kayıttan sonra form temiz (`markClean`), değer
+  yenilemede kalıcı; eski ad geri yazılır. Yanlışlıkla eklenmiş geçici
+  `zz-probe-tmp.spec.ts` kaldırıldı.
 - DataTable: aktif satır (aktif hücrenin satırı) renkleniyor
   (`--dt-row-active`, primary %11): işlem yapılan satır gözle izlenir. Seçili
   satır ve hücre aralığı rengi bunun üzerinde.
