@@ -243,6 +243,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   Gizle" modül değişince sıfırlanmıyor. Menü başlıkları çevriliyor.
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: yeni `d02_layout_2026-11-27.md` (iskelet, menü verisi, aktif yol,
+  `NavTree`, gizleme, yeni sayfa/modül ekleme, erişilebilirlik, yol haritası);
+  çekirdek belgeden bağlantı.
 - Belgeler: DataTable belgesi alpha.213 / `e15b67d`; çekirdek belgede
   güncelleme notu alpha.213 ve gönderim akışı testleri (`form-inputs.spec.ts`,
   `settings.spec.ts`).
