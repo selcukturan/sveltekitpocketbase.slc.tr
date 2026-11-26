@@ -9,7 +9,7 @@
 	// Liste filtreleri (utils/filter.ts → defineFilters). Tablodan bağımsızdır: sayfa nereye koyarsa orada durur.
 	// Metin filtreleri satır içinde (hızlı arama); sayı, tarih, evet/hayır ve seçim filtreleri "Filtreler" panelinde.
 	// Değerler list.filter'a (taslak) yazılır; Ara ya da Enter uygular (list.search), Temizle sıfırlayıp arar (list.clear).
-	// Etiketler kolonlardan (label) gelir; kolonu olmayan filtrede alan adı görünür.
+	// Etiket: filtre tanımındaki label (defineTable kolonlardan verir), yoksa columns'taki kolon, yoksa alan adı.
 	type ListLike = { filter: object; params: { filterData: object }; search: () => void; clear: () => void };
 	let { list, filters, columns = [] }: { list: ListLike; filters: Filters; columns?: Column<TData>[] } = $props();
 
@@ -19,7 +19,7 @@
 	const applied = $derived(filters.countActive(list.params.filterData as FilterValues, ['number', 'date', 'bool', 'select']));
 
 	const labelOf = (f: FilterField) => {
-		const label = columns.find((col) => col.field === f.field)?.label ?? f.field;
+		const label = f.label ?? columns.find((col) => col.field === f.field)?.label ?? f.field;
 		return t(label, undefined, label);
 	};
 	const onEnter = (e: KeyboardEvent, close?: () => void) => {

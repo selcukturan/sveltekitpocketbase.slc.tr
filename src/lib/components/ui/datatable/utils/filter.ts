@@ -27,11 +27,12 @@ import * as v from 'valibot';
  */
 
 export type FilterType = 'text' | 'number' | 'date' | 'bool' | 'select';
-export type FilterDef = Exclude<FilterType, 'select'> | { type: 'select'; options: readonly string[] };
+// Kısa yazım ('number') ya da nesne; select için options zorunlu. label: FilterBar'daki etiket (çeviri anahtarı olabilir)
+export type FilterDef = Exclude<FilterType, 'select'> | { type: FilterType; options?: readonly string[]; label?: string };
 export type FilterValues = Record<string, string>;
 
 // FilterBar'ın çizdiği alan: hangi anahtarlara bağlanacağı
-export type FilterField = { field: string; type: FilterType; options?: readonly string[]; keys: string[] };
+export type FilterField = { field: string; type: FilterType; options?: readonly string[]; label?: string; keys: string[] };
 
 // pb.filter(raw, params): PocketBase istemcisinin yer tutuculu filtre üreticisi
 type PbFilter = { filter: (raw: string, params?: Record<string, unknown>) => string };
@@ -63,9 +64,11 @@ export function defineFilters<const T extends Record<string, FilterDef>>(defs: T
 		if (!FIELD_RE.test(field)) throw new Error(`Geçersiz filtre alanı: ${field}`);
 		const type = typeof def === 'string' ? def : def.type;
 		const options = typeof def === 'string' ? undefined : def.options;
+		const label = typeof def === 'string' ? undefined : def.label;
+		if (type === 'select' && !options?.length) throw new Error(`Seçim filtresi için options gerekli: ${field}`);
 		const range = type === 'number' || type === 'date';
 		const keys = range ? [field + MIN, field + MAX] : [field];
-		fields.push({ field, type, options, keys });
+		fields.push({ field, type, options, label, keys });
 
 		if (type === 'text') entries[field] = text();
 		else if (type === 'number') for (const key of keys) entries[key] = matching(NUMBER_RE, 'Geçersiz sayı.');

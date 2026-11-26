@@ -11,6 +11,7 @@ export type { Column, ColumnType, Footer, FooterValue } from './types.js';
 export { parseAggregate, aggregate, formatAggregate, type Aggregate, type AggregateFn } from './utils/footer.js';
 export { parseSort, formatSort, nextSort, isValidSort, type SortEntry, type SortDir } from './utils/sort.js';
 export { defineFilters, type Filters, type FilterDef, type FilterType, type FilterValues } from './utils/filter.js';
+export { defineTable, type Table, type TableColumnDef, type ColumnOverride, type ExtraColumn } from './utils/table.js';
 export {
 	DEFAULT_COLUMN_WIDTHS,
 	DENSITY_ROW_HEIGHTS,

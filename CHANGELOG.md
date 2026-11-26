@@ -13,6 +13,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: `defineTable` (`utils/table.ts`, saf). Kolonlar ve kolon başına
+  izinler (`sortable`, `filter`, `edit` opt-in; satır kuralı `editable(row)`)
+  tek tanımda; liste şeması (yalnızca sayfa, sayfa boyutu ≤ 1000, doğrulanmış
+  sıralama, filtre), hücre düzenleme şemaları, `canEdit` ve filtreler buradan
+  türer. Sayfa `columnsFor<Item>()` ile kolonları alır: tanımdaki alanlar
+  `Item`'da yoksa derleme hatası; `override` sunumu ezer ve `editable`'ı
+  daraltır, `prepend`/`append` istemci kolonu ekler, `order` sıralar.
+  Filtre alanları etiket taşıyabilir (`FilterBar` tanımdaki etiketi kullanır).
 - DataTable: filtreler. `defineFilters` (`utils/filter.ts`, saf) tek tanımdan
   doğrulama şeması, güvenli PocketBase filtresi (`toPb`, yer tutuculu) ve
   arayüz alanlarını üretir; türler: `text`, `number`, `date`, `bool`,
@@ -156,7 +164,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.183` oldu.
+- Uygulama sürümü `v0.2.0-alpha.184` oldu.
 - DataTable klasörü düzenlendi: temel bileşenler kökte; durum sınıfları
   `state/`, saf yardımcılar `utils/` (`sort`, `footer`, `format`), düzenleyici
   `parts/CellInput.svelte`. Sunucudan `sort.js` artık
