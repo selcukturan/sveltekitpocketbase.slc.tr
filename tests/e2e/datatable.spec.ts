@@ -309,12 +309,14 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	await expect(page.getByText('1 hücre yapıştırılamadı').first()).toBeVisible();
 	await expect(cell(page, 0, 5)).toHaveText('10');
 
-	// Düzenlenemeyen hücre (id) sessizce atlanır
-	const id = await cell(page, 0, 2).textContent();
+	// Düzenlenemeyen hücre (id) sessizce atlanır. Satır sırasına bakılmaz: varsayılan sıralama (-sayı) yukarıdaki
+	// yapıştırmalardan sonra liste tazelenince satırların yerini değiştirebilir.
+	const ids = await grid(page).locator('[data-slc-table-datacell][data-col="2"]').allTextContents();
 	await cell(page, 0, 2).click();
 	await clip('xyz');
 	await page.keyboard.press('Control+v');
-	await expect(cell(page, 0, 2)).toHaveText(id!);
+	await expect(grid(page).getByRole('gridcell', { name: 'xyz', exact: true })).toHaveCount(0);
+	await expect.poll(async () => (await grid(page).locator('[data-slc-table-datacell][data-col="2"]').allTextContents()).sort()).toEqual(ids.sort());
 
 	// temizlik
 	await deleteFirstRow(page);

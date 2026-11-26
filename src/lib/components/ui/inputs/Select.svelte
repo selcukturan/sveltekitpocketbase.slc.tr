@@ -438,7 +438,6 @@
 			aria-expanded={isOpenPopup}
 			aria-haspopup="listbox"
 			aria-label={ariaLabel}
-			aria-labelledby={ariaLabel ? undefined : attr.id}
 			aria-activedescendant={activeOptionId}
 			aria-invalid={!isValid}
 			aria-readonly={readonly}

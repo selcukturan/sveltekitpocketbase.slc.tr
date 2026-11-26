@@ -188,14 +188,17 @@
 		onFilesChange?.($state.snapshot(selectedFiles));
 	};
 
-	// Hata mesajını temizleme zamanlayıcısı
+	// Hata mesajını temizleme zamanlayıcısı: yeni hata öncekinin zamanlayıcısını iptal eder (yoksa erken silinirdi)
+	let errorTimer: ReturnType<typeof setTimeout> | undefined;
 	const triggerErrorClear = () => {
+		clearTimeout(errorTimer);
 		if (errorText) {
-			setTimeout(() => {
+			errorTimer = setTimeout(() => {
 				errorText = null;
 			}, 4000);
 		}
 	};
+	$effect(() => () => clearTimeout(errorTimer)); // bileşen kaldırılınca
 
 	// Dosya kaldırma
 	function removeFile(file: FileDisplayType) {
@@ -457,6 +460,7 @@
 	{#if errorText}
 		<div
 			transition:slide={{ duration: 200 }}
+			role="alert"
 			class="bg-error-50 text-error-700 border-error-100 mx-1 mt-1 flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-semibold"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 shrink-0">

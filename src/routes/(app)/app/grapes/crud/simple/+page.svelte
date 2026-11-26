@@ -149,7 +149,7 @@
 {/snippet}
 
 {#snippet closeButton()}
-	<input.Button icon="close" iconOnly class="rounded-full!" variant="ghost" color="surface" onclick={drawer.close} />
+	<input.Button icon="close" iconOnly label={t('close')} class="rounded-full!" variant="ghost" color="surface" onclick={drawer.close} />
 {/snippet}
 
 <Head title="create-read-update-delete" />

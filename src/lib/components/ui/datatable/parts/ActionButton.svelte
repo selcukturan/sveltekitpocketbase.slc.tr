@@ -19,6 +19,7 @@
 <button
 	type="button"
 	tabindex={-1}
+	aria-label={label}
 	{@attach tooltip({
 		text: label,
 		position: 'top',

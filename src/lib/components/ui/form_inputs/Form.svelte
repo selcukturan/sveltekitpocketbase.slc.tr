@@ -72,7 +72,7 @@
 		{/key}
 
 		{#if formIssues.length > 0}
-			<div class="bg-error-50 text-error-700 border-error-200 mt-2 rounded-sm border px-3 py-2 text-xs font-medium">
+			<div role="alert" class="bg-error-50 text-error-700 border-error-200 mt-2 rounded-sm border px-3 py-2 text-xs font-medium">
 				{#each formIssues as message, i (i)}
 					<p>{message}</p>
 				{/each}

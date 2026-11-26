@@ -81,7 +81,14 @@
 	);
 </script>
 
-<button {type} class="{baseClasses} {sizeClasses} {colorClasses} {classes}" {...rest}>
+<!-- Yalnızca ikon: görünür metin yok, ad label'dan gelir (aria-label + ipucu) -->
+<button
+	{type}
+	class="{baseClasses} {sizeClasses} {colorClasses} {classes}"
+	aria-label={iconOnly && label ? label : undefined}
+	title={iconOnly && label ? label : undefined}
+	{...rest}
+>
 	{#if iconOnly}
 		{#if icon}
 			<Icon name={icon} size={iconSize} />

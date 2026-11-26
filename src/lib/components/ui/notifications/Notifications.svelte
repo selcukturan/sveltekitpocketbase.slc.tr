@@ -172,7 +172,7 @@
 						<span class="relative inline-flex size-2.5 rounded-full {stream.connected ? 'bg-success-500' : 'bg-error-500'}"></span>
 					</span>
 				</h3>
-				<Button size="sm" variant="ghost" color="error" icon="close" iconOnly={true} onclick={close} class="text-surface-950!" />
+				<Button size="sm" variant="ghost" color="error" icon="close" iconOnly={true} label={t('close')} onclick={close} class="text-surface-950!" />
 			</div>
 			<!-- filter -->
 			<div class="bg-surface-200/75 border-surface-300 flex items-center justify-between border-b p-2">
@@ -287,7 +287,7 @@
 		<div class="flex flex-col">
 			<div class="bg-surface-100 inset-shadow-surface-200 flex items-center justify-between gap-2 border-b p-3 inset-shadow-sm">
 				<h4 class="truncate font-semibold">{selected.title}</h4>
-				<Button size="sm" variant="ghost" color="error" icon="close" iconOnly={true} onclick={() => dialog?.hide(false)} class="text-surface-950!" />
+				<Button size="sm" variant="ghost" color="error" icon="close" iconOnly={true} label={t('close')} onclick={() => dialog?.hide(false)} class="text-surface-950!" />
 			</div>
 			<div class="text-surface-600 border-surface-200 flex items-center gap-2 border-b px-4 py-2 text-xs">
 				{@render typeTag(selected)}

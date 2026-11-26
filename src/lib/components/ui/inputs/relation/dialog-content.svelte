@@ -11,6 +11,8 @@
 	let { multiple = false as Tmultiple, yes, no, hide }: RelationDialogContentPropsType<Tmultiple> = $props();
 
 	const context = getRelationInputsContext<Tmultiple>();
+	const uid = $props.id();
+	const searchId = `slc-relation-search-${uid}`;
 
 	function handleToggle(item: Record<string, string>) {
 		const isSelected = Array.isArray(context.pickerValue) ? context.pickerValue.includes(item.id) : context.pickerValue === item.id;
@@ -53,8 +55,9 @@
 <div class="flex flex-col gap-1" {@attach watchCurrentChanged}>
 	<!-- search record -->
 	<div class="px-3 pt-3">
-		<p class="pb-1 text-xs font-semibold tracking-wider">{t('relation_search_label')}</p>
+		<label for={searchId} class="block pb-1 text-xs font-semibold tracking-wider">{t('relation_search_label')}</label>
 		<input
+			id={searchId}
 			value={context.pickerParams.search}
 			type="text"
 			placeholder={t('relation_search_placeholder')}
@@ -140,13 +143,15 @@
 			<div tabindex="-1" class="bg-surface-100 border-surface-300 flex items-center gap-2 overflow-x-auto overflow-y-hidden rounded-md border p-2.5">
 				{#if !isEmpty}
 					{#each listItems as item, i (i)}
+						{@const label = context.itemDetailCache.get(item)?.label ?? item}
 						<div
 							class="bg-success-100 border-success-600 text-success-800 inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-px text-xs whitespace-nowrap select-none"
 						>
-							<span>{context.itemDetailCache.get(item)?.label ?? item}</span>
+							<span>{label}</span>
 							<button
 								type="button"
 								tabindex="-1"
+								aria-label={t('remove_item_aria', { name: label })}
 								onclick={() => removePickerSelectedItem(item)}
 								class="text-success-800 hover:text-success-600 ml-1 cursor-pointer font-bold"
 							>

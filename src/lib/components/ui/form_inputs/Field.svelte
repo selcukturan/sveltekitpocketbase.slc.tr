@@ -52,9 +52,10 @@
 		{/if}
 	</div>
 
-	<div class={issuesClasses}>
+	<!-- role="status": hata çıkınca/değişince ekran okuyucu duyurur (kibar, yazmayı bölmez) -->
+	<div class={issuesClasses} role="status">
 		{#each issues as issue, i (i)}
-			<p class="">{issue.message}</p>
+			<p>{issue.message}</p>
 		{/each}
 	</div>
 </div>

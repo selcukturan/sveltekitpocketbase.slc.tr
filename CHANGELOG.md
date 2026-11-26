@@ -13,6 +13,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Testler: `form-inputs.spec.ts` (tüm form alanları: erişilebilir adlar,
+  doğrulama, kaydet → güncelleme formunda geri okuma, sıfırla, değişiklik
+  takibi, dosya sil/geri al, Select klavye/Esc, Bool, kaydedilmemiş değişiklik
+  sorusu, Relation seçici, Türkçe ondalık ayracı) ve `file-input.spec.ts`
+  (tür/boyut/adet kısıtları, tekli değiştirme, dışarıdan value, hata süresi).
 - FilterBar: evet/hayır ve seçim filtreleri native `<select>` yerine
   `input.Select` kullanıyor (filtre panelinin içinde iç içe popover; seçim,
   Esc, dışarı tıklama e2e testiyle doğrulandı). `input.Select` `aria-label`
@@ -267,6 +272,16 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- `input.Select`: formda adını alan etiketinden alıyor (düğme kendine
+  `aria-labelledby` veriyordu, ekran okuyucu seçili değeri okuyordu).
+- `input.Button`: `iconOnly` düğmede `label` ad ve ipucu olarak kullanılıyor;
+  çekmece ve bildirim kapat düğmelerine ad verildi. `dt.ActionButton` adlı.
+- Relation seçici: arama kutusu etiketli, seçilenlerdeki ✕ düğmeleri adlı.
+- `input.File`: arka arkaya iki hatada ilk zamanlayıcı ikinci mesajı erken
+  siliyordu; hata mesajı `role="alert"`. Alan hataları `role="status"`, form
+  hataları `role="alert"` ile duyuruluyor.
+- `datatable.spec.ts` Ctrl+V testi satır sırasına bağlı değil (varsayılan
+  sıralama tazelemede satırların yerini değiştirebiliyordu).
 - `relations.remote.ts` (kayıt seçici): filtre enjeksiyonu kapatıldı. Arama
   ve id değerleri filtre metnine yazılıyordu (`search_label ~ "…"`); tırnakla
   filtreden çıkılabiliyordu (örn. `" || id != "` tüm kayıtları döndürüyordu).
