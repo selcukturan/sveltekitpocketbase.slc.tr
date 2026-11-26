@@ -53,9 +53,34 @@ export type TableColumnDef = {
 	editable?: (row: AnyRow) => boolean;
 };
 
-export type TableDef<C extends Record<string, TableColumnDef>> = {
+// --- defaultSort'un derleme zamanı kontrolü ---
+// sortable: true işaretli kolonların adları
+// C henüz çıkarılmamışken (genel Record<string, …>) her alan kabul edilir: aksi hâlde TypeScript'in ilk çıkarım aşamasında
+// defaultSort metni bağlamsal tipini kaybedip 'string'e genişler. Asıl denetim C kesinleşince yapılır.
+export type SortableKeys<C> = string extends keyof C ? string : { [K in keyof C]: C[K] extends { sortable: true } ? K : never }[keyof C] & string;
+// Parçadaki alan adı ('-alan' / '+alan' / 'alan')
+type SortField<P extends string> = P extends `-${infer F}` ? F : P extends `+${infer F}` ? F : P;
+// Metni virgülle parçalayıp her parçayı denetler (Seen: tekrar kontrolü). Geçerliyse S, değilse okunur bir hata tipi:
+// editör "… 'Geçersiz defaultSort: …' tipine atanamaz" der. Boşluk kabul edilmez ('-a,b' yazın, '-a, b' değil).
+type CheckSort<S extends string, K extends string, Seen extends string = never> = S extends `${infer Head},${infer Rest}`
+	? SortField<Head> extends K
+		? SortField<Head> extends Seen
+			? `Geçersiz defaultSort: '${SortField<Head>}' tekrar ediyor`
+			: CheckSort<Rest, K, Seen | SortField<Head>>
+		: `Geçersiz defaultSort: '${SortField<Head>}' tanımda yok ya da sortable: true değil`
+	: SortField<S> extends K
+		? SortField<S> extends Seen
+			? `Geçersiz defaultSort: '${SortField<S>}' tekrar ediyor`
+			: true
+		: `Geçersiz defaultSort: '${SortField<S>}' tanımda yok ya da sortable: true değil`;
+// string extends S: S çıkarılamadıysa (genel string) derleme zamanında denetlenmez; çalışma zamanı denetimi (isValidSort) kalır.
+export type ValidSort<S extends string, K extends string> = string extends S ? S : S extends '' ? S : CheckSort<S, K> extends true ? S : CheckSort<S, K>;
+
+export type TableDef<C extends Record<string, TableColumnDef>, S extends string = string> = {
 	columns: C;
-	defaultSort: string; // sortable alanlardan; çoklu: '-number_optional,text_required'
+	// sortable alanlardan; '-' azalan, çoklu: '-number_optional,text_required' ('' = PocketBase varsayılanı).
+	// Derleme zamanında denetlenir (ValidSort); çalışma zamanında da (isValidSort).
+	defaultSort: ValidSort<S, SortableKeys<C>>;
 	perPage?: number; // varsayılan sayfa boyutu (30)
 };
 
@@ -96,13 +121,14 @@ const editSchemaOf = (col: TableColumnDef): v.GenericSchema => {
 	return v.pipe(v.string(), v.trim());
 };
 
-export function defineTable<const C extends Record<string, TableColumnDef>>(def: TableDef<C>) {
+export function defineTable<const C extends Record<string, TableColumnDef>, const S extends string>(def: TableDef<C, S>) {
 	type K = Extract<keyof C, string>;
 	const entries = Object.entries(def.columns) as [K, TableColumnDef][];
 
 	// --- sıralama ---
 	const sortable = entries.filter(([, col]) => col.sortable).map(([field]) => field as string);
-	if (!isValidSort(def.defaultSort, sortable)) throw new Error(`defaultSort sıralanabilir alanlardan olmalı: ${def.defaultSort}`);
+	const defaultSort = def.defaultSort as string; // tip denetimi ValidSort'ta; gövdede düz metin
+	if (!isValidSort(defaultSort, sortable)) throw new Error(`defaultSort sıralanabilir alanlardan olmalı: ${defaultSort}`);
 
 	// --- filtreler ---
 	const filters = defineFilters(
@@ -123,7 +149,7 @@ export function defineTable<const C extends Record<string, TableColumnDef>>(def:
 					v.string(),
 					v.check((sort) => isValidSort(sort, sortable), 'Geçersiz sıralama alanı.')
 				),
-				def.defaultSort
+				defaultSort
 			)
 		}),
 		filterData: filters.schema,
@@ -191,7 +217,7 @@ export function defineTable<const C extends Record<string, TableColumnDef>>(def:
 			.map(({ col }) => col);
 	};
 
-	return { columns: def.columns, sortable, defaultSort: def.defaultSort, filters, listParamsSchema, cellEditSchema, cellsEditSchema, canEdit, ruleFields, columnsFor };
+	return { columns: def.columns, sortable, defaultSort, filters, listParamsSchema, cellEditSchema, cellsEditSchema, canEdit, ruleFields, columnsFor };
 }
 
 export type Table = ReturnType<typeof defineTable>;

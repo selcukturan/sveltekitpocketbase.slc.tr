@@ -34,3 +34,24 @@ export const extraSort = TABLE.columnsFor<Good>({ append: [{ field: '_x', sortab
 export const extraEdit = TABLE.columnsFor<Good>({ append: [{ field: '_x', editable: true }] });
 // @ts-expect-error: tanımda olmayan alan ezilemez
 export const unknownOverride = TABLE.columnsFor<Good>({ override: { nope: { width: '90px' } } });
+
+// --- defaultSort (derleme zamanı) ---
+const columns = { a: { sortable: true }, b: { sortable: true }, c: {} } as const;
+export const sortAsc = defineTable({ defaultSort: 'a', columns });
+export const sortDescMulti = defineTable({ defaultSort: '-a,b', columns });
+export const sortPlus = defineTable({ defaultSort: '+b,-a', columns });
+export const sortEmpty = defineTable({ defaultSort: '', columns });
+// @ts-expect-error: sortable olmayan kolon
+export const sortNotSortable = defineTable({ defaultSort: 'c', columns });
+// @ts-expect-error: tanımda olmayan alan (yazım hatası)
+export const sortTypo = defineTable({ defaultSort: '-aa', columns });
+// @ts-expect-error: çoklu sıralamada sonraki parça geçersiz
+export const sortMultiBad = defineTable({ defaultSort: 'a,-x', columns });
+// @ts-expect-error: aynı alan iki kez
+export const sortDuplicate = defineTable({ defaultSort: 'a,-a', columns });
+// editable fonksiyonu olsa da (parametresi tipli ya da tipsiz) denetlenir
+// @ts-expect-error: yazım hatası, editable parametresi tipsiz
+export const sortUntypedFn = defineTable({ defaultSort: 'nam', columns: { name: { sortable: true, editable: (row) => !row.locked } } });
+// @ts-expect-error: yazım hatası, editable parametresi tipli
+export const sortTypedFn = defineTable({ defaultSort: 'nam', columns: { name: { sortable: true, editable: (row: Record<string, unknown>) => !row.locked } } });
+export const sortFnOk = defineTable({ defaultSort: '-name', columns: { name: { sortable: true, editable: (row) => !row.locked } } });

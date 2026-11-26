@@ -13,6 +13,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- `defineTable`: `defaultSort` derleme zamanında denetleniyor. Tanımda olmayan
+  ya da `sortable: true` olmayan alan ve tekrar eden alan editörde okunur bir
+  mesajla hata veriyor (`"Geçersiz defaultSort: 'nam' tanımda yok ya da
+  sortable: true değil"`); `editable: (row) => …` fonksiyonu olsa da çalışır.
+  Çalışma zamanı denetimi de sürüyor. Tip testleri eklendi.
 - DataTable: `defineTable` (`utils/table.ts`, saf). Kolonlar ve kolon başına
   izinler (`sortable`, `filter`, `edit` opt-in; satır kuralı `editable(row)`)
   tek tanımda; liste şeması (yalnızca sayfa, sayfa boyutu ≤ 1000, doğrulanmış
@@ -164,7 +169,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.190` oldu.
+- Uygulama sürümü `v0.2.0-alpha.191` oldu.
 - Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
   Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
   zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
