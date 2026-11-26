@@ -1,7 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { getSelectedLang, t } from '#lib/app/localization/index.js';
-import type { Column, Field, Row } from './types.js';
-import { numberFormat, NUMBER_RAW } from './format.js';
+import type { Column, Field, Row } from '../types.js';
+import { numberFormat, NUMBER_RAW } from '../utils/format.js';
 import type { CellPos, CellRange } from './navigation.svelte.js';
 import type { Attachment } from 'svelte/attachments';
 

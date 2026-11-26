@@ -2,9 +2,9 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, FooterRowType, FooterCellType } from './types.js';
-	import { getTableContext } from './context.svelte.js';
+	import { getTableContext } from './state/context.svelte.js';
 	import { t, getSelectedLang } from '#lib/app/localization/index.js';
-	import { parseAggregate, aggregate, formatAggregate } from './footer.js';
+	import { parseAggregate, aggregate, formatAggregate } from './utils/footer.js';
 </script>
 
 <script lang="ts" generics="TData extends Row">

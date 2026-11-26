@@ -1,4 +1,4 @@
-import type { Row } from './types.js';
+import type { Row } from '../types.js';
 
 /**
  * Satır seçimi.

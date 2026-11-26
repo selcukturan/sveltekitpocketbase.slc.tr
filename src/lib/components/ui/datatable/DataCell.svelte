@@ -1,9 +1,9 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
 	import type { Row, DataRowType, DataCellType } from './types.js';
-	import { getTableContext } from './context.svelte.js';
+	import { getTableContext } from './state/context.svelte.js';
 	import Value from './Value.svelte';
-	import CellInput from './CellInput.svelte';
+	import CellInput from './parts/CellInput.svelte';
 </script>
 
 <script lang="ts" generics="TData extends Row">

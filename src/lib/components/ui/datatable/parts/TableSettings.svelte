@@ -2,7 +2,7 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
-	import { getTableContext, type Borders, type Density } from '../context.svelte';
+	import { getTableContext, type Borders, type Density } from '../state/context.svelte.js';
 	import type { Row } from '../types';
 
 	const context = getTableContext<TData>();

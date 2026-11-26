@@ -1,10 +1,10 @@
 
-import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from './types.js';
+import type { Row, Column, ColumnType, Footer, FooterRowType, DataRowType, HeaderRowType, ListResult, Field, Width, Align } from '../types.js';
 import type { ListSource } from './list-state.svelte.js';
 import { GridCursor, type CellPos, type CellRange } from './navigation.svelte.js';
 import { RowSelection, type SelectionMode, type RowId } from './selection.svelte.js';
 import { CellEditor, type CellEditEvent } from './editing.svelte.js';
-import { parseSort, nextSort } from './sort.js';
+import { parseSort, nextSort } from '../utils/sort.js';
 
 import { getContext, setContext, untrack, type Snippet } from 'svelte';
 import type { Attachment } from 'svelte/attachments';

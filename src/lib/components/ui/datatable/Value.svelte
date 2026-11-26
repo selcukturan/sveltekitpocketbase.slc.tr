@@ -33,7 +33,7 @@
 
 <script lang="ts">
 	import { getSelectedLang } from '#lib/app/localization/index.js';
-	import { numberFormat, dateFormat, DATETIME } from './format.js';
+	import { numberFormat, dateFormat, DATETIME } from './utils/format.js';
 
 	// wrap: false → tablo hücresi (tek satır, taşan kısım …); true → detay görünümü (satır kaydırır, liste etiket olur)
 	let { value, type, wrap = false }: { value: unknown; type?: ColumnType; wrap?: boolean } = $props();

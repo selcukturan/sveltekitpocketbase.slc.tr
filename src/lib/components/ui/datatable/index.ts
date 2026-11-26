@@ -8,8 +8,8 @@ export { default as HeaderRow } from './HeaderRow.svelte';
 export { default as Value } from './Value.svelte';
 
 export type { Column, ColumnType, Footer, FooterValue } from './types.js';
-export { parseAggregate, aggregate, formatAggregate, type Aggregate, type AggregateFn } from './footer.js';
-export { parseSort, formatSort, nextSort, isValidSort, type SortEntry, type SortDir } from './sort.js';
+export { parseAggregate, aggregate, formatAggregate, type Aggregate, type AggregateFn } from './utils/footer.js';
+export { parseSort, formatSort, nextSort, isValidSort, type SortEntry, type SortDir } from './utils/sort.js';
 export {
 	DEFAULT_COLUMN_WIDTHS,
 	DENSITY_ROW_HEIGHTS,
@@ -22,10 +22,10 @@ export {
 	type RangeInfo,
 	type KeyContext,
 	type VisibleRows
-} from './context.svelte.js';
-export type { SelectionMode, RowId } from './selection.svelte.js';
-export type { CellEditEvent, EditorKind } from './editing.svelte.js';
-export { createList, ListState, type ListOptions } from './list-state.svelte.js';
+} from './state/context.svelte.js';
+export type { SelectionMode, RowId } from './state/selection.svelte.js';
+export type { CellEditEvent, EditorKind } from './state/editing.svelte.js';
+export { createList, ListState, type ListOptions } from './state/list-state.svelte.js';
 
 export { default as ActionButton } from './parts/ActionButton.svelte';
 export { default as ColumnToggler } from './parts/ColumnToggler.svelte';

@@ -3,7 +3,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { Row, HeaderRowType, HeaderCellType } from './types.js';
-	import { getTableContext } from './context.svelte.js';
+	import { getTableContext } from './state/context.svelte.js';
 	import { on } from 'svelte/events';
 	import { Icon } from '#lib/components/icons/index.js';
 </script>

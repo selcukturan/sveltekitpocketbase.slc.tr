@@ -2,7 +2,7 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
-	import { getTableContext } from '../context.svelte';
+	import { getTableContext } from '../state/context.svelte.js';
 	import type { Row } from '../types';
 
 	const context = getTableContext<TData>();

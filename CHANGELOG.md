@@ -144,7 +144,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.180` oldu.
+- Uygulama sürümü `v0.2.0-alpha.181` oldu.
+- DataTable klasörü düzenlendi: temel bileşenler kökte; durum sınıfları
+  `state/`, saf yardımcılar `utils/` (`sort`, `footer`, `format`), düzenleyici
+  `parts/CellInput.svelte`. Sunucudan `sort.js` artık
+  `#lib/components/ui/datatable/utils/sort.js` yolundan alınır.
 - DataTable: `list` zorunlu ve tek veri kaynağı. Eski `query`, `sort`, `onSort`,
   `onPagination` prop'ları ve tek kayıt döndüren sorgu desteği kaldırıldı;
   sıralama `list.setSort`, sayfalama `list.paginate` ile yapılıyor.

@@ -5,9 +5,9 @@
 	import PerPage from './parts/PerPage.svelte';
 	import ColumnToggler from './parts/ColumnToggler.svelte';
 	import TableSettings from './parts/TableSettings.svelte';
-	import { createTableContext, type MainProps, type RangeInfo } from './context.svelte';
+	import { createTableContext, type MainProps, type RangeInfo } from './state/context.svelte.js';
 	import { getSelectedLang } from '#lib/app/localization/index.js';
-	import { numberFormat, NUMBER_2 } from './format.js';
+	import { numberFormat, NUMBER_2 } from './utils/format.js';
 	import { untrack } from 'svelte';
 	import HeaderRow from './HeaderRow.svelte';
 	import HeaderCell from './HeaderCell.svelte';

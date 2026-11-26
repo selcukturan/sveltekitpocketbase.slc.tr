@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import * as input from '#lib/app/schemas/inputs/index.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
-import { isValidSort } from '#lib/components/ui/datatable/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
+import { isValidSort } from '#lib/components/ui/datatable/utils/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const oneParamsSchema = v.object({

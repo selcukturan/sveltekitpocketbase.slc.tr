@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import type { Attachment } from 'svelte/attachments';
 	import { on } from 'svelte/events';
-	import type { Row, Column, Align } from './types.js';
-	import { getTableContext } from './context.svelte.js';
+	import type { Row, Column, Align } from '../types.js';
+	import { getTableContext } from '../state/context.svelte.js';
 </script>
 
 <script lang="ts" generics="TData extends Row">
