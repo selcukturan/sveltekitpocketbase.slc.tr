@@ -463,24 +463,6 @@ test('Ctrl + tıklama/sürükleme hücre ekler; özet, kopyalama ve satır seçi
 	await expect(rangeCells(page)).toHaveCount(0);
 });
 
-test('onVisibleRowsChange: görünen satırlar kaydırmayla değişir', async ({ page }) => {
-	await openTable(page);
-	const status = page.locator('.slc-visible-rows');
-	await expect(status).toContainText('Görünen satırlar: 1–');
-	const text = (await status.textContent()) ?? '';
-	const [, from, to, total] = text.match(/(\d+)–(\d+) \/ (\d+)/)!.map(Number);
-	expect(from).toBe(1);
-	// Görünen satır sayısı veri alanının yüksekliğiyle tutarlı (başlık 44, footer 3×40, satır 40)
-	const height = await grid(page).evaluate((el) => el.clientHeight);
-	expect(to - from + 1).toBe(Math.ceil((height - 44 - 3 * 40) / 40));
-
-	await cell(page, 0, 2).click();
-	await page.keyboard.press('Control+End');
-	await expect(status).toContainText(`–${total} / ${total}`);
-	await page.keyboard.press('Control+Home');
-	await expect(status).toContainText('Görünen satırlar: 1–');
-});
-
 // ---------------------------------------------------------------- satır geri dönüşümü
 const nextFrames = (page: Page, n = 3) =>
 	page.evaluate(

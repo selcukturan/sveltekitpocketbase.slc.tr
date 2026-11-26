@@ -5,10 +5,10 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Page, Head } from '#lib/components/templates/index.js';
 	import * as dt from '#lib/components/ui/datatable/index.js';
-	import { listParamsSchema } from '../grapes/crud/simple/page.shared';
+	import { TABLE } from '../grapes/crud/simple/page.shared';
 	import { getList } from '../grapes/crud/simple/page.remote';
 
-	const list = dt.createList(getList, listParamsSchema); // filtre + sayfalama + sıralama + sorgu
+	const list = dt.createList(getList, TABLE.listParamsSchema); // filtre + sayfalama + sıralama + sorgu
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
 	const columns: dt.Column<Item>[] = [

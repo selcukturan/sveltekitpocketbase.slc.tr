@@ -164,7 +164,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.184` oldu.
+- Uygulama sürümü `v0.2.0-alpha.185` oldu.
+- Simple CRUD: kolonlar, sıralama, filtre ve hücre düzenleme izinleri
+  `page.shared.ts`'teki tek `TABLE` tanımından (`SORTABLE_FIELDS`, `FILTERS`,
+  elle yazılmış `listParamsSchema` / `cellEditSchema` kalktı). Sıralanabilir
+  alanlar artık yalnızca `sortable: true` işaretli kolonlar. Sayfa kolonları
+  `TABLE.columnsFor<Item>()` ile alıyor; FilterBar etiketleri tanımdan.
+  Kolon etiketleri çevrildi (`dt_number_optional`, `dt_bool_optional` …).
 - DataTable klasörü düzenlendi: temel bileşenler kökte; durum sınıfları
   `state/`, saf yardımcılar `utils/` (`sort`, `footer`, `format`), düzenleyici
   `parts/CellInput.svelte`. Sunucudan `sort.js` artık
@@ -231,6 +237,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Simple CRUD `getList`: istemci `options.expand` / `options.fields`
+  göndererek ilişkili koleksiyonları açabiliyordu; liste şeması artık yalnızca
+  sayfa, sayfa boyutu (≤ 1000), sıralama ve filtre kabul ediyor.
+- Hücre düzenlemede satır kuralı (`editable(row)`) sunucuda da denetleniyor
+  (`TABLE.canEdit`; kuralı olan alanlarda kayıt okunur, 403).
 - `tooltip`: eleman DOM'dan kalkarken tooltip'i açıksa gizleniyor (ekranda
   takılı kalabiliyordu).
 - e2e: `createRecord` çekmecenin kapanmasını da bekliyor (kapanma animasyonu

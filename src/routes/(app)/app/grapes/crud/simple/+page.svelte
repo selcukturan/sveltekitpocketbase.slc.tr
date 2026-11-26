@@ -8,29 +8,24 @@
 	import { confirm } from '#lib/components/ui/confirm/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import * as v from 'valibot';
-	import { DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
-	import { listParamsSchema, FILTERS, createFormSchema, updateFormSchema, cellEditSchema, cellsEditSchema } from './page.shared';
+	import { TABLE, createFormSchema, updateFormSchema } from './page.shared';
 	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
-	const list = dt.createList(getList, listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
+	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
 	const drawer = createHashDrawer(); // #cmd=update&id=... → drawer
 
 	type Item = Awaited<ReturnType<typeof getList>>['items'][number];
 	let selected = $state<Item['id'][]>([]); // seçili satır id'leri (sayfalar arası korunur)
-	const columns: dt.Column<Item>[] = [
-		{ field: '_select', type: 'select' },
-		{ field: '_actions', type: 'actions', label: 'dt_actions' },
-		{ field: 'id', label: 'dt_id', width: 'minmax(50px,1fr)' },
-		{ field: 'text_required', label: 'dt_text_required', width: 'minmax(50px,1fr)', editable: true },
-		{ field: 'text_optional', label: 'dt_text_optional', width: 'minmax(50px,1fr)', editable: true },
-		{ field: 'number_optional', label: 'number_optional', type: 'number', width: '130px', editable: true },
-		{ field: 'select_optional_single', label: 'select_optional_single', width: '150px', editable: true, options: Object.values(DemoCrudSelectOptionalSingleOptions) },
-		{ field: 'select_optional_multiple', label: 'select_optional_multiple', type: 'list', width: '180px' },
-		{ field: 'date_optional', label: 'date_optional', type: 'date', width: '130px', editable: true },
-		{ field: 'bool_optional', label: 'bool_optional', type: 'bool', width: '120px', editable: true },
-		{ field: 'updated', label: 'updated', type: 'datetime', width: '170px' }
-	];
+	// Kolonlar page.shared.ts'teki TABLE tanımından (sıralama, filtre, düzenleme izinleri orada). Burada yalnızca
+	// sayfaya özgü kolonlar eklenir; override ile sunum değiştirilebilir (izin verilemez). TABLE'daki bir alan Item'da
+	// yoksa derleme hatası verir.
+	const columns = TABLE.columnsFor<Item>({
+		prepend: [
+			{ field: '_select', type: 'select' },
+			{ field: '_actions', type: 'actions', label: 'dt_actions' }
+		]
+	});
 
 	// create/update ortak gönderim: alan hataları inputların altında, genel sonuç toast ile
 	const save = async (submit: () => Promise<boolean>) => {
@@ -49,11 +44,11 @@
 	// gerçek veri gelir, hata olursa SvelteKit override'ı geri alır.
 	const cellArgs = ({ row, field, value }: dt.CellEditEvent<Item>) => ({ id: row.id, field, value });
 	const validateCell = (e: dt.CellEditEvent<Item>) => {
-		const result = v.safeParse(cellEditSchema, cellArgs(e));
+		const result = v.safeParse(TABLE.cellEditSchema, cellArgs(e));
 		return result.success ? undefined : result.issues[0].message;
 	};
 	// Optimistik görünüm: listede ilgili kayıtlara alanları uygular (withOverride)
-	const applyEdits = (edits: v.InferOutput<typeof cellEditSchema>[]) =>
+	const applyEdits = (edits: v.InferOutput<typeof TABLE.cellEditSchema>[]) =>
 		list.updatesWith((result) => ({
 			...result,
 			items: result.items.map((item) => {
@@ -63,7 +58,7 @@
 		}));
 
 	const editCell = async (e: dt.CellEditEvent<Item>) => {
-		const args = v.parse(cellEditSchema, cellArgs(e));
+		const args = v.parse(TABLE.cellEditSchema, cellArgs(e));
 		try {
 			await updateCell(args).updates(...applyEdits([args]));
 		} catch (error) {
@@ -75,7 +70,7 @@
 	const editCells = async (edits: dt.CellEditEvent<Item>[], { invalid }: { invalid: number }) => {
 		if (invalid > 0) toaster.error(null, t('dt_paste_invalid', { count: invalid }));
 		if (edits.length === 0) return;
-		const args = v.parse(cellsEditSchema, edits.map(cellArgs));
+		const args = v.parse(TABLE.cellsEditSchema, edits.map(cellArgs));
 		try {
 			await updateCells(args).updates(...applyEdits(args));
 		} catch (error) {
@@ -181,8 +176,8 @@
 
 <Page>
 	<Page.Header>
-		<!-- Filtreler page.shared.ts'teki FILTERS tanımından; etiketler kolonlardan -->
-		<dt.FilterBar {list} filters={FILTERS} {columns} />
+		<!-- Filtreler ve etiketleri TABLE tanımından -->
+		<dt.FilterBar {list} filters={TABLE.filters} />
 		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 		<div class="ml-auto flex items-center gap-2">
 			<!-- GEÇİCİ: test butonları -->

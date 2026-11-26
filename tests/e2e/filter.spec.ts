@@ -41,7 +41,7 @@ test('filtreler: metin, sayı aralığı, evet/hayır birlikte uygulanır; Temiz
 
 	// Panel: sayı en az 100 → yalnızca 500'lük kayıt; butonda uygulanan filtre sayısı
 	await panelButton(page).click();
-	await page.getByRole('spinbutton', { name: 'number_optional · En az' }).fill('100');
+	await page.getByRole('spinbutton', { name: 'Sayı · En az' }).fill('100');
 	await page.getByRole('group', { name: 'Filtreler' }).getByRole('button', { name: 'Ara' }).click();
 	await expect(rows(page)).toHaveCount(1);
 	await expect(cell(page, 0, 4)).toHaveText(`${stamp}-1`);
@@ -49,8 +49,8 @@ test('filtreler: metin, sayı aralığı, evet/hayır birlikte uygulanır; Temiz
 
 	// + evet/hayır: Evet → iki filtre birlikte (VE): 500'lük kaydın bool değeri false → sonuç yok
 	await panelButton(page).click();
-	await page.getByRole('combobox', { name: 'bool_optional' }).selectOption('true');
-	await page.getByRole('spinbutton', { name: 'number_optional · En az' }).press('Enter');
+	await page.getByRole('combobox', { name: 'Onay' }).selectOption('true');
+	await page.getByRole('spinbutton', { name: 'Sayı · En az' }).press('Enter');
 	await expect(rows(page)).toHaveCount(0);
 	await expect(panelButton(page)).toContainText('2');
 

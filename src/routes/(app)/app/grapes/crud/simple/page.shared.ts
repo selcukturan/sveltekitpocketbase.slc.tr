@@ -2,8 +2,7 @@ import * as v from 'valibot';
 import * as input from '#lib/app/schemas/inputs/index.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
-import { isValidSort } from '#lib/components/ui/datatable/utils/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
-import { defineFilters } from '#lib/components/ui/datatable/utils/filter.js'; // saf: sunucuda da kullanılır
+import { defineTable } from '#lib/components/ui/datatable/utils/table.js'; // saf (bileşen değil): sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const oneParamsSchema = v.object({
@@ -36,42 +35,31 @@ export const createFormSchema = v.object({
 });
 export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 
-// Sıralanabilecek alanlar: form şemasındaki alanlar + PocketBase sistem alanları. Kolonları yeniden tanımlamaya gerek yok;
-// form alanları kullanıcının zaten gördüğü alanlar olduğu için sıralamak bilgi sızdırmaz. Formda olmayan (iç) alanlara göre
-// sıralama reddedilir. Çoklu sıralama: '-number_optional,text_required'.
-export const SORTABLE_FIELDS: readonly string[] = [...Object.keys(createFormSchema.entries), 'id', 'created', 'updated'];
-
-// Filtrelenebilecek alanlar ve türleri: tek tanım. Şema (sunucu doğrular), PocketBase filtresi (page.remote.ts) ve
-// FilterBar arayüzü buradan üretilir; tanımda olmayan alana göre filtre gönderilemez.
-export const FILTERS = defineFilters({
-	text_required: 'text',
-	text_optional: 'text',
-	number_optional: 'number',
-	date_optional: 'date',
-	bool_optional: 'bool',
-	select_optional_single: { type: 'select', options: Object.values(DemoCrudSelectOptionalSingleOptions) }
+// Tablo tanımı: kolonlar ve kolon başına izinler tek yerde (bkz. datatable/utils/table.ts).
+// Sunucunun kabul ettiği sıralama alanları, filtreler ve hücre düzenlemeleri yalnızca buradaki işaretlerden türer
+// (sortable / filter / edit, hepsi opt-in). Sayfa kolonları TABLE.columnsFor<Item>() ile alır; sunumu ezebilir, izin veremez.
+const singleOptions = Object.values(DemoCrudSelectOptionalSingleOptions);
+export const TABLE = defineTable({
+	defaultSort: 'text_required',
+	columns: {
+		id: { label: 'dt_id', width: 'minmax(50px,1fr)', sortable: true },
+		text_required: {
+			label: 'dt_text_required',
+			width: 'minmax(50px,1fr)',
+			sortable: true,
+			filter: true,
+			edit: v.pipe(v.string(), v.trim(), v.nonEmpty('Bu alan zorunludur.'))
+		},
+		text_optional: { label: 'dt_text_optional', width: 'minmax(50px,1fr)', sortable: true, filter: true, edit: true },
+		number_optional: { label: 'dt_number_optional', type: 'number', width: '130px', sortable: true, filter: true, edit: true },
+		select_optional_single: { label: 'dt_select_optional_single', width: '150px', options: singleOptions, sortable: true, filter: true, edit: true },
+		select_optional_multiple: { label: 'dt_select_optional_multiple', type: 'list', width: '180px', sortable: true },
+		date_optional: { label: 'dt_date_optional', type: 'date', width: '130px', sortable: true, filter: true, edit: true },
+		bool_optional: { label: 'dt_bool_optional', type: 'bool', width: '120px', sortable: true, filter: true, edit: true },
+		updated: { label: 'dt_updated', type: 'datetime', width: '170px', sortable: true }
+	}
 });
-
-// Liste (tablo) parametreleri: SORTABLE_FIELDS'ten sonra, çünkü sıralama onunla doğrulanır
-export const listParamsSchema = v.object({
-	page: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 1), 1),
-	perPage: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 30), 30),
-	options: v.object({
-		sort: v.optional(
-			v.pipe(
-				v.string(),
-				v.check((sort) => isValidSort(sort, SORTABLE_FIELDS), 'Geçersiz sıralama alanı.')
-			),
-			'text_required'
-		),
-		expand: v.optional(v.string()),
-		fields: v.optional(v.string()),
-		skipTotal: v.optional(v.fallback(v.boolean(), false), false)
-	}),
-	filterData: FILTERS.schema,
-	timestamp: v.optional(v.fallback(v.number(), 0), 0)
-});
-export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;
+export type ListParamsSchemaType = v.InferOutput<typeof TABLE.listParamsSchema>;
 
 export const updateFormSchema = v.object({
 	...input.Hidden('id'),
@@ -92,19 +80,3 @@ export const relationListParamsSchema = v.object({
 	collection: v.picklist([...Object.values(Collections)])
 });
 export type RelationListParamsSchemaType = v.InferOutput<typeof relationListParamsSchema>;
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-// Tablo içinde tek hücre düzenleme (DataTable onCellEdit). Alan başına doğrulama; değerler DataTable düzenleyicisinin
-// verdiği tipte: metin string, sayı number|null, bool boolean, tarih 'YYYY-MM-DD'|null, liste string|null.
-const cellId = { id: v.pipe(v.string(), v.nonEmpty()) };
-export const cellEditSchema = v.variant('field', [
-	v.object({ ...cellId, field: v.literal('text_required'), value: v.pipe(v.string(), v.trim(), v.nonEmpty('Bu alan zorunludur.')) }),
-	v.object({ ...cellId, field: v.literal('text_optional'), value: v.pipe(v.string(), v.trim()) }),
-	v.object({ ...cellId, field: v.literal('number_optional'), value: v.nullable(v.number()) }),
-	v.object({ ...cellId, field: v.literal('bool_optional'), value: v.boolean() }),
-	v.object({ ...cellId, field: v.literal('date_optional'), value: v.nullable(v.pipe(v.string(), v.isoDate())) }),
-	v.object({ ...cellId, field: v.literal('select_optional_single'), value: v.nullable(v.picklist(Object.values(DemoCrudSelectOptionalSingleOptions))) })
-]);
-export type CellEditSchemaType = v.InferOutput<typeof cellEditSchema>;
-// Toplu düzenleme (tabloya Ctrl+V ile yapıştırma); bir istekte en fazla 1000 hücre
-export const cellsEditSchema = v.pipe(v.array(cellEditSchema), v.minLength(1), v.maxLength(1000));

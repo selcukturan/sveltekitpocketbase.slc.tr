@@ -1,4 +1,5 @@
 import { getRequestEvent, query, form, command, requested } from '$app/server';
+import { error } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { Collections, DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
 import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
@@ -6,35 +7,24 @@ import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
-import {
-	listParamsSchema,
-	oneParamsSchema,
-	createFormSchema,
-	updateFormSchema,
-	deleteParamsSchema,
-	deleteManySchema,
-	cellEditSchema,
-	cellsEditSchema,
-	FILTERS
-} from './page.shared';
+import { TABLE, oneParamsSchema, createFormSchema, updateFormSchema, deleteParamsSchema, deleteManySchema } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const getList = query(listParamsSchema, async (params) => {
+// İstemciden yalnızca sayfa, sayfa boyutu, sıralama (TABLE'daki sortable alanlar) ve filtre gelir; expand/fields
+// gerekiyorsa burada sabit verilir (istemci ilişkili koleksiyonları açamaz).
+export const getList = query(TABLE.listParamsSchema, async (params) => {
 	await checkAuthenticated(); // 🔒
 
 	const { locals } = getRequestEvent();
 
 	await sleep(300);
 
-	// Alanlar ve operatörler FILTERS tanımından, değerler yer tutuculara (bkz. utils/filter.ts)
-	const filterString = FILTERS.toPb(locals.pb, params.filterData);
+	// Alanlar ve operatörler TABLE tanımından, değerler yer tutuculara (bkz. datatable/utils/filter.ts)
+	const filter = TABLE.filters.toPb(locals.pb, params.filterData);
 
 	const listResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.DemoCrud).getList(params.page, params.perPage, {
-			filter: filterString,
-			...params.options
-		}),
+		locals.pb.collection(Collections.DemoCrud).getList(params.page, params.perPage, { filter, sort: params.options.sort }),
 		mapUnknownToError
 	);
 
@@ -128,9 +118,27 @@ export const deleteRecords = command(deleteManySchema, async ({ ids }) => {
 	return { deleted: ids.length };
 });
 
+// Satır kuralı (TABLE'da editable: (row) => …) olan alanlarda kaydın güncel hâli okunur ve kural sunucuda da denetlenir.
+// Kuralı olmayan alanlarda ek istek yapılmaz (alanın düzenlenebilirliği zaten cellEditSchema ile doğrulandı).
+async function assertEditable(edits: { id: string; field: string }[]) {
+	const ruled = edits.filter((edit) => TABLE.ruleFields.has(edit.field));
+	if (ruled.length === 0) return;
+	const { locals } = getRequestEvent();
+	const collection = locals.pb.collection(Collections.DemoCrud);
+	const ids = [...new Set(ruled.map((edit) => edit.id))];
+	const results = await Promise.all(ids.map((id) => ResultAsync.fromPromise(collection.getOne(id), mapUnknownToError)));
+	const records = new Map<string, Record<string, unknown>>();
+	for (const [i, result] of results.entries()) {
+		if (result.isErr()) throwError(result.error);
+		records.set(ids[i], result.value);
+	}
+	if (ruled.some((edit) => !TABLE.canEdit(records.get(edit.id)!, edit.field))) error(403, { message: 'dt_cell_not_editable', type: 'general', errorId: '' });
+}
+
 // Tablo içinde tek hücre düzenleme: yalnızca o alan güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).
-export const updateCell = command(cellEditSchema, async ({ id, field, value }) => {
+export const updateCell = command(TABLE.cellEditSchema, async ({ id, field, value }) => {
 	await checkAuthenticated(); // 🔒
+	await assertEditable([{ id, field }]);
 
 	const { locals } = getRequestEvent();
 
@@ -146,8 +154,9 @@ export const updateCell = command(cellEditSchema, async ({ id, field, value }) =
 });
 
 // Toplu hücre düzenleme (yapıştırma): hücreler kayıt bazında birleştirilir, her kayıt tek istekle güncellenir.
-export const updateCells = command(cellsEditSchema, async (edits) => {
+export const updateCells = command(TABLE.cellsEditSchema, async (edits) => {
 	await checkAuthenticated(); // 🔒
+	await assertEditable(edits);
 
 	const { locals } = getRequestEvent();
 	const collection = locals.pb.collection(Collections.DemoCrud);
