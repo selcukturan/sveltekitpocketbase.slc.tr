@@ -41,12 +41,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 
 	await sleep(300);
 
-	const oneResult = await ResultAsync.fromPromise(
-		locals.pb.collection(Collections.DemoCrud).getOne(params.id, {
-			...params.options
-		}),
-		mapUnknownToError
-	);
+	const oneResult = await ResultAsync.fromPromise(locals.pb.collection(Collections.DemoCrud).getOne(params.id), mapUnknownToError);
 
 	if (oneResult.isErr()) {
 		throwError(oneResult.error);

@@ -5,12 +5,10 @@ import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOpti
 import { defineTable } from '#lib/components/ui/datatable/utils/table.js'; // saf (bileşen değil): sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
+// Tek kayıt: istemciden yalnızca id (ve önbelleği aşmak için timestamp). expand/fields gerekiyorsa sunucuda sabit
+// verilir; istemci ilişkili koleksiyonları açamaz (bkz. TABLE.listParamsSchema).
 export const oneParamsSchema = v.object({
-	id: v.optional(v.fallback(v.string(), ''), ''),
-	options: v.object({
-		expand: v.optional(v.string()),
-		fields: v.optional(v.string())
-	}),
+	id: v.pipe(v.string(), v.nonEmpty()),
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type OneParamsSchemaType = v.InferOutput<typeof oneParamsSchema>;

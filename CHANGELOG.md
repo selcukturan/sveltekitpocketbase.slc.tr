@@ -164,7 +164,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.188` oldu.
+- Uygulama sürümü `v0.2.0-alpha.189` oldu.
 - Belge: "Tablo tanımı (`defineTable`)" bölümü; Filtreler, Hücre düzenleme ve
   Sıralama bölümleri tanıma bağlandı. Testler: `table.typetest.ts` (derleme
   zamanı güvenceleri, `npm run check`) ve `table-def.spec.ts` (eklenen kolon
@@ -243,6 +243,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Simple CRUD `getOne`: istemci `options.expand` / `options.fields`
+  göndererek ilişkili koleksiyonları açabiliyordu; şema artık yalnızca `id`
+  (boş olamaz) ve `timestamp` kabul ediyor.
 - Simple CRUD `getList`: istemci `options.expand` / `options.fields`
   göndererek ilişkili koleksiyonları açabiliyordu; liste şeması artık yalnızca
   sayfa, sayfa boyutu (≤ 1000), sıralama ve filtre kabul ediyor.

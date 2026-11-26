@@ -240,7 +240,7 @@
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`${t('update')} - ID: ${drawer.id}`}>{@render closeButton()}</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
-						{@const record = await getOne({ id: drawer.id, options: {}, timestamp: Date.now() })}
+						{@const record = await getOne({ id: drawer.id, timestamp: Date.now() })}
 						<DrawerFormContent.Content.Form
 							enctype="multipart/form-data"
 							schema={updateFormSchema}
@@ -266,7 +266,7 @@
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`${t('view')} - ID: ${drawer.id}`}>{@render closeButton()}</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>
-						{@const record = await getOne({ id: drawer.id, options: {}, timestamp: Date.now() })}
+						{@const record = await getOne({ id: drawer.id, timestamp: Date.now() })}
 						<!-- minmax(0,1fr): değer kolonu içeriğe göre büyüyüp yatay scroll üretmez; uzun değerler satır kaydırır -->
 						<dl class="grid grid-cols-[minmax(7rem,max-content)_minmax(0,1fr)] content-start gap-x-6 gap-y-3 overflow-x-hidden overflow-y-auto p-6 text-sm">
 							{#each Object.entries(record) as [key, value] (key)}
