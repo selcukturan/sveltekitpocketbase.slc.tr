@@ -10,7 +10,7 @@
 		label?: string;
 	};
 
-	let { label: componentLabel, field, onValueChange: userOnValueChange, oninput: userOnInput, ...restProps }: Props = $props();
+	let { label: componentLabel, field, onValueChange: userOnValueChange, oninput: userOnInput, onblur: userOnBlur, ...restProps }: Props = $props();
 
 	const cid = $props.id();
 	const id = $derived(restProps.id || cid);
@@ -41,17 +41,22 @@
 		field.set(value);
 	};
 
+	// Yazarken geçersiz metin hemen hata göstermez: '123.' ya da '-' bir sonraki tuşla geçerli olabilir. Hata alandan
+	// çıkınca (blur) ya da gönderimde (gizli input 'NaN') gösterilir; metin düzelince varsa hemen kalkar.
 	const onValueChange = (args: NumberValueChangeArgs) => {
 		numberValue = args.value;
 		sync(args.initial);
 		userOnValueChange?.(args);
-		formField.validate();
+		if (!badInput) formField.validate();
 	};
 	// Değer değişmeden geçerlilik değişebilir ('1-2' → tümü silinir: değer 0 → 0)
 	const onInput = () => {
 		const wasBad = badInput;
 		sync();
-		if (wasBad !== badInput) formField.validate();
+		if (wasBad && !badInput) formField.validate();
+	};
+	const onBlur = () => {
+		if (badInput) formField.validate();
 	};
 	// ######### END: handle value change #####################
 </script>
@@ -67,6 +72,10 @@
 		oninput={(e) => {
 			onInput();
 			userOnInput?.(e);
+		}}
+		onblur={(e) => {
+			onBlur();
+			userOnBlur?.(e);
 		}}
 		{...restProps}
 		status="with-field"

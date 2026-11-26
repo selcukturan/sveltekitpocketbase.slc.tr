@@ -215,6 +215,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Form Number: geçersiz ya da yarım metin (`123.`, `-`, `1-2`) yazarken hata
+  göstermiyor; hata alandan çıkınca ya da gönderimde görünür, metin düzelince
+  hemen kalkar. Gönderimde koruma aynı (`NaN` → "geçerli bir sayı girin").
+- Belgeler: çekirdek belgede gönderim akışı `createFormSave` ile; Number
+  geçersiz metin davranışı.
 - Number: nokta → yerel ondalık ayracı çevirme (`autoChangeDecimalSeparator`)
   tutarsız çalıştığı için kaldırıldı; ayracı tarayıcı yönetir.
 - Belgeler: DataTable belgesine `createRowDelete` bölümü ve `list.selected`;

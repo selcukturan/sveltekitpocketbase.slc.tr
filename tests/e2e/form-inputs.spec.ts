@@ -329,9 +329,21 @@ test('Number: geçersiz metin sessizce 0 olarak gönderilmez; negatif ve ondalı
 	const error = form.getByRole('status').filter({ hasText: 'Lütfen geçerli bir sayı girin.' });
 	await form.getByLabel('text_required').fill('seed-e2e-gonderilmemeli');
 
-	// Tarayıcı '1-2' için değeri '' verir (badInput); alan hatalı görünür, form gönderilmez
+	// Yazarken yarım metin ('123.') hata göstermez; bir sonraki tuşla geçerli olur
+	await num.click();
+	await page.keyboard.type('123.', { delay: 30 });
+	await expect(num).toHaveValue(''); // tarayıcı için şu an geçersiz (badInput)
+	await expect(error).toHaveCount(0);
+	await page.keyboard.type('2');
+	await expect(num).toHaveJSProperty('valueAsNumber', 123.2);
+	await expect(error).toHaveCount(0);
+
+	// Tarayıcı '1-2' için değeri '' verir (badInput): yazarken sessiz, alandan çıkınca hatalı görünür, form gönderilmez
+	await num.fill('');
 	await num.click();
 	await page.keyboard.type('1-2', { delay: 30 });
+	await expect(error).toHaveCount(0);
+	await page.keyboard.press('Tab');
 	await expect(error).toHaveCount(1);
 	await expect(num).toHaveAttribute('aria-invalid', 'true');
 	await form.getByRole('button', { name: 'Oluştur' }).click();
