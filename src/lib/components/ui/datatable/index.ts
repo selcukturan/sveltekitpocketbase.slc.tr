@@ -10,6 +10,7 @@ export { default as Value } from './Value.svelte';
 export type { Column, ColumnType, Footer, FooterValue } from './types.js';
 export { parseAggregate, aggregate, formatAggregate, type Aggregate, type AggregateFn } from './utils/footer.js';
 export { parseSort, formatSort, nextSort, isValidSort, type SortEntry, type SortDir } from './utils/sort.js';
+export { defineFilters, type Filters, type FilterDef, type FilterType, type FilterValues } from './utils/filter.js';
 export {
 	DEFAULT_COLUMN_WIDTHS,
 	DENSITY_ROW_HEIGHTS,
@@ -29,4 +30,5 @@ export { createList, ListState, type ListOptions } from './state/list-state.svel
 
 export { default as ActionButton } from './parts/ActionButton.svelte';
 export { default as MenuItem } from './parts/MenuItem.svelte';
+export { default as FilterBar } from './parts/FilterBar.svelte';
 export { default as ColumnToggler } from './parts/ColumnToggler.svelte';

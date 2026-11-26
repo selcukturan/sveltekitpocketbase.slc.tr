@@ -9,7 +9,7 @@
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import * as v from 'valibot';
 	import { DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
-	import { listParamsSchema, createFormSchema, updateFormSchema, cellEditSchema, cellsEditSchema } from './page.shared';
+	import { listParamsSchema, FILTERS, createFormSchema, updateFormSchema, cellEditSchema, cellsEditSchema } from './page.shared';
 	import { getOne, getList, createForm, updateForm, deleteRecord, deleteRecords, updateCell, updateCells, seedRecords, deleteSeedRecords } from './page.remote';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
@@ -184,13 +184,8 @@
 
 <Page>
 	<Page.Header>
-		<div class="w-56">
-			<input.Text bind:value={list.filter.filter_text_required} placeholder={t('search_contains', { field: 'text_required' })} onkeydown={list.searchOnEnter} />
-		</div>
-		<div class="w-56">
-			<input.Text bind:value={list.filter.filter_text_optional} placeholder={t('search_contains', { field: 'text_optional' })} onkeydown={list.searchOnEnter} />
-		</div>
-		<input.Button variant="filled" label={t('search')} onclick={list.search} />
+		<!-- Filtreler page.shared.ts'teki FILTERS tanımından; etiketler kolonlardan -->
+		<dt.FilterBar {list} filters={FILTERS} {columns} />
 		<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 		<div class="ml-auto flex items-center gap-2">
 			<!-- GEÇİCİ: test butonları -->

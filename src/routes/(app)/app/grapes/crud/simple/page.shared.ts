@@ -3,6 +3,7 @@ import * as input from '#lib/app/schemas/inputs/index.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { DemoCrudSelectOptionalMultipleOptions, DemoCrudSelectOptionalSingleOptions } from '#lib/types/pocketbase-types.js';
 import { isValidSort } from '#lib/components/ui/datatable/utils/sort.js'; // saf fonksiyon (bileşen değil): sunucuda da kullanılır
+import { defineFilters } from '#lib/components/ui/datatable/utils/filter.js'; // saf: sunucuda da kullanılır
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 export const oneParamsSchema = v.object({
@@ -40,9 +41,19 @@ export type CreateFormSchemaType = v.InferOutput<typeof createFormSchema>;
 // sıralama reddedilir. Çoklu sıralama: '-number_optional,text_required'.
 export const SORTABLE_FIELDS: readonly string[] = [...Object.keys(createFormSchema.entries), 'id', 'created', 'updated'];
 
+// Filtrelenebilecek alanlar ve türleri: tek tanım. Şema (sunucu doğrular), PocketBase filtresi (page.remote.ts) ve
+// FilterBar arayüzü buradan üretilir; tanımda olmayan alana göre filtre gönderilemez.
+export const FILTERS = defineFilters({
+	text_required: 'text',
+	text_optional: 'text',
+	number_optional: 'number',
+	date_optional: 'date',
+	bool_optional: 'bool',
+	select_optional_single: { type: 'select', options: Object.values(DemoCrudSelectOptionalSingleOptions) }
+});
+
 // Liste (tablo) parametreleri: SORTABLE_FIELDS'ten sonra, çünkü sıralama onunla doğrulanır
 export const listParamsSchema = v.object({
-	filter: v.optional(v.string()),
 	page: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 1), 1),
 	perPage: v.optional(v.fallback(v.pipe(v.number(), v.integer()), 30), 30),
 	options: v.object({
@@ -57,10 +68,7 @@ export const listParamsSchema = v.object({
 		fields: v.optional(v.string()),
 		skipTotal: v.optional(v.fallback(v.boolean(), false), false)
 	}),
-	filterData: v.object({
-		...input.Text('filter_text_required', { required: false }),
-		...input.Text('filter_text_optional', { required: false })
-	}),
+	filterData: FILTERS.schema,
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type ListParamsSchemaType = v.InferOutput<typeof listParamsSchema>;

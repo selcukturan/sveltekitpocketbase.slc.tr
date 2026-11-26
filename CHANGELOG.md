@@ -13,6 +13,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- DataTable: filtreler. `defineFilters` (`utils/filter.ts`, saf) tek tanımdan
+  doğrulama şeması, güvenli PocketBase filtresi (`toPb`, yer tutuculu) ve
+  arayüz alanlarını üretir; türler: `text`, `number`, `date`, `bool`,
+  `select`. `dt.FilterBar`: metin filtreleri satır içinde, diğerleri
+  "Filtreler" panelinde (uygulanan filtre sayısıyla), Ara ve Temizle. Simple
+  CRUD sayfası buna geçti; liste şemasındaki kullanılmayan serbest `filter`
+  alanı kaldırıldı. e2e testi eklendi (`filter.spec.ts`).
 - DataTable: sağ tık menüsü tabloda. `contextMenu(row)` snippet'i ve
   `dt.MenuItem` (`label`, `onclick`, `danger`, `disabled`). Konum (ekrana
   sığdırma), popover, ↑ ↓ Home End gezinme, Esc/dışarı tıklama/kaydırma ile
@@ -149,7 +156,7 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Uygulama sürümü `v0.2.0-alpha.182` oldu.
+- Uygulama sürümü `v0.2.0-alpha.183` oldu.
 - DataTable klasörü düzenlendi: temel bileşenler kökte; durum sınıfları
   `state/`, saf yardımcılar `utils/` (`sort`, `footer`, `format`), düzenleyici
   `parts/CellInput.svelte`. Sunucudan `sort.js` artık

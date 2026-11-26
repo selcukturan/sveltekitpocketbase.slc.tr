@@ -101,7 +101,7 @@ test('silinen satırla kaybolan odak gride geri verilir (toast sonrasında da)',
 	await createRecord(page, `${stamp}-1`);
 	await createRecord(page, `${stamp}-2`);
 
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(stamp);
 	await search.press('Enter');
 	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(2);
@@ -199,7 +199,7 @@ test('hücre düzenleme: yazma/F2/Enter/Esc, sayı, liste, tarih, bool ve doğru
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	await createRecord(page, `${stamp}-1`);
 	await createRecord(page, `${stamp}-2`);
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(stamp);
 	await search.press('Enter');
 	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(2);
@@ -279,7 +279,7 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	await createRecord(page, `${stamp}-1`);
 	await createRecord(page, `${stamp}-2`);
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(stamp);
 	await search.press('Enter');
 	await expect(grid(page).locator('[role="row"][aria-selected]')).toHaveCount(2);
@@ -339,7 +339,7 @@ test('aralık özeti alt barda: hücre sayısı, toplam, ortalama', async ({ pag
 
 test('onLoad: yeni sorgu boş dönerse bilgi verilir', async ({ page }) => {
 	await openTable(page);
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(`yok-${Date.now()}`);
 	await search.press('Enter');
 	await expect(page.locator('h3', { hasText: 'Gösterilecek veri yok.' })).toBeVisible();
@@ -350,7 +350,7 @@ test('onKeyDown ile Delete toplu siler, sağ tık menüsü ve rowClass çalış�
 	await openTable(page);
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	for (const n of [1, 2, 3]) await createRecord(page, `${stamp}-${n}`);
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(stamp);
 	await search.press('Enter');
 	const rows = grid(page).locator('[role="row"][aria-selected]');
@@ -565,7 +565,7 @@ test('footer: sum(2), avg(2), max(), count() ve fonksiyon yüklü satırlardan h
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	await createRecord(page, `${stamp}-1`);
 	await createRecord(page, `${stamp}-2`);
-	const search = page.getByPlaceholder('Ara: text_optional içerir...');
+	const search = page.getByRole('textbox', { name: 'Metin (İsteğe Bağlı)', exact: true });
 	await search.fill(stamp);
 	await search.press('Enter');
 	const rows = grid(page).locator('[role="row"][aria-selected]');

@@ -14,7 +14,8 @@ import {
 	deleteParamsSchema,
 	deleteManySchema,
 	cellEditSchema,
-	cellsEditSchema
+	cellsEditSchema,
+	FILTERS
 } from './page.shared';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,7 +27,8 @@ export const getList = query(listParamsSchema, async (params) => {
 
 	await sleep(300);
 
-	const filterString = locals.pb.filter('(text_required ~ {:filter_text_required} && text_optional ~ {:filter_text_optional})', { ...params.filterData });
+	// Alanlar ve operatörler FILTERS tanımından, değerler yer tutuculara (bkz. utils/filter.ts)
+	const filterString = FILTERS.toPb(locals.pb, params.filterData);
 
 	const listResult = await ResultAsync.fromPromise(
 		locals.pb.collection(Collections.DemoCrud).getList(params.page, params.perPage, {
