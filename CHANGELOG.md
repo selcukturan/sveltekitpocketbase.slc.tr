@@ -251,6 +251,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   Gizle" modül değişince sıfırlanmıyor. Menü başlıkları çevriliyor.
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: yerleşim belgesi alpha.217 / `fba2ea8`: ekran boyutları, mobil
+  drawer, tablet paneli, kalıcı tercihler, bölücünün klavye kullanımı;
+  Aşama 2 tamam.
 - Belgeler: yeni `d02_layout_2026-11-27.md` (iskelet, menü verisi, aktif yol,
   `NavTree`, gizleme, yeni sayfa/modül ekleme, erişilebilirlik, yol haritası);
   çekirdek belgeden bağlantı.
