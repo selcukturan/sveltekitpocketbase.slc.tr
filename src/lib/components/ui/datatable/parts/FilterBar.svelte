@@ -2,7 +2,7 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import * as input from '#lib/components/ui/inputs/index.js';
-	import { inputClasses } from '#lib/components/ui/inputs/common.js';
+	import { formatDatetimeIsoToInput, parseDatetimeInputToIso } from '#lib/utils/input-helper.js';
 	import type { Column, Row } from '../types.js';
 	import { MIN, MAX, type Filters, type FilterField, type FilterValues } from '../utils/filter.js';
 
@@ -29,29 +29,42 @@
 					{ value: 'false', label: t('no') }
 				]
 			: (f.options ?? []).map((option) => ({ value: option, label: option }));
-	const onEnter =(e: KeyboardEvent, close?: () => void) => {
+	const onEnter = (e: KeyboardEvent, close?: () => void) => {
 		if (e.key !== 'Enter') return;
+		// Panel kapanınca odak "Filtreler" düğmesine döner; aynı Enter'ın devamı (keypress) o düğmeye tıklayıp paneli
+		// yeniden açıyordu. preventDefault bunu durdurur.
+		e.preventDefault();
 		list.search();
 		close?.();
 	};
-	const fieldClass = `${inputClasses.base} ${inputClasses.variants.default} ${inputClasses.sizes.md}`; // inputs/ ile aynı görünüm
 </script>
 
+<!-- Aralık: inputs/ bileşenleri. Taslak değerler metin ('' = filtre yok); bileşen değerine çevrilip geri yazılır:
+	 number → Number nullable (boş = null, 0 ≠ boş) · date → 'YYYY-MM-DD' ↔ PocketBase tarihi ·
+	 datetime → 'YYYY-MM-DDTHH:mm' (uygulama saat dilimi) ↔ PocketBase UTC -->
 {#snippet range(f: FilterField, close: () => void)}
 	{@const label = labelOf(f)}
-	{@const date = f.type === 'date' || f.type === 'datetime'}
 	<div class="slc-filter-range">
 		{#each [MIN, MAX] as end (end)}
-			{@const hint = t(date ? (end === MIN ? 'dt_filter_from' : 'dt_filter_to') : end === MIN ? 'dt_filter_min' : 'dt_filter_max')}
-			<input
-				class={fieldClass}
-				type={date ? 'date' : 'number'}
-				step="any"
-				bind:value={() => draft[f.field + end], (value) => (draft[f.field + end] = value == null ? '' : String(value))}
-				placeholder={hint}
-				aria-label="{label} · {hint}"
-				onkeydown={(e) => onEnter(e, close)}
-			/>
+			{@const key = f.field + end}
+			{@const hint = t(f.type === 'number' ? (end === MIN ? 'dt_filter_min' : 'dt_filter_max') : end === MIN ? 'dt_filter_from' : 'dt_filter_to')}
+			{@const common = { 'aria-label': `${label} · ${hint}`, onkeydown: (e: KeyboardEvent) => onEnter(e, close) }}
+			{#if f.type === 'number'}
+				<input.Number
+					nullable
+					step="any"
+					placeholder={hint}
+					bind:value={() => (draft[key] ? Number(draft[key].replace(',', '.')) : null), (value) => (draft[key] = value == null ? '' : String(value))}
+					{...common}
+				/>
+			{:else if f.type === 'date'}
+				<input.Date bind:value={() => (draft[key] ? `${draft[key]} 00:00:00.000Z` : ''), (value) => (draft[key] = value.slice(0, 10))} {...common} />
+			{:else}
+				<input.Datetime
+					bind:value={() => (draft[key] ? parseDatetimeInputToIso(draft[key]) : ''), (value) => (draft[key] = value ? formatDatetimeIsoToInput(value) : '')}
+					{...common}
+				/>
+			{/if}
 		{/each}
 	</div>
 {/snippet}

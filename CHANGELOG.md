@@ -13,6 +13,11 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- FilterBar: aralık filtreleri `inputs/` bileşenleriyle (`Number`, `Date`,
+  `Datetime`); native input kalmadı. Tarih-saat filtresi saat alıyor
+  (`'YYYY-MM-DDTHH:mm'`, uygulama saat diliminde, bitiş dakikası dahil).
+- `input.Number`: `nullable` (boş alan `null`; varsayılan 0). Tip buna bağlı:
+  verilmezse değer `number`.
 - Saat dilimi: `config.timezone` (uygulama saat dilimi, varsayılan
   `Europe/Istanbul`) ve saf `utils/timezone.ts` (duvar saati ↔ UTC, yaz saati
   geçişleri, gün aralığı). Tarih-saat alanları gerçek an olarak tutulur (UTC);
@@ -282,6 +287,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- FilterBar: panelde Enter arıyor ama paneli kapatmıyordu (odak "Filtreler"
+  düğmesine dönünce aynı Enter düğmeye basıp paneli yeniden açıyordu).
 - Tarih-saat formda UTC duvar saati olarak tutuluyordu (02:00 → `02:00Z`),
   tablo ise yerel saate çevirip 05:00 gösteriyordu; hücre düzenleme de
   tarayıcı saat dilimini kullanıyordu. Hepsi uygulama saat diliminde.

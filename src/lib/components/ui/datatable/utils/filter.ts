@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import { config } from '#lib/app/config.js';
-import { dayRangeUtc, toPbDate } from '#lib/utils/timezone.js';
+import { toPbDate, wallToUtc } from '#lib/utils/timezone.js';
 
 /**
  * Liste filtreleri: tek tanımdan hem doğrulama şeması, hem güvenli PocketBase filtresi, hem de FilterBar arayüzü.
@@ -14,8 +14,9 @@ import { dayRangeUtc, toPbDate } from '#lib/utils/timezone.js';
  *   text   → alan             : içerir (~)
  *   number → alan__min/__max  : >= / <=
  *   date     → alan__min/__max : 'YYYY-MM-DD', gün başı / gün sonu dahil (takvim günü: UTC gece yarısı tutulan alanlar)
- *   datetime → alan__min/__max : 'YYYY-MM-DD', uygulama saat dilimindeki gün (config.timezone): İstanbul'da 2 Eylül
- *                                = [1 Eylül 21:00Z, 2 Eylül 21:00Z). Tarayıcının saat dilimi kullanılmaz.
+ *   datetime → alan__min/__max : 'YYYY-MM-DDTHH:mm', uygulama saat diliminde (config.timezone); bitiş dakikası dahil.
+ *                                İstanbul'da 2 Eylül 00:00–23:59 = [1 Eylül 21:00Z, 2 Eylül 21:00Z). Tarayıcının saat
+ *                                dilimi kullanılmaz.
  *   bool   → alan             : 'true' | 'false'
  *   select → alan             : seçeneklerden biri (=)
  *
@@ -47,6 +48,7 @@ export const MAX = '__max';
 const FIELD_RE = /^[A-Za-z_][A-Za-z0-9_.]*$/; // tanımdaki alan adı (sunucu kodu); yine de denetlenir
 const NUMBER_RE = /^-?\d+(?:[.,]\d+)?$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/; // datetime-local
 
 const text = () => v.optional(v.pipe(v.string(), v.trim()), '');
 const matching = (re: RegExp, message: string) =>
@@ -77,7 +79,8 @@ export function defineFilters<const T extends Record<string, FilterDef>>(defs: T
 
 		if (type === 'text') entries[field] = text();
 		else if (type === 'number') for (const key of keys) entries[key] = matching(NUMBER_RE, 'Geçersiz sayı.');
-		else if (type === 'date' || type === 'datetime') for (const key of keys) entries[key] = matching(DATE_RE, 'Geçersiz tarih.');
+		else if (type === 'date') for (const key of keys) entries[key] = matching(DATE_RE, 'Geçersiz tarih.');
+		else if (type === 'datetime') for (const key of keys) entries[key] = matching(DATETIME_RE, 'Geçersiz tarih-saat.');
 		else if (type === 'bool') entries[field] = oneOf(['true', 'false']);
 		else entries[field] = oneOf(options ?? []);
 	}
@@ -95,11 +98,11 @@ export function defineFilters<const T extends Record<string, FilterDef>>(defs: T
 		};
 		for (const { field, type } of fields) {
 			if (type === 'datetime') {
-				// Gün başı dahil, ertesi gün başı hariç (yaz saati geçişinde gün 23/25 saat olabilir)
-				const min = dayRangeUtc(values[field + MIN] ?? '', timeZone);
-				const max = dayRangeUtc(values[field + MAX] ?? '', timeZone);
-				if (min) parts.push(`${field} >= ${param(toPbDate(min[0]))}`);
-				if (max) parts.push(`${field} < ${param(toPbDate(max[1]))}`);
+				// Başlangıç dakikası dahil; bitiş dakikası sonuna kadar dahil (< bitiş + 1 dk). Geçersiz değer atlanır.
+				const min = wallToUtc(values[field + MIN] ?? '', timeZone);
+				const max = wallToUtc(values[field + MAX] ?? '', timeZone);
+				if (min) parts.push(`${field} >= ${param(toPbDate(min))}`);
+				if (max) parts.push(`${field} < ${param(toPbDate(new Date(max.getTime() + 60_000)))}`);
 				continue;
 			}
 			if (type === 'number' || type === 'date') {

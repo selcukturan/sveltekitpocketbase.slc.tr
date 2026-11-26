@@ -19,15 +19,17 @@ async function search(page: Page, stamp: string, count: number) {
 	await expect(rows(page)).toHaveCount(count);
 }
 
-async function applyDayFilter(page: Page, label: string, day: string) {
+// Tarih-saat filtresi: uygulama saat diliminde 'YYYY-MM-DDTHH:mm' (bitiş dakikası dahil)
+async function applyRange(page: Page, from: string, to: string) {
 	await page.getByRole('button', { name: /Filtreler|Uygulanan filtre/ }).click();
 	const panel = page.getByRole('group', { name: 'Filtreler' });
-	await panel.getByLabel(`${label} · Başlangıç`).fill(day);
-	await panel.getByLabel(`${label} · Bitiş`).fill(day);
+	await panel.getByLabel('Tarih-saat · Başlangıç').fill(from);
+	await panel.getByLabel('Tarih-saat · Bitiş').fill(to);
 	await panel.getByRole('button', { name: 'Ara' }).click();
 }
+const applyDay = (page: Page, day: string) => applyRange(page, `${day}T00:00`, `${day}T23:59`);
 
-test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; gün filtresi uygulama gününe göre', async ({ page }) => {
+test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; filtre uygulama saat diliminde (gün ve saat)', async ({ page }) => {
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	await page.goto(URL);
 	await expect(cell(page, 0, 3)).toBeVisible();
@@ -54,10 +56,17 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; gün filtr
 	await expect(page).not.toHaveURL(/cmd=update/);
 
 	// Gün filtresi: İstanbul'da 2 Eylül → bulunur; 1 Eylül (UTC günü) → bulunmaz
-	await applyDayFilter(page, 'Tarih-saat', '2026-09-01');
+	await applyDay(page, '2026-09-01');
 	await expect(rows(page)).toHaveCount(0);
-	await applyDayFilter(page, 'Tarih-saat', '2026-09-02');
+	await applyDay(page, '2026-09-02');
 	await expect(rows(page)).toHaveCount(1);
+	// Saat sınırları: başlangıç dakikası dahil, bitiş dakikası dahil
+	await applyRange(page, '2026-09-02T02:00', '2026-09-02T02:00');
+	await expect(rows(page)).toHaveCount(1);
+	await applyRange(page, '2026-09-02T02:01', '2026-09-02T03:00');
+	await expect(rows(page)).toHaveCount(0);
+	await applyRange(page, '2026-09-02T01:00', '2026-09-02T01:59');
+	await expect(rows(page)).toHaveCount(0);
 	await page.getByRole('button', { name: 'Temizle' }).first().click();
 
 	// Hücre düzenleme de uygulama saat diliminde: 23:30 → aynı gün 23:30 görünür, filtre 2 Eylül'de bulur
@@ -72,9 +81,9 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; gün filtr
 	await page.reload();
 	await search(page, stamp, 1);
 	await expect(cell(page, 0, COL.datetime)).toHaveText('2.09.2026 23:30');
-	await applyDayFilter(page, 'Tarih-saat', '2026-09-02');
+	await applyDay(page, '2026-09-02');
 	await expect(rows(page)).toHaveCount(1);
-	await applyDayFilter(page, 'Tarih-saat', '2026-09-03'); // UTC'de 2 Eylül 20:30 → 3 Eylül'de yok
+	await applyDay(page, '2026-09-03'); // UTC'de 2 Eylül 20:30 → 3 Eylül'de yok
 	await expect(rows(page)).toHaveCount(0);
 	await page.getByRole('button', { name: 'Temizle' }).first().click();
 

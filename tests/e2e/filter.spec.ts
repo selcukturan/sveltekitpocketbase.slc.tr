@@ -54,6 +54,21 @@ test('filtreler: metin, sayı aralığı, evet/hayır birlikte uygulanır; Temiz
 	await page.getByRole('spinbutton', { name: 'Sayı · En az' }).press('Enter');
 	await expect(rows(page)).toHaveCount(0);
 	await expect(panelButton(page)).toContainText('2');
+	await expect(page.getByRole('group', { name: 'Filtreler' })).toBeHidden(); // Enter arar ve paneli kapatır
+
+	// Sayı: 0 boş değildir (en az 0 → iki kayıt da; sayı alanı boş kayıt 0'dır). Boş bırakınca filtre kalkar.
+	await panelButton(page).click();
+	await page.getByRole('combobox', { name: 'Onay' }).click();
+	await page.getByRole('option', { name: 'Tümü' }).click();
+	const min = page.getByRole('spinbutton', { name: 'Sayı · En az' });
+	await min.fill('0');
+	await min.press('Enter');
+	await expect(rows(page)).toHaveCount(2);
+	await expect(panelButton(page)).toContainText('1');
+	await panelButton(page).click();
+	await min.fill('');
+	await min.press('Enter');
+	await expect(panelButton(page)).not.toContainText(/\d/);
 
 	// Temizle: tüm filtreler (metin dahil) sıfırlanır
 	await page.getByRole('button', { name: 'Temizle' }).first().click();

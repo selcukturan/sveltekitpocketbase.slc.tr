@@ -1,7 +1,7 @@
-<script lang="ts">
+<script lang="ts" generics="N extends boolean = false">
 	import { inputClasses } from './common.js';
 	import { on } from 'svelte/events';
-	import type { NumberProps, NumberValueChangeArgs } from './type.js';
+	import type { NumberProps, NumberValue, NumberValueChangeArgs } from './type.js';
 
 	let {
 		value = $bindable(0),
@@ -11,12 +11,15 @@
 		disabled = false,
 		dev = false,
 		autoChangeDecimalSeparator = true,
+		nullable = false as N,
 		onValueChange,
 		...rest
-	}: NumberProps = $props();
+	}: NumberProps<N> = $props();
+	// nullable: boş alan null (ör. filtre: boş = filtre yok, 0 = en az 0). Varsayılan: boş alan 0 (PocketBase sayı alanı)
+	const empty = () => (nullable ? null : 0) as NumberValue<N>;
 
 	// ############################### BEGIN ONVALUECHANGE HANDLER ###############################
-	const triggerChange = ({ value, beforeValue, initial }: NumberValueChangeArgs) => {
+	const triggerChange = ({ value, beforeValue, initial }: NumberValueChangeArgs<N>) => {
 		onValueChange?.({ value, beforeValue, initial });
 	};
 	// ############################### END ONVALUECHANGE HANDLER ###############################
@@ -28,9 +31,9 @@
 
 	const proxy = {
 		get value() {
-			// Dışarıdan null, undefined veya NaN atanırsa bunu 0'a çekiyoruz
+			// Dışarıdan null, undefined veya NaN atanırsa boş değere (0 ya da nullable ise null) çekiyoruz
 			if (value === null || value === undefined || Number.isNaN(value)) {
-				value = 0;
+				if (value !== empty()) value = empty();
 			}
 
 			let currentValue = value;
@@ -53,7 +56,7 @@
 		set value(v) {
 			const isInputEmpty = v === null || v === undefined || Number.isNaN(v);
 			isNull = isInputEmpty;
-			const newValue = isInputEmpty ? 0 : v;
+			const newValue = isInputEmpty ? empty() : v;
 
 			if (newValue !== value) {
 				// Kullanıcı doğrudan bu input içine yazdığında tetiklenir

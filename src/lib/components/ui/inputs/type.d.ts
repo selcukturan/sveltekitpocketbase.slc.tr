@@ -110,16 +110,19 @@ export type RelationDialogContentPropsType<Tmultiple extends boolean> = {
 // ################# END Relation.svelte Props ###############################
 
 // ################# BEGIN Number.svelte Props ###############################
-export type NumberValueChangeArgs = { value: number; beforeValue: number; initial: boolean };
+// nullable: true ise boş alan null (değer tipi number | null); değilse 0 (number)
+export type NumberValue<N extends boolean = false> = N extends true ? number | null : number;
+export type NumberValueChangeArgs<N extends boolean = false> = { value: NumberValue<N>; beforeValue: NumberValue<N>; initial: boolean };
 
-export type NumberProps = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
-	value?: number;
+export type NumberProps<N extends boolean = false> = Omit<SvelteHTMLElements['input'], 'type' | 'value' | 'size'> & {
+	value?: NumberValue<N>;
+	nullable?: N;
 	status?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'with-field';
 	size?: 'sm' | 'md' | 'lg';
 	disabled?: boolean;
 	dev?: boolean;
 	autoChangeDecimalSeparator?: boolean;
-	onValueChange?: ({ value, beforeValue, initial }: NumberValueChangeArgs) => void;
+	onValueChange?: ({ value, beforeValue, initial }: NumberValueChangeArgs<N>) => void;
 };
 // ################# END Number.svelte Props ###############################
 
