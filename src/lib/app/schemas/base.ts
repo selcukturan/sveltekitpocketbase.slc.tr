@@ -7,7 +7,7 @@ import { errorKeys } from './inputs/meta';
 // Mesajlar çeviri anahtarıdır (errorKeys); istemcide `t()` ile çevrilir.
 
 // ########################### BEGIN STRING ###########################
-const safeStringCharsRegex = /^[a-zA-Z0-9ÇçĞğİıÖöŞşÜü\s._()'!*:@,;+?=-]*$/;
+const safeStringCharsRegex = /^[a-zA-Z0-9ÇçĞğİıÖöŞşÜü\s._()'!*:@,;+?=/-]*$/; // '/' : adres, tarih gibi değerler
 const safeStringIdCharsRegex = /^[a-z0-9:-]+$/;
 // Regex açıklaması:
 // \p{L}: Tüm dillerdeki harfler (Türkçe dahil)

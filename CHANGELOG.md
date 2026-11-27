@@ -299,6 +299,17 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Metin şeması (`base.ts` → `text`) `/` karakterini kabul eder; Kaynaklar'da
+  adres yeniden `input.Text` ile (biçim kuralı sunucuda: `acl_href_format`).
+- `dt.createCellEdit` sayfalamasız (dizi) sorgularla da çalışır. Kaynaklar
+  ekranının tabloları dizi döndürür: sayfa boyutu kutusu ve sayfalama yok.
+- Simple CRUD sayfasından açıklama yorumları kaldırıldı.
+- Testler: yetki matrisinde hücre düzenleme yardımcısı (`setCell`) hücre aktif
+  olana kadar tıklar, düzenleyiciyi hedef hücrede arar, kayıt isteği gidene
+  kadar yineler. Yapılacaklar: tam suite'te yetki matrisinde eski değerin kalması.
+- Belgeler: DataTable (`$state.raw`, dizi sonuçla `createCellEdit`), yerleşim
+  (glob notu, adres doğrulaması, sayfalamasız tablolar), çekirdek (metin
+  şemasının karakterleri).
 - Belgeler: `d02_layout` kaynak ve işlem düzenleme bölümü (3e: ekran,
   kurallar tablosu, gerçek sayfa denetimi, testler); "yeni sayfa ekleme"
   adımları ekranlara göre; yol haritası 3e tamam, sırada Aşama 4.
@@ -466,6 +477,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Kaynaklar ekranı: var olan her adres "Bu adreste bir sayfa yok" ile
+  reddediliyordu (tabloda bildirim, drawer'da alan hatası).
+  `import.meta.glob` kalıbındaki `(app)` parantezleri glob sözdizimi sayıldığı
+  için hiçbir sayfa bulunmuyordu; tüm sayfalar alınıp `(app)` altındakiler
+  süzülür. Test var olan bir adresin kabulünü de dener.
+- DataTable: tablo verisi `$state.raw` (önceden derin `$state`). Her atamada
+  satırlar yeni proxy'lerle sarılıyordu; değişmeyen satır her tazelemede yeniden
+  kuruluyor ve Svelte `state_proxy_equality_mismatch` uyarısı veriyordu
+  (görünen satır başına).
 - Testler: paralel çalışan yetki testleri birbirinin kolon sırasını
   kaydırmasın (test işlemi en sona eklenir); `acl-data` yönetici-yalnız işlem
   istisnaları tek listede.

@@ -21,8 +21,12 @@ import type { CellEditEvent } from './editing.svelte.js';
 
 type CellEdit = { id: string; field: string; value: unknown };
 
-// Satır tipi liste sonucundan çıkarılır (TResult['items'][number]): DataTable<Item> ile aynı olur
-export type CellEditOptions<TResult extends { items: { id: string }[] }> = {
+// Liste sonucu: sayfalı ({ items, page, … }) ya da sayfalamasız (dizi). Satır tipi buradan çıkarılır: DataTable<Item> ile aynı.
+type Row = { id: string };
+type ListResultOf = { items: Row[] } | Row[];
+type RowOf<TResult> = TResult extends { items: (infer R)[] } ? R : TResult extends (infer R)[] ? R : never;
+
+export type CellEditOptions<TResult extends ListResultOf> = {
 	list: { updatesWith: (update: (current: TResult) => TResult) => RemoteQueryOverride[] };
 	table: {
 		cellEditSchema: v.GenericSchema<unknown, CellEdit>;
@@ -34,19 +38,20 @@ export type CellEditOptions<TResult extends { items: { id: string }[] }> = {
 	onError?: (error: unknown, message?: string) => void;
 };
 
-export function createCellEdit<TResult extends { items: { id: string }[] }>({ list, table, save, onError }: CellEditOptions<TResult>) {
-	type TData = TResult['items'][number];
+export function createCellEdit<TResult extends ListResultOf>({ list, table, save, onError }: CellEditOptions<TResult>) {
+	type TData = RowOf<TResult>;
 	const toEdit = ({ row, field, value }: CellEditEvent<TData>): CellEdit => ({ id: row.id, field: field as string, value });
 
 	// Geçici görünüm: listedeki ilgili kayıtlara yeni değerleri uygular
 	const optimistic = (edits: CellEdit[]) =>
-		list.updatesWith((result) => ({
-			...result,
-			items: result.items.map((item) => {
-				const own = edits.filter((edit) => edit.id === item.id);
-				return own.length ? { ...item, ...Object.fromEntries(own.map((edit) => [edit.field, edit.value])) } : item;
-			})
-		}));
+		list.updatesWith((result) => {
+			const apply = (items: Row[]) =>
+				items.map((item) => {
+					const own = edits.filter((edit) => edit.id === item.id);
+					return own.length ? { ...item, ...Object.fromEntries(own.map((edit) => [edit.field, edit.value])) } : item;
+				});
+			return (Array.isArray(result) ? apply(result) : { ...result, items: apply(result.items) }) as TResult;
+		});
 
 	const commit = async (events: CellEditEvent<TData>[]) => {
 		const edits = v.parse(table.cellsEditSchema, events.map(toEdit)); // validateCell'den geçti; şemanın çıktısı (kırpılmış vb.) kaydedilir

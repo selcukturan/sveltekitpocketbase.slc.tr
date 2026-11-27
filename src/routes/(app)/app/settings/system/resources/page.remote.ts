@@ -51,8 +51,7 @@ async function refresh() {
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------
-// Okuma (sayfalamasız; PocketBase liste biçiminde: hücre düzenleme ve optimistik güncelleme items üzerinden çalışır)
-const asList = <T>(items: T[]) => ({ page: 1, perPage: items.length, totalItems: items.length, totalPages: 1, items });
+// Okuma (sayfalamasız: dizi döner; tablo sayfalama ve sayfa boyutu kutusunu göstermez)
 
 export const getResources = query(RESOURCES.listParamsSchema, async () => {
 	await requirePermission(RESOURCE, 'view'); // 🔒
@@ -83,13 +82,13 @@ export const getResources = query(RESOURCES.listParamsSchema, async () => {
 		}
 	};
 	walk(buildTree(resources.map((r) => ({ id: r.id, parent_id: r.parent || null, title: r.label, sort: r.sort }))), 0);
-	return asList(rows);
+	return rows;
 });
 
 export const getActions = query(ACTIONS.listParamsSchema, async () => {
 	await requirePermission(RESOURCE, 'view'); // 🔒
 	const [actions, resources] = await Promise.all([loadActions(), loadResources()]);
-	return asList(actions.map((a): ActionRow => ({ ...a, used: resources.filter((r) => r.actions.includes(a.id)).length })));
+	return actions.map((a): ActionRow => ({ ...a, used: resources.filter((r) => r.actions.includes(a.id)).length }));
 });
 
 // ------------------------------------------------------------------------------------------------------------------------------

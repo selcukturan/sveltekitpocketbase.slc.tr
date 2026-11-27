@@ -3,7 +3,6 @@ import * as input from '#lib/app/schemas/inputs/index.js';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { defineTable } from '#lib/components/ui/datatable/utils/table.js'; // saf: sunucuda da kullanılır
 import { icons } from '#lib/components/icons/icons.svelte.js';
-import { errorKeys, inputMeta } from '#lib/app/schemas/inputs/meta.js';
 
 // Kaynak (menü) ve işlem düzenleme ekranının istemci ve sunucuda ortak tanımları.
 
@@ -12,16 +11,8 @@ export const MATCHES = ['exact', 'prefix'] as const;
 export const ICONS = Object.keys(icons);
 export type Kind = (typeof KINDS)[number];
 
-// Adres: uygulama içi yol (/app/...). input.Text'in karakter kısıtı '/' kabul etmediği için ayrı şema; sayfanın
-// gerçekten var olduğu sunucuda denetlenir (checkResource → pageExists).
-const HREF = /^(\/[A-Za-z0-9_\-.[\]/]*)?$/;
-const hrefSchema = v.pipe(
-	v.optional(v.string(), ''),
-	v.trim(),
-	v.regex(HREF, 'acl_href_format'),
-	v.maxLength(300, errorKeys.maxLength),
-	inputMeta({ required: false, min: 0, max: 300 })
-);
+// Adres: uygulama içi yol (/app/...). Biçim burada, sayfanın gerçekten var olduğu sunucuda denetlenir (pageExists).
+const HREF = /^(\/[A-Za-z0-9_\-./]*)?$/;
 
 // ------------------------------------------------------------------------------------------------------------------------------
 // Kaynaklar tablosu. Satırlar ağaç sırasıyla gelir (sıralama yok). Anahtar (key) ve tür oluşturulduktan sonra değişmez
@@ -66,7 +57,7 @@ const resourceFields = {
 	...input.Text('label', { max: 200 }),
 	...input.Relation('parent', { collection: Collections.AclResources, required: false }),
 	...input.Text('icon', { required: false, max: 50 }),
-	href: hrefSchema,
+	...input.Text('href', { required: false, max: 300 }),
 	...input.Select('match', { required: false, values: MATCHES }),
 	...input.Number('sort', { required: false, onlyInt: true }),
 	...input.Relation('actions', { collection: Collections.AclActions, required: false, multiple: true }),
@@ -137,7 +128,8 @@ export function checkResource(r: ResourceDraft, ctx: ResourceContext): Record<st
 	// Adres: sayfada zorunlu, grup ve özellikte yok, modülde isteğe bağlı (alt menüsü yoksa). Gerçek bir sayfa olmalı.
 	if (r.kind === 'page' && !r.href) issues.href = 'acl_href_required';
 	if ((r.kind === 'group' || r.kind === 'feature') && r.href) issues.href = 'acl_href_none';
-	if (r.href && !ctx.pageExists(r.href)) issues.href = 'acl_href_no_page';
+	if (r.href && !HREF.test(r.href)) issues.href = 'acl_href_format';
+	else if (r.href && !ctx.pageExists(r.href)) issues.href = 'acl_href_no_page';
 	if (r.href && !r.match) issues.match = 'acl_match_required';
 
 	// Modül rayda ikonla görünür; ikon listede olmalı

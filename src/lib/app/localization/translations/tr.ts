@@ -135,7 +135,7 @@ export const tr = {
 	err_mime_type: 'Bu dosya türüne izin verilmiyor.',
 	err_not_unique: 'Bu değer zaten kullanılıyor.',
 	err_invalid_id: 'Geçersiz kimlik (ID).',
-	err_invalid_text_chars: "Yalnızca harf, rakam, boşluk ve şu işaretler kullanılabilir: . _ ( ) ' ! * : @ , ; + ? = -",
+	err_invalid_text_chars: "Yalnızca harf, rakam, boşluk ve şu işaretler kullanılabilir: . _ ( ) ' ! * : @ , ; + ? = / -",
 	err_invalid_textarea_chars: 'Metin desteklenmeyen karakterler içeriyor.',
 	err_invalid_email: 'Lütfen geçerli bir e-posta adresi girin.',
 	err_invalid_url: 'Lütfen geçerli bir URL girin (örn: https://ornek.com).',

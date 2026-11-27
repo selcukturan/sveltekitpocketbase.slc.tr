@@ -185,7 +185,11 @@ class TableContext<TData extends Row> {
 	// çıkarsa ya da sırasını değiştirse de ayarlar doğru kolonda kalır. `persist` verilirse localStorage'da saklanır.
 	#ui = $state<UiState<TData>>({ columns: {} });
 
-	#currentData = $state<ListResult<TData> | undefined>(undefined); // watchCurrentChanged ile değişir
+	// watchCurrentChanged ile değişir. raw: sorgu verisi salt okunur ve her seferinde bütün olarak değiştirilir (yerinde
+	// değişmez). Derin $state her atamada satırları yeni proxy'lerle sarıyordu: değişmeyen satırın eski ve yeni proxy'si
+	// farklı kimlikte olduğu için virtualData'daki `old.data === data` hep yanlış çıkıyor, her satır yeniden kuruluyor ve
+	// Svelte state_proxy_equality_mismatch uyarısı veriyordu.
+	#currentData = $state.raw<ListResult<TData> | undefined>(undefined);
 
 	// Data structure
 	readonly list = $derived(this.#props.list);

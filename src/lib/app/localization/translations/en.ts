@@ -137,7 +137,7 @@ export const en = {
 	err_mime_type: 'This file type is not allowed.',
 	err_not_unique: 'This value is already in use.',
 	err_invalid_id: 'Invalid ID.',
-	err_invalid_text_chars: "Only letters, digits, spaces and these characters are allowed: . _ ( ) ' ! * : @ , ; + ? = -",
+	err_invalid_text_chars: "Only letters, digits, spaces and these characters are allowed: . _ ( ) ' ! * : @ , ; + ? = / -",
 	err_invalid_textarea_chars: 'The text contains unsupported characters.',
 	err_invalid_email: 'Please enter a valid email address.',
 	err_invalid_url: 'Please enter a valid URL (e.g. https://example.com).',

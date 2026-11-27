@@ -1,7 +1,8 @@
 // Uygulamanın (app) sayfaları: derleme zamanında src/routes'tan (Vite import.meta.glob). Kaynak düzenleme ekranında
 // href'in gerçek bir sayfaya karşılık geldiği buradan denetlenir (tests/e2e/helpers/routes.ts'in sunucudaki karşılığı).
 
-const files = Object.keys(import.meta.glob('/src/routes/(app)/**/+page.svelte'));
+// Kalıpta '(app)' yazılamaz: parantez glob sözdizimidir ve hiçbir dosya eşleşmez. Tümü alınıp süzülür.
+const files = Object.keys(import.meta.glob('/src/routes/**/+page.svelte')).filter((file) => file.startsWith('/src/routes/(app)/'));
 
 // '/src/routes/(app)/app/grapes/(x)/crud/+page.svelte' → '/app/grapes/crud' ((group) klasörleri adreste görünmez)
 const toPath = (file: string) =>

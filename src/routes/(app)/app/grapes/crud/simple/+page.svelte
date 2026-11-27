@@ -68,7 +68,6 @@
 <Page>
 	<Page.Header>
 		<Page.Header.Table>
-			<!-- Filtreler ve etiketleri TABLE tanımından -->
 			<dt.FilterBar {list} filters={TABLE.filters} />
 			<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 			{#snippet actions()}
@@ -80,9 +79,6 @@
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table>
-			<!-- Kolonlar TABLE tanımından (sıralama, filtre, düzenleme izinleri orada); burada yalnızca sayfaya özgü kolonlar
-				 eklenir, override ile sunum değişir (izin verilemez). Footer kısayolları (sum/avg/max/count) bu sayfadaki
-				 kayıtlardan hesaplanır. -->
 			<dt.DataTable
 				bind:this={table}
 				{list}

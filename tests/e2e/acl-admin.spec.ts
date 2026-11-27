@@ -47,12 +47,21 @@ const chooseSubject = async (page: Page, label: string) => {
 	await page.getByRole('option', { name: label, exact: true }).click();
 };
 // Hücrede Enter → açılır liste → değer ('' = belirtilmemiş) → Enter ile kaydet
+// Hücre aktif olana kadar tıklanır; düzenleyici yalnızca hedef hücrede aranır; kayıt isteği gidene kadar yinelenir.
+// Değer zaten istenen değerse çağrılmamalı (istek gitmez). Tam suite'in yükünde nadiren arayüz tazelenen veriyi
+// göstermiyor (bkz. docs/yapilacaklar.md).
 const setCell = async (page: Page, resource: string, action: string, value: '' | 'allow' | 'deny') => {
-	await (await cell(page, resource, action)).click();
-	await page.keyboard.press('Enter');
-	const editor = page.locator('select.slc-table-editor');
-	await editor.selectOption(value);
-	await editor.press('Enter');
+	const target = await cell(page, resource, action);
+	await expect(async () => {
+		await target.click();
+		await expect(target).toHaveAttribute('data-active', 'true', { timeout: 1000 });
+		await page.keyboard.press('Enter');
+		const editor = target.locator('select.slc-table-editor');
+		await editor.selectOption(value, { timeout: 2000 });
+		const saved = page.waitForRequest((r) => r.url().includes('setPermissions'), { timeout: 3000 });
+		await editor.press('Enter');
+		await saved;
+	}).toPass({ intervals: [500], timeout: 20_000 });
 };
 
 test('demo kullanıcı ekranı görür ama değiştiremez (yalnızca görüntüleme)', async ({ page }) => {

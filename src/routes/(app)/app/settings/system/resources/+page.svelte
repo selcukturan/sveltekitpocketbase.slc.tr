@@ -48,14 +48,14 @@
 	const actionDelete = dt.createRowDelete({ list: actionList, table: () => actionTable, remove: deleteActions, onSuccess: toaster.success, onError: toaster.error });
 
 	// Seçenekler (formlar): üst kaynak yalnızca modül ya da grup; işlemler işlem tablosundan
-	const resourceRows = $derived(resourceList.query?.current?.items ?? []);
+	const resourceRows = $derived(resourceList.query?.current ?? []);
 	const parentOptions = $derived(
 		resourceRows
 			.filter((r) => r.kind === 'module' || r.kind === 'group')
 			.map((r) => ({ value: r.id, label: `${'— '.repeat(r.depth)}${menuTitle({ id: r.key, title: r.label })}` }))
 	);
-	const actionOptions = $derived((actionList.query?.current?.items ?? []).map((a) => ({ value: a.id, label: t(`acl.action.${a.key}`, undefined, a.label) })));
-	const accessId = $derived((actionList.query?.current?.items ?? []).find((a) => a.key === 'access')?.id);
+	const actionOptions = $derived((actionList.query?.current ?? []).map((a) => ({ value: a.id, label: t(`acl.action.${a.key}`, undefined, a.label) })));
+	const accessId = $derived((actionList.query?.current ?? []).find((a) => a.key === 'access')?.id);
 	const kindOptions = KINDS.map((kind) => ({ value: kind, label: t(`acl_kind_${kind}`) }));
 	const iconOptions = ICONS.map((icon) => ({ value: icon, label: icon }));
 

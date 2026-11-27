@@ -54,9 +54,17 @@ test('kaynak oluşturma: kurallar alanın altında (sayfa adresi yoksa), geçerl
 	await form.getByRole('button', { name: 'Oluştur' }).click();
 	await expect(form.getByText('Bu adreste bir sayfa yok')).toBeVisible();
 	expect(await list('acl_resources', `key ~ "${KEY}"`)).toEqual([]);
-	await form.getByRole('button', { name: 'Kapat' }).first().click();
-	await page.getByRole('button', { name: 'Evet' }).click(); // "Kaydedilmemiş değişiklikler" onayı
+
+	// Var olan bir sayfa (/ içeren adres metin şemasından geçer, sunucu sayfayı bulur) kabul edilir. Kaynak pasif ve en
+	// sonda: aynı adresteki gerçek kaynağın yerine geçmez (paralel testler etkilenmez)
+	await form.getByLabel('Adres', { exact: true }).fill('/app/developments/components/empty');
+	await form.getByLabel('Sıra', { exact: true }).fill('9999');
+	await form.getByLabel('Aktif', { exact: true }).uncheck();
+	await form.getByRole('button', { name: 'Oluştur' }).click();
 	await expect(page).not.toHaveURL(/cmd=/);
+	expect(await list('acl_resources', `key = "${KEY}.yok"`)).toEqual([
+		expect.objectContaining({ kind: 'page', href: '/app/developments/components/empty', active: false })
+	]);
 
 	// Geçerli: özellik (kökte, adressiz; erişim işlemi varsayılan seçili)
 	await page.getByRole('button', { name: 'Kaynak oluştur' }).click();

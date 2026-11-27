@@ -13,6 +13,7 @@ Ertelenen işler ve açık konular. Bir iş yapılınca buradan silinir (geçmi�
 
 ### Diğer
 
+- **Yetki matrisinde ara sıra eski değer kalıyor:** tam test suite'inin yükünde (`acl-admin` "kişisel engel" testi; tam suite'te her çalıştırmada, tek başına hiç) hücre "Engel"den boşa çevrilince istek gidiyor, sunucu 200 ve doğru tazelenmiş matrisi dönüyor (hücre `null`), ama arayüz "Engel"i göstermeye devam ediyor. Tek başına ve tekrarlı çalıştırmada görülmedi. Şüphe: iyimser gösterim (`list.updatesWith` → `withOverride`) kalkmıyor ya da yanıttaki tazeleme yükte uygulanmıyor (DataTable / SvelteKit remote). Gerçek kullanımda sayfa yenilenince doğru değer görünür; incelenmeli.
 - **`getAcl()` önbelleği yok:** her korunan remote çağrısında PocketBase'e 4 okuma. Gerekirse kısa süreli (ör. 30 sn) kullanıcı bazlı önbellek; yetki ekranındaki yazma önbelleği temizler.
 - **İzin değişikliği açık oturumlara yansımıyor:** menü ve düğmeler sayfa yenilenene kadar eski kalır (sunucu kontrolü günceldir). Yol haritasında Aşama 4.
 
