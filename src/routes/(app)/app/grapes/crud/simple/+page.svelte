@@ -8,6 +8,8 @@
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import { TABLE, createFormSchema, updateFormSchema } from './page.shared';
 	import { getOne, getList, createForm, updateForm, deleteRecords, updateCells } from './page.remote';
+	import { can } from '#lib/app/acl/access.js';
+	import { getMyAccess } from '#lib/remotes/acl.remote.js';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -23,6 +25,17 @@
 	const cellEdit = dt.createCellEdit({ list, table: TABLE, save: updateCells, onError: toaster.error });
 	// Satır silme: onay, silme, seçimden çıkarma, bildirim; Delete tuşu (onKeyDown) ve sağ tık hedefleri (targetsOf)
 	const rowDelete = dt.createRowDelete({ list, table: () => table, remove: deleteRecords, onSuccess: toaster.success, onError: toaster.error });
+
+	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
+	// İzinler (acl_resources: grapes.crud.simple): izin olmayan işlemin düğmesi görünmez, hücreler düzenlenemez.
+	// Asıl kontrol sunucuda (page.remote.ts → requirePermission); bu yalnızca arayüz.
+	const access = $derived((await getMyAccess()).access);
+	const allow = $derived({
+		create: can(access, 'grapes.crud.simple', 'create'),
+		update: can(access, 'grapes.crud.simple', 'update'),
+		delete: can(access, 'grapes.crud.simple', 'delete'),
+		view: can(access, 'grapes.crud.simple', 'view')
+	});
 </script>
 
 <!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
@@ -59,7 +72,9 @@
 			<dt.FilterBar {list} filters={TABLE.filters} />
 			<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
 			{#snippet actions()}
-				<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
+				{#if allow.create}
+					<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
+				{/if}
 			{/snippet}
 		</Page.Header.Table>
 	</Page.Header>
@@ -71,7 +86,7 @@
 			<dt.DataTable
 				bind:this={table}
 				{list}
-				{...cellEdit}
+				{...allow.update ? cellEdit : {}}
 				persist="grapes-crud-simple"
 				selection="multiple"
 				freezeLeft={2}
@@ -86,8 +101,8 @@
 					{ text_optional: 'Ortalama', number_optional: 'avg(2)', bool_optional: (items) => `${items.filter((item) => item.bool_optional).length} ✓` },
 					{ text_optional: 'En büyük', number_optional: 'max()' }
 				]}
-				onKeyDown={rowDelete.onKeyDown}
-				onRowActivate={(row) => drawer.show('update', row.id)}
+				onKeyDown={allow.delete ? rowDelete.onKeyDown : undefined}
+				onRowActivate={(row) => (allow.update ? drawer.show('update', row.id) : allow.view && drawer.show('view', row.id))}
 				onLoad={({ reason, totalItems }) => reason === 'query' && totalItems === 0 && toaster.add({ type: 'info', title: t('dt_no_data') })}
 				onError={(error) => toaster.error(error)}
 				rowClass={(row) => (row.bool_optional ? 'font-semibold' : undefined)}
@@ -95,21 +110,23 @@
 				<!-- Sağ tık menüsü: konum, kapanma ve odağı tablo yönetir (ContextMenu tuşu / Shift+F10 da açar) -->
 				{#snippet contextMenu(row)}
 					{@const targets = rowDelete.targetsOf(row.id)}
-					<dt.MenuItem label={t('update')} onclick={() => drawer.show('update', row.id)} />
+					{#if allow.update}<dt.MenuItem label={t('update')} onclick={() => drawer.show('update', row.id)} />{/if}
 					<dt.MenuItem label={t('dt_copy')} onclick={() => table?.helpers.copy()} />
-					<dt.MenuItem label={targets.length > 1 ? `${t('delete')} (${targets.length})` : t('delete')} danger onclick={() => rowDelete.remove(targets)} />
+					{#if allow.delete}
+						<dt.MenuItem label={targets.length > 1 ? `${t('delete')} (${targets.length})` : t('delete')} danger onclick={() => rowDelete.remove(targets)} />
+					{/if}
 				{/snippet}
 				{#snippet actions(row)}
-					<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />
-					<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => rowDelete.remove([row.id])} />
-					<dt.ActionButton label={t('view')} icon="view" onclick={() => drawer.show('view', row.id)} />
+					{#if allow.update}<dt.ActionButton label={t('update')} icon="update" onclick={() => drawer.show('update', row.id)} />{/if}
+					{#if allow.delete}<dt.ActionButton label={t('delete')} icon="delete" class="text-error-500!" onclick={() => rowDelete.remove([row.id])} />{/if}
+					{#if allow.view}<dt.ActionButton label={t('view')} icon="view" onclick={() => drawer.show('view', row.id)} />{/if}
 				{/snippet}
 			</dt.DataTable>
 		</Page.Main.Table>
 	</Page.Main>
 	<Page.Drawer>
 		<Drawer bind:this={drawer.ref} {@attach drawer.watch} onBeforeClose={drawer.beforeClose}>
-			{#if drawer.cmd === 'create'}
+			{#if drawer.cmd === 'create' && allow.create}
 				<!-- .for(): drawer her açılışta temiz bir form örneği alır; kapanınca örnek (değerler, hatalar) silinir -->
 				{@const form = createForm.for('create')}
 				<DrawerFormContent>
@@ -135,7 +152,7 @@
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
 				</DrawerFormContent>
-			{:else if drawer.cmd === 'update' && drawer.id}
+			{:else if drawer.cmd === 'update' && drawer.id && allow.update}
 				{@const form = updateForm.for(drawer.id)}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`${t('update')} - ID: ${drawer.id}`}>{@render closeButton()}</DrawerFormContent.Header>
@@ -162,7 +179,7 @@
 						</DrawerFormContent.Content.Form>
 					</DrawerFormContent.Content>
 				</DrawerFormContent>
-			{:else if drawer.cmd === 'view' && drawer.id}
+			{:else if drawer.cmd === 'view' && drawer.id && allow.view}
 				<DrawerFormContent>
 					<DrawerFormContent.Header label={`${t('view')} - ID: ${drawer.id}`}>{@render closeButton()}</DrawerFormContent.Header>
 					<DrawerFormContent.Content boundary>

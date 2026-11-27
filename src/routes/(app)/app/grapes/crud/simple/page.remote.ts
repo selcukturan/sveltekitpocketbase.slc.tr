@@ -1,7 +1,7 @@
 import { getRequestEvent, query, form, command, requested } from '$app/server';
 import { error } from '@sveltejs/kit';
 import { Collections } from '#lib/types/pocketbase-types.js';
-import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
+import { requirePermission } from '#lib/server/acl.js';
 import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
@@ -10,10 +10,13 @@ import { TABLE, oneParamsSchema, createFormSchema, updateFormSchema, deleteManyS
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Yetki kaynağı (acl_resources.key): her fonksiyon kendi işlemini denetler (oturum yoksa girişe yönlendirir)
+const RESOURCE = 'grapes.crud.simple';
+
 // İstemciden yalnızca sayfa, sayfa boyutu, sıralama (TABLE'daki sortable alanlar) ve filtre gelir; expand/fields
 // gerekiyorsa burada sabit verilir (istemci ilişkili koleksiyonları açamaz).
 export const getList = query(TABLE.listParamsSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'list'); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -35,7 +38,7 @@ export const getList = query(TABLE.listParamsSchema, async (params) => {
 });
 
 export const getOne = query(oneParamsSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'view'); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -51,7 +54,7 @@ export const getOne = query(oneParamsSchema, async (params) => {
 });
 
 export const createForm = form(createFormSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'create'); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -67,7 +70,7 @@ export const createForm = form(createFormSchema, async (params) => {
 });
 
 export const updateForm = form(updateFormSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'update'); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -84,7 +87,7 @@ export const updateForm = form(updateFormSchema, async (params) => {
 
 // Silme (tek kayıt da bir elemanlı liste olarak gelir; bkz. dt.createRowDelete)
 export const deleteRecords = command(deleteManySchema, async ({ ids }) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'delete'); // 🔒
 
 	const { locals } = getRequestEvent();
 	const collection = locals.pb.collection(Collections.DemoCrud);
@@ -119,7 +122,7 @@ async function assertEditable(edits: { id: string; field: string }[]) {
 // Hücre düzenleme (tek hücre de bir elemanlı liste olarak gelir; bkz. dt.createCellEdit). Hücreler kayıt bazında
 // birleştirilir, her kayıt tek istekle güncellenir. Boş değerler PocketBase'e '' olarak gider (alan temizlenir).
 export const updateCells = command(TABLE.cellsEditSchema, async (edits) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'update'); // 🔒
 	await assertEditable(edits);
 
 	const { locals } = getRequestEvent();

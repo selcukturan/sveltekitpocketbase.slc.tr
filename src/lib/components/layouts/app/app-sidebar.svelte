@@ -6,6 +6,8 @@
 	import { tooltip } from '#lib/attachments/index.js';
 	import { resolve } from '$app/paths';
 	import { Icon } from '#lib/components/icons/index.js';
+	import { menuTitle } from '#lib/app/menu/menu.js';
+	import { firstHref } from '#lib/app/menu/tree.js';
 
 	// Modül rayı: menü ağacının kökleri. Aktif modül adresten bulunur (app-layout → findActivePath).
 	let { modules, activeId, class: classes, ...attributes }: PropsAppSidebarType = $props();
@@ -37,10 +39,10 @@
 	>
 		{#each modules as d (d.id)}
 			<a
-				href={d.href}
-				aria-label={t(d.title)}
+				href={firstHref(d)}
+				aria-label={menuTitle(d)}
 				{@attach tooltip({
-					text: t(d.title),
+					text: menuTitle(d),
 					position: global.isMobileBreakpoint ? 'bottom' : 'right'
 				})}
 				aria-current={d.id === activeId ? 'page' : undefined}

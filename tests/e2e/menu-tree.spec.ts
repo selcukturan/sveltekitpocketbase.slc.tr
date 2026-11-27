@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { pageExists } from './helpers/routes.ts';
 import { buildTree, findActivePath, hrefMatches, type MenuRecord } from '../../src/lib/app/menu/tree.ts';
-import { MENU, MENU_RECORDS } from '../../src/lib/app/menu/menu.ts';
 
-// app/menu (saf): tarayıcı açılmaz.
+// app/menu/tree.ts (saf): tarayıcı açılmaz. Gerçek menü veritabanındadır (acl_resources): tutarlılığı ve bağlantıların
+// sayfası acl-data.spec.ts'te denetlenir.
 const rec = (id: string, parent_id: string | null, sort: number, href?: string): MenuRecord => ({ id, parent_id, title: id, sort, href });
 const ids = (path: { id: string }[]) => path.map((node) => node.id);
 
@@ -34,31 +33,24 @@ test('hrefMatches: aynı adres ya da alt adres; benzer önek eşleşmez, sondaki
 });
 
 test('findActivePath: en uzun eşleşme; eşitlikte derindeki yaprak; menüde olmayan alt sayfada en yakın üst öğe', () => {
-	const at = (pathname: string) => ids(findActivePath(MENU, pathname));
+	// Gerçek menünün biçimi: alt menülü modülün href'i yok, "Giriş" yaprakları üst adreste
+	const menu = buildTree([
+		rec('home', null, 10, '/app'),
+		rec('grapes', null, 20),
+		rec('grapes.intro', 'grapes', 10, '/app/grapes'),
+		rec('grapes.crud', 'grapes', 20),
+		rec('grapes.crud.intro', 'grapes.crud', 10, '/app/grapes/crud'),
+		rec('grapes.crud.simple', 'grapes.crud', 20, '/app/grapes/crud/simple'),
+		rec('logs', null, 30, '/app/logs'),
+		rec('settings', null, 40, '/app/settings'),
+		rec('settings.intro', 'settings', 10, '/app/settings')
+	]);
+	const at = (pathname: string) => ids(findActivePath(menu, pathname));
 	expect(at('/app')).toEqual(['home']);
-	expect(at('/app/grapes')).toEqual(['grapes', 'grapes-intro']); // modülün kendi adresi = "Giriş" yaprağı
-	expect(at('/app/grapes/crud/simple')).toEqual(['grapes', 'grapes-crud', 'grapes-crud-simple']);
-	expect(at('/app/grapes/crud/yok')).toEqual(['grapes', 'grapes-crud', 'grapes-crud-intro']);
+	expect(at('/app/grapes')).toEqual(['grapes', 'grapes.intro']);
+	expect(at('/app/grapes/crud/simple')).toEqual(['grapes', 'grapes.crud', 'grapes.crud.simple']);
+	expect(at('/app/grapes/crud/yok')).toEqual(['grapes', 'grapes.crud', 'grapes.crud.intro']);
 	expect(at('/app/logs')).toEqual(['logs']);
-	expect(at('/app/settings/system/application')).toEqual(['settings', 'settings-system', 'settings-application']);
+	expect(at('/app/settings')).toEqual(['settings', 'settings.intro']); // modülün adresi = "Giriş": derindeki kazanır
 	expect(at('/login')).toEqual([]);
-});
-
-test('menu.ts: id tekil, her parent_id var, kökler ikonlu, gruplar href’siz ve boş değil', () => {
-	const byId = new Map(MENU_RECORDS.map((r) => [r.id, r]));
-	expect(byId.size).toBe(MENU_RECORDS.length);
-	for (const r of MENU_RECORDS) {
-		if (r.parent_id !== null) expect(byId.has(r.parent_id), `${r.id} → ${r.parent_id}`).toBe(true);
-		else expect(r.icon, `${r.id} modülünün ikonu`).toBeTruthy();
-		const hasChildren = MENU_RECORDS.some((c) => c.parent_id === r.id);
-		if (r.parent_id !== null && !r.href) expect(hasChildren, `${r.id}: href yoksa grup olmalı`).toBe(true);
-	}
-	expect(JSON.stringify(MENU).length).toBeGreaterThan(0);
-});
-
-test('menü bağlantılarının hepsinin bir sayfası var (+page.svelte)', () => {
-	expect(pageExists('/app/yok-boyle-sayfa')).toBe(false); // denetimin kendisi: olmayan sayfa yakalanır
-	expect(pageExists('/app/grapes/crud/simple')).toBe(true);
-	const missing = MENU_RECORDS.filter((r) => r.href && !pageExists(r.href)).map((r) => `${r.id}: ${r.href}`);
-	expect(missing).toEqual([]);
 });

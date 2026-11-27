@@ -4,4 +4,5 @@ export { default as AppFooter } from './app-footer.svelte';
 export { default as AppLayout } from './view/app-layout.svelte';
 export { default as NavTree } from './nav-tree.svelte';
 export { default as MobileNav } from './mobile-nav.svelte';
+export { default as Forbidden } from './forbidden.svelte';
 export type { ChildrenPropsType, AppLayoutPropsType, PropsAppSidebarType } from './types';

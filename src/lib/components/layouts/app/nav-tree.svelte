@@ -2,7 +2,7 @@
 	/* eslint-disable svelte/no-navigation-without-resolve -- href'ler menü verisinden gelen uygulama içi tam yollar */
 	import { t } from '#lib/app/localization/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
-	import type { AppMenuNode } from '#lib/app/menu/menu.js';
+	import { menuTitle, type AppMenuNode } from '#lib/app/menu/menu.js';
 
 	// Aktif modülün menü ağacı (sidebar). Gruplar açılır/kapanır düğmedir (aria-expanded), yapraklar bağlantıdır.
 	// Site gezinmesi için WAI'nin önerdiği "disclosure" kalıbı: iç içe <ul>, role="tree" yok.
@@ -35,7 +35,7 @@
 						class:mt-5={depth === 0}
 					>
 						<Icon name={open ? 'chevron_down' : 'chevron_right'} size={16} />
-						<span class="truncate">{t(node.title)}</span>
+						<span class="truncate">{menuTitle(node)}</span>
 					</button>
 					{#if open}
 						{@render branch(node.children, depth + 1)}
@@ -47,7 +47,7 @@
 						class="text-surface-500 hover:bg-surface-200 hover:text-surface-900 active:bg-surface-300 aria-[current]:bg-surface-200 aria-[current]:text-surface-900 my-0.5 flex min-h-10 w-full min-w-0 items-center gap-x-2 rounded px-3 py-1 text-base no-underline select-none"
 					>
 						{#if node.icon}<Icon name={node.icon} size={20} />{/if}
-						<span class="truncate">{t(node.title)}</span>
+						<span class="truncate">{menuTitle(node)}</span>
 					</a>
 				{/if}
 			</li>
@@ -55,9 +55,9 @@
 	</ul>
 {/snippet}
 
-<nav aria-label={t(module.title)} class="flex h-full w-full flex-col overflow-hidden">
+<nav aria-label={menuTitle(module)} class="flex h-full w-full flex-col overflow-hidden">
 	{#if heading}
-		<h2 class="text-surface-500 px-5 pt-4 pb-1 text-xs font-semibold tracking-wide uppercase">{t(module.title)}</h2>
+		<h2 class="text-surface-500 px-5 pt-4 pb-1 text-xs font-semibold tracking-wide uppercase">{menuTitle(module)}</h2>
 	{/if}
 	<div class="flex-1 overflow-x-hidden overflow-y-auto px-4 pb-4">
 		{@render branch(module.children, 0)}

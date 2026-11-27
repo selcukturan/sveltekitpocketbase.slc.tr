@@ -5,11 +5,17 @@
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
 	import { settingsFormSchema } from './page.shared';
 	import { getSettings, updateSettings } from './page.remote';
+	import { can } from '#lib/app/acl/access.js';
+	import { getMyAccess } from '#lib/remotes/acl.remote.js';
 
 	const toaster = createToaster({ name: 'settings-toaster', position: 'bottom-center' });
 
 	// Kaydetme: gönderim, ayarları tazeleme, bildirim (form sayfada açık kalır; drawer yok)
 	const save = formInput.createFormSave({ updates: () => [getSettings()], onSuccess: toaster.success, onError: toaster.error });
+
+	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
+	// Güncelleme izni yoksa form salt görüntülenir (asıl kontrol: page.remote.ts → requirePermission)
+	const canUpdate = $derived(can((await getMyAccess()).access, 'settings.system.application', 'update'));
 </script>
 
 <Head>
@@ -34,7 +40,7 @@
 					{/snippet}
 					{#snippet buttons({ isChanged } = {})}
 						<formInput.Button type="reset" variant="ghost" color="surface" label={t('form_reset')} disabled={!isChanged} />
-						<formInput.Button type="submit" label={t('update')} disabled={Boolean(updateSettings.pending) || !isChanged} />
+						<formInput.Button type="submit" label={t('update')} disabled={!canUpdate || Boolean(updateSettings.pending) || !isChanged} />
 					{/snippet}
 				</formInput.Form>
 			{:else}

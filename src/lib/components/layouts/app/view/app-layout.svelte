@@ -2,18 +2,22 @@
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { t } from '#lib/app/localization/index.js';
-	import { AppSidebar, AppHeader, NavTree, MobileNav } from '..';
+	import { AppSidebar, AppHeader, NavTree, MobileNav, Forbidden } from '..';
 	import type { AppLayoutPropsType } from '../types';
 	import { getGlobalContext, TREE_MIN, TREE_MAX, TREE_DEFAULT } from '#lib/app/global.svelte.js';
-	import { MENU } from '#lib/app/menu/menu.js';
+	import { buildAppMenu } from '#lib/app/menu/menu.js';
 	import { findActivePath } from '#lib/app/menu/tree.js';
+	import { canAccessPage } from '#lib/app/acl/access.js';
+	import { getMyAccess } from '#lib/remotes/acl.remote.js';
 	import { SplitPane } from '#lib/components/base/split-pane/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import { tooltip } from '#lib/attachments/index.js';
 
 	// Uygulama iskeleti: üst çubuk · modül rayı (menü kökleri) · aktif modülün menü ağacı · içerik (<main>).
-	// Menü tek yerden gelir (app/menu/menu.ts); modüllerin ayrı layout dosyası yoktur. Alt menüsü olmayan modülde
-	// (ör. ana sayfa) ağaç yoktur, içerik tüm alanı alır.
+	// Menü veritabanından gelir (getMyAccess → buildAppMenu): yalnızca erişilebilen sayfalar; modüllerin ayrı layout
+	// dosyası yoktur. Alt menüsü olmayan modülde (ör. ana sayfa) ağaç yoktur, içerik tüm alanı alır.
+	// Sayfa koruması: adres bir kaynakla eşleşmiyorsa ya da erişim izni yoksa sayfanın yerine 403 görünümü çizilir
+	// (sayfa kurulmaz). Asıl koruma remote fonksiyonlardadır (requirePermission).
 	//
 	// Ekran boyutuna göre (global.screen):
 	// - masaüstü (≥ 1024): ray + ağaç split pane'de (genişlik sürüklenir/klavyeyle değişir, daraltılabilir, kaydedilir)
@@ -25,19 +29,6 @@
 
 	const global = getGlobalContext();
 
-	// Adrese karşılık gelen yol: [modül, …, sayfa]. Modül rayda, yol ağaçta işaretlenir.
-	const activePath = $derived(findActivePath(MENU, page.url.pathname));
-	const module = $derived(activePath[0]);
-	const activeIds = $derived(new Set(activePath.map((node) => node.id)));
-	const activeId = $derived(activePath.at(-1)?.id);
-	const hasTree = $derived(module !== undefined && module.children.length > 0);
-
-	// Masaüstü: ağaç daraltılmış (kendi düğmesiyle ya da üst çubuktaki odak moduyla)
-	const collapsed = $derived(global.hideSidebar || global.hidePageSidebar);
-	const desktopTree = $derived(global.screen === 'desktop' && !collapsed);
-
-	const toggleLabel = $derived(global.hidePageSidebar ? t('show_menu') : t('hide_menu'));
-
 	// Tablet: ağaç paneli
 	let tabletOpen = $state(false);
 	const tabletLabel = $derived(tabletOpen ? t('hide_menu') : t('show_menu'));
@@ -45,6 +36,24 @@
 	let mobileNav = $state<ReturnType<typeof MobileNav>>();
 
 	afterNavigate(() => (tabletOpen = false));
+
+	// Masaüstü: ağaç daraltılmış (kendi düğmesiyle ya da üst çubuktaki odak moduyla)
+	const collapsed = $derived(global.hideSidebar || global.hidePageSidebar);
+	const desktopTree = $derived(global.screen === 'desktop' && !collapsed);
+
+	const toggleLabel = $derived(global.hidePageSidebar ? t('show_menu') : t('hide_menu'));
+
+	// Yetki (await bağlam gerektiren çağrılardan sonra: getContext, afterNavigate await'ten sonra çalışmaz)
+	const acl = $derived(await getMyAccess());
+	const menu = $derived(buildAppMenu(acl.resources, acl.access));
+	const allowed = $derived(canAccessPage(acl.resources, acl.access, page.url.pathname));
+
+	// Adrese karşılık gelen yol: [modül, …, sayfa]. Modül rayda, yol ağaçta işaretlenir.
+	const activePath = $derived(findActivePath(menu, page.url.pathname));
+	const module = $derived(activePath[0]);
+	const activeIds = $derived(new Set(activePath.map((node) => node.id)));
+	const activeId = $derived(activePath.at(-1)?.id);
+	const hasTree = $derived(module !== undefined && module.children.length > 0);
 </script>
 
 <svelte:window
@@ -61,7 +70,11 @@
 
 {#snippet content()}
 	<main class="relative flex h-full w-full flex-col overflow-hidden">
-		{@render children?.()}
+		{#if allowed}
+			{@render children?.()}
+		{:else}
+			<Forbidden />
+		{/if}
 	</main>
 {/snippet}
 
@@ -69,7 +82,7 @@
 	<AppHeader onMenu={() => mobileNav?.open()} />
 	<div class="flex flex-1 flex-row overflow-hidden">
 		<div class="{global.hideSidebar || global.screen === 'mobile' ? 'hidden' : 'block'} bg-surface-50 overflow-hidden border-r">
-			<AppSidebar modules={MENU} activeId={module?.id} />
+			<AppSidebar modules={menu} activeId={module?.id} />
 		</div>
 		<div class="relative flex-1 overflow-hidden">
 			{#if hasTree}
@@ -137,7 +150,7 @@
 	</div>
 </div>
 
-<MobileNav bind:this={mobileNav} modules={MENU} {activePath} />
+<MobileNav bind:this={mobileNav} modules={menu} {activePath} />
 
 <style>
 	/* Ağacı aç/kapat düğmesi: bölücünün (ya da panelin) kenarında, dikeyde ortada */

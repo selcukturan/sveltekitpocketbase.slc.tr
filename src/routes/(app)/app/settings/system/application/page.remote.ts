@@ -1,15 +1,17 @@
 import { getRequestEvent, query, form, requested } from '$app/server';
 import { Collections } from '#lib/types/pocketbase-types.js';
-import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
+import { requirePermission } from '#lib/server/acl.js';
 import { ResultAsync } from 'neverthrow';
 import { throwError, throwFormError, mapUnknownToError } from '#lib/server/error.js';
 import { toPbPayload } from '#lib/utils/transform-params-helper.js';
 
 import { settingsFormSchema } from './page.shared';
 
+const RESOURCE = 'settings.system.application'; // yetki kaynağı (acl_resources.key)
+
 // Tek ayar kaydı; yoksa null (createRule kapalı olduğu için istemci oluşturamaz)
 export const getSettings = query(async () => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'view'); // 🔒
 
 	const { locals } = getRequestEvent();
 
@@ -23,7 +25,7 @@ export const getSettings = query(async () => {
 });
 
 export const updateSettings = form(settingsFormSchema, async (params) => {
-	await checkAuthenticated(); // 🔒
+	await requirePermission(RESOURCE, 'update'); // 🔒
 
 	const { locals } = getRequestEvent();
 

@@ -9,7 +9,8 @@ import {
 	type AclPermission,
 	type AclAction
 } from '../../src/lib/app/acl/access.ts';
-import { MENU_RECORDS } from '../../src/lib/app/menu/menu.ts';
+import { tr } from '../../src/lib/app/localization/translations/tr.ts';
+import { en } from '../../src/lib/app/localization/translations/en.ts';
 
 // Yetki verisi (acl_*): PocketBase'den demo kullanıcının oturumuyla okunur (geliştirme veritabanı).
 const PB = process.env.PB_TEST_URL ?? 'http://localhost:8099';
@@ -33,7 +34,7 @@ async function all(token: string, collection: string): Promise<Item[]> {
 	return ((await res.json()) as { items: Item[] }).items;
 }
 
-test('yetki verisi: kaynaklar tutarlı, bağlantıların sayfası var, sayfalar herkese açık (bugünkü davranış)', async () => {
+test('yetki verisi: kaynaklar tutarlı, bağlantıların sayfası var, sayfalar ve işlemleri herkese açık (bugünkü davranış)', async () => {
 	const token = await login();
 	const [actions, resources, permissions] = await Promise.all([all(token, 'acl_actions'), all(token, 'acl_resources'), all(token, 'acl_permissions')]);
 	const access = actions.find((a) => a.key === 'access');
@@ -47,18 +48,23 @@ test('yetki verisi: kaynaklar tutarlı, bağlantıların sayfası var, sayfalar 
 		if (r.href) {
 			expect(pageExists(String(r.href)), `${key}: ${r.href} sayfası`).toBe(true);
 			expect(r.actions as string[], `${key}: access işlemi`).toContain(access!.id);
-			const everyone = permissions.find((p) => p.resource === r.id && p.action === access!.id && !p.role && !p.user);
-			expect(everyone?.effect, `${key}: Herkes → access`).toBe('allow');
+		}
+		// Herkes → kaynağın tanımlı her işlemi (1795740002: access, 1795740003: diğerleri)
+		for (const actionId of r.actions as string[]) {
+			const everyone = permissions.find((p) => p.resource === r.id && p.action === actionId && !p.role && !p.user);
+			expect(everyone?.effect, `${key}: Herkes → ${actions.find((a) => a.id === actionId)?.key}`).toBe('allow');
 		}
 		// search_label label'dan üretilmiş (hook / tohum)
 		expect(r.search_label).toBe(String(r.label).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/ı/g, 'i'));
 	}
 	expect(resources.filter((r) => r.kind === 'feature').map((r) => r.key)).toEqual(expect.arrayContaining(['app.language']));
 
-	// Geçiş dönemi: menu.ts (şu an menüyü çizen) ile veritabanındaki kaynaklar aynı sayfaları içeriyor
-	const dbHrefs = new Set(resources.filter((r) => r.href).map((r) => String(r.href)));
-	const menuHrefs = new Set(MENU_RECORDS.filter((r) => r.href).map((r) => r.href!));
-	expect([...dbHrefs].sort()).toEqual([...menuHrefs].sort());
+	// Menü: kökler ikonlu modül; başlık çevirisi 'menu.' + key (yoksa label gösterilir: başlangıç verisinde hepsi var)
+	const menu = resources.filter((r) => r.kind !== 'feature');
+	for (const r of menu) if (!r.parent) expect(r.icon, `${r.key}: modül ikonu`).toBeTruthy();
+	const missing = (dict: Record<string, string>) => menu.map((r) => `menu.${r.key}`).filter((k) => !(k in dict));
+	expect(missing(tr)).toEqual([]);
+	expect(missing(en)).toEqual([]);
 });
 
 test('yetki verisi: normal kullanıcı okur ama yazamaz; oturumsuz hiçbir şey göremez', async () => {

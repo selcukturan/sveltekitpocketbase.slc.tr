@@ -4,7 +4,7 @@
 	import { t } from '#lib/app/localization/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
-	import type { AppMenuNode } from '#lib/app/menu/menu.js';
+	import { menuTitle, type AppMenuNode } from '#lib/app/menu/menu.js';
 	import NavTree from './nav-tree.svelte';
 
 	// Mobil menü (< 640 px): soldan açılan drawer. Üstte modüller, altında seçili modülün ağacı.
@@ -63,13 +63,13 @@
 								class:slc-mobile-nav-current={m.id === activePath[0]?.id}
 							>
 								{#if m.icon}<Icon name={m.icon} size={20} />{/if}
-								<span class="flex-1 truncate text-left">{t(m.title)}</span>
+								<span class="flex-1 truncate text-left">{menuTitle(m)}</span>
 								<Icon name="chevron_right" size={16} />
 							</button>
 						{:else if m.href}
 							<a href={m.href} aria-current={m.id === activePath[0]?.id ? 'page' : undefined} class="slc-mobile-nav-item">
 								{#if m.icon}<Icon name={m.icon} size={20} />{/if}
-								<span class="flex-1 truncate">{t(m.title)}</span>
+								<span class="flex-1 truncate">{menuTitle(m)}</span>
 							</a>
 						{/if}
 					</li>

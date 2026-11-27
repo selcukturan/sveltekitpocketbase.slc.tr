@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Boundary } from '#lib/components/base/boundary/index.js';
 	import { t } from '#lib/app/localization/index.js';
 	import type { Snippet } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
@@ -16,16 +17,13 @@
 	<!-- panel -->
 	<div class="bg-surface-50 shadow-surface-400/40 rounded-xl p-6 shadow-xl/30">
 		{#if boundary}
-			<svelte:boundary>
+			<Boundary>
 				{#if children}
 					{@render children()}
 				{:else}
 					<span>{t('no_content')}</span>
 				{/if}
-				{#snippet pending()}
-					<p>{t('loading')}</p>
-				{/snippet}
-			</svelte:boundary>
+			</Boundary>
 		{:else if children}
 			{@render children()}
 		{:else}

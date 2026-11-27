@@ -13,6 +13,17 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Yetkinin uygulanması (Aşama 3c): sunucuda `getAcl()` (istek başına bir kez,
+  kullanıcının oturumuyla) ve `requirePermission(key, action)` (oturum yoksa
+  girişe yönlendirir, izin yoksa 403); istemcide `getMyAccess()` query'si.
+  Menü veritabanından (`buildAppMenu`; başlık `menu.<key>` çevirisi, yoksa
+  `label`); raydaki modül bağlantısı ilk erişilebilen sayfaya gider; erişilemeyen
+  ya da kaynağı olmayan sayfada sayfa yerine 403 görünümü (`Forbidden`).
+  Simple CRUD remote'ları işlem bazında (`list`, `view`, `create`, `update`,
+  `delete`), uygulama ayarları `view` / `update` denetler; düğmeler `can()` ile
+  gizlenir, güncelleme izni yoksa hücreler düzenlenemez. Migration
+  `1795740003`: Herkes → her kaynağın tanımlı tüm işlemleri (bugünkü davranış
+  korunur). Testler: `acl-ui.spec.ts`.
 - Yetki çekirdeği (Aşama 3b, saf: `src/lib/app/acl/access.ts`):
   `resolvePermissions` (kişisel satır rolü ezer; aktif rollerden biri allow;
   rol deny'ı yok sayılır; Herkes; varsayılan kapalı; access yoksa diğer
@@ -265,6 +276,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Menü `menu.ts`'teki sabit listeden değil veritabanından (`acl_resources`)
+  çizilir; `MENU` / `MENU_RECORDS` kaldırıldı. Menü çeviri anahtarları
+  `menu_*` → `menu.<kaynak anahtarı>`.
 - Layout: modüllerin dört `+layout.svelte` dosyası ve `layouts/page/`
   kaldırıldı; tek iskelet `app-layout` (üst çubuk · ray · ağaç · içerik). Alt
   menüsü olmayan modülde ağaç yok. Sayfada tek `<main>` (`Page.Main` artık
@@ -408,6 +422,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Şablonlardaki `boundary` (`Page`, `Page.Main.Panel`,
+  `DrawerFormContent.Content`…) artık ortak `Boundary` bileşenini kullanır:
+  içerideki bir await hata verirse (ör. 403, silinmiş kayıt) hata yalnızca o
+  alanda "Tekrar dene" ile gösterilir; sayfa kök hata sayfasına düşmez.
 - `buildTree` dönüş tipi ikonu olmayan kayıtlarda `{}` oluyordu (ağaç
   `pruneTree`'ye verilemiyordu); başlık ve ikon tipleri parametre.
 - Kayıt seçici araması Türkçe terimi normalize etmiyordu ("WİNDOWS" sonuç
