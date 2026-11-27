@@ -22,6 +22,15 @@ test('kayıt seçici arar, enjeksiyon denemesi sonuç döndürmez, seçilen kay�
 	await search.press('Enter');
 	await expect.poll(() => items.count(), { timeout: 10000 }).toBeGreaterThan(0);
 	const label = (await items.first().textContent())!.trim();
+
+	// Türkçe arama: büyük harfle ve aksanlı yazılan terim normalize edilir (search_label ile aynı biçim)
+	await search.fill(label.toLocaleUpperCase('tr-TR'));
+	await search.press('Enter');
+	await expect(items.filter({ hasText: label }).first()).toBeVisible({ timeout: 10000 });
+	await search.fill('');
+	await search.press('Enter');
+	await expect.poll(() => items.count(), { timeout: 10000 }).toBeGreaterThan(0);
+
 	await items.first().click();
 	await page.getByRole('button', { name: 'Seçimi kaydet' }).click();
 	// Seçilen kayıt id ile yeniden okunup etiketiyle gösterilir (getSingleRelationSelectedList)

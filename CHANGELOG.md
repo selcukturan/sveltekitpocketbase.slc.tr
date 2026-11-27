@@ -13,6 +13,19 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Yetki sistemi (Aşama 3a, veritabanı): `acl_actions` (işlem kataloğu),
+  `acl_resources` (menü ve uygulama özellikleri; ağaç), `acl_permissions` (bir
+  satır = kaynak + işlem + rol/kullanıcı/Herkes + allow/deny; tekil hücre,
+  cascade). Okuma giriş yapmış kullanıcı (izinlerde yalnızca kendi, rolleri ve
+  Herkes satırları), yazma yönetici rolleri. Tohum verisi: 7 işlem, menüdeki
+  sayfalar + `app.language`, `app.notifications`; her sayfaya Herkes → erişim
+  (bugünkü davranış). Migration'lar `1795740001_created_acl.js`,
+  `1795740002_initial_acl_data.js`; tipler yeniden üretildi.
+- PocketBase hook: `label` ve `search_label` alanı olan her koleksiyonda
+  `search_label` kayıtta `label`'dan üretilir (Türkçe arama); izinlerde
+  `label` ilişkilerden ("Rol · Kaynak · İşlem"). Hook kopyası ile
+  `normalizeStringForTurkishSearch` eşitliği testli (`search-label.spec.ts`).
+  Yetki verisi testi: `acl-data.spec.ts`.
 - Layout (Aşama 2): ekran boyutu `MediaQuery` ile (`global.screen`). Tablette
   ağaç içeriğin üstünde panel (varsayılan kapalı; gezinme, Esc, dışarı
   tıklama kapatır). Mobilde ray gizli, üst çubukta menü düğmesi, soldan
@@ -381,6 +394,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Kayıt seçici araması Türkçe terimi normalize etmiyordu ("WİNDOWS" sonuç
+  vermiyordu); terim `search_label` ile aynı biçime getiriliyor. Üç yapay
+  `sleep(300)` beklemesi kaldırıldı.
 - Split pane: sürükleme bitince pointer capture bırakılmıyordu (yeniden
   alınıyordu).
 - Number: yazarken metin ara sıra siliniyordu ('12.5' → 5 ya da 125).

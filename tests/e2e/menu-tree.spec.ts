@@ -1,7 +1,5 @@
-/// <reference types="node" />
 import { test, expect } from '@playwright/test';
-import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { pageExists } from './helpers/routes.ts';
 import { buildTree, findActivePath, hrefMatches, type MenuRecord } from '../../src/lib/app/menu/tree.ts';
 import { MENU, MENU_RECORDS } from '../../src/lib/app/menu/menu.ts';
 
@@ -57,17 +55,6 @@ test('menu.ts: id tekil, her parent_id var, kökler ikonlu, gruplar href’siz v
 	}
 	expect(JSON.stringify(MENU).length).toBeGreaterThan(0);
 });
-
-// Rota klasöründeki (group) segmentleri adreste görünmez: '/app/grapes' → src/routes/(app)/app/grapes/+page.svelte
-function pageExists(href: string, dir = 'src/routes', segments = href.split('/').filter(Boolean)): boolean {
-	if (segments.length === 0 && existsSync(join(dir, '+page.svelte'))) return true;
-	for (const entry of readdirSync(dir, { withFileTypes: true })) {
-		if (!entry.isDirectory()) continue;
-		if (/^\(.+\)$/.test(entry.name) && pageExists(href, join(dir, entry.name), segments)) return true;
-		if (segments.length > 0 && entry.name === segments[0] && pageExists(href, join(dir, entry.name), segments.slice(1))) return true;
-	}
-	return false;
-}
 
 test('menü bağlantılarının hepsinin bir sayfası var (+page.svelte)', () => {
 	expect(pageExists('/app/yok-boyle-sayfa')).toBe(false); // denetimin kendisi: olmayan sayfa yakalanır

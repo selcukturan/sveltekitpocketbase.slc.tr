@@ -11,6 +11,9 @@ export const Collections = {
 	Mfas: "_mfas",
 	Otps: "_otps",
 	Superusers: "_superusers",
+	AclActions: "acl_actions",
+	AclPermissions: "acl_permissions",
+	AclResources: "acl_resources",
 	AclRoles: "acl_roles",
 	DemoCrud: "demo_crud",
 	DemoRelationInputMultiple: "demo_relation_input_multiple",
@@ -97,6 +100,65 @@ export type SuperusersRecord = {
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
+}
+
+export type AclActionsRecord = {
+	created: IsoAutoDateString
+	id: string
+	key: string
+	label: string
+	search_label?: string
+	sort?: number
+	updated: IsoAutoDateString
+}
+
+export const AclPermissionsEffectOptions = {
+	"allow": "allow",
+	"deny": "deny",
+} as const
+export type AclPermissionsEffectOptions = typeof AclPermissionsEffectOptions[keyof typeof AclPermissionsEffectOptions]
+export type AclPermissionsRecord = {
+	action: RecordIdString
+	created: IsoAutoDateString
+	effect: AclPermissionsEffectOptions
+	id: string
+	label: string
+	resource: RecordIdString
+	role?: RecordIdString
+	search_label?: string
+	updated: IsoAutoDateString
+	user?: RecordIdString
+}
+
+export const AclResourcesKindOptions = {
+	"module": "module",
+	"group": "group",
+	"page": "page",
+	"feature": "feature",
+} as const
+export type AclResourcesKindOptions = typeof AclResourcesKindOptions[keyof typeof AclResourcesKindOptions]
+
+export const AclResourcesMatchOptions = {
+	"exact": "exact",
+	"prefix": "prefix",
+} as const
+export type AclResourcesMatchOptions = typeof AclResourcesMatchOptions[keyof typeof AclResourcesMatchOptions]
+export type AclResourcesRecord = {
+	actions?: RecordIdString[]
+	active?: boolean
+	created: IsoAutoDateString
+	hidden?: boolean
+	href?: string
+	icon?: string
+	id: string
+	key: string
+	kind: AclResourcesKindOptions
+	label: string
+	match?: AclResourcesMatchOptions
+	parent?: RecordIdString
+	search_label?: string
+	sort?: number
+	updated: IsoAutoDateString
 }
 
 export const AclRolesTypeOptions = {
@@ -227,6 +289,9 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
+export type AclActionsResponse<Texpand = unknown> = Required<AclActionsRecord> & BaseSystemFields<Texpand>
+export type AclPermissionsResponse<Texpand = unknown> = Required<AclPermissionsRecord> & BaseSystemFields<Texpand>
+export type AclResourcesResponse<Texpand = unknown> = Required<AclResourcesRecord> & BaseSystemFields<Texpand>
 export type AclRolesResponse<Texpand = unknown> = Required<AclRolesRecord> & BaseSystemFields<Texpand>
 export type DemoCrudResponse<Texpand = unknown> = Required<DemoCrudRecord> & BaseSystemFields<Texpand>
 export type DemoRelationInputMultipleResponse<Texpand = unknown> = Required<DemoRelationInputMultipleRecord> & BaseSystemFields<Texpand>
@@ -243,6 +308,9 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
+	acl_actions: AclActionsRecord
+	acl_permissions: AclPermissionsRecord
+	acl_resources: AclResourcesRecord
 	acl_roles: AclRolesRecord
 	demo_crud: DemoCrudRecord
 	demo_relation_input_multiple: DemoRelationInputMultipleRecord
@@ -258,6 +326,9 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
+	acl_actions: AclActionsResponse
+	acl_permissions: AclPermissionsResponse
+	acl_resources: AclResourcesResponse
 	acl_roles: AclRolesResponse
 	demo_crud: DemoCrudResponse
 	demo_relation_input_multiple: DemoRelationInputMultipleResponse

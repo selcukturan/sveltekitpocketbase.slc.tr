@@ -4,6 +4,7 @@ import { checkAuthenticated } from '#lib/remotes/guarded.remote.js';
 import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '#lib/server/error.js';
 import * as v from 'valibot';
+import { normalizeStringForTurkishSearch } from '#lib/utils/common.js';
 
 // Kayıt seçicinin (Relation input) arayabileceği koleksiyonlar: yalnızca ilişki alanlarının hedefleri. Yeni bir ilişki
 // alanı eklenince hedef koleksiyonu buraya eklenmeli. (Önceden '_' ile başlamayan her koleksiyon açıktı: sys_users,
@@ -19,19 +20,16 @@ const id = v.pipe(v.string(), v.nonEmpty(), v.maxLength(64));
 // Değerler filtre metnine yazılmaz, pb.filter yer tutucularına ({:x}) verilir: tırnak vb. ile filtreden çıkılamaz.
 
 const relationListParamsSchema = v.object({
-	search: v.pipe(v.string(), v.maxLength(200)),
+	// Aranan metin search_label ile aynı biçime getirilir (Türkçe: 'Öğr', 'ÖĞR', 'ogr' aynı sonucu verir; bkz. pb_hooks/utils.js)
+	search: v.pipe(v.string(), v.maxLength(200), v.transform(normalizeStringForTurkishSearch)),
 	collection,
 	timestamp: v.optional(v.fallback(v.number(), 0), 0)
 });
 export type RelationListParamsType = v.InferOutput<typeof relationListParamsSchema>;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const getRelationList = query(relationListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
-
-	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -57,8 +55,6 @@ const relationMultipleSelectedListParamsSchema = v.object({
 export const getMultipleRelationSelectedList = query(relationMultipleSelectedListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
-
-	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
@@ -92,8 +88,6 @@ const relationSingleSelectedListParamsSchema = v.object({
 export const getSingleRelationSelectedList = query(relationSingleSelectedListParamsSchema, async (params) => {
 	// 🔒🔐
 	await checkAuthenticated();
-
-	await sleep(300);
 
 	const { locals } = getRequestEvent();
 
