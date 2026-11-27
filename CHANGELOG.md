@@ -288,6 +288,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` yetki ekranı bölümü DataTable ve Select'e göre
+  (düzenleme, kopyala-yapıştır, sıralı kayıt, batch API notu, testler);
+  yapılacaklar listesinden "yetki ekranında DataTable ve Select" çıkarıldı.
 - Yetki ekranı bizim bileşenlerimizle: özne seçimi `inputs/Select`, matris
   `DataTable` (kolonlar işlemlerden çalışma anında; hücrede açılır liste;
   Ctrl+C / Ctrl+V ile toplu izin, tek istek; geçersiz değer ve rol/Herkes'e
