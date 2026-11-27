@@ -105,3 +105,19 @@ test('sunucu reddederse (403) hata yalnızca drawer içinde görünür, sayfa ay
 	await expect(alert).toHaveCount(0);
 	await expect(page.getByText('text_required').last()).toBeVisible();
 });
+
+test('uygulama özellikleri: izin yoksa üst çubukta bildirimler ve dil düğmesi görünmez', async ({ page }) => {
+	await page.goto('/app');
+	const header = page.locator('header').first();
+	await expect(header.getByRole('button', { name: /Bildirimler/ })).toBeVisible();
+	const buttons = await header.getByRole('button').count();
+
+	await withAccess(page, (access) => {
+		delete access['app.notifications'];
+		delete access['app.language'];
+	});
+	await page.reload();
+	await expect(page.getByRole('navigation', { name: 'Modüller' })).toBeVisible();
+	await expect(header.getByRole('button', { name: /Bildirimler/ })).toHaveCount(0);
+	await expect(header.getByRole('button')).toHaveCount(buttons - 2); // bildirimler ve dil
+});

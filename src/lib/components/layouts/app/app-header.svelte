@@ -11,6 +11,8 @@
 	import { Icon } from '#lib/components/icons/index.js';
 	import { getUser } from '#lib/remotes/guarded.remote.js';
 	import { Notifications } from '#lib/components/ui/notifications/index.js';
+	import { can } from '#lib/app/acl/access.js';
+	import { getMyAccess } from '#lib/remotes/acl.remote.js';
 
 	type Props = SvelteHTMLElements['header'] & {
 		onMenu?: () => void; // mobilde menü düğmesi (drawer'ı açar)
@@ -25,6 +27,9 @@
 	};
 
 	const tooltipText = $derived(global.hideSidebar ? t('show_panel') : t('hide_panel'));
+
+	// Uygulama özellikleri (acl_resources kind: feature): izin yoksa düğme görünmez. (await en sonda: bileşen bağlamı)
+	const access = $derived((await getMyAccess()).access);
 </script>
 
 <header class="{classes} border-b" {...attributes}>
@@ -62,7 +67,7 @@
 			<p>{config.version}</p>
 		</div>
 		<div class="ml-auto flex items-center gap-2 sm:gap-4">
-			<Notifications />
+			{#if can(access, 'app.notifications')}<Notifications />{/if}
 			<form
 				{...logout.enhance(async ({ submit }) => {
 					try {
@@ -89,7 +94,7 @@
 
 			<ThemeToggle />
 
-			<LangToggle />
+			{#if can(access, 'app.language')}<LangToggle />{/if}
 		</div>
 	</div>
 </header>

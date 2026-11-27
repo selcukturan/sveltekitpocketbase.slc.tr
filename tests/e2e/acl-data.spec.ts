@@ -49,8 +49,17 @@ test('yetki verisi: kaynaklar tutarlı, bağlantıların sayfası var, sayfalar 
 			expect(pageExists(String(r.href)), `${key}: ${r.href} sayfası`).toBe(true);
 			expect(r.actions as string[], `${key}: access işlemi`).toContain(access!.id);
 		}
-		// Herkes → kaynağın tanımlı her işlemi (1795740002: access, 1795740003: diğerleri)
+		// Herkes → kaynağın tanımlı her işlemi (1795740002: access, 1795740003: diğerleri). İstisna: yetki ekranında
+		// değiştirme (update) yalnızca yönetici rollerinde (1795740004)
 		for (const actionId of r.actions as string[]) {
+			const actionKey = actions.find((a) => a.id === actionId)?.key;
+			if (key === 'settings.system.permissions' && actionKey === 'update') {
+				expect(
+					permissions.some((p) => p.resource === r.id && p.action === actionId && !p.role && !p.user),
+					'Herkes yetkileri değiştiremez'
+				).toBe(false);
+				continue;
+			}
 			const everyone = permissions.find((p) => p.resource === r.id && p.action === actionId && !p.role && !p.user);
 			expect(everyone?.effect, `${key}: Herkes → ${actions.find((a) => a.id === actionId)?.key}`).toBe('allow');
 		}

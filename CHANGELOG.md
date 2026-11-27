@@ -13,6 +13,18 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Yetki ekranı (Aşama 3d, Ayarlar → Sistem → Yetkiler): özne seçimi (Herkes,
+  rol, kullanıcı), kaynak × işlem matrisi; hücreye tıklamak durumu değiştirir
+  ve kaydeder (kullanıcı: Belirtilmemiş → İzin → Engel; rol ve Herkes:
+  Belirtilmemiş ↔ İzin). Belirtilmemiş hücrede etkin sonuç önizlenir
+  (`resolvePermissions` tarayıcıda). `getPermissionData` (`view`),
+  `setPermission` (`update`; işlem kaynakta tanımlı olmalı, engel yalnızca
+  kişisel). Üst çubukta bildirimler ve dil düğmesi `app.notifications` /
+  `app.language` iznine bağlı. Migration `1795740004`: admin ve üstü roller
+  kullanıcıları listeleyebilir; `settings.system.permissions` kaynağı (Herkes →
+  erişim, görüntüleme; Admin, Super Admin → güncelleme). Testler:
+  `acl-admin.spec.ts` (geçici yönetici ve hedef kullanıcıyla: kişisel engel
+  sunucuda 403, menü budanması, rolde engel yok).
 - Yetkinin uygulanması (Aşama 3c): sunucuda `getAcl()` (istek başına bir kez,
   kullanıcının oturumuyla) ve `requirePermission(key, action)` (oturum yoksa
   girişe yönlendirir, izin yoksa 403); istemcide `getMyAccess()` query'si.
