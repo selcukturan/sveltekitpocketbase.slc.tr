@@ -13,6 +13,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Karşılama panosu (`/app`, tasarım Aşama 3): saate göre selamlama ve tarih
+  (tarayıcıda), özet (modül, erişilebilen sayfa, sürüm), "Sayfa ara" ve GitHub
+  düğmeleri; öne çıkan bölüm kartları (CRUD, veri tablosu, yetkiler, kaynaklar,
+  canlı bildirimler, bileşenler) izne göre süzülür, adresleri veritabanından;
+  kısayollar ve ipucu. Ortak kart stili `.slc-card`. `global.openSearch()`
+  (arama penceresini sayfalardan açmak için). Eski test düğmeleri Geliştirme →
+  Giriş sayfasına taşındı. Test: `acl-ui.spec.ts`.
+
 - Üst çubuk ve kullanıcı menüsü (tasarım Aşama 2): solda odak modu düğmesi ve
   uygulama adı, ortada arama kutusu (Ctrl K), sağda bildirim zili (okunmamış
   rozeti), tema ikon düğmesi ve avatar. Kullanıcı menüsü (`user-menu.svelte`,

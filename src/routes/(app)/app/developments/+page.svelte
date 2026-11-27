@@ -1,7 +1,16 @@
 <script lang="ts">
 	import { Page, Head } from '#lib/components/templates/index.js';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
+	import { getUser } from '#lib/remotes/guarded.remote.js';
+	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
+
 	const global = getGlobalContext();
+
+	// Hızlı testler (önceden ana sayfadaydı)
+	const user = getUser();
+	const crudWithHash = resolve('/(app)/app/grapes/crud/create-read-update-delete') + '#cmd=create&id=ogakwsw3aeym0u9';
+	const testButton = 'bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center';
 </script>
 
 <Head>
@@ -17,6 +26,16 @@
 		<Page.Main.Panel>
 			<div class="flex h-full w-full flex-col overflow-hidden">
 				<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1">
+					<!-- Hızlı testler -->
+					<div class="flex flex-col gap-2 p-4">
+						<h2 class="font-semibold">Hızlı testler</h2>
+						<button class={testButton} onclick={() => user.refresh()}>Check getUser(): {user.current?.email}</button>
+						<p>1 - FancyInput'ların içinde orjinal input değerlerini değiştirirken `field?.set('new value');` kullan.</p>
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolve ile kuruldu; hash ekli -->
+						<button class={testButton} onclick={() => goto(crudWithHash)}>BUTTON: Go DataTable with filter and recordId in hash</button>
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolve ile kuruldu; hash ekli -->
+						<a href={crudWithHash} class={testButton} target="_blank" rel="noopener noreferrer">LINK: Go DataTable with filter and recordId in hash</a>
+					</div>
 					<div class="p-4">
 						<div class="p-4">isMobileBreakpoint: {global.isMobileBreakpoint}</div>
 						<!-- <div class="p-4">

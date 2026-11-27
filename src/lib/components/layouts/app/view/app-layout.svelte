@@ -38,6 +38,7 @@
 	let palette = $state<ReturnType<typeof CommandPalette>>();
 
 	afterNavigate(() => (tabletOpen = false));
+	global.openSearch = () => palette?.open();
 
 	// Masaüstü: ağaç daraltılmış (kendi düğmesiyle ya da üst çubuktaki odak moduyla)
 	const collapsed = $derived(global.hideSidebar || global.hidePageSidebar);

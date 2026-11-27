@@ -30,6 +30,9 @@ class Globals {
 	treeWidth = $state(TREE_DEFAULT);
 	// Menü ağacında kullanıcının açıp kapattığı gruplar (id → açık mı). Seçilmeyen grup varsayılanla açılır (nav-tree).
 	readonly menuExpanded = new SvelteMap<string, boolean>();
+	// Menüde arama penceresini açar (app-layout bağlar). Sayfalar da kullanabilir (ör. karşılama panosu).
+	// Ctrl+K taklit edilmez: geliştirme sunucusunda Vite DevTools da aynı kısayolu dinler.
+	openSearch = () => {};
 
 	constructor() {
 		const saved = this.#read();

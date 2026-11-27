@@ -139,3 +139,28 @@ test('menüde arama erişilemeyen sayfayı göstermez', async ({ page }) => {
 	await expect(palette.getByRole('option')).toHaveCount(2); // CRUD › Giriş ve Basit CRUD
 	await expect(palette.getByRole('option', { name: /Oluştur, Oku/ })).toHaveCount(0);
 });
+
+test('karşılama panosu: kartlar izne göre; kart sayfaya götürür; "Sayfa ara" arama penceresini açar', async ({ page }) => {
+	await page.goto('/app');
+	const features = page.getByRole('region', { name: 'Öne çıkanlar' });
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('DemoName');
+	await expect(features.getByRole('link')).toHaveCount(6);
+
+	await page
+		.getByRole('main')
+		.getByRole('button', { name: /Sayfa ara/ })
+		.click();
+	await expect(page.getByRole('combobox')).toBeFocused();
+	await page.keyboard.press('Escape');
+
+	await features.getByRole('link', { name: /Veri tablosu/ }).click();
+	await expect(page).toHaveURL(/\/app\/data-table\/demos\/common-features/);
+
+	await withAccess(page, (access) => {
+		delete access['settings.system.permissions'];
+		delete access['grapes.crud.full'];
+	});
+	await page.goto('/app');
+	await expect(features.getByRole('link')).toHaveCount(4);
+	await expect(features.getByRole('link', { name: /Yetkiler/ })).toHaveCount(0);
+});
