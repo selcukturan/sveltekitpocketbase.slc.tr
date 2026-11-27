@@ -31,6 +31,7 @@ export const icons = {
 	view: 'view',
 	moon: 'moon',
 	sun: 'sun',
+	search: 'search',
 	lucide: 'lucide'
 } as const;
 // ####################################### END TRANSLATIONS ######################################

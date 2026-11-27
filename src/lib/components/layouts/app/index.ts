@@ -6,4 +6,5 @@ export { default as NavTree } from './nav-tree.svelte';
 export { default as MobileNav } from './mobile-nav.svelte';
 export { default as Forbidden } from './forbidden.svelte';
 export { default as Breadcrumb, type Crumb } from './breadcrumb.svelte';
+export { default as CommandPalette } from './command-palette.svelte';
 export type { ChildrenPropsType, AppLayoutPropsType, PropsAppSidebarType } from './types';

@@ -13,6 +13,14 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Menüde arama (Aşama 4b): üst çubukta "Ara" düğmesi ve Ctrl+K / ⌘K (geliştirme
+  sunucusunda Ctrl+K'yı Vite DevTools yakalar; düğme çalışır). Native `<dialog>`
+  içinde WAI combobox + listbox; kullanıcının erişebildiği sayfalar, başlık ve
+  yoluyla; Türkçe normalizasyonla arama (başlık, ad, anahtar, yol; tüm kelimeler
+  gerekli; başlığı sorguyla başlayan önce); ↑ ↓, Enter, Esc. Pencere ve arka
+  plan temaya göre (koyu temada kenarlık ve daha koyu arka plan). Saf arama
+  mantığı `app/menu/search.ts`; arama ikonu. Testler: `menu-search.spec.ts`,
+  `acl-ui.spec.ts` (erişilemeyen sayfa aramada yok).
 - Konum çubuğu (breadcrumb, Aşama 4a): içerik alanının üstünde, her sayfada
   aynı yerde. Yol sayfanın kaynağından köke (`resourceTrail`; menüde gizli ve
   alt adresli sayfalarda da doğru); modül ilk erişilebilir sayfasına gider, grup

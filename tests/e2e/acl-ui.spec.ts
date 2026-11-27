@@ -121,3 +121,15 @@ test('uygulama özellikleri: izin yoksa üst çubukta bildirimler ve dil düğme
 	await expect(header.getByRole('button', { name: /Bildirimler/ })).toHaveCount(0);
 	await expect(header.getByRole('button')).toHaveCount(buttons - 2); // bildirimler ve dil
 });
+
+test('menüde arama erişilemeyen sayfayı göstermez', async ({ page }) => {
+	await withAccess(page, (access) => {
+		delete access['grapes.crud.full'];
+	});
+	await page.goto('/app');
+	await page.getByRole('banner').getByRole('button', { name: 'Ara' }).click();
+	const palette = page.getByRole('dialog', { name: 'Ara' });
+	await palette.getByRole('combobox').fill('crud');
+	await expect(palette.getByRole('option')).toHaveCount(2); // CRUD › Giriş ve Basit CRUD
+	await expect(palette.getByRole('option', { name: /Oluştur, Oku/ })).toHaveCount(0);
+});

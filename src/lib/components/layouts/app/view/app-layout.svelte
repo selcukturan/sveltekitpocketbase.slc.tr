@@ -2,7 +2,8 @@
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { t } from '#lib/app/localization/index.js';
-	import { AppSidebar, AppHeader, NavTree, MobileNav, Forbidden, Breadcrumb, type Crumb } from '..';
+	import { AppSidebar, AppHeader, NavTree, MobileNav, Forbidden, Breadcrumb, CommandPalette, type Crumb } from '..';
+	import { menuEntries } from '#lib/app/menu/search.js';
 	import type { AppLayoutPropsType } from '../types';
 	import { getGlobalContext, TREE_MIN, TREE_MAX, TREE_DEFAULT } from '#lib/app/global.svelte.js';
 	import { buildAppMenu, menuTitle } from '#lib/app/menu/menu.js';
@@ -34,6 +35,7 @@
 	const tabletLabel = $derived(tabletOpen ? t('hide_menu') : t('show_menu'));
 
 	let mobileNav = $state<ReturnType<typeof MobileNav>>();
+	let palette = $state<ReturnType<typeof CommandPalette>>();
 
 	afterNavigate(() => (tabletOpen = false));
 
@@ -53,6 +55,9 @@
 
 	// Konum çubuğu: sayfanın kaynağından köke. Modül → ilk erişilebilir sayfası (menüde yoksa bağlantısız), grup düz metin,
 	// diğer sayfalar kendi adresi; son öğe bulunulan sayfa.
+	// Menüde arama (Ctrl+K): kullanıcının menüsündeki sayfalar
+	const searchEntries = $derived(menuEntries(menu, menuTitle));
+
 	const crumbs = $derived(
 		resourceTrail(acl.resources, page.url.pathname).map((r): Crumb => {
 			const module = r.kind === 'module' ? menu.find((m) => m.id === r.key) : undefined;
@@ -71,6 +76,11 @@
 <svelte:window
 	onkeydown={(e) => {
 		if (tabletOpen && e.key === 'Escape') tabletOpen = false;
+		// Ctrl+K / ⌘K: menüde arama (tarayıcının kendi Ctrl+K'sı yerine)
+		if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+			e.preventDefault();
+			palette?.open();
+		}
 	}}
 />
 
@@ -94,7 +104,7 @@
 {/snippet}
 
 <div class="{classes} flex h-full w-full flex-col" {...attributes}>
-	<AppHeader onMenu={() => mobileNav?.open()} />
+	<AppHeader onMenu={() => mobileNav?.open()} onSearch={() => palette?.open()} />
 	<div class="flex flex-1 flex-row overflow-hidden">
 		<div class="{global.hideSidebar || global.screen === 'mobile' ? 'hidden' : 'block'} bg-surface-50 overflow-hidden border-r">
 			<AppSidebar modules={menu} activeId={module?.id} />
@@ -166,6 +176,7 @@
 </div>
 
 <MobileNav bind:this={mobileNav} modules={menu} {activePath} />
+<CommandPalette bind:this={palette} entries={searchEntries} />
 
 <style>
 	/* Ağacı aç/kapat düğmesi: bölücünün (ya da panelin) kenarında, dikeyde ortada */

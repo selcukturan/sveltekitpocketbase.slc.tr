@@ -16,8 +16,9 @@
 
 	type Props = SvelteHTMLElements['header'] & {
 		onMenu?: () => void; // mobilde menü düğmesi (drawer'ı açar)
+		onSearch?: () => void; // menüde arama (Ctrl+K penceresi)
 	};
-	let { class: classes, style, onMenu, ...attributes }: Props = $props();
+	let { class: classes, style, onMenu, onSearch, ...attributes }: Props = $props();
 
 	const global = getGlobalContext();
 
@@ -68,6 +69,18 @@
 			<p>{config.version}</p>
 		</div>
 		<div class="ml-auto flex items-center gap-2 sm:gap-4">
+			<!-- Menüde arama: Ctrl+K / ⌘K ile de açılır -->
+			<button
+				type="button"
+				onclick={onSearch}
+				aria-haspopup="dialog"
+				aria-keyshortcuts="Control+K Meta+K"
+				class="border-surface-300 text-surface-600 hover:bg-surface-200 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-sm select-none"
+			>
+				<Icon name="search" size={16} />
+				<span class="hidden sm:inline">{t('menu_search')}</span>
+				<kbd class="text-surface-500 hidden text-xs md:inline">Ctrl K</kbd>
+			</button>
 			{#if can(access, 'app.notifications')}<Notifications />{/if}
 			<form
 				{...logout.enhance(async ({ submit }) => {
