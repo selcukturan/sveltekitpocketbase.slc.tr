@@ -305,6 +305,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` konum çubuğu bölümü (4a), şema ve erişilebilirlik;
+  yol haritası 4a tamam, 4b sırada, 4c ertelendi. Yapılacaklar: 4c planı, yük
+  altında ara sıra kırılan form testi.
 - Belgeler: `d02_layout` yetki uygulaması bölümüne kural (komutların tazelediği
   sorgular için `$derived(await …)` yazılmaz); yapılacaklardan "eski değer"
   maddesi çıkarıldı.
