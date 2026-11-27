@@ -276,6 +276,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` menü verisi (veritabanından), yeni sayfa ekleme
+  adımları (kaynak, izin, `menu.<key>`, `requirePermission`), yetkinin
+  uygulanması bölümü (3c), testler; yol haritası 3c tamam, 3d sırada.
+  `d00_core`: remote fonksiyonlarda `requirePermission`.
 - Menü `menu.ts`'teki sabit listeden değil veritabanından (`acl_resources`)
   çizilir; `MENU` / `MENU_RECORDS` kaldırıldı. Menü çeviri anahtarları
   `menu_*` → `menu.<kaynak anahtarı>`.
