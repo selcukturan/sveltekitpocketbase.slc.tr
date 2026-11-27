@@ -5,7 +5,8 @@
 	import type { BaseTranslationKeys } from '#lib/app/localization/translations/index.js';
 	import { config } from '#lib/app/config.js';
 	import { Page, Head } from '#lib/components/templates/index.js';
-	import { Icon, type IconKey } from '#lib/components/icons/index.js';
+	import { Icon } from '#lib/components/icons/index.js';
+	import { features, GITHUB_URL } from '#lib/app/features.js';
 	import { can } from '#lib/app/acl/access.js';
 	import { buildAppMenu } from '#lib/app/menu/menu.js';
 	import { getMyAccess } from '#lib/remotes/acl.remote.js';
@@ -14,24 +15,6 @@
 
 	// Karşılama panosu: selamlama, kısa özet ve uygulamanın önemli bölümleri. Kartlar kaynak anahtarıyla menüye
 	// bağlanır: kullanıcının erişemediği (ya da veritabanında olmayan) bölümün kartı görünmez, adres veritabanından gelir.
-
-	type Feature = { key: string; icon: IconKey; title: BaseTranslationKeys; desc: BaseTranslationKeys; tone: string };
-
-	// Tailwind sınıfları tam yazılmalı (dinamik birleştirme derlemede görünmez). Koyu temada tonlar kendiliğinden döner.
-	const features: Feature[] = [
-		{ key: 'grapes.crud.full', icon: 'grape', title: 'dash_f_crud_title', desc: 'dash_f_crud_desc', tone: 'bg-primary-100 text-primary-700' },
-		{ key: 'data_table.demos.common', icon: 'data_table', title: 'dash_f_table_title', desc: 'dash_f_table_desc', tone: 'bg-info-100 text-info-700' },
-		{ key: 'settings.system.permissions', icon: 'users', title: 'dash_f_acl_title', desc: 'dash_f_acl_desc', tone: 'bg-success-100 text-success-700' },
-		{ key: 'settings.system.resources', icon: 'file_symlink', title: 'dash_f_resources_title', desc: 'dash_f_resources_desc', tone: 'bg-tertiary-100 text-tertiary-700' },
-		{ key: 'developments.components.notifications', icon: 'bell', title: 'dash_f_notif_title', desc: 'dash_f_notif_desc', tone: 'bg-error-100 text-error-700' },
-		{
-			key: 'developments.components.form_slc',
-			icon: 'square_code',
-			title: 'dash_f_components_title',
-			desc: 'dash_f_components_desc',
-			tone: 'bg-secondary-100 text-secondary-800'
-		}
-	];
 
 	// Menüde arama penceresi iskelette (app-layout); global bağlam üzerinden açılır (getContext: await'ten önce)
 	const global = getGlobalContext();
@@ -93,21 +76,12 @@
 						<p class="text-surface-600 mt-2 text-sm sm:text-base">{t('dash_intro')}</p>
 					</div>
 					<div class="flex shrink-0 flex-wrap gap-2">
-						<button
-							type="button"
-							onclick={() => global.openSearch()}
-							class="bg-primary-500 text-surface-token-950 hover:bg-primary-400 inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg px-4 text-sm font-semibold"
-						>
+						<button type="button" onclick={() => global.openSearch()} class="slc-btn-primary">
 							<Icon name="search" size={18} />
 							{t('dash_search')}
 							<kbd class="border-surface-token-950/30 hidden rounded border px-1 font-sans text-[11px] sm:inline">Ctrl K</kbd>
 						</button>
-						<a
-							href="https://github.com/selcukturan/sveltekitpocketbase.slc.tr"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="border-surface-300 text-surface-800 hover:bg-surface-100 inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium"
-						>
+						<a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="slc-btn-outline">
 							<Icon name="square_code" size={18} />
 							{t('dash_github')}
 						</a>

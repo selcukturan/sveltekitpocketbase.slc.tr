@@ -13,6 +13,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Tanıtım sayfası (`/`, tasarım Aşama 4): üst çubuk (tema, dil, giriş), hero
+  (rozet, başlık, "Demoyu dene" / oturum açıksa "Uygulamaya git", GitHub),
+  özellik kartları, teknoloji şeridi, çağrı ve alt bilgi. Özellik listesi pano
+  ile ortak (`app/features.ts`). Önceden `/` her zaman `/app`'e yönlendiriyordu.
+  Test: `landing.spec.ts`.
+
 - Karşılama panosu (`/app`, tasarım Aşama 3): saate göre selamlama ve tarih
   (tarayıcıda), özet (modül, erişilebilen sayfa, sürüm), "Sayfa ara" ve GitHub
   düğmeleri; öne çıkan bölüm kartları (CRUD, veri tablosu, yetkiler, kaynaklar,
@@ -331,6 +337,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   (`seedRecords`, `deleteSeedRecords`).
 
 ### Değişti
+
+- Giriş sayfası yeniden tasarlandı: geniş ekranda solda marka paneli (öne çıkan
+  üç bölüm, illüstrasyon, sürüm), sağda form kartı ("Giriş yap" başlığı, demo
+  bilgisi notu, `autocomplete`, gönderilirken düğme kilitli), "Ana sayfaya dön"
+  bağlantısı; sayfa kendi içinde kayar. Dil düğmesi ikon düğmesi oldu ve
+  erişilebilir ad kazandı. Ortak düğme stilleri `.slc-btn-primary`,
+  `.slc-btn-outline`.
 
 - Tema renk paleti (tasarım Aşama 1): sRGB dışında kalan tonlar (Tailwind v4'ün
   P3 renkleri: quaternary, warning, success, info, error, tertiary) ton ve

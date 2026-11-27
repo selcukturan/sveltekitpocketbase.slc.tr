@@ -5,7 +5,14 @@
 	const tooltipText = $derived(getSelectedLang() === 'tr' ? t('change_language_english') : t('change_language_turkish'));
 </script>
 
-<button onclick={() => setSelectedLang(getSelectedLang() === 'tr' ? 'en' : 'tr')} class="cursor-pointer" {@attach tooltip(tooltipText)}>
+<!-- İkon düğmesi: seçili dilin bayrağı; tıklayınca diğer dile geçer -->
+<button
+	type="button"
+	onclick={() => setSelectedLang(getSelectedLang() === 'tr' ? 'en' : 'tr')}
+	class="slc-icon-button"
+	aria-label={tooltipText}
+	{@attach tooltip(tooltipText)}
+>
 	<div class="flag-container">
 		{#if getSelectedLang() === 'tr'}
 			<!-- Türkiye (TR) -->
@@ -35,14 +42,10 @@
 	}
 
 	.flag-icon {
-		width: 40px;
-		height: 22px;
-		object-fit: cover;
-		border-radius: 4px;
-		border: 2px solid var(--color-surface-300);
+		width: 22px;
+		height: 15px;
+		border-radius: 3px;
+		outline: 1px solid var(--color-surface-300);
 		display: block;
-	}
-	.flag-icon:hover {
-		border-color: var(--color-surface-400);
 	}
 </style>

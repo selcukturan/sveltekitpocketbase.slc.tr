@@ -76,6 +76,14 @@
 		@apply bg-surface-200 border-surface-300 shadow-none;
 	}
 
+	/* Ana eylem düğmesi (marka rengi) ve ikincil (kenarlıklı) düğme: pano, giriş ve tanıtım sayfaları */
+	.slc-btn-primary {
+		@apply bg-primary-500 text-surface-token-950 hover:bg-primary-400 active:bg-primary-600 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-60;
+	}
+	.slc-btn-outline {
+		@apply border-surface-300 text-surface-800 hover:bg-surface-100 active:bg-surface-200 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium whitespace-nowrap transition-colors select-none;
+	}
+
 	/* Üst çubuktaki ikon düğmeleri (tema, bildirimler, panel…): hepsi aynı boyut ve hover */
 	.slc-icon-button {
 		@apply text-surface-600 hover:bg-surface-200 hover:text-surface-900 active:bg-surface-300 relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors select-none;

@@ -1,6 +1,7 @@
-import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = () => {
-	throw redirect(302, '/app');
+// Herkese açık tanıtım sayfası (/). Önceden /app'e yönlendiriyordu; artık oturum açmış kullanıcıya "Uygulamaya git",
+// açmamış olana "Demoyu dene" (giriş) gösterilir.
+export const load: LayoutServerLoad = ({ locals }) => {
+	return { loggedIn: Boolean(locals.user?.id) };
 };
