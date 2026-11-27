@@ -299,6 +299,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` kaynak ve işlem düzenleme bölümü (3e: ekran,
+  kurallar tablosu, gerçek sayfa denetimi, testler); "yeni sayfa ekleme"
+  adımları ekranlara göre; yol haritası 3e tamam, sırada Aşama 4.
 - Belgeler: `d02_layout` yetki ekranı bölümü DataTable ve Select'e göre
   (düzenleme, kopyala-yapıştır, sıralı kayıt, batch API notu, testler);
   yapılacaklar listesinden "yetki ekranında DataTable ve Select" çıkarıldı.

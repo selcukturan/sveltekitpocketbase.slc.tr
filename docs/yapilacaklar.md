@@ -15,7 +15,6 @@ Ertelenen işler ve açık konular. Bir iş yapılınca buradan silinir (geçmi�
 
 - **`getAcl()` önbelleği yok:** her korunan remote çağrısında PocketBase'e 4 okuma. Gerekirse kısa süreli (ör. 30 sn) kullanıcı bazlı önbellek; yetki ekranındaki yazma önbelleği temizler.
 - **İzin değişikliği açık oturumlara yansımıyor:** menü ve düğmeler sayfa yenilenene kadar eski kalır (sunucu kontrolü günceldir). Yol haritasında Aşama 4.
-- **Kaynak ve işlem düzenleme ekranı:** Aşama 3e (`docs/d02_layout`).
 
 ## Form ve girdiler
 
