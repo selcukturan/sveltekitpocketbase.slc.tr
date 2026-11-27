@@ -13,6 +13,17 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Üst çubuk ve kullanıcı menüsü (tasarım Aşama 2): solda odak modu düğmesi ve
+  uygulama adı, ortada arama kutusu (Ctrl K), sağda bildirim zili (okunmamış
+  rozeti), tema ikon düğmesi ve avatar. Kullanıcı menüsü (`user-menu.svelte`,
+  WAI menu deseni, ↑ ↓ Home End, Esc): ad/e-posta, Profilim, Mesajlar,
+  Yardım (şimdilik "Yakında"), Ayarlar (erişim varsa), dil (`app.language`),
+  geliştirmede yerel veritabanı bağlantısı, sürüm, Çıkış Yap. Sürüm ve
+  veritabanı bağlantısı üst çubuktan menüye taşındı; tema anahtarı ikon
+  düğmesine dönüştü; ortak `.slc-icon-button`. Yeni ikonlar: bell, mail,
+  log_out, circle_help, languages, database. Testler: `user-menu.spec.ts`,
+  `acl-ui.spec.ts` (dil seçimi menüde).
+
 - Menüde arama (Aşama 4b): üst çubukta "Ara" düğmesi ve Ctrl+K / ⌘K (geliştirme
   sunucusunda Ctrl+K'yı Vite DevTools yakalar; düğme çalışır). Native `<dialog>`
   içinde WAI combobox + listbox; kullanıcının erişebildiği sayfalar, başlık ve

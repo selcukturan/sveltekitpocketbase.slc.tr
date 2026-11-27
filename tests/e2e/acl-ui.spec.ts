@@ -106,11 +106,14 @@ test('sunucu reddederse (403) hata yalnızca drawer içinde görünür, sayfa ay
 	await expect(page.getByText('text_required').last()).toBeVisible();
 });
 
-test('uygulama özellikleri: izin yoksa üst çubukta bildirimler ve dil düğmesi görünmez', async ({ page }) => {
+test('uygulama özellikleri: izin yoksa üst çubukta bildirimler, kullanıcı menüsünde dil seçimi görünmez', async ({ page }) => {
 	await page.goto('/app');
 	const header = page.locator('header').first();
 	await expect(header.getByRole('button', { name: /Bildirimler/ })).toBeVisible();
 	const buttons = await header.getByRole('button').count();
+	await header.getByRole('button', { name: 'Kullanıcı menüsü' }).click();
+	await expect(page.getByRole('menuitem', { name: 'Dil: Türkçe' })).toBeVisible();
+	await page.keyboard.press('Escape');
 
 	await withAccess(page, (access) => {
 		delete access['app.notifications'];
@@ -119,7 +122,10 @@ test('uygulama özellikleri: izin yoksa üst çubukta bildirimler ve dil düğme
 	await page.reload();
 	await expect(page.getByRole('navigation', { name: 'Modüller' })).toBeVisible();
 	await expect(header.getByRole('button', { name: /Bildirimler/ })).toHaveCount(0);
-	await expect(header.getByRole('button')).toHaveCount(buttons - 2); // bildirimler ve dil
+	await expect(header.getByRole('button')).toHaveCount(buttons - 1); // bildirimler
+	await header.getByRole('button', { name: 'Kullanıcı menüsü' }).click();
+	await expect(page.getByRole('menuitem', { name: 'Profilim' })).toBeVisible();
+	await expect(page.getByRole('menuitem', { name: 'Dil: Türkçe' })).toHaveCount(0);
 });
 
 test('menüde arama erişilemeyen sayfayı göstermez', async ({ page }) => {

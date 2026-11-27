@@ -36,17 +36,7 @@
 	});
 </script>
 
-<button
-	onclick={toggle}
-	aria-pressed={theme.current === 'dark' ? 'true' : 'false'}
-	aria-label={t('change_theme')}
-	class="bg-surface-50 border-surface-300 hover:border-surface-400 relative block h-5.5 w-10 shrink-0 rounded-xl border hover:cursor-pointer"
-	{@attach tooltip(t('change_theme'))}
->
-	<span
-		class="bg-surface-300 pointer-events-none absolute top-px left-px flex h-4.5 w-4.5 items-center justify-center overflow-hidden rounded-full p-0.5 shadow transition-transform"
-		class:translate-x-4.5={theme.current === 'dark'}
-	>
-		<Icon name={theme.current === 'dark' ? 'moon' : 'sun'} size="100%" />
-	</span>
+<!-- İkon düğmesi: geçerli temanın ikonu (güneş / ay) -->
+<button type="button" onclick={toggle} aria-label={t('change_theme')} class="slc-icon-button" {@attach tooltip(t('change_theme'))}>
+	<Icon name={theme.current === 'dark' ? 'moon' : 'sun'} size={20} />
 </button>

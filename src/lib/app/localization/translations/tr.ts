@@ -340,7 +340,17 @@ export const tr = {
 	notif_from: 'Kimden:',
 	notif_system: 'Sistem',
 	notif_type_notification: 'Bildirim',
-	notif_type_message: 'Mesaj'
+	notif_type_message: 'Mesaj',
+	notif_unread_count: '{count} okunmamış',
+	user_menu: 'Kullanıcı menüsü',
+	user_menu_profile: 'Profilim',
+	user_menu_messages: 'Mesajlar',
+	user_menu_settings: 'Ayarlar',
+	user_menu_help: 'Yardım',
+	user_menu_language: 'Dil: Türkçe',
+	user_menu_database: 'Yerel veritabanı',
+	coming_soon: 'Yakında',
+	coming_soon_description: 'Bu bölüm henüz hazır değil.'
 } as const;
 
 export type BaseTranslationKeys = keyof typeof tr;

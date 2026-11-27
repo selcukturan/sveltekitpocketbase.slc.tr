@@ -341,5 +341,15 @@ export const en = {
 	notif_from: 'From:',
 	notif_system: 'System',
 	notif_type_notification: 'Notification',
-	notif_type_message: 'Message'
+	notif_type_message: 'Message',
+	notif_unread_count: '{count} unread',
+	user_menu: 'User menu',
+	user_menu_profile: 'My profile',
+	user_menu_messages: 'Messages',
+	user_menu_settings: 'Settings',
+	user_menu_help: 'Help',
+	user_menu_language: 'Language: English',
+	user_menu_database: 'Local database',
+	coming_soon: 'Coming soon',
+	coming_soon_description: 'This section is not ready yet.'
 } as const satisfies Record<BaseTranslationKeys, string>;

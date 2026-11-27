@@ -32,7 +32,13 @@ export const icons = {
 	moon: 'moon',
 	sun: 'sun',
 	search: 'search',
-	lucide: 'lucide'
+	lucide: 'lucide',
+	bell: 'bell',
+	mail: 'mail',
+	log_out: 'log-out',
+	circle_help: 'circle-help',
+	languages: 'languages',
+	database: 'database'
 } as const;
 // ####################################### END TRANSLATIONS ######################################
 

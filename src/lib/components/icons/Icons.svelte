@@ -175,4 +175,23 @@
 		<path d="M6 18a4 4 0 0 1-2-7.464" />
 		<path d="M6.003 5.125a4 4 0 0 0-2.526 5.77" />
 	</symbol>
+	<symbol id={icons.bell} viewBox="0 0 24 24">
+		<path d="M10.268 21a2 2 0 0 0 3.464 0" />
+		<path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+	</symbol>
+	<symbol id={icons.mail} viewBox="0 0 24 24">
+		<rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+	</symbol>
+	<symbol id={icons.log_out} viewBox="0 0 24 24">
+		<path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+	</symbol>
+	<symbol id={icons.circle_help} viewBox="0 0 24 24">
+		<circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" />
+	</symbol>
+	<symbol id={icons.languages} viewBox="0 0 24 24">
+		<path d="m5 8 6 6" /><path d="m4 14 6-6 2-3" /><path d="M2 5h12" /><path d="M7 2h1" /><path d="m22 22-5-10-5 10" /><path d="M14 18h6" />
+	</symbol>
+	<symbol id={icons.database} viewBox="0 0 24 24">
+		<ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5" /><path d="M3 12A9 3 0 0 0 21 12" />
+	</symbol>
 </svg>

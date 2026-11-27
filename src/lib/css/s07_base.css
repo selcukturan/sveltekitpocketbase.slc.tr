@@ -67,4 +67,13 @@
 	*:not(body):not(.focus-override):focus-visible {
 		@apply outline-primary-400 outline-2 outline-offset-2;
 	}
+
+	/* Üst çubuktaki ikon düğmeleri (tema, bildirimler, panel…): hepsi aynı boyut ve hover */
+	.slc-icon-button {
+		@apply text-surface-600 hover:bg-surface-200 hover:text-surface-900 active:bg-surface-300 relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors select-none;
+	}
+	.slc-icon-button[aria-expanded='true'],
+	.slc-icon-button[aria-pressed='true'] {
+		@apply bg-surface-200 text-surface-900;
+	}
 }

@@ -3,7 +3,7 @@
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import { Button } from '../inputs/index.js';
 	import { Dialog } from '#lib/components/base/dialog/index.js';
-	import { focustrap } from '#lib/attachments/index.js';
+	import { focustrap, tooltip } from '#lib/attachments/index.js';
 	import { getToaster } from '#lib/components/ui/toast/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
 	import {
@@ -75,8 +75,9 @@
 </script>
 
 {#snippet typeTag(item: NotificationItem)}
-	<span class="bg-surface-200 text-surface-700 shrink-0 rounded px-1.5 py-px text-[10px] font-medium">{typeLabels[item.type] ? t(typeLabels[item.type]) : item.type}</span
-	>
+	<span class="bg-surface-200 text-surface-700 shrink-0 rounded px-1.5 py-px text-[10px] font-medium">
+		{typeLabels[item.type] ? t(typeLabels[item.type]) : item.type}
+	</span>
 {/snippet}
 
 {#snippet spinner()}
@@ -137,7 +138,7 @@
 	bind:this={toggl}
 	animation={false}
 	style="margin-inline: var(--gutter, 5px);"
-	placement="bottom-center"
+	placement="bottom-end"
 	--border="1px solid var(--color-surface-300)"
 	--border-radius="6px"
 	--background-color="var(--color-surface-50)"
@@ -149,8 +150,24 @@
 	--display="flex"
 	--overflow="hidden"
 >
-	{#snippet trigger({ active, attr })}
-		<button {...attr} class="bg-error-300 cursor-pointer touch-manipulation" class:bg-error-400={active}>{t('notif_title')} ({badge})</button>
+	{#snippet trigger({ attr })}
+		<!-- Zil + okunmamış rozeti (okunmamış yoksa rozet yok) -->
+		<button
+			{...attr}
+			class="slc-icon-button touch-manipulation"
+			aria-label={stream.unread.length ? `${t('notif_title')} (${t('notif_unread_count', { count: badge })})` : t('notif_title')}
+			{@attach tooltip(t('notif_title'))}
+		>
+			<Icon name="bell" size={20} />
+			{#if stream.unread.length}
+				<span
+					class="bg-error-token-600 ring-surface-50 text-surface-token-50 pointer-events-none absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold tabular-nums ring-2"
+					aria-hidden="true"
+				>
+					{badge}
+				</span>
+			{/if}
+		</button>
 	{/snippet}
 
 	{#snippet children({ close })}
