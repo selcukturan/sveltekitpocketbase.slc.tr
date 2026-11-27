@@ -273,6 +273,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   Gizle" modül değişince sıfırlanmıyor. Menü başlıkları çevriliyor.
 - DataTable: hücreye tıklamak satırı seçmiyor (`single` modda da); satır
   seçimi yalnızca seçim kolonu ve klavyeyle (Space, Shift+Space, Ctrl+A).
+- Belgeler: yetki bölümüne çekirdek fonksiyonlar tablosu, sıkı koruma testi;
+  yol haritasında 3b tamam, 3c sırada; başlık alpha.221 / `d128ebd`.
 - Belgeler: yerleşim belgesine "Yetki sistemi" bölümü (koleksiyonlar, etkin
   izin kuralı, başlangıç verisi, `label` / `search_label` ve Türkçe arama);
   yol haritası 3a–3e; başlık alpha.219 / `f902e5e`.
