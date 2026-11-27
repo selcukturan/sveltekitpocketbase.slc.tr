@@ -13,6 +13,17 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Kaynak ve işlem düzenleme ekranı (Aşama 3e, Ayarlar → Sistem → Kaynaklar):
+  kaynaklar tablosu (ağaç sırası; ad, ikon, adres, eşleşme, sıra, aktif, gizli
+  hücrede; üst kaynak ve işlemler drawer formunda; anahtar ve tür oluşturulduktan
+  sonra sabit) ve işlemler tablosu (ad, sıra, kullanım). Kurallar sunucuda
+  (`checkResource`): adres gerçek bir sayfa olmalı (`server/routes.ts`,
+  `import.meta.glob`), tür/ağaç kuralları, modülde ikon, sayfa ve özellikte
+  erişim işlemi; alt kaynağı olan kaynak, `access` ve kullanılan işlem
+  silinemez. Yazmalar batch API ile; menü aynı yanıtta tazelenir. Migration
+  `1795740005`: `settings.system.resources` (Herkes → erişim, görüntüleme;
+  Admin, Super Admin → oluşturma, güncelleme, silme). Testler:
+  `acl-resources.spec.ts`; ortak yardımcılar `tests/e2e/helpers/pb-admin.ts`.
 - Yetki ekranı (Aşama 3d, Ayarlar → Sistem → Yetkiler): özne seçimi (Herkes,
   rol, kullanıcı), kaynak × işlem matrisi; hücreye tıklamak durumu değiştirir
   ve kaydeder (kullanıcı: Belirtilmemiş → İzin → Engel; rol ve Herkes:
@@ -452,6 +463,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Testler: paralel çalışan yetki testleri birbirinin kolon sırasını
+  kaydırmasın (test işlemi en sona eklenir); `acl-data` yönetici-yalnız işlem
+  istisnaları tek listede.
 - Yetki ekranında toplu kayıt: paralel tekil `create` istekleri PocketBase JS
   SDK'sının otomatik iptaline takılıyordu (yalnızca sonuncusu kaydediliyordu);
   batch API'ye geçildi. Aynı hücre art arda değişince istekler ters sırada
