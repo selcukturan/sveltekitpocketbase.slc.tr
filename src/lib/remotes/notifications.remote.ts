@@ -1,7 +1,7 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { dev } from '$app/env';
 import { error } from '@sveltejs/kit';
-import type { DemoNotificationResponse } from '#lib/types/pocketbase-types.js';
+import type { SysNotificationResponse } from '#lib/types/pocketbase-types.js';
 import { AsyncQueue } from '#lib/utils/asyncQueue.js';
 import { ResultAsync } from 'neverthrow';
 import { throwError, mapUnknownToError } from '#lib/server/error.js';
@@ -9,11 +9,11 @@ import { getTokenPayload } from 'pocketbase';
 import * as v from 'valibot';
 
 // Diğer kullanıcıların id'leri istemciye gitmez; yalnızca bu kullanıcının okuma durumu (`read`) gider.
-export type PublicNotificationResponse = Omit<DemoNotificationResponse, 'to' | 'read_by' | 'remove_by'> & { read: boolean };
+export type PublicNotificationResponse = Omit<SysNotificationResponse, 'to' | 'read_by' | 'remove_by'> & { read: boolean };
 
 // PB tarihleri ("2026-10-21 12:00:00.000Z") sabit biçimli olduğu için metin olarak karşılaştırılabilir.
 // Aynı anda oluşturulanlarda sıra id ile sabitlenir.
-const newestFirst = (a: DemoNotificationResponse, b: DemoNotificationResponse) => (a.created === b.created ? (a.id < b.id ? 1 : -1) : a.created < b.created ? 1 : -1);
+const newestFirst = (a: SysNotificationResponse, b: SysNotificationResponse) => (a.created === b.created ? (a.id < b.id ? 1 : -1) : a.created < b.created ? 1 : -1);
 
 // `message` PB editöründen HTML gelir; istemciye düz metin gider. Blok sonları satır sonuna çevrilir,
 // arayüz metni `whitespace-pre-line` ile gösterir. Svelte metni zaten kaçışladığı için bu bir güvenlik değil görünüm işlemidir.
@@ -130,7 +130,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	debug(`Kullanıcı doğrulandı: ID = ${userId}`);
 
 	// En yeni en üstte sıralı liste. read/unread ayrımı istemcide `read` alanından türetilir.
-	const toPublicList = (list: DemoNotificationResponse[]): PublicNotificationResponse[] =>
+	const toPublicList = (list: SysNotificationResponse[]): PublicNotificationResponse[] =>
 		list.toSorted(newestFirst).map(({ to: _to, read_by, remove_by: _remove_by, ...item }) => ({
 			...item,
 			message: toPlainText(item.message),
@@ -140,12 +140,12 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	// Liste çekilirken kullanıcının sildikleri hariç tutulur (visibleFilter).
 	// Abonelikte yalnızca targetFilter kullanılır: kayıt filtreden çıktığında PocketBase olay göndermez,
 	// silme işareti hiç gelmez. Bu yüzden abonelik tüm güncellemeleri alır, kontrolü `isRemoved` yapar.
-	const isRemoved = (item: DemoNotificationResponse) => item.remove_by.includes(userId);
+	const isRemoved = (item: SysNotificationResponse) => item.remove_by.includes(userId);
 
 	// Hata yutulmaz: boş liste "bildirim yok" gibi görünürdü. Dıştaki catch istemciye hata olarak iletir.
-	const getRawList = async (): Promise<DemoNotificationResponse[]> => {
+	const getRawList = async (): Promise<SysNotificationResponse[]> => {
 		debug('Liste çekiliyor...');
-		const result = await pb.collection('demo_notification').getList<DemoNotificationResponse>(1, NOTIFICATION_LIMIT, {
+		const result = await pb.collection('sys_notification').getList<SysNotificationResponse>(1, NOTIFICATION_LIMIT, {
 			filter: visibleFilter(pb, userId),
 			sort: '-created',
 			skipTotal: true
@@ -155,7 +155,7 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 	};
 
 	// Bellekte güncel listeyi tutacak değişken
-	let currentList: DemoNotificationResponse[] = [];
+	let currentList: SysNotificationResponse[] = [];
 
 	// Real-time güncellemeleri generator'a taşıyan kuyruk
 	const queue = new AsyncQueue<PublicNotificationResponse[] | null>();
@@ -194,8 +194,8 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 		let ready = false;
 		let dirty = false;
 
-		debug('PocketBase demo_notification real-time aboneliği başlatılıyor...');
-		await pb.collection('demo_notification').subscribe<DemoNotificationResponse>(
+		debug('PocketBase sys_notification real-time aboneliği başlatılıyor...');
+		await pb.collection('sys_notification').subscribe<SysNotificationResponse>(
 			'*',
 			(e) => {
 				debug(`💥 PocketBase güncelleme olayını yakaladı! Eylem: ${e.action}, Kayıt ID: ${e.record.id}`);
@@ -257,8 +257,8 @@ export const notificationsBG = query.live(connectionSchema, async function* ({ c
 		if (flushTimer) clearTimeout(flushTimer);
 		if (connections.get(connectionId) === entry) connections.delete(connectionId);
 		try {
-			await pb.collection('demo_notification').unsubscribe('*');
-			debug('PocketBase demo_notification aboneliği başarıyla iptal edildi.');
+			await pb.collection('sys_notification').unsubscribe('*');
+			debug('PocketBase sys_notification aboneliği başarıyla iptal edildi.');
 		} catch (uErr) {
 			console.error('[notificationsRemote] Unsubscribe hatası:', uErr);
 		}
@@ -274,7 +274,7 @@ export const updateNotificationReadStatus = command(updateReadSchema, async ({ i
 	const auth = getAuth();
 	if (!auth) return;
 
-	await auth.pb.collection('demo_notification').update(id, { [read ? 'read_by+' : 'read_by-']: auth.userId });
+	await auth.pb.collection('sys_notification').update(id, { [read ? 'read_by+' : 'read_by-']: auth.userId });
 });
 
 const removeSchema = v.object({
@@ -286,7 +286,7 @@ export const removeNotification = command(removeSchema, async ({ id }) => {
 	if (!auth) return;
 
 	// Kayıt silinmez, yalnızca bu kullanıcı için gizlenir. Canlı liste update olayıyla kaydı düşürür.
-	await auth.pb.collection('demo_notification').update(id, { 'remove_by+': auth.userId });
+	await auth.pb.collection('sys_notification').update(id, { 'remove_by+': auth.userId });
 });
 
 // Filtreye uyan tüm görünür bildirimlere aynı güncellemeyi Batch API ile uygular.
@@ -298,12 +298,12 @@ const updateAllVisible = async (body: (userId: string) => Record<string, unknown
 
 	const base = visibleFilter(pb, userId);
 	const filter = extraFilter ? `(${base}) && (${pb.filter(extraFilter, { id: userId })})` : base;
-	const items = await pb.collection('demo_notification').getFullList({ filter, fields: 'id' });
+	const items = await pb.collection('sys_notification').getFullList({ filter, fields: 'id' });
 
 	for (let i = 0; i < items.length; i += BATCH_SIZE) {
 		const batch = pb.createBatch();
 		for (const { id } of items.slice(i, i + BATCH_SIZE)) {
-			batch.collection('demo_notification').update(id, body(userId));
+			batch.collection('sys_notification').update(id, body(userId));
 		}
 
 		const send = await ResultAsync.fromPromise(batch.send(), mapUnknownToError);
