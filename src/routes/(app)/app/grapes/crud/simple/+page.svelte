@@ -29,7 +29,8 @@
 	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
 	// İzinler (acl_resources: grapes.crud.simple): izin olmayan işlemin düğmesi görünmez, hücreler düzenlenemez.
 	// Asıl kontrol sunucuda (page.remote.ts → requirePermission); bu yalnızca arayüz.
-	const access = $derived((await getMyAccess()).access);
+	await getMyAccess(); // ilk yükleme; tazelemeler senkron (bkz. app-layout)
+	const access = $derived(getMyAccess().current?.access ?? {});
 	const allow = $derived({
 		create: can(access, 'grapes.crud.simple', 'create'),
 		update: can(access, 'grapes.crud.simple', 'update'),

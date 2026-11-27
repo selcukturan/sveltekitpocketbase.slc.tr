@@ -29,7 +29,8 @@
 	const tooltipText = $derived(global.hideSidebar ? t('show_panel') : t('hide_panel'));
 
 	// Uygulama özellikleri (acl_resources kind: feature): izin yoksa düğme görünmez. (await en sonda: bileşen bağlamı)
-	const access = $derived((await getMyAccess()).access);
+	await getMyAccess(); // ilk yükleme; tazelemeler senkron (bkz. app-layout)
+	const access = $derived(getMyAccess().current?.access ?? {});
 </script>
 
 <header class="{classes} border-b" {...attributes}>

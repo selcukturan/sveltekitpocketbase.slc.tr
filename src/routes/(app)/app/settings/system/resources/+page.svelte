@@ -70,7 +70,8 @@
 	const actionColumns = ACTIONS.columnsFor<ActionRow>({ prepend: [{ field: '_actions', type: 'actions', label: 'dt_actions' }] });
 
 	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
-	const access = $derived((await getMyAccess()).access);
+	await getMyAccess(); // ilk yükleme; tazelemeler senkron (bkz. app-layout)
+	const access = $derived(getMyAccess().current?.access ?? {});
 	const allow = $derived({
 		create: can(access, 'settings.system.resources', 'create'),
 		update: can(access, 'settings.system.resources', 'update'),

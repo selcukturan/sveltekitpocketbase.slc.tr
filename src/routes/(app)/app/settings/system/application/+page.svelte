@@ -15,7 +15,8 @@
 
 	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
 	// Güncelleme izni yoksa form salt görüntülenir (asıl kontrol: page.remote.ts → requirePermission)
-	const canUpdate = $derived(can((await getMyAccess()).access, 'settings.system.application', 'update'));
+	await getMyAccess(); // ilk yükleme; tazelemeler senkron (bkz. app-layout)
+	const canUpdate = $derived(can(getMyAccess().current?.access ?? {}, 'settings.system.application', 'update'));
 </script>
 
 <Head>

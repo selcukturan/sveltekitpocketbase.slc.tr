@@ -44,7 +44,10 @@
 	const toggleLabel = $derived(global.hidePageSidebar ? t('show_menu') : t('hide_menu'));
 
 	// Yetki (await bağlam gerektiren çağrılardan sonra: getContext, afterNavigate await'ten sonra çalışmaz)
-	const acl = $derived(await getMyAccess());
+	await getMyAccess();
+	// İlk yükleme bir kez beklenir; tazelemeler senkron .current ile okunur ($derived(await …) her tazelemede async iş
+	// başlatıyor, aynı yanıtla gelen tablo güncellemesi sıra karışınca kayboluyordu; bkz. docs/d02_layout).
+	const acl = $derived(getMyAccess().current ?? { resources: [], access: {} });
 	const menu = $derived(buildAppMenu(acl.resources, acl.access));
 	const allowed = $derived(canAccessPage(acl.resources, acl.access, page.url.pathname));
 

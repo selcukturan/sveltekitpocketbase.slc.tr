@@ -299,6 +299,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` yetki uygulaması bölümüne kural (komutların tazelediği
+  sorgular için `$derived(await …)` yazılmaz); yapılacaklardan "eski değer"
+  maddesi çıkarıldı.
 - Metin şeması (`base.ts` → `text`) `/` karakterini kabul eder; Kaynaklar'da
   adres yeniden `input.Text` ile (biçim kuralı sunucuda: `acl_href_format`).
 - `dt.createCellEdit` sayfalamasız (dizi) sorgularla da çalışır. Kaynaklar
@@ -477,6 +480,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Yetki matrisinde hücre değiştirilince ekranda ara sıra eski değer kalıyordu
+  (tam test suite'inde neredeyse her çalıştırmada, tek başına hiç).
+  `setPermissions` matrisi ve `getMyAccess`'i aynı yanıtta tazeler;
+  `$derived(await getMyAccess())` her tazelemede async iş başlattığı için aynı
+  yanıtla gelen tablo güncellemesi sıra karışınca kayboluyordu. Yerleşim, üst
+  çubuk, Simple CRUD, uygulama ayarları ve Kaynaklar `getMyAccess`'i ilk
+  yüklemede bir kez bekler, sonra `.current` ile senkron okur.
 - Kaynaklar ekranı: var olan her adres "Bu adreste bir sayfa yok" ile
   reddediliyordu (tabloda bildirim, drawer'da alan hatası).
   `import.meta.glob` kalıbındaki `(app)` parantezleri glob sözdizimi sayıldığı
