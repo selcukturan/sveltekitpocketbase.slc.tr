@@ -83,7 +83,12 @@ test('yetki verisi: normal kullanıcı okur ama yazamaz; oturumsuz hiçbir şey 
 		headers: { 'Content-Type': 'application/json', Authorization: token },
 		body: JSON.stringify({ key: 'yetkisiz', label: 'Yetkisiz' })
 	});
-	expect(res.ok).toBe(false);
+	// Yazabildiyse (ör. demo kullanıcıya yönetici rolü verilmişse) kayıt hemen silinir: veritabanında iz kalmasın
+	if (res.ok) {
+		const { id } = (await res.json()) as { id: string };
+		await fetch(`${PB}/api/collections/acl_actions/records/${id}`, { method: 'DELETE', headers: { Authorization: token } });
+	}
+	expect(res.ok, 'demo kullanıcı yetki verisi yazamamalı (yönetici rolü verilmiş olabilir)').toBe(false);
 	const anonymous = await fetch(`${PB}/api/collections/acl_resources/records`);
 	expect(((await anonymous.json()) as { totalItems: number }).totalItems).toBe(0);
 });

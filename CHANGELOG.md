@@ -288,6 +288,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Yetki ekranı bizim bileşenlerimizle: özne seçimi `inputs/Select`, matris
+  `DataTable` (kolonlar işlemlerden çalışma anında; hücrede açılır liste;
+  Ctrl+C / Ctrl+V ile toplu izin, tek istek; geçersiz değer ve rol/Herkes'e
+  engel `validateCell` ile reddedilir; optimistik ve sıralı kayıt; tablo
+  ayarları açık, genişlikler sıfırlanabilir). Remote: `getPermissionSubjects`,
+  `getPermissionMatrix` (etkin izinler sunucuda), `setPermissions` (PocketBase
+  batch API). `getPermissionData` ve `setPermission` kaldırıldı.
 - Belgeler: `d02_layout` yetki ekranı bölümü (3d), `sys_users` okuma kuralı,
   `acl-admin.spec.ts`; yol haritası 3d tamam, 3e sırada. Yeni
   `docs/yapilacaklar.md`: ertelenen işler (bildirimlerin sunucu kontrolü,
@@ -442,6 +449,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Yetki ekranında toplu kayıt: paralel tekil `create` istekleri PocketBase JS
+  SDK'sının otomatik iptaline takılıyordu (yalnızca sonuncusu kaydediliyordu);
+  batch API'ye geçildi. Aynı hücre art arda değişince istekler ters sırada
+  varıp eski değeri bırakabiliyordu; kayıtlar sıraya alındı.
+- Testler: `acl-admin` kolonları başlık adından bulur (işlem listesi
+  değişebilir); `acl-data`'daki "demo yazamaz" denemesi yazabilirse kaydı siler.
 - Şablonlardaki `boundary` (`Page`, `Page.Main.Panel`,
   `DrawerFormContent.Content`…) artık ortak `Boundary` bileşenini kullanır:
   içerideki bir await hata verirse (ör. 403, silinmiş kayıt) hata yalnızca o

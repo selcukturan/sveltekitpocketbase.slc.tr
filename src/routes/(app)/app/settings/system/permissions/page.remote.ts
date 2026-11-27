@@ -1,93 +1,131 @@
-import { getRequestEvent, query, command } from '$app/server';
+import { getRequestEvent, query, command, requested } from '$app/server';
 import { error } from '@sveltejs/kit';
-import * as v from 'valibot';
 import { ResultAsync } from 'neverthrow';
-import { ClientResponseError } from 'pocketbase';
 import { Collections } from '#lib/types/pocketbase-types.js';
 import { requirePermission, getAcl } from '#lib/server/acl.js';
 import { throwError, mapUnknownToError } from '#lib/server/error.js';
-import { can } from '#lib/app/acl/access.js';
-import type { AclAction, AclPermission, AclResource, AclRole } from '#lib/app/acl/access.js';
+import { resolvePermissions, can, type AclAction, type AclPermission, type AclResource, type AclRole } from '#lib/app/acl/access.js';
+import { buildTree, type MenuNode } from '#lib/app/menu/tree.js';
 import { getMyAccess } from '#lib/remotes/acl.remote.js';
+import { matrixParamsSchema, setPermissionsSchema, parseSubject, ACTION_FIELD, type MatrixRow, type Effect } from './page.shared';
 
 // Yetki ekranı. Okuma ve yazma kullanıcının kendi oturumuyla: PocketBase kuralları ikinci katmandır (yönetici
 // olmayan diğer kullanıcıları ve onların kişisel satırlarını göremez; hiçbir satırı yazamaz).
 const RESOURCE = 'settings.system.permissions';
+const BATCH_SIZE = 50; // PocketBase batch API'nin varsayılan istek sınırı
 
-export type PermissionRow = AclPermission & { id: string };
-export type PermissionUser = { id: string; label: string; email: string; role: string[] };
+type Role = AclRole & { label: string };
+type User = { id: string; label: string; email: string; role: string[] };
+type PermissionRow = AclPermission & { id: string };
 
-export const getPermissionData = query(async () => {
-	await requirePermission(RESOURCE, 'view'); // 🔒
-
-	const { locals } = getRequestEvent();
-	const pb = locals.pb;
-	const result = await ResultAsync.fromPromise(
-		Promise.all([
-			pb.collection(Collections.AclActions).getFullList({ fields: 'id,key,label,sort', sort: 'sort' }),
-			pb.collection(Collections.AclResources).getFullList({ sort: 'sort' }),
-			pb.collection(Collections.AclRoles).getFullList({ fields: 'id,label,type,status,order', sort: 'order' }),
-			pb.collection(Collections.SysUsers).getFullList({ fields: 'id,label,email,role', sort: 'label' }),
-			pb.collection(Collections.AclPermissions).getFullList({ fields: 'id,resource,action,role,user,effect' })
-		]),
-		mapUnknownToError
-	);
+const read = async <T>(promise: Promise<T>): Promise<T> => {
+	const result = await ResultAsync.fromPromise(promise, mapUnknownToError);
 	if (result.isErr()) throwError(result.error);
+	return result.value;
+};
 
-	const [actions, resources, roles, users, permissions] = result.value;
-	const { access } = await getAcl();
-	return {
-		actions: actions as unknown as (AclAction & { label: string })[],
-		resources: resources as unknown as AclResource[],
-		roles: roles as unknown as (AclRole & { label: string })[],
-		users: users as unknown as PermissionUser[],
-		permissions: permissions as unknown as PermissionRow[],
-		canEdit: can(access, RESOURCE, 'update')
-	};
+const pb = () => getRequestEvent().locals.pb;
+const loadActions = () =>
+	read(pb().collection(Collections.AclActions).getFullList({ fields: 'id,key,label,sort', sort: 'sort' })) as Promise<(AclAction & { label: string })[]>;
+const loadRoles = () => read(pb().collection(Collections.AclRoles).getFullList({ fields: 'id,label,type,status', sort: 'order' })) as Promise<Role[]>;
+
+/** Ekranın üst kısmı: özne seçimi (roller, kullanıcılar), kolonlar (işlemler) ve düzenleme izni. */
+export const getPermissionSubjects = query(async () => {
+	await requirePermission(RESOURCE, 'view'); // 🔒
+	const [actions, roles, users, { access }] = await Promise.all([
+		loadActions(),
+		loadRoles(),
+		read(pb().collection(Collections.SysUsers).getFullList({ fields: 'id,label,email,role', sort: 'label' })) as Promise<User[]>,
+		getAcl()
+	]);
+	return { actions, roles, users, canEdit: can(access, RESOURCE, 'update') };
 });
 
-// Bir hücre: kaynak + işlem + özne (rol, kullanıcı ya da ikisi boş = Herkes). effect '' → satır silinir (belirtilmemiş).
-const setPermissionSchema = v.pipe(
-	v.object({
-		resource: v.pipe(v.string(), v.nonEmpty()),
-		action: v.pipe(v.string(), v.nonEmpty()),
-		role: v.string(),
-		user: v.string(),
-		effect: v.picklist(['allow', 'deny', ''])
-	}),
-	v.check((p) => !(p.role && p.user), 'acl_invalid_subject'),
-	v.check((p) => !(!p.user && p.effect === 'deny'), 'acl_role_deny') // rol ve Herkes satırlarında yalnızca allow
-);
+/**
+ * Seçilen öznenin matrisi (DataTable'ın verisi): satır = kaynak (ağaç sırası, derinlik), hücre = öznenin kendi satırı,
+ * effective = etkin izinler (rol ve Herkes satırları da hesaba katılarak, sunucudaki kuralla: resolvePermissions).
+ */
+export const getPermissionMatrix = query(matrixParamsSchema, async ({ filterData }) => {
+	await requirePermission(RESOURCE, 'view'); // 🔒
+	const subject = parseSubject(filterData.subject);
+	const [actions, roles, resources, permissions, user] = await Promise.all([
+		loadActions(),
+		loadRoles(),
+		read(pb().collection(Collections.AclResources).getFullList({ sort: 'sort' })) as unknown as Promise<AclResource[]>,
+		read(pb().collection(Collections.AclPermissions).getFullList({ fields: 'id,resource,action,role,user,effect' })) as Promise<PermissionRow[]>,
+		subject.user ? (read(pb().collection(Collections.SysUsers).getOne(subject.user, { fields: 'id,role' })) as Promise<{ role: string[] }>) : undefined
+	]);
 
-export const setPermission = command(setPermissionSchema, async (p) => {
+	const subjectRoles = subject.role ? roles.filter((r) => r.id === subject.role) : user ? roles.filter((r) => user.role.includes(r.id)) : [];
+	const access = resolvePermissions({ subject: { id: subject.user, roles: subjectRoles }, actions, resources, permissions });
+	const keyOf = new Map(actions.map((a) => [a.id, a.key]));
+	const own = new Map(permissions.filter((p) => p.role === subject.role && p.user === subject.user).map((p) => [`${p.resource}|${p.action}`, p.effect as Effect]));
+
+	const byId = new Map(resources.map((r) => [r.id, r]));
+	const rows: MatrixRow[] = [];
+	const walk = (nodes: MenuNode[], depth: number) => {
+		for (const node of nodes) {
+			const r = byId.get(node.id)!;
+			const row: MatrixRow = {
+				id: r.id,
+				key: r.key,
+				label: r.label,
+				kind: r.kind,
+				depth,
+				active: r.active,
+				defined: r.actions.map((id) => keyOf.get(id)).filter((k) => k !== undefined),
+				effective: access[r.key] ?? []
+			};
+			for (const a of actions) row[`${ACTION_FIELD}${a.key}`] = own.get(`${r.id}|${a.id}`) ?? null;
+			rows.push(row);
+			walk(node.children, depth + 1);
+		}
+	};
+	walk(buildTree(resources.map((r) => ({ id: r.id, parent_id: r.parent || null, title: r.label, sort: r.sort }))), 0);
+	return rows;
+});
+
+/**
+ * Hücreler (tek düzenleme ya da yapıştırma): öznenin satırları oluşturulur, güncellenir ya da silinir (effect null).
+ * İşlem kaynakta tanımlı olmalı; engel yalnızca kişisel (şema). Matris ve kullanıcının menüsü aynı yanıtta tazelenir.
+ */
+export const setPermissions = command(setPermissionsSchema, async ({ subject: value, edits }) => {
 	await requirePermission(RESOURCE, 'update'); // 🔒
+	const subject = parseSubject(value);
+	const collection = pb().collection(Collections.AclPermissions);
 
-	const { locals } = getRequestEvent();
-	const pb = locals.pb;
-	const collection = pb.collection(Collections.AclPermissions);
+	const [resources, existing] = await Promise.all([
+		read(pb().collection(Collections.AclResources).getFullList({ fields: 'id,actions' })) as Promise<{ id: string; actions: string[] }[]>,
+		read(collection.getFullList({ fields: 'id,resource,action', filter: pb().filter('role = {:role} && user = {:user}', subject) })) as Promise<PermissionRow[]>
+	]);
+	const defined = new Map(resources.map((r) => [r.id, new Set(r.actions)]));
+	if (edits.some((e) => !defined.get(e.resource)?.has(e.action))) error(400, 'acl_action_not_defined', { type: 'general', errorId: 'acl' });
 
-	// İşlem bu kaynakta tanımlı olmalı (tanımsız işlemin satırı etkisizdir; karışıklık yaratmasın)
-	const resource = await ResultAsync.fromPromise(pb.collection(Collections.AclResources).getOne(p.resource, { fields: 'actions' }), mapUnknownToError);
-	if (resource.isErr()) throwError(resource.error);
-	if (!(resource.value.actions as string[]).includes(p.action)) error(400, 'acl_action_not_defined', { type: 'general', errorId: 'acl' });
-
-	const filter = pb.filter('resource = {:resource} && action = {:action} && role = {:role} && user = {:user}', p);
-	const existing = await collection.getFirstListItem(filter, { fields: 'id' }).catch((err: unknown) => {
-		if (err instanceof ClientResponseError && err.status === 404) return null;
-		throwError(err);
+	// PocketBase batch API: paralel tekil istekler SDK'nın otomatik iptaline takılır (aynı adrese giden create'ler).
+	// Her parça atomiktir (kurallar ve hook'lar satır satır uygulanır); PocketBase'in varsayılan sınırı 50 istek.
+	const rowOf = new Map(existing.map((p) => [`${p.resource}|${p.action}`, p.id]));
+	type Op = { id?: string; data?: { resource: string; action: string; role: string; user: string; effect: Effect } }; // data yoksa silme
+	const ops = edits.flatMap((e): Op[] => {
+		const id = rowOf.get(`${e.resource}|${e.action}`);
+		if (e.effect === null) return id ? [{ id }] : []; // silinecek satır yoksa iş yok
+		return [{ id, data: { resource: e.resource, action: e.action, role: subject.role, user: subject.user, effect: e.effect } }];
 	});
+	let failure: unknown;
+	for (let i = 0; i < ops.length && !failure; i += BATCH_SIZE) {
+		const batch = pb().createBatch();
+		for (const op of ops.slice(i, i + BATCH_SIZE)) {
+			const target = batch.collection(Collections.AclPermissions);
+			if (!op.data) target.delete(op.id!);
+			else if (op.id) target.update(op.id, { effect: op.data.effect });
+			else target.create(op.data);
+		}
+		const sent = await ResultAsync.fromPromise(batch.send(), mapUnknownToError);
+		if (sent.isErr()) failure = sent.error;
+	}
 
-	const write: Promise<unknown> = !p.effect
-		? existing
-			? collection.delete(existing.id)
-			: Promise.resolve()
-		: existing
-			? collection.update(existing.id, { effect: p.effect })
-			: collection.create({ resource: p.resource, action: p.action, role: p.role, user: p.user, effect: p.effect });
-	const result = await ResultAsync.fromPromise(write, mapUnknownToError);
-	if (result.isErr()) throwError(result.error);
-
-	// Ekran ve (kendi izinleri değişmiş olabilir) menü aynı yanıtta tazelenir
-	void getPermissionData().refresh();
+	// Hata olsa da tazelenir: önceki parçalar kaydedilmiş olabilir, tablo gerçek durumu göstersin
+	await requested(getPermissionMatrix, 1).refreshAll();
 	void getMyAccess().refresh();
+	if (failure) throwError(failure);
+	return { saved: edits.length };
 });

@@ -1,4 +1,4 @@
-import { test, expect, type Browser, type Page } from '@playwright/test';
+import { test, expect, type Browser, type Page, type Request } from '@playwright/test';
 
 // Yetki ekranı (Ayarlar → Sistem → Yetkiler) ve izinlerin gerçekten uygulanması.
 // Geliştirme superuser'ı (migration 1757071369) ile iki geçici kullanıcı oluşturulur: yönetici (Admin rolü) ve hedef
@@ -64,17 +64,44 @@ async function loginAs(browser: Browser, email: string): Promise<Page> {
 	return page;
 }
 
-const cell = (page: Page, resource: string, action: string) => page.getByRole('button', { name: new RegExp(`^${resource} · ${action}: `) });
+// Matris (DataTable): satır = kaynak, kolon = işlem (kolon başlık adından bulunur: işlem listesi veritabanından gelir).
+// Hücredeki işaretin data-state'i: allow | deny | inherit-allow | inherit-off
+const cell = async (page: Page, resource: string, action: string) => {
+	const headers = (await page.getByRole('columnheader').allTextContents()).map((h) => h.trim());
+	const index = headers.indexOf(action);
+	expect(index, `${action} kolonu`).toBeGreaterThan(0);
+	return page
+		.getByRole('row')
+		.filter({ has: page.getByRole('gridcell', { name: resource, exact: true }) })
+		.getByRole('gridcell')
+		.nth(index);
+};
+const stateOf = async (page: Page, resource: string, action: string) => (await cell(page, resource, action)).locator('[data-state]');
+const chooseSubject = async (page: Page, label: string) => {
+	await page.getByRole('combobox', { name: 'Kime' }).click();
+	await page.getByRole('option', { name: label, exact: true }).click();
+};
+// Hücrede Enter → açılır liste → değer ('' = belirtilmemiş) → Enter ile kaydet
+const setCell = async (page: Page, resource: string, action: string, value: '' | 'allow' | 'deny') => {
+	await (await cell(page, resource, action)).click();
+	await page.keyboard.press('Enter');
+	const editor = page.locator('select.slc-table-editor');
+	await editor.selectOption(value);
+	await editor.press('Enter');
+};
 
 test('demo kullanıcı ekranı görür ama değiştiremez (yalnızca görüntüleme)', async ({ page }) => {
 	await page.goto(URL);
 	await expect(page.getByTestId('acl-matrix')).toBeVisible();
 	await expect(page.getByText('Yetkileri değiştirme izniniz yok')).toBeVisible();
-	await expect(cell(page, 'Basit CRUD', 'Silme')).toBeDisabled();
+	await expect(await stateOf(page, 'Basit CRUD', 'Silme')).toHaveAttribute('data-state', 'allow'); // Herkes'in kendi satırı
+	await (await cell(page, 'Basit CRUD', 'Silme')).click();
+	await page.keyboard.press('Enter');
+	await expect(page.locator('select.slc-table-editor')).toHaveCount(0); // düzenleyici açılmaz
 	await expect(page.getByRole('navigation', { name: 'Ayarlar' }).getByRole('link', { name: 'Yetkiler' })).toBeVisible();
 });
 
-test('yönetici kişisel engel verir: satır yazılır, önizleme ve hedef kullanıcının arayüzü ile sunucusu reddeder', async ({ browser }) => {
+test('yönetici kişisel engel verir: satır yazılır, hedef kullanıcının isteği sunucuda reddedilir; kaldırınca açılır', async ({ browser }) => {
 	const page = await loginAs(browser, admin.email);
 
 	// Sunucu kontrolünü doğrudan denemek için getList isteğinin adresi (yöneticinin oturumunda yakalanır)
@@ -84,58 +111,103 @@ test('yönetici kişisel engel verir: satır yazılır, önizleme ve hedef kulla
 
 	await page.goto(URL);
 	await expect(page.getByText('Yetkileri değiştirme izniniz yok')).toHaveCount(0);
-	await page.getByLabel('Kime').selectOption({ label: target.label });
+	await chooseSubject(page, `Kullanıcı: ${target.label}`);
 
-	// Belirtilmemiş (Herkes'ten izinli) → İzin → Engel
-	const listCell = cell(page, 'Basit CRUD', 'Listeleme');
-	await expect(listCell).toHaveAttribute('aria-label', /Belirtilmemiş \(Başka yerden izinli\)$/);
-	await listCell.click();
-	await expect(listCell).toHaveAttribute('aria-label', /: İzin$/);
-	await listCell.click();
-	await expect(listCell).toHaveAttribute('aria-label', /: Engel$/);
-	const rows = await simpleRows(target.id);
-	expect(rows.map((r) => r.effect)).toEqual(['deny']);
+	await expect(await stateOf(page, 'Basit CRUD', 'Listeleme')).toHaveAttribute('data-state', 'inherit-allow'); // Herkes'ten
+	await setCell(page, 'Basit CRUD', 'Listeleme', 'deny');
+	await expect(await stateOf(page, 'Basit CRUD', 'Listeleme')).toHaveAttribute('data-state', 'deny');
+	await expect.poll(async () => (await simpleRows(target.id)).map((r) => r.effect)).toEqual(['deny']);
 
-	// Hedef kullanıcı: tablo verisi sunucuda reddedilir (403), arayüzde düğmeler kalır ama liste gelmez
 	const targetPage = await loginAs(browser, target.email);
-	const res = await targetPage.request.get(listUrl);
-	const body = (await res.json()) as { type: string; error?: { status: number; message: string } };
+	const body = (await (await targetPage.request.get(listUrl)).json()) as { type: string; error?: { status: number; message: string } };
 	expect(body.type).toBe('error');
 	expect(body.error).toMatchObject({ status: 403, message: 'error_forbidden' });
 
-	// Engel kaldırılır (Engel → Belirtilmemiş): satır silinir, hedef tekrar okuyabilir
-	await listCell.click();
-	await expect(listCell).toHaveAttribute('aria-label', /Belirtilmemiş/);
-	expect(await simpleRows(target.id)).toEqual([]);
+	// Belirtilmemiş: satır silinir, hedef tekrar okuyabilir
+	await setCell(page, 'Basit CRUD', 'Listeleme', '');
+	await expect(await stateOf(page, 'Basit CRUD', 'Listeleme')).toHaveAttribute('data-state', 'inherit-allow');
+	await expect.poll(() => simpleRows(target.id)).toEqual([]);
 	expect(((await (await targetPage.request.get(listUrl)).json()) as { type: string }).type).toBe('result');
 
 	await targetPage.context().close();
 	await page.context().close();
 });
 
+test('yapıştırma: bir hücre birden çok hücreye tek istekte yazılır; geçersiz değer kaydedilmez', async ({ browser }) => {
+	const page = await loginAs(browser, admin.email);
+	await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+	await page.goto(URL);
+	await chooseSubject(page, `Kullanıcı: ${target.label}`);
+	await expect(await stateOf(page, 'Basit CRUD', 'Oluşturma')).toHaveAttribute('data-state', 'inherit-allow');
+
+	// Oluşturma … Silme (3 hücre) seçilir, panodaki tek değer hepsine yazılır
+	let saves = 0;
+	page.on('request', (r) => r.url().includes('setPermissions') && saves++);
+	await page.evaluate(() => navigator.clipboard.writeText('deny'));
+	await (await cell(page, 'Basit CRUD', 'Oluşturma')).click();
+	await page.keyboard.press('Shift+ArrowRight');
+	await page.keyboard.press('Shift+ArrowRight');
+	await page.keyboard.press('Control+v');
+	for (const action of ['Oluşturma', 'Güncelleme', 'Silme']) await expect(await stateOf(page, 'Basit CRUD', action)).toHaveAttribute('data-state', 'deny');
+	await expect.poll(async () => (await simpleRows(target.id)).length).toBe(3);
+	expect(saves).toBe(1);
+
+	// Geçersiz metin: kaydedilmez, uyarı
+	await page.evaluate(() => navigator.clipboard.writeText('evet'));
+	await (await cell(page, 'Basit CRUD', 'Dışa aktarma')).click();
+	await page.keyboard.press('Control+v');
+	await expect(page.getByText(/geçersiz/i).last()).toBeVisible();
+	await expect(await stateOf(page, 'Basit CRUD', 'Dışa aktarma')).toHaveAttribute('data-state', 'inherit-allow');
+	expect((await simpleRows(target.id)).length).toBe(3);
+
+	await page.context().close();
+});
+
 // Hedef kullanıcının Basit CRUD satırları
 const simpleRows = (userId: string) => list('acl_permissions', `user = "${userId}" && resource = "${ids['simple']}"`);
 
-test('rol satırında engel yok: Belirtilmemiş ↔ İzin; erişim yoksa sayfa ve menü kapanır', async ({ browser }) => {
+test('rol satırında engel yok (seçenek de yapıştırma da); erişim yoksa sayfa ve menü kapanır', async ({ browser }) => {
 	const page = await loginAs(browser, admin.email);
+	await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
 	await page.goto(URL);
-	await page.getByLabel('Kime').selectOption({ label: 'User 1' });
-	const exp = cell(page, 'Basit CRUD', 'Dışa aktarma');
-	await expect(exp).toHaveAttribute('aria-label', /Belirtilmemiş/);
-	await exp.click();
-	await expect(exp).toHaveAttribute('aria-label', /: İzin$/);
-	await exp.click(); // rolde Engel yok: doğrudan Belirtilmemiş
-	await expect(exp).toHaveAttribute('aria-label', /Belirtilmemiş/);
+	await chooseSubject(page, 'Rol: User 1');
+	await expect(await stateOf(page, 'Basit CRUD', 'Dışa aktarma')).toHaveAttribute('data-state', /^inherit/);
+
+	await (await cell(page, 'Basit CRUD', 'Dışa aktarma')).click();
+	await page.keyboard.press('Enter');
+	await expect(page.locator('select.slc-table-editor option')).toHaveText(['—', 'İzin']); // Engel yok
+	await page.keyboard.press('Escape');
+
+	await setCell(page, 'Basit CRUD', 'Dışa aktarma', 'allow');
+	await expect(await stateOf(page, 'Basit CRUD', 'Dışa aktarma')).toHaveAttribute('data-state', 'allow');
+	await expect
+		.poll(async () => (await list('acl_permissions', `role = "${ids['userRole']}" && resource = "${ids['simple']}" && action = "${ids['export']}"`)).length)
+		.toBe(1);
+	await setCell(page, 'Basit CRUD', 'Dışa aktarma', '');
+	await expect.poll(() => list('acl_permissions', `role = "${ids['userRole']}" && resource = "${ids['simple']}" && action = "${ids['export']}"`)).toEqual([]);
+
+	// Hızlı art arda (İzin → boş, birincinin yanıtı beklenmeden): kayıtlar sırayla gider, sonda satır kalmaz
+	// (yalnızca bu adımda gönderilen isteklerin yanıtları beklenir; önceki adımın geç gelen yanıtı sayılmaz)
+	const sent: Request[] = [];
+	page.on('request', (r) => r.url().includes('setPermissions') && sent.push(r));
+	await setCell(page, 'Basit CRUD', 'Dışa aktarma', 'allow');
+	await setCell(page, 'Basit CRUD', 'Dışa aktarma', '');
+	await expect.poll(() => sent.length).toBe(2);
+	await Promise.all(sent.map((r) => r.response()));
 	expect(await list('acl_permissions', `role = "${ids['userRole']}" && resource = "${ids['simple']}" && action = "${ids['export']}"`)).toEqual([]);
 
+	await page.evaluate(() => navigator.clipboard.writeText('deny'));
+	await (await cell(page, 'Basit CRUD', 'Dışa aktarma')).click();
+	await page.keyboard.press('Control+v');
+	await expect(page.getByText(/geçersiz/i).last()).toBeVisible();
+	await expect(await stateOf(page, 'Basit CRUD', 'Dışa aktarma')).not.toHaveAttribute('data-state', 'deny');
+
 	// Kişisel erişim engeli: hedefin menüsünde Basit CRUD yok, adresinde 403 görünümü
-	await page.getByLabel('Kime').selectOption({ label: target.label });
-	const access = cell(page, 'Basit CRUD', 'Erişim');
-	await access.click();
-	await access.click();
-	await expect(access).toHaveAttribute('aria-label', /: Engel$/);
+	await chooseSubject(page, `Kullanıcı: ${target.label}`);
+	await setCell(page, 'Basit CRUD', 'Erişim', 'deny');
+	await expect(await stateOf(page, 'Basit CRUD', 'Erişim')).toHaveAttribute('data-state', 'deny');
 	// Önizleme: erişim yoksa diğer işlemler de kapalı
-	await expect(cell(page, 'Basit CRUD', 'Listeleme')).toHaveAttribute('aria-label', /\(Kapalı\)$/);
+	await expect(await stateOf(page, 'Basit CRUD', 'Dışa aktarma')).toHaveAttribute('data-state', 'inherit-off');
 
 	const targetPage = await loginAs(browser, target.email);
 	await targetPage.goto('/app/grapes/crud/simple');

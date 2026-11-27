@@ -1,84 +1,92 @@
 <script lang="ts">
 	import { t } from '#lib/app/localization/index.js';
 	import { Page, Head } from '#lib/components/templates/index.js';
+	import * as input from '#lib/components/ui/inputs/index.js';
+	import * as dt from '#lib/components/ui/datatable/index.js';
 	import { Toasts, createToaster } from '#lib/components/ui/toast/index.js';
-	import { Icon } from '#lib/components/icons/index.js';
-	import { resolvePermissions, can, SUPER_ROLE_TYPES, type AclResource, type AclRole } from '#lib/app/acl/access.js';
-	import { buildTree, type MenuNode } from '#lib/app/menu/tree.js';
+	import { SUPER_ROLE_TYPES } from '#lib/app/acl/access.js';
 	import { menuTitle } from '#lib/app/menu/menu.js';
-	import { getPermissionData, setPermission } from './page.remote';
+	import { matrixParamsSchema, parseSubject, ACTION_FIELD, type MatrixRow, type Effect } from './page.shared';
+	import { getPermissionSubjects, getPermissionMatrix, setPermissions } from './page.remote';
 
-	// Yetki ekranı: bir özne (Herkes, rol ya da kullanıcı) seçilir; kaynak × işlem matrisinde her hücre o öznenin
-	// satırıdır (İzin / Engel / Belirtilmemiş). Belirtilmemiş hücrede etkin sonuç soluk gösterilir (önizleme): rol ve
-	// Herkes satırları da hesaba katılarak, app/acl/access.ts'teki aynı kuralla (resolvePermissions) tarayıcıda hesaplanır.
+	// Yetki ekranı: bir özne (Herkes, rol ya da kullanıcı) seçilir; DataTable'da satır = kaynak, kolon = işlem. Hücre
+	// öznenin kendi satırıdır (İzin / Engel / boş = belirtilmemiş). Boş hücrede etkin sonuç soluk gösterilir (önizleme;
+	// sunucuda aynı kuralla hesaplanır). Düzenleme tablonun kendisiyle: Enter ya da çift tıklama açılır listeyi açar;
+	// Ctrl+C / Ctrl+V ile bir satırın izinleri başka satırlara toplu yapıştırılır (tek istek).
 	const toaster = createToaster({ name: 'permissions-toaster', position: 'bottom-center' });
+	const list = dt.createList(getPermissionMatrix, matrixParamsSchema);
 
-	type Effect = 'allow' | 'deny' | '';
-	let subjectValue = $state(''); // '' = Herkes, 'role:<id>', 'user:<id>'
-	let busy = $state<string | null>(null); // kaydedilen hücre
+	let subjectValue = $state('everyone');
+	const changeSubject = (value: string) => {
+		list.filter.subject = value;
+		list.search();
+	};
 
-	const cellKey = (resource: string, action: string) => `${resource}|${action}`;
+	// Kayıtlar sırayla gider: aynı hücre art arda değiştirilirse (İzin → boş) istekler sunucuya ters sırada varıp eski
+	// değeri bırakmasın. Özne düzenleme anında alınır (sırada beklerken özne değişse de doğru özneye yazılır).
+	let queue: Promise<void> = Promise.resolve();
+	const save = (edits: dt.CellEditEvent<MatrixRow>[]) => {
+		const subjectAtEdit = subjectValue;
+		return (queue = queue.then(() => send(subjectAtEdit, edits)));
+	};
 
-	async function toggle(resource: AclResource, actionId: string, current: Effect) {
-		// Rol ve Herkes: Belirtilmemiş ↔ İzin. Kullanıcı: Belirtilmemiş → İzin → Engel → Belirtilmemiş.
-		const next: Effect = current === '' ? 'allow' : current === 'allow' && subject.kind === 'user' ? 'deny' : '';
-		busy = cellKey(resource.id, actionId);
+	async function send(subjectAtEdit: string, edits: dt.CellEditEvent<MatrixRow>[]) {
+		const actionId = new Map(subjects.actions.map((a) => [`${ACTION_FIELD}${a.key}`, a.id]));
+		const cells = edits.map((e) => ({ resource: e.row.id, action: actionId.get(e.field as string)!, effect: (e.value as Effect | null) ?? null }));
+		const patch = new Map(edits.map((e) => [`${e.row.id}|${e.field as string}`, e.value]));
 		try {
-			await setPermission({ resource: resource.id, action: actionId, role: subject.role, user: subject.user, effect: next });
+			// Optimistik: yeni değer yanıt beklenmeden görünür; sunucu tazelenmiş matrisi (etkin sonuçlarla) aynı yanıtta gönderir
+			await setPermissions({ subject: subjectAtEdit, edits: cells }).updates(
+				...list.updatesWith((rows) =>
+					rows.map((row) => {
+						const changed = Object.keys(row).filter((field) => patch.has(`${row.id}|${field}`));
+						return changed.length ? { ...row, ...Object.fromEntries(changed.map((field) => [field, patch.get(`${row.id}|${field}`)])) } : row;
+					})
+				)
+			);
 		} catch (error) {
 			toaster.error(error);
-		} finally {
-			busy = null;
 		}
 	}
 
 	// await en sonda: await'ten sonraki kod bileşen bağlamında çalışmaz (getContext: createToaster… hata verir)
-	const data = $derived(await getPermissionData());
+	const subjects = $derived(await getPermissionSubjects());
 
-	const subject = $derived.by(() => {
-		const [kind, id = ''] = subjectValue.split(':');
-		if (kind === 'role') {
-			const role = data.roles.find((r) => r.id === id);
-			return { kind: 'role' as const, role: id, user: '', roles: role ? [role] : [] };
-		}
-		if (kind === 'user') {
-			const user = data.users.find((u) => u.id === id);
-			const roles = data.roles.filter((r) => user?.role.includes(r.id));
-			return { kind: 'user' as const, role: '', user: id, roles };
-		}
-		return { kind: 'everyone' as const, role: '', user: '', roles: [] as AclRole[] };
-	});
-	const isSuper = $derived(subject.roles.some((r) => r.status === 'active' && SUPER_ROLE_TYPES.includes(r.type)));
-
-	// Öznenin kendi satırları (hücre → effect) ve etkin izinler
-	const own = $derived(new Map(data.permissions.filter((p) => p.role === subject.role && p.user === subject.user).map((p) => [cellKey(p.resource, p.action), p.effect])));
-	const access = $derived(
-		resolvePermissions({
-			subject: { id: subject.user, roles: subject.roles },
-			actions: data.actions,
-			resources: data.resources,
-			permissions: data.permissions
-		})
-	);
-
-	// Satırlar: kaynak ağacı derinlik sırasıyla (menü, sonra uygulama özellikleri)
-	type Row = { resource: AclResource; depth: number };
-	const rows = $derived.by(() => {
-		const byId = new Map(data.resources.map((r) => [r.id, r]));
-		const tree = buildTree(data.resources.map((r) => ({ id: r.id, parent_id: r.parent || null, title: r.label, sort: r.sort })));
-		const out: Row[] = [];
-		const walk = (nodes: MenuNode[], depth: number) => {
-			for (const node of nodes) {
-				out.push({ resource: byId.get(node.id)!, depth });
-				walk(node.children, depth + 1);
-			}
-		};
-		walk(tree, 0);
-		return out;
+	const subject = $derived(parseSubject(subjectValue));
+	const subjectOptions = $derived([
+		{ value: 'everyone', label: t('acl_everyone') },
+		...subjects.roles.map((r) => ({ value: `role:${r.id}`, label: `${t('acl_role')}: ${r.label}${r.status === 'active' ? '' : ' (–)'}` })),
+		...subjects.users.map((u) => ({ value: `user:${u.id}`, label: `${t('acl_user')}: ${u.label || u.email}` }))
+	]);
+	const isSuper = $derived.by(() => {
+		const user = subjects.users.find((u) => u.id === subject.user);
+		const roles = subjects.roles.filter((r) => r.id === subject.role || user?.role.includes(r.id));
+		return roles.some((r) => r.status === 'active' && SUPER_ROLE_TYPES.includes(r.type));
 	});
 
-	const actionTitle = (a: { key: string; label: string }) => t(`acl.action.${a.key}`, undefined, a.label);
-	const resourceTitle = (r: AclResource) => menuTitle({ id: r.key, title: r.label });
+	// Kolonlar işlemlerden (veritabanı): kaynak adı + işlem başına bir hücre. Engel seçeneği yalnızca kullanıcıda.
+	const effectOptions = $derived([{ value: 'allow', label: t('acl_allow') }, ...(subject.kind === 'user' ? [{ value: 'deny', label: t('acl_deny') }] : [])]);
+	const columns = $derived<dt.Column<MatrixRow>[]>([
+		{ field: 'label', label: 'acl_resource', width: 'minmax(260px,2fr)', sortable: false },
+		...subjects.actions.map((a): dt.Column<MatrixRow> => ({
+			field: `${ACTION_FIELD}${a.key}`,
+			label: t(`acl.action.${a.key}`, undefined, a.label),
+			width: 'minmax(95px,1fr)',
+			align: 'center',
+			sortable: false,
+			editable: subjects.canEdit,
+			options: effectOptions
+		}))
+	]);
+
+	// Yapıştırılan değer de buradan geçer: yalnızca allow / deny / boş; rol ve Herkes'te deny yok
+	const validateCell = (e: dt.CellEditEvent<MatrixRow>) => {
+		if (e.value === null) return undefined;
+		if (e.value !== 'allow' && e.value !== 'deny') return t('acl_invalid_effect');
+		if (e.value === 'deny' && subject.kind !== 'user') return t('acl_role_deny');
+		return undefined;
+	};
+
 	const hint = $derived(subject.kind === 'user' ? t('acl_user_hint') : subject.kind === 'role' ? t('acl_role_hint') : t('acl_everyone_hint'));
 </script>
 
@@ -91,122 +99,104 @@
 <Page>
 	<Page.Header>
 		<h1 class="text-lg font-semibold">{t('acl_title')}</h1>
-		<label class="ml-4 flex items-center gap-2 text-sm">
-			<span class="text-surface-600">{t('acl_subject')}</span>
-			<select bind:value={subjectValue} class="border-surface-300 bg-surface-50 rounded border px-2 py-1">
-				<option value="">{t('acl_everyone')}</option>
-				<optgroup label={t('acl_roles')}>
-					{#each data.roles as role (role.id)}
-						<option value="role:{role.id}">{role.label}{role.status === 'active' ? '' : ' (–)'}</option>
-					{/each}
-				</optgroup>
-				<optgroup label={t('acl_users')}>
-					{#each data.users as user (user.id)}
-						<option value="user:{user.id}">{user.label || user.email}</option>
-					{/each}
-				</optgroup>
-			</select>
-		</label>
+		<div class="ml-4 w-80 max-w-full">
+			<input.Select
+				required
+				aria-label={t('acl_subject')}
+				options={subjectOptions}
+				bind:value={subjectValue}
+				onValueChange={({ value, initial }) => !initial && changeSubject(value)}
+			/>
+		</div>
 	</Page.Header>
 	<Page.Main>
-		<div class="flex h-full flex-col gap-3 overflow-auto p-4">
-			<div class="text-surface-600 flex flex-col gap-1 text-sm">
-				{#if !data.canEdit}<p role="status" class="text-warning-800">{t('acl_readonly')}</p>{/if}
+		<div class="flex h-full min-h-0 flex-col gap-2 p-3">
+			<div class="text-surface-600 flex flex-col gap-1 px-1 text-sm">
+				{#if !subjects.canEdit}<p role="status" class="text-warning-800">{t('acl_readonly')}</p>{/if}
 				{#if isSuper}<p role="status" class="text-warning-800">{t('acl_super_role')}</p>{/if}
 				<p>{hint}</p>
 				<p class="flex flex-wrap items-center gap-3" aria-label={t('acl_legend')}>
-					<span class="slc-cell slc-allow">✓</span>{t('acl_allow')}
-					<span class="slc-cell slc-deny">✕</span>{t('acl_deny')}
-					<span class="slc-cell slc-inherited">✓</span>{t('acl_inherited_allow')}
-					<span class="slc-cell">·</span>{t('acl_inherited_deny')}
+					<span class="slc-acl slc-allow">✓</span>{t('acl_allow')}
+					<span class="slc-acl slc-deny">✕</span>{t('acl_deny')}
+					<span class="slc-acl slc-inherited">✓</span>{t('acl_inherited_allow')}
+					<span class="slc-acl">·</span>{t('acl_inherited_deny')}
 				</p>
 			</div>
-
-			<table class="slc-matrix bg-surface-50 border-surface-200 w-max border-collapse rounded border text-sm" data-testid="acl-matrix">
-				<thead>
-					<tr>
-						<th scope="col" class="text-left">{t('acl_resource')}</th>
-						{#each data.actions as action (action.id)}
-							<th scope="col">{actionTitle(action)}</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each rows as { resource, depth }, i (resource.id)}
-						{#if resource.kind === 'feature' && rows[i - 1]?.resource.kind !== 'feature'}
-							<tr><th colspan={data.actions.length + 1} scope="colgroup" class="text-surface-500 pt-4 text-left">{t('acl_features')}</th></tr>
-						{/if}
-						<tr class:opacity-50={!resource.active}>
-							<th scope="row" class="text-left font-normal" class:font-semibold={resource.kind === 'module' || resource.kind === 'group'}>
-								<span style:padding-left="{resource.kind === 'feature' ? 0 : depth * 1.25}rem">{resourceTitle(resource)}</span>
-							</th>
-							{#each data.actions as action (action.id)}
-								<td class="text-center">
-									{#if resource.actions.includes(action.id)}
-										{@const effect = (own.get(cellKey(resource.id, action.id)) ?? '') as Effect}
-										{@const allowed = can(access, resource.key, action.key)}
-										{@const state =
-											effect === 'allow'
-												? t('acl_allow')
-												: effect === 'deny'
-													? t('acl_deny')
-													: `${t('acl_unset')} (${allowed ? t('acl_inherited_allow') : t('acl_inherited_deny')})`}
-										<button
-											type="button"
-											class="slc-cell"
-											class:slc-allow={effect === 'allow'}
-											class:slc-deny={effect === 'deny'}
-											class:slc-inherited={effect === '' && allowed}
-											disabled={!data.canEdit || busy !== null}
-											aria-busy={busy === cellKey(resource.id, action.id)}
-											aria-label={t('acl_cell_label', { resource: resourceTitle(resource), action: actionTitle(action), state })}
-											title={state}
-											onclick={() => toggle(resource, action.id, effect)}
-										>
-											{#if busy === cellKey(resource.id, action.id)}
-												<Icon name="loader" size={14} class="animate-spin" />
-											{:else}
+			<div class="border-surface-200 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border" data-testid="acl-matrix">
+				<dt.DataTable
+					{list}
+					{columns}
+					{validateCell}
+					onCellEdit={subjects.canEdit ? (e) => save([e]) : undefined}
+					onCellsEdit={subjects.canEdit
+						? async (edits, { invalid }) => {
+								if (invalid > 0) toaster.error(null, t('dt_paste_invalid', { count: invalid }));
+								if (edits.length > 0) await save(edits);
+							}
+						: undefined}
+					onError={(error) => toaster.error(error)}
+					persist="acl-permissions"
+					freezeLeft={1}
+					borders="both"
+					rowClass={(row) => (row.active ? undefined : 'opacity-50')}
+				>
+					{#snippet dataRow(dr)}
+						<dt.DataRow {dr}>
+							{#snippet dataCell(dc)}
+								{@const field = dc.col.data.field as string}
+								{#if field === 'label'}
+									<dt.DataCell {dr} {dc} class={dr.row.kind === 'module' || dr.row.kind === 'group' ? 'font-semibold' : undefined}>
+										<span class="truncate" style:padding-left="{dr.row.kind === 'feature' ? 0 : dr.row.depth * 1.25}rem">
+											{menuTitle({ id: dr.row.key, title: dr.row.label })}
+										</span>
+										{#if dr.row.kind === 'feature'}<span class="text-surface-500 ml-2 text-xs">({t('acl_feature')})</span>{/if}
+									</dt.DataCell>
+								{:else}
+									{@const action = field.slice(ACTION_FIELD.length)}
+									{#if dr.row.defined.includes(action)}
+										{@const effect = dc.value as Effect | null}
+										{@const allowed = dr.row.effective.includes(action)}
+										{@const state = effect ?? (allowed ? 'inherit-allow' : 'inherit-off')}
+										<dt.DataCell {dr} {dc}>
+											<span
+												class="slc-acl"
+												class:slc-allow={effect === 'allow'}
+												class:slc-deny={effect === 'deny'}
+												class:slc-inherited={state === 'inherit-allow'}
+												data-state={state}
+												title={effect === 'allow'
+													? t('acl_allow')
+													: effect === 'deny'
+														? t('acl_deny')
+														: `${t('acl_unset')} (${allowed ? t('acl_inherited_allow') : t('acl_inherited_deny')})`}
+											>
 												{effect === 'deny' ? '✕' : effect === 'allow' || allowed ? '✓' : '·'}
-											{/if}
-										</button>
+											</span>
+										</dt.DataCell>
+									{:else}
+										<!-- işlem bu kaynakta tanımlı değil: boş, düzenlenemez (yapıştırmada atlanır) -->
+										<dt.DataCell {dr} {dc} editable={false}><span></span></dt.DataCell>
 									{/if}
-								</td>
-							{/each}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+								{/if}
+							{/snippet}
+						</dt.DataRow>
+					{/snippet}
+				</dt.DataTable>
+			</div>
 		</div>
 	</Page.Main>
 </Page>
 
 <style>
-	.slc-matrix :is(th, td) {
-		padding: 0.25rem 0.5rem;
-		border-bottom: 1px solid var(--color-surface-200);
-		white-space: nowrap;
-	}
-	.slc-matrix thead th {
-		position: sticky;
-		top: 0;
-		z-index: 1;
-		background-color: var(--color-surface-100);
-	}
-	.slc-cell {
+	.slc-acl {
 		display: inline-flex;
-		width: 1.75rem;
-		height: 1.75rem;
+		width: 1.5rem;
+		height: 1.5rem;
 		align-items: center;
 		justify-content: center;
 		border: 1px solid var(--color-surface-300);
 		border-radius: 0.375rem;
 		color: var(--color-surface-400);
-	}
-	button.slc-cell:not(:disabled) {
-		cursor: pointer;
-	}
-	button.slc-cell:not(:disabled):hover {
-		border-color: var(--color-surface-600);
 	}
 	.slc-allow {
 		border-color: var(--color-success-600);
