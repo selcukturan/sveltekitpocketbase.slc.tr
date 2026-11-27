@@ -13,3 +13,14 @@ export function pageExists(href: string, dir = 'src/routes', segments = href.spl
 	}
 	return false;
 }
+
+/** Klasördeki tüm sayfaların adresleri ((group) segmentleri atılır): listPages('src/routes/(app)') → ['/app', …] */
+export function listPages(dir: string, prefix = ''): string[] {
+	const pages = existsSync(join(dir, '+page.svelte')) ? [prefix || '/'] : [];
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue;
+		const segment = /^\(.+\)$/.test(entry.name) ? '' : `/${entry.name}`;
+		pages.push(...listPages(join(dir, entry.name), prefix + segment));
+	}
+	return pages;
+}

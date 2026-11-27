@@ -1,5 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { pageExists } from './helpers/routes.ts';
+import { pageExists, listPages } from './helpers/routes.ts';
+import {
+	resolvePermissions,
+	findPageResource,
+	canAccessPage,
+	buildAccessMenu,
+	type AclResource,
+	type AclPermission,
+	type AclAction
+} from '../../src/lib/app/acl/access.ts';
 import { MENU_RECORDS } from '../../src/lib/app/menu/menu.ts';
 
 // Yetki verisi (acl_*): PocketBase'den demo kullanıcının oturumuyla okunur (geliştirme veritabanı).
@@ -7,13 +16,16 @@ const PB = process.env.PB_TEST_URL ?? 'http://localhost:8099';
 
 type Item = Record<string, unknown> & { id: string };
 async function login() {
-	const res = await fetch(`${PB}/api/collections/sys_users/auth-with-password`, {
+	return (await loginWithRecord()).token;
+}
+async function loginWithRecord() {
+	const res = await fetch(`${PB}/api/collections/sys_users/auth-with-password?expand=role`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ identity: 'demo@slc.tr', password: 'SLc1234567' })
 	});
 	expect(res.ok).toBe(true);
-	return ((await res.json()) as { token: string }).token;
+	return (await res.json()) as { token: string; record: Item & { expand?: { role?: Item[] } } };
 }
 async function all(token: string, collection: string): Promise<Item[]> {
 	const res = await fetch(`${PB}/api/collections/${collection}/records?perPage=500`, { headers: { Authorization: token } });
@@ -59,4 +71,26 @@ test('yetki verisi: normal kullanıcı okur ama yazamaz; oturumsuz hiçbir şey 
 	expect(res.ok).toBe(false);
 	const anonymous = await fetch(`${PB}/api/collections/acl_resources/records`);
 	expect(((await anonymous.json()) as { totalItems: number }).totalItems).toBe(0);
+});
+
+test('gerçek veri: (app) altındaki her sayfa bir kaynakla eşleşir (sıkı koruma); demo kullanıcı hepsine erişir, menüsü tam', async () => {
+	const { token, record } = await loginWithRecord();
+	const [actions, resources, permissions] = await Promise.all([all(token, 'acl_actions'), all(token, 'acl_resources'), all(token, 'acl_permissions')]);
+	const roles = (record.expand?.role ?? []).map((r) => ({ id: r.id, type: String(r.type), status: String(r.status) }));
+	expect(roles.length).toBeGreaterThan(0);
+
+	const access = resolvePermissions({
+		subject: { id: record.id, roles },
+		actions: actions as unknown as AclAction[],
+		resources: resources as unknown as AclResource[],
+		permissions: permissions as unknown as AclPermission[]
+	});
+	const pages = listPages('src/routes/(app)');
+	expect(pages.length).toBeGreaterThan(20);
+	for (const path of pages) {
+		expect(findPageResource(resources as unknown as AclResource[], path), `${path}: kaynak yok`).toBeTruthy();
+		expect(canAccessPage(resources as unknown as AclResource[], access, path), `${path}: erişim`).toBe(true);
+	}
+	// Bugünkü menü: altı modül, hiçbiri budanmamış
+	expect(buildAccessMenu(resources as unknown as AclResource[], access).map((n) => n.id)).toEqual(['home', 'grapes', 'data_table', 'logs', 'developments', 'settings']);
 });

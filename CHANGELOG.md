@@ -13,6 +13,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Yetki çekirdeği (Aşama 3b, saf: `src/lib/app/acl/access.ts`):
+  `resolvePermissions` (kişisel satır rolü ezer; aktif rollerden biri allow;
+  rol deny'ı yok sayılır; Herkes; varsayılan kapalı; access yoksa diğer
+  işlemler yok; developer/system her şeye izinli), `can`,
+  `findPageResource` / `canAccessPage` (birebir, sonra `prefix`; kaynağı
+  olmayan sayfa kapalı), `buildAccessMenu`. `tree.ts`: `pruneTree`,
+  `firstHref`. Testler: `acl-access.spec.ts` (tarayıcısız); gerçek veriyle
+  `(app)` altındaki her sayfanın bir kaynakla eşleştiği ve demo kullanıcının
+  hepsine eriştiği (`acl-data.spec.ts`).
 - Yetki sistemi (Aşama 3a, veritabanı): `acl_actions` (işlem kataloğu),
   `acl_resources` (menü ve uygulama özellikleri; ağaç), `acl_permissions` (bir
   satır = kaynak + işlem + rol/kullanıcı/Herkes + allow/deny; tekil hücre,
@@ -397,6 +406,8 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- `buildTree` dönüş tipi ikonu olmayan kayıtlarda `{}` oluyordu (ağaç
+  `pruneTree`'ye verilemiyordu); başlık ve ikon tipleri parametre.
 - Kayıt seçici araması Türkçe terimi normalize etmiyordu ("WİNDOWS" sonuç
   vermiyordu); terim `search_label` ile aynı biçime getiriliyor. Üç yapay
   `sleep(300)` beklemesi kaldırıldı.

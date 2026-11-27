@@ -21,8 +21,11 @@ export type MenuNode<TTitle extends string = string, TIcon extends string = stri
  * Düz kayıtlardan ağaç kurar. Kardeşler `sort`'a göre sıralanır. Ebeveyni listede olmayan kayıtlar (yetim) ve
  * döngüdeki kayıtlar köklerden ulaşılamadığı için ağaca girmez.
  */
-export function buildTree<T extends MenuRecord>(records: readonly T[]): MenuNode<T['title'], NonNullable<T['icon']>>[] {
-	type Node = MenuNode<T['title'], NonNullable<T['icon']>>;
+export function buildTree<TTitle extends string = string, TIcon extends string = string>(records: readonly MenuRecord<TTitle, TIcon>[]): MenuNode<TTitle, TIcon>[] {
+	// Tipler kayıtların başlık/ikon tiplerinden gelir (ikonu olmayan kayıtlarda TIcon = string; önceden T['icon']'dan
+	// çıkarıldığı için {} oluyor ve pruneTree'ye verilemiyordu)
+	type T = MenuRecord<TTitle, TIcon>;
+	type Node = MenuNode<TTitle, TIcon>;
 	const byParent = new Map<string | null, T[]>();
 	for (const record of records) {
 		const list = byParent.get(record.parent_id) ?? [];
@@ -66,4 +69,31 @@ export function findActivePath<N extends MenuNode>(roots: readonly N[], pathname
 	};
 	for (const root of roots) visit(root, []);
 	return best?.path ?? [];
+}
+
+/**
+ * Görünmeyen sayfaları ve altında görünen sayfa kalmayan başlıkları (modül, grup) atar. Sayfası olan (href'li) düğüm
+ * isVisible ile karar verilir; sayfası olmayan düğüm yalnızca görünen bir alt düğümü varsa kalır. Hem sayfası hem alt
+ * sayfaları olan düğümde sayfa görünmüyorsa düğüm başlık olarak kalır, bağlantısı (href) kaldırılır. Ağacı değiştirmez,
+ * yenisini döndürür.
+ */
+export function pruneTree<N extends MenuNode>(roots: readonly N[], isVisible: (node: N) => boolean): N[] {
+	const prune = (nodes: readonly N[]): N[] =>
+		nodes.flatMap((node) => {
+			const children = prune(node.children as N[]);
+			const visible = node.href !== undefined && node.href !== '' && isVisible(node);
+			if (!visible && children.length === 0) return [];
+			return [{ ...node, href: visible ? node.href : undefined, children }];
+		});
+	return prune(roots);
+}
+
+/** Düğümün açtığı ilk sayfa: kendi href'i, yoksa sırayla ilk alt düğümün (raydaki modül bağlantısı). */
+export function firstHref(node: MenuNode): string | undefined {
+	if (node.href) return node.href;
+	for (const child of node.children) {
+		const href = firstHref(child);
+		if (href) return href;
+	}
+	return undefined;
 }
