@@ -20,10 +20,31 @@ test('aktif modül rayda, aktif sayfa ağaçta işaretli; sayfada tek <main>', a
 	await expect(rail(page).getByRole('link', { name: 'Ayarlar' })).toHaveAttribute('aria-current', 'page');
 });
 
+test('konum çubuğu: modül › grup › sayfa; modül ilk sayfasına gider, grup bağlantısız, son öğe bulunulan sayfa', async ({ page }) => {
+	await page.goto('/app/grapes/crud/simple');
+	const crumbs = page.getByRole('navigation', { name: 'Konum' });
+	await expect(crumbs.getByRole('listitem')).toHaveText(['Grapes', 'CRUD', 'Basit CRUD']);
+	await expect(crumbs.getByText('Basit CRUD')).toHaveAttribute('aria-current', 'page');
+	await expect(crumbs.getByRole('link', { name: 'CRUD' })).toHaveCount(0); // grubun sayfası yok
+	await crumbs.getByRole('link', { name: 'Grapes' }).click();
+	await expect(page).toHaveURL(/\/app\/grapes$/);
+	await expect(crumbs.getByRole('listitem')).toHaveText(['Grapes', 'Giriş']);
+});
+
+test('konum çubuğu dar ekranda yalnızca son iki öğe (öncesi …)', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 800 });
+	await page.goto('/app/settings/system/permissions');
+	const crumbs = page.getByRole('navigation', { name: 'Konum' });
+	await expect(crumbs.getByRole('link', { name: 'Ayarlar' })).toBeHidden();
+	await expect(crumbs.getByText('Sistem')).toBeVisible();
+	await expect(crumbs.getByText('Yetkiler')).toBeVisible();
+});
+
 test('alt menüsü olmayan modülde ağaç yok, içerik tüm alanı alır', async ({ page }) => {
 	await page.goto('/app');
 	await expect(rail(page).getByRole('link', { name: 'Ana Sayfa' })).toHaveAttribute('aria-current', 'page');
-	await expect(page.getByRole('navigation')).toHaveCount(1); // yalnızca modül rayı
+	await expect(page.getByRole('navigation')).toHaveCount(2); // modül rayı ve konum çubuğu (ağaç yok)
+	await expect(page.getByRole('navigation', { name: 'Konum' })).toBeVisible();
 	await expect(page.locator('main')).toHaveCount(1);
 });
 

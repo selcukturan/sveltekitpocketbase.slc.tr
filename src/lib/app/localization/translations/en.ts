@@ -203,6 +203,7 @@ export const en = {
 	'menu.settings.system.resources': 'Resources',
 	menu_resize: 'Menu width',
 	menu_modules: 'Modules',
+	breadcrumb: 'Breadcrumb',
 	forbidden_title: 'You do not have access to this page',
 	forbidden_description: 'Contact your administrator if you need access.',
 	forbidden_back: 'Back to home',

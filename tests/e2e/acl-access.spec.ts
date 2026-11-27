@@ -5,6 +5,7 @@ import {
 	findPageResource,
 	canAccessPage,
 	buildAccessMenu,
+	resourceTrail,
 	type AclResource,
 	type AclPermission,
 	type AclRole
@@ -139,4 +140,14 @@ test('pruneTree: sayfası görünmeyen ama alt sayfası görünen düğüm başl
 	expect(pruned[0].href).toBeUndefined();
 	expect(pruned[0].children[0].href).toBe('/p/1');
 	expect(pruneTree(tree, () => false)).toEqual([]);
+});
+
+test('resourceTrail: sayfadan köke kaynak yolu; gizli sayfa da; prefix alt adres; kaynak yoksa boş', () => {
+	const keys = (path: string) => resourceTrail(resources, path).map((r) => r.key);
+	expect(keys('/app/a')).toEqual(['mod', 'grp', 'a']);
+	expect(keys('/app/b')).toEqual(['mod', 'b']);
+	expect(keys('/app/c/123')).toEqual(['mod', 'grp', 'c']); // prefix: alt adres
+	expect(keys('/app/hidden')).toEqual(['mod', 'hidden']); // menüde gizli
+	expect(keys('/app/yok')).toEqual([]);
+	expect(keys('/app/off')).toEqual([]); // pasif
 });

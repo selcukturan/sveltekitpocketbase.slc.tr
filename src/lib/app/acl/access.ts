@@ -112,6 +112,17 @@ export function canAccessPage(resources: readonly AclResource[], access: Access,
 }
 
 /**
+ * Adresin kaynak yolu (breadcrumb): kökten sayfaya [modül, …, sayfa]. Sayfa kaynağından (findPageResource) üst
+ * kaynaklara çıkılır; menüde gizli ya da menüde olmayan sayfalar da doğru yolu verir. Kaynak yoksa [].
+ */
+export function resourceTrail<R extends Pick<AclResource, 'id' | 'parent' | 'href' | 'match' | 'active'>>(resources: readonly R[], pathname: string): R[] {
+	const byId = new Map(resources.map((r) => [r.id, r]));
+	const trail: R[] = [];
+	for (let r = findPageResource(resources, pathname); r && trail.length < 50; r = r.parent ? byId.get(r.parent) : undefined) trail.unshift(r);
+	return trail;
+}
+
+/**
  * Kullanıcının menüsü: aktif ve gizli olmayan menü kaynakları (modül, grup, sayfa) ağaç olarak; erişemediği sayfalar
  * ve altında sayfa kalmayan başlıklar budanır. Düğüm id'si kaynak anahtarıdır (key), başlık label (arayüz çeviriyi
  * t('acl.' + key, undefined, label) ile yapar). Alt menüsü olan modülün href'i yoktur: ray firstHref ile bağlanır.

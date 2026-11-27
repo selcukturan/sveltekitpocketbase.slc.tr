@@ -2,12 +2,12 @@
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { t } from '#lib/app/localization/index.js';
-	import { AppSidebar, AppHeader, NavTree, MobileNav, Forbidden } from '..';
+	import { AppSidebar, AppHeader, NavTree, MobileNav, Forbidden, Breadcrumb, type Crumb } from '..';
 	import type { AppLayoutPropsType } from '../types';
 	import { getGlobalContext, TREE_MIN, TREE_MAX, TREE_DEFAULT } from '#lib/app/global.svelte.js';
-	import { buildAppMenu } from '#lib/app/menu/menu.js';
-	import { findActivePath } from '#lib/app/menu/tree.js';
-	import { canAccessPage } from '#lib/app/acl/access.js';
+	import { buildAppMenu, menuTitle } from '#lib/app/menu/menu.js';
+	import { findActivePath, firstHref } from '#lib/app/menu/tree.js';
+	import { canAccessPage, resourceTrail } from '#lib/app/acl/access.js';
 	import { getMyAccess } from '#lib/remotes/acl.remote.js';
 	import { SplitPane } from '#lib/components/base/split-pane/index.js';
 	import { Icon } from '#lib/components/icons/index.js';
@@ -51,6 +51,15 @@
 	const menu = $derived(buildAppMenu(acl.resources, acl.access));
 	const allowed = $derived(canAccessPage(acl.resources, acl.access, page.url.pathname));
 
+	// Konum çubuğu: sayfanın kaynağından köke. Modül → ilk erişilebilir sayfası (menüde yoksa bağlantısız), grup düz metin,
+	// diğer sayfalar kendi adresi; son öğe bulunulan sayfa.
+	const crumbs = $derived(
+		resourceTrail(acl.resources, page.url.pathname).map((r): Crumb => {
+			const module = r.kind === 'module' ? menu.find((m) => m.id === r.key) : undefined;
+			return { key: r.key, title: menuTitle({ id: r.key, title: r.label }), href: module ? firstHref(module) : r.kind === 'page' ? r.href : undefined };
+		})
+	);
+
 	// Adrese karşılık gelen yol: [modül, …, sayfa]. Modül rayda, yol ağaçta işaretlenir.
 	const activePath = $derived(findActivePath(menu, page.url.pathname));
 	const module = $derived(activePath[0]);
@@ -72,13 +81,16 @@
 {/snippet}
 
 {#snippet content()}
-	<main class="relative flex h-full w-full flex-col overflow-hidden">
-		{#if allowed}
-			{@render children?.()}
-		{:else}
-			<Forbidden />
-		{/if}
-	</main>
+	<div class="flex h-full w-full flex-col overflow-hidden">
+		<Breadcrumb items={crumbs} />
+		<main class="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+			{#if allowed}
+				{@render children?.()}
+			{:else}
+				<Forbidden />
+			{/if}
+		</main>
+	</div>
 {/snippet}
 
 <div class="{classes} flex h-full w-full flex-col" {...attributes}>

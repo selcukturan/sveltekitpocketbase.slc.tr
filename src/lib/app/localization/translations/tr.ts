@@ -201,6 +201,7 @@ export const tr = {
 	'menu.settings.system.resources': 'Kaynaklar',
 	menu_resize: 'Menü genişliği',
 	menu_modules: 'Modüller',
+	breadcrumb: 'Konum',
 	forbidden_title: 'Bu sayfaya erişim yetkiniz yok',
 	forbidden_description: 'Erişim gerekiyorsa yöneticinize başvurun.',
 	forbidden_back: 'Ana sayfaya dön',

@@ -13,6 +13,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Konum çubuğu (breadcrumb, Aşama 4a): içerik alanının üstünde, her sayfada
+  aynı yerde. Yol sayfanın kaynağından köke (`resourceTrail`; menüde gizli ve
+  alt adresli sayfalarda da doğru); modül ilk erişilebilir sayfasına gider, grup
+  bağlantısız, son öğe bulunulan sayfa (`aria-current`); dar ekranda son iki
+  öğe. `<nav aria-label="Konum">`. Testler: `navigation.spec.ts`,
+  `acl-access.spec.ts`.
 - Kaynak ve işlem düzenleme ekranı (Aşama 3e, Ayarlar → Sistem → Kaynaklar):
   kaynaklar tablosu (ağaç sırası; ad, ikon, adres, eşleşme, sıra, aktif, gizli
   hücrede; üst kaynak ve işlemler drawer formunda; anahtar ve tür oluşturulduktan
