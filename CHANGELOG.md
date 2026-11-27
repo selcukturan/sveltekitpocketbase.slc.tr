@@ -313,7 +313,15 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
-- Belgeler: `d02_layout` menüde arama bölümü (4b: liste, arama kuralları,
+- Tema renk paleti (tasarım Aşama 1): sRGB dışında kalan tonlar (Tailwind v4'ün
+  P3 renkleri: quaternary, warning, success, info, error, tertiary) ton ve
+  açıklık korunarak chroma'ları sRGB sınırına çekildi; geniş gamutlu (OLED) ve
+  sRGB monitörlerde aynı görünür. Primary (amber) ton aralığı 100°→34°'ten
+  80°→42°'ye daraltıldı (açık uç yeşilimsi sarı, koyu uç kırmızı değil; orta
+  tonlar aynı). Koyu tema zeminleri aynalanmıyor: L %18, az mavi, katmanlar
+  arasında belirgin adımlar (slate-950 OLED'de siyaha karışıyordu). Açılır
+  pencereler (toggler) sistem renkleri yerine tema renklerini kullanıyor; koyu
+  temada zeminden bir kat açık. `theme-color` temaya göre. (4b: liste, arama kuralları,
   klavye, pencere ve tema, Vite DevTools Ctrl+K notu), erişilebilirlik; yol
   haritası 4b tamam.
 - Belgeler: `d02_layout` konum çubuğu bölümü (4a), şema ve erişilebilirlik;
@@ -500,6 +508,9 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Düzeltildi
 
+- Koyu temada `color-scheme: light dark` sistem renklerini (Canvas, kaydırma
+  çubuğu, form denetimleri) uygulamanın teması yerine işletim sisteminin
+  temasına bağlıyordu; artık açık temada `light`, koyu temada `dark`.
 - Yetki matrisinde hücre değiştirilince ekranda ara sıra eski değer kalıyordu
   (tam test suite'inde neredeyse her çalıştırmada, tek başına hiç).
   `setPermissions` matrisi ve `getMyAccess`'i aynı yanıtta tazeler;

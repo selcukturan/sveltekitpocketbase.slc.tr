@@ -16,16 +16,13 @@
 		<link rel="shortcut icon" href="/%sveltekit.assets%/images/favicon/favicon.ico" />
 		<meta name="msapplication-TileColor" content="#ffffff" />
 		<meta name="msapplication-config" content="/%sveltekit.assets%/images/favicon/browserconfig.xml" />
-		<meta name="theme-color" content="#ffffff" />
+		<meta name="theme-color" content="#f8fafc" />
 
 		<script>
-			// setInitialMode
+			// setInitialMode (theme-color: surface-50; theme-toggle.svelte ile aynı değerler)
 			const current = JSON.parse(localStorage.getItem('slc:theme'))?.current || 'light';
-			if (current === 'dark') {
-				document.documentElement.classList.add('dark');
-			} else {
-				document.documentElement.classList.remove('dark');
-			}
+			document.documentElement.classList.toggle('dark', current === 'dark');
+			document.querySelector('meta[name="theme-color"]')?.setAttribute('content', current === 'dark' ? '#0d121a' : '#f8fafc');
 		</script>
 
 		%sveltekit.head%

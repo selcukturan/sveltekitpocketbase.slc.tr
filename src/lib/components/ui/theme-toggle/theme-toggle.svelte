@@ -29,11 +29,9 @@
 
 	$effect(() => {
 		// setInitialMode
-		if (theme.current === 'dark') {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
+		document.documentElement.classList.toggle('dark', theme.current === 'dark');
+		// Mobil tarayıcı çubuğu: surface-50 (app.html ile aynı değerler)
+		document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.current === 'dark' ? '#0d121a' : '#f8fafc');
 		localStorage.setItem('slc:theme', JSON.stringify(theme));
 	});
 </script>

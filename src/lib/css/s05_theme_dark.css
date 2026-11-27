@@ -1,6 +1,7 @@
 /* SLC Colors Dark */
 .dark {
-	color-scheme: light dark;
+	/* Sistem renkleri (Canvas, kaydırma çubuğu, form denetimleri) uygulamanın temasını izler, işletim sisteminin değil */
+	color-scheme: dark;
 	/* primary */
 	--provider-primary-50: var(--token-primary-950);
 	--provider-primary-100: var(--token-primary-900);
@@ -50,11 +51,13 @@
 	--provider-quaternary-900: var(--token-quaternary-100);
 	--provider-quaternary-950: var(--token-quaternary-50);
 	/* surface */
-	--provider-surface-50: var(--token-surface-950);
-	--provider-surface-100: var(--token-surface-900);
-	--provider-surface-200: var(--token-surface-800);
-	--provider-surface-300: var(--token-surface-700);
-	--provider-surface-400: var(--token-surface-600);
+	/* Koyu zeminler aynalanmaz: slate-950 (L %12.9) OLED'de siyaha karışıyor, eski panellerde grimsi mavi görünüyordu.
+	   Zemin L %18 ve az mavi; katmanlar (zemin → panel → kenarlık) arasında belirgin adımlar. */
+	--provider-surface-50: oklch(18% 0.018 262deg);
+	--provider-surface-100: oklch(22% 0.02 262deg);
+	--provider-surface-200: oklch(27% 0.022 262deg);
+	--provider-surface-300: oklch(34% 0.025 260deg);
+	--provider-surface-400: oklch(45% 0.03 258deg);
 	--provider-surface-500: var(--token-surface-500);
 	--provider-surface-600: var(--token-surface-400);
 	--provider-surface-700: var(--token-surface-300);

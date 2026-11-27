@@ -1,17 +1,17 @@
 /* SLC Theme Colors Token */
 :root {
 	/* Brand - Vintage Primary */
-	--token-primary-50: oklch(95.02% 0.11 100.34deg);
-	--token-primary-100: oklch(90.13% 0.12 91.31deg);
-	--token-primary-200: oklch(85.14% 0.13 82.19deg);
-	--token-primary-300: oklch(80.37% 0.14 74.65deg);
-	--token-primary-400: oklch(75.67% 0.15 66.6deg);
+	--token-primary-50: oklch(95.02% 0.045 80deg);
+	--token-primary-100: oklch(90.13% 0.084 76deg);
+	--token-primary-200: oklch(85.14% 0.12 72deg);
+	--token-primary-300: oklch(80.37% 0.14 68deg);
+	--token-primary-400: oklch(75.67% 0.15 64deg);
 	--token-primary-500: oklch(71.4% 0.16 59.34deg);
 	--token-primary-600: oklch(64.09% 0.15 55.13deg);
-	--token-primary-700: oklch(56.49% 0.14 50.56deg);
-	--token-primary-800: oklch(48.91% 0.13 44.86deg);
-	--token-primary-900: oklch(41.06% 0.13 39.16deg);
-	--token-primary-950: oklch(33.41% 0.12 34.28deg);
+	--token-primary-700: oklch(56.49% 0.14 51deg);
+	--token-primary-800: oklch(48.91% 0.13 47deg);
+	--token-primary-900: oklch(41.06% 0.119 44deg);
+	--token-primary-950: oklch(33.41% 0.101 42deg);
 	/* Accent - Vintage Secondary */
 	--token-secondary-50: oklch(98.26% 0.02 169.26deg);
 	--token-secondary-100: oklch(94.6% 0.03 162.13deg);
@@ -30,8 +30,8 @@
 	--token-tertiary-200: oklch(85.25% 0.09 209.24deg);
 	--token-tertiary-300: oklch(80.05% 0.11 210.82deg);
 	--token-tertiary-400: oklch(75.64% 0.12 212.53deg);
-	--token-tertiary-500: oklch(71.78% 0.13 215.63deg);
-	--token-tertiary-600: oklch(65.12% 0.12 217.48deg);
+	--token-tertiary-500: oklch(71.78% 0.127 215.63deg);
+	--token-tertiary-600: oklch(65.12% 0.116 217.48deg);
 	--token-tertiary-700: oklch(58.25% 0.1 219.09deg);
 	--token-tertiary-800: oklch(50.96% 0.09 223.14deg);
 	--token-tertiary-900: oklch(43.64% 0.08 226.61deg);
@@ -40,12 +40,12 @@
 	--token-quaternary-50: oklch(98.7% 0.026 102.212);
 	--token-quaternary-100: oklch(97.3% 0.071 103.193);
 	--token-quaternary-200: oklch(94.5% 0.129 101.54);
-	--token-quaternary-300: oklch(90.5% 0.182 98.111);
-	--token-quaternary-400: oklch(85.2% 0.199 91.936);
-	--token-quaternary-500: oklch(79.5% 0.184 86.047);
-	--token-quaternary-600: oklch(68.1% 0.162 75.834);
-	--token-quaternary-700: oklch(55.4% 0.135 66.442);
-	--token-quaternary-800: oklch(47.6% 0.114 61.907);
+	--token-quaternary-300: oklch(90.5% 0.176 98.111);
+	--token-quaternary-400: oklch(85.2% 0.174 91.936);
+	--token-quaternary-500: oklch(79.5% 0.162 86.047);
+	--token-quaternary-600: oklch(68.1% 0.143 75.834);
+	--token-quaternary-700: oklch(55.4% 0.123 66.442);
+	--token-quaternary-800: oklch(47.6% 0.109 61.907);
 	--token-quaternary-900: oklch(42.1% 0.095 57.708);
 	--token-quaternary-950: oklch(28.6% 0.066 53.813);
 	/* Slate */
@@ -63,10 +63,10 @@
 	/* Blue */
 	--token-info-50: oklch(97% 0.014 254.604);
 	--token-info-100: oklch(93.2% 0.032 255.585);
-	--token-info-200: oklch(88.2% 0.059 254.128);
-	--token-info-300: oklch(80.9% 0.105 251.813);
-	--token-info-400: oklch(70.7% 0.165 254.624);
-	--token-info-500: oklch(62.3% 0.214 259.815);
+	--token-info-200: oklch(88.2% 0.058 254.128);
+	--token-info-300: oklch(80.9% 0.098 251.813);
+	--token-info-400: oklch(70.7% 0.155 254.624);
+	--token-info-500: oklch(62.3% 0.203 259.815);
 	--token-info-600: oklch(54.6% 0.245 262.881);
 	--token-info-700: oklch(48.8% 0.243 264.376);
 	--token-info-800: oklch(42.4% 0.199 265.638);
@@ -77,34 +77,34 @@
 	--token-success-100: oklch(96.7% 0.067 122.328);
 	--token-success-200: oklch(93.8% 0.127 124.321);
 	--token-success-300: oklch(89.7% 0.196 126.665);
-	--token-success-400: oklch(84.1% 0.238 128.85);
-	--token-success-500: oklch(76.8% 0.233 130.85);
-	--token-success-600: oklch(64.8% 0.2 131.684);
-	--token-success-700: oklch(53.2% 0.157 131.589);
-	--token-success-800: oklch(45.3% 0.124 130.933);
+	--token-success-400: oklch(84.1% 0.222 128.85);
+	--token-success-500: oklch(76.8% 0.209 130.85);
+	--token-success-600: oklch(64.8% 0.179 131.684);
+	--token-success-700: oklch(53.2% 0.146 131.589);
+	--token-success-800: oklch(45.3% 0.123 130.933);
 	--token-success-900: oklch(40.5% 0.101 131.063);
 	--token-success-950: oklch(27.4% 0.072 132.109);
 	/* Amber */
-	--token-warning-50: oklch(98.7% 0.022 95.277);
+	--token-warning-50: oklch(98.7% 0.021 95.277);
 	--token-warning-100: oklch(96.2% 0.059 95.617);
 	--token-warning-200: oklch(92.4% 0.12 95.746);
-	--token-warning-300: oklch(87.9% 0.169 91.605);
-	--token-warning-400: oklch(82.8% 0.189 84.429);
-	--token-warning-500: oklch(76.9% 0.188 70.08);
-	--token-warning-600: oklch(66.6% 0.179 58.318);
-	--token-warning-700: oklch(55.5% 0.163 48.998);
-	--token-warning-800: oklch(47.3% 0.137 46.201);
+	--token-warning-300: oklch(87.9% 0.165 91.605);
+	--token-warning-400: oklch(82.8% 0.169 84.429);
+	--token-warning-500: oklch(76.9% 0.166 70.08);
+	--token-warning-600: oklch(66.6% 0.158 58.318);
+	--token-warning-700: oklch(55.5% 0.149 48.998);
+	--token-warning-800: oklch(47.3% 0.132 46.201);
 	--token-warning-900: oklch(41.4% 0.112 45.904);
 	--token-warning-950: oklch(27.9% 0.077 45.635);
 	/* Red */
 	--token-error-50: oklch(97.1% 0.013 17.38);
 	--token-error-100: oklch(93.6% 0.032 17.717);
-	--token-error-200: oklch(88.5% 0.062 18.334);
-	--token-error-300: oklch(80.8% 0.114 19.571);
-	--token-error-400: oklch(70.4% 0.191 22.216);
+	--token-error-200: oklch(88.5% 0.06 18.334);
+	--token-error-300: oklch(80.8% 0.109 19.571);
+	--token-error-400: oklch(70.4% 0.187 22.216);
 	--token-error-500: oklch(63.7% 0.237 25.331);
-	--token-error-600: oklch(57.7% 0.245 27.325);
-	--token-error-700: oklch(50.5% 0.213 27.518);
+	--token-error-600: oklch(57.7% 0.235 27.325);
+	--token-error-700: oklch(50.5% 0.206 27.518);
 	--token-error-800: oklch(44.4% 0.177 26.899);
 	--token-error-900: oklch(39.6% 0.141 25.723);
 	--token-error-950: oklch(25.8% 0.092 26.042);
