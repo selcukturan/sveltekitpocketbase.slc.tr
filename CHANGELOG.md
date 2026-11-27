@@ -288,6 +288,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Belgeler: `d02_layout` yetki ekranı bölümü (3d), `sys_users` okuma kuralı,
+  `acl-admin.spec.ts`; yol haritası 3d tamam, 3e sırada. Yeni
+  `docs/yapilacaklar.md`: ertelenen işler (bildirimlerin sunucu kontrolü,
+  yetki ekranında DataTable/Select, form, DataTable, veri).
 - Belgeler: `d02_layout` menü verisi (veritabanından), yeni sayfa ekleme
   adımları (kaynak, izin, `menu.<key>`, `requirePermission`), yetkinin
   uygulanması bölümü (3c), testler; yol haritası 3c tamam, 3d sırada.
