@@ -12,13 +12,8 @@
 	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
 </script>
 
-<!-- Sayfa araç çubuğu: zemin (Main) surface-100, araç çubuğu ve içerik kartları surface-50 -->
-<header
-	class="bg-surface-50 border-surface-200 flex min-h-14 flex-wrap items-center gap-2 border-b px-4 py-2 {classes}"
-	style:border-top="0px"
-	style:border-left="0px"
-	{...attributes}
->
+<!-- Sayfa başlığı / araç çubuğu: içerik yüzeyinde (surface-100, app-layout), altta ince çizgi; kartlar surface-50 -->
+<header class="border-surface-200 flex min-h-14 flex-wrap items-center gap-2 border-b px-4 py-2 {classes}" style:border-top="0px" style:border-left="0px" {...attributes}>
 	{#if boundary}
 		<Boundary>
 			{#if children}

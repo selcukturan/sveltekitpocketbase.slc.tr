@@ -133,7 +133,8 @@
 					stroke-linecap="round"
 					stroke-linejoin="round"
 					class="text-surface-500 h-4 w-4 shrink-0"
-					><path d="M20 6 9 17l-5-5" />
+				>
+					<path d="M20 6 9 17l-5-5" />
 				</svg>
 			{/if}
 			<!-- label -->
@@ -166,8 +167,8 @@
 	{@const isLoading = ids.some(isPending)}
 	{@const listItems = (Array.isArray(value) ? [...value].reverse() : value ? [value] : []) as string[]}
 	{@const isEmpty = listItems.length === 0}
-	<output class="mt-1 flex flex-col gap-0 rounded-sm {defaultClasses}">
-		<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true}>
+	<output class="{inform ? '' : 'mt-1'} flex flex-col gap-0 rounded-lg {defaultClasses}">
+		<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={!inform && !isEmpty}>
 			{#each listItems as item (item)}
 				{@const pending = isPending(item)}
 				{@render listItem({ id: item, label: pending ? item : (context.itemDetailCache.get(item)?.label ?? t('relation_no_data')), isLoading: pending })}

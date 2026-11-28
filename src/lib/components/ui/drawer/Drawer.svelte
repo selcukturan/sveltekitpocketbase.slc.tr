@@ -176,7 +176,8 @@
 		};
 	};
 
-	const dialogClasses = 'bg-surface-50 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
+	// Açılır yüzey rengi (bildirim paneli ve pencerelerle aynı): koyu temada çerçeveden ayrışır, alanlar içinde gömük durur
+	const dialogClasses = 'bg-(--slc-system-bg-surface) border-l border-surface-300 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
 	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 

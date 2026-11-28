@@ -4,6 +4,7 @@
 	import { on } from 'svelte/events';
 	import { areEqual } from '#lib/utils/common.js';
 	import { inputClasses } from './common.js';
+	import { Icon } from '#lib/components/icons/index.js';
 	import type { SelectValueChangeArgs, SelectValueTypeChoice, SelectPropsType } from './type.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 
@@ -402,8 +403,10 @@
 		`slc-input inline-flex w-full touch-manipulation items-center justify-center text-start select-none ${canInteract ? 'cursor-pointer' : 'cursor-default'} 
 		disabled:cursor-not-allowed disabled:opacity-50 ${isValid ? inputClasses.variants[status] : inputClasses.variants.error} ${inputClasses.sizes[size]}`
 	);
-	const internalListboxClasses = 'slc-input pointer-events-auto scroll-py-2 p-1.5! select-none';
-	const internalOptionClasses = 'hover:bg-surface-300 flex cursor-pointer items-center px-3 py-1.5 rounded touch-manipulation';
+	// Açılır liste bildirim paneliyle aynı yüzey (--slc-system-bg-surface, kenarlık, gölge); seçili öğe marka tonunda
+	// (.slc-nav-current) ve ✓ ile, klavyeyle gelinen öğe hafif zeminle işaretli.
+	const internalListboxClasses = 'slc-input pointer-events-auto scroll-py-2 p-1! select-none';
+	const internalOptionClasses = 'flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-sm touch-manipulation';
 </script>
 
 <Toggler
@@ -411,13 +414,12 @@
 	{placement}
 	{matchTriggerWidth}
 	--container-width="100%"
-	--border="{inform === true ? '3px solid var(--color-surface-300)' : '1px solid var(--color-surface-400)'} "
-	--background-color="var(--color-surface-200)"
-	--box-shadow="0px 8px 5px -5px color-mix(in srgb, var(--color-surface-token-700) 30%, transparent)"
-	--gutter={inform === true ? '-3px' : '5px'}
-	--min-height="100px"
+	--border="1px solid var(--color-surface-300)"
+	--background-color="var(--slc-system-bg-surface)"
+	--box-shadow="0 12px 32px -8px color-mix(in oklab, black 25%, transparent)"
+	--gutter="4px"
 	--max-height="320px"
-	--border-radius="6px"
+	--border-radius="10px"
 	class="{internalListboxClasses} {listboxClass}"
 	escClose={false}
 >
@@ -447,31 +449,7 @@
 			disabled={disabled || displayOptions.length === 0}
 		>
 			<span class="flex-1 {textEllipsisClasses}">{selectedLabels}</span>
-			{#if isOpenPopup}
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="14"
-					height="14"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg
-				>
-			{:else}
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="14"
-					height="14"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-				>
-			{/if}
+			<Icon name="chevron_down" size={16} class="text-surface-500 shrink-0 transition-transform {isOpenPopup ? 'rotate-180' : ''}" />
 		</button>
 	{/snippet}
 
@@ -485,22 +463,17 @@
 					id="{optionId}-{i}"
 					role="option"
 					aria-selected={isSelected}
-					class:bg-success-700!={isSelected}
-					class:text-success-50!={isSelected}
-					class:outline-2={isActive && isKeyboardNav}
-					class:outline-primary-400={isActive && isKeyboardNav}
-					class="{internalOptionClasses} {optionClass}"
+					class="{internalOptionClasses} {isSelected
+						? 'slc-nav-current font-medium'
+						: isActive && isKeyboardNav
+							? 'bg-surface-200 text-surface-950'
+							: 'text-surface-800 hover:bg-surface-200/70'} {isActive && isKeyboardNav ? 'ring-primary-500/60 ring-1 ring-inset' : ''} {optionClass}"
 					{@attach optionEvents(i)}
 				>
 					<span class="flex-1 {textEllipsisClasses}">
 						{option.label}
 					</span>
-					<span aria-hidden={!isSelected} hidden={!isSelected}>
-						<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-							<path fill="none" d="M0 0h24v24H0z"></path>
-							<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
-						</svg>
-					</span>
+					<Icon name="check" size={16} class="text-primary-600 shrink-0 {isSelected ? '' : 'invisible'}" />
 				</li>
 			{/each}
 		</ul>

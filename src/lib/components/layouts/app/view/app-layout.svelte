@@ -92,7 +92,9 @@
 {/snippet}
 
 {#snippet content()}
-	<div class="flex h-full w-full flex-col overflow-hidden">
+	<!-- İçerik yüzeyi: konum çubuğu, sayfa başlığı ve içerik aynı zeminde (surface-100); çerçeve (üst çubuk, ray, ağaç)
+	     surface-50. Gezinme ile içerik iki ayrı yüzey olarak okunur. -->
+	<div class="bg-surface-100 flex h-full w-full flex-col overflow-hidden">
 		<Breadcrumb items={crumbs} />
 		<main class="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
 			{#if allowed}
@@ -193,14 +195,22 @@
 		padding: 1px;
 		border: 1px solid var(--color-surface-300);
 		border-radius: 9999px;
-		background-color: var(--color-surface-50);
+		/* Açılır yüzey rengi (bildirim paneliyle aynı): iki zeminin (ağaç / içerik) sınırında ikisinden de ayrışır */
+		background-color: var(--slc-system-bg-surface);
 		color: var(--color-surface-600);
+		box-shadow: 0 1px 3px color-mix(in oklab, black 18%, transparent);
 		cursor: pointer;
 		transform: translate(-50%, -50%);
+		transition:
+			color 120ms,
+			border-color 120ms,
+			background-color 120ms;
 		user-select: none;
 	}
+	/* Üzerine gelince marka rengi (önceden sarı quaternary-50 zemin: paletin geri kalanıyla uyumsuzdu) */
 	.slc-tree-toggle:hover {
-		background-color: var(--color-quaternary-50);
+		border-color: var(--color-primary-500);
+		color: var(--color-primary-700);
 	}
 	/* Tablet paneli: içeriğin üstünde, solda */
 	.slc-tree-overlay {

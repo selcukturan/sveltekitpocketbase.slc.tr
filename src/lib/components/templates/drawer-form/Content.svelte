@@ -14,7 +14,7 @@
 	const internalClasses = 'flex flex-1 flex-col overflow-hidden';
 </script>
 
-<main class="{classes} {internalClasses} bg-surface-50" {...attributes}>
+<main class="{classes} {internalClasses} bg-(--slc-system-bg-surface)" {...attributes}>
 	{#if boundary}
 		<Boundary>
 			{#if children}

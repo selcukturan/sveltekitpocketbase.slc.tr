@@ -15,7 +15,7 @@
 </script>
 
 {#if items.length > 0}
-	<nav aria-label={t('breadcrumb')} class="slc-breadcrumb border-surface-200 bg-surface-50 text-surface-600 flex h-8 shrink-0 items-center border-b px-4 text-sm">
+	<nav aria-label={t('breadcrumb')} class="slc-breadcrumb text-surface-600 flex h-9 shrink-0 items-end px-4 text-sm">
 		<ol class="flex min-w-0 items-center gap-1">
 			{#if items.length > 2}
 				<li class="flex items-center gap-1 sm:hidden" aria-hidden="true">

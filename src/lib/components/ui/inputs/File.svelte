@@ -445,12 +445,12 @@
 {/snippet}
 
 <output
-	class="mt-1 flex flex-col gap-0 rounded-sm transition-colors {defaultClasses} {isDragging
+	class="{inform ? '' : 'mt-1'} flex flex-col gap-0 rounded-lg transition-colors {defaultClasses} {isDragging
 		? 'outline-primary-500 bg-primary-100/30 outline-2 outline-dashed'
 		: ''} {classes}"
 	{@attach dropzoneEvents}
 >
-	<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={inform ? true : isEmpty ? false : true} {@attach preventDefaultClick}>
+	<div class="border-surface-300 max-h-48 overflow-y-auto" class:border-t={!inform && !isEmpty} {@attach preventDefaultClick}>
 		{#each displayFiles as file (keyOf(file))}
 			{@render listItem(file)}
 		{/each}

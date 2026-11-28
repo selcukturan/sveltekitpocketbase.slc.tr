@@ -345,6 +345,21 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Girdiler (`inputs/common.ts`): açık zemin, kenarlık, üzerine gelince koyulaşan
+  kenarlık, odakta marka renginde kenarlık ve halka; durum renkleri yalnızca
+  kenarlık ve halkada. Form alanında (`Field`) etiket kutunun üstünde, kutu
+  yalnızca girdiyi çevreler; ilişki ve dosya girdisinin kutu içi üst boşluğu
+  kaldırıldı.
+- Select açılır listesi: bildirim paneliyle aynı yüzey (kenarlık, gölge,
+  yuvarlak köşe), seçili öğe marka tonunda ve ✓ ile, klavyeyle gelinen öğe iç
+  halkayla; tetikleyicide dönen ok.
+- Drawer: açılır yüzey rengi (koyu temada çerçeveden ayrışır, alanlar içinde
+  gömük), solda kenarlık.
+- Yüzeyler: çerçeve (üst çubuk, modül rayı, menü ağacı) surface-50; konum
+  çubuğu, sayfa başlığı ve içerik aynı içerik yüzeyinde (surface-100).
+- Menü gizle/göster düğmesi: açılır yüzey rengi ve gölge, üzerine gelince marka
+  rengi (önceden sarı zemin).
+
 - Bildirimler yeniden tasarlandı: panel (başlık + canlı bağlantı noktası,
   bölümlü filtre "Hepsi / Okunmamış / Okunmuş" sayılarıyla, okunmamışta marka
   renginde nokta, satırda okundu ✓ ve kaldır × ikon düğmeleri, boş durum,
