@@ -1,7 +1,6 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-navigation-without-resolve -- href'ler menü verisinden gelen uygulama içi tam yollar */
 	import { t } from '#lib/app/localization/index.js';
-	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	import type { PropsAppSidebarType } from './types';
 	import { tooltip } from '#lib/attachments/index.js';
 	import { resolve } from '$app/paths';
@@ -11,66 +10,35 @@
 
 	// Modül rayı: menü ağacının kökleri. Aktif modül adresten bulunur (app-layout → findActivePath).
 	let { modules, activeId, class: classes, ...attributes }: PropsAppSidebarType = $props();
-
-	const global = getGlobalContext();
 </script>
 
-<section class="{classes} flex h-full w-full flex-row overflow-hidden sm:flex-col" {...attributes}>
-	<header class="flex items-center justify-center px-2 sm:py-2">
-		<a href={resolve('app')} class="flex h-10 w-10 items-center justify-center select-none">
-			<img class="h-10 w-10 select-none" src="/images/logo/logo_512.png" alt="SLC Web logo" />
+<!-- Modül rayı: logo, modüller (ikon + kısa ad). Bulunulan modül marka tonunda, solda şeritle işaretli. -->
+<section class="{classes} flex h-full w-[4.5rem] flex-col overflow-hidden" {...attributes}>
+	<header class="flex items-center justify-center py-3">
+		<a href={resolve('app')} class="flex size-10 items-center justify-center select-none" aria-label={t('menu.home')}>
+			<img class="size-9 select-none" src="/images/logo/logo_512.png" alt="" />
 		</a>
 	</header>
-	<nav
-		aria-label={t('menu_modules')}
-		class="flex
-			flex-1
-			flex-row
-			items-center
-			justify-start
-			gap-5
-			overflow-x-auto
-			overflow-y-hidden
-			p-1
-			text-base
-			sm:flex-col
-			sm:overflow-x-hidden
-			sm:overflow-y-auto"
-	>
+	<nav aria-label={t('menu_modules')} class="flex flex-1 flex-col items-center gap-1 overflow-x-hidden overflow-y-auto px-1.5 pb-3">
 		{#each modules as d (d.id)}
+			{@const current = d.id === activeId}
 			<a
 				href={firstHref(d)}
 				aria-label={menuTitle(d)}
-				{@attach tooltip({
-					text: menuTitle(d),
-					position: global.isMobileBreakpoint ? 'bottom' : 'right'
-				})}
-				aria-current={d.id === activeId ? 'page' : undefined}
-				class="hover:bg-surface-200
-					active:bg-surface-300
-					aria-[current]:border-primary-900
-					aria-[current]:bg-primary-50
-					aria-[current]:text-primary-900
-					relative
-					inline-flex
-					min-h-11.25
-					min-w-11.25
-					cursor-pointer
-					items-center
-					justify-center
-					rounded-xl
-					border-2
-					border-solid
-					border-transparent
-					text-center select-none"
+				{@attach tooltip({ text: menuTitle(d), position: 'right' })}
+				aria-current={current ? 'page' : undefined}
+				class="group relative flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 select-none {current
+					? 'slc-nav-current'
+					: 'text-surface-600 hover:bg-surface-200 hover:text-surface-900'}"
 			>
-				{#if d.icon}<Icon name={d.icon} />{/if}
+				<!-- bulunulan modül: rayın sol kenarında şerit -->
+				<span
+					class="bg-primary-500 absolute top-1/2 -left-1.5 h-6 w-1 -translate-y-1/2 rounded-r transition-opacity {current ? 'opacity-100' : 'opacity-0'}"
+					aria-hidden="true"
+				></span>
+				{#if d.icon}<Icon name={d.icon} size={22} />{/if}
+				<span class="w-full truncate text-center text-[10px] leading-tight font-medium" aria-hidden="true">{menuTitle(d)}</span>
 			</a>
 		{/each}
 	</nav>
-	<footer class="flex items-center justify-center px-2 sm:py-2">
-		<!-- <figure class="bg-secondary-300 flex h-10 w-10 items-center justify-center rounded-full select-none">
-			<span>x</span>
-		</figure> -->
-	</footer>
 </section>

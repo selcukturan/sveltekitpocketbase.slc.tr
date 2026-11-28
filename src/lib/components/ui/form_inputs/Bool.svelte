@@ -34,7 +34,7 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field issues={formField.issues} required={formField.required} label={formField.label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+<Field issues={formField.issues} required={formField.required} label={formField.label} {id}>
 	<Bool {id} name={attributes.name} aria-invalid={attrAriaInvalid} {onValueChange} {...restProps} class="px-3 pt-1" />
 </Field>
 

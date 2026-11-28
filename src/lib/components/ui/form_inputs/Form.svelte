@@ -81,7 +81,7 @@
 			</div>
 		{/if}
 	</div>
-	<div class="bg-surface-50 flex border-t p-4 {context.props.buttonsClass ?? 'justify-between'}">
+	<div class="border-surface-200 flex border-t p-4 {context.props.buttonsClass ?? 'justify-between'}">
 		{@render context.props.buttons?.({ isChanged: context.isChanged })}
 	</div>
 	{@render context.props.children?.({ isChanged: context.isChanged })}

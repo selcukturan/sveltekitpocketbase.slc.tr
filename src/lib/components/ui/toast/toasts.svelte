@@ -4,7 +4,7 @@
 	import { getToaster } from './toaster.svelte.js';
 	import { slide, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
-	import { Icon } from '#lib/components/icons/index.js';
+	import { Icon, type IconKey } from '#lib/components/icons/index.js';
 
 	const { toasterName = 'app-toaster' }: ToastsProps = $props();
 
@@ -18,35 +18,25 @@
 		'top-center': 'top-2 left-1/2 -translate-x-1/2 items-center',
 		'bottom-center': 'bottom-2 left-1/2 -translate-x-1/2 items-center'
 	};
-	const toasterRootClasses = `min-w-11/12 sm:min-w-0 fixed z-4000 flex flex-col gap-2 px-2 ${positionClasses[toaster.options.position]}`;
-	const toastRootClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'relative flex items-center break-words rounded-sm border p-2 shadow-lg min-w-full sm:min-w-sm sm:max-w-lg',
-		info: 'bg-info-400 text-info-950 border-info-600 border',
-		success: 'bg-success-400 text-success-950 border-success-600 border',
-		warning: 'bg-warning-400 text-warning-950 border-warning-600 border',
-		error: 'bg-error-400 text-error-950 border-error-600 border',
-		loading: 'bg-surface-400 text-surface-950 border-surface-600 border',
-		default: 'bg-surface-400 text-surface-950 border-surface-600 border'
+	const toasterRootClasses = `w-full sm:w-auto fixed z-4000 flex flex-col gap-2 px-2 ${positionClasses[toaster.options.position]}`;
+	// Toast: nötr kart (açılır yüzey rengi), türün rengi yalnızca soldaki şeritte ve ikonda. Doygun renkli zeminler
+	// koyu temada ve farklı monitörlerde göz yoruyordu; metin her türde aynı (okunaklı) renkte.
+	type ToastType = Required<Toast>['type'];
+	const tones: Record<ToastType, { bar: string; icon: string }> = {
+		info: { bar: 'bg-info-500', icon: 'bg-info-100 text-info-700' },
+		success: { bar: 'bg-success-500', icon: 'bg-success-100 text-success-700' },
+		warning: { bar: 'bg-warning-500', icon: 'bg-warning-100 text-warning-700' },
+		error: { bar: 'bg-error-500', icon: 'bg-error-100 text-error-700' },
+		loading: { bar: 'bg-surface-400', icon: 'bg-surface-200 text-surface-700' },
+		default: { bar: 'bg-surface-400', icon: 'bg-surface-200 text-surface-700' }
 	};
-
-	const actionButtonClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'cursor-pointer mx-2 rounded-sm px-2 py-1',
-		info: 'text-info-50 bg-info-600 hover:bg-info-800 active:bg-info-700',
-		success: 'text-success-50 bg-success-600 hover:bg-success-800 active:bg-success-700',
-		warning: 'text-warning-50 bg-warning-600 hover:bg-warning-800 active:bg-warning-700',
-		error: 'text-error-50 bg-error-600 hover:bg-error-800 active:bg-error-700',
-		loading: 'text-surface-50 bg-surface-600 hover:bg-surface-800 active:bg-surface-700',
-		default: 'text-surface-50 bg-surface-600 hover:bg-surface-800 active:bg-surface-700'
-	};
-
-	const closeButtonClasses: Record<Required<Toast>['type'] | 'base', string> = {
-		base: 'inline-flex items-center justify-center h-5 w-5 rounded-full cursor-pointer select-none p-0.5',
-		info: 'bg-info-500 text-info-50 hover:bg-info-700 active:bg-info-600',
-		success: 'bg-success-500 text-success-50 hover:bg-success-700 active:bg-success-600',
-		warning: 'bg-warning-500 text-warning-50 hover:bg-warning-700 active:bg-warning-600',
-		error: 'bg-error-500 text-error-50 hover:bg-error-700 active:bg-error-600',
-		loading: 'bg-surface-500 text-surface-50 hover:bg-surface-700 active:bg-surface-600',
-		default: 'bg-surface-500 text-surface-50 hover:bg-surface-700 active:bg-surface-600'
+	const icons: Record<ToastType, IconKey> = {
+		info: 'info',
+		success: 'circle_check',
+		warning: 'circle_alert',
+		error: 'circle_x',
+		loading: 'loader',
+		default: 'bell'
 	};
 </script>
 
@@ -61,42 +51,31 @@
 			in:slide={{ duration: 200 }}
 			out:fly={{ y: toaster.options.position.startsWith('top') ? -20 : 20, duration: 200 }}
 			animate:flip={{ duration: 200 }}
-			class={`${toastRootClasses.base} ${toastRootClasses[toastType]}`}
+			class="border-surface-300 relative flex w-full items-start gap-3 overflow-hidden rounded-xl border bg-(--slc-system-bg-surface) p-3 pl-4 shadow-lg sm:w-96"
+			role={toastType === 'error' ? 'alert' : 'status'}
 		>
-			<div class="pr-2">
-				{#if toastType === 'info'}
-					<Icon name="info" />
-				{:else if toastType === 'error'}
-					<Icon name="circle_x" />
-				{:else if toastType === 'success'}
-					<Icon name="circle_check" />
-				{:else if toastType === 'warning'}
-					<Icon name="circle_alert" />
-				{:else if toastType === 'loading'}
-					<div class="animate-spin">
-						<Icon name="loader" />
-					</div>
-				{:else}
-					<Icon name="circle" />
-				{/if}
-			</div>
-			<div class="flex-1">
-				<h3 class="font-semibold">{toast.title}</h3>
-				<p class="text-sm">{toast.description}</p>
-			</div>
-			{#if toastId && toast.action}
-				<div>
-					<button class={`${actionButtonClasses.base} ${actionButtonClasses[toastType]}`} onclick={() => toast.action?.onClick(toastId)}>
+			<span class="{tones[toastType].bar} absolute inset-y-0 left-0 w-1" aria-hidden="true"></span>
+			<span class="{tones[toastType].icon} inline-flex size-8 shrink-0 items-center justify-center rounded-full" aria-hidden="true">
+				<Icon name={icons[toastType]} size={18} class={toastType === 'loading' ? 'animate-spin' : ''} />
+			</span>
+			<div class="min-w-0 flex-1 pt-0.5">
+				<h3 class="text-surface-950 text-sm font-semibold">{toast.title}</h3>
+				{#if toast.description}<p class="text-surface-600 mt-0.5 text-sm break-words">{toast.description}</p>{/if}
+				{#if toastId && toast.action}
+					<button class="slc-btn-outline mt-2 h-8 px-3 text-xs" onclick={() => toast.action?.onClick(toastId)}>
 						{toast.action.label}
 					</button>
-				</div>
-			{/if}
+				{/if}
+			</div>
 			{#if toastId && toast.closable !== false}
-				<div class="self-start">
-					<button type="button" class={`${closeButtonClasses.base} ${closeButtonClasses[toastType]}`} onclick={() => toaster.remove(toastId)} aria-label={t('close')}>
-						<Icon name="close" size="100%" />
-					</button>
-				</div>
+				<button
+					type="button"
+					class="text-surface-500 hover:bg-surface-200 hover:text-surface-900 -mt-1 -mr-1 inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md"
+					onclick={() => toaster.remove(toastId)}
+					aria-label={t('close')}
+				>
+					<Icon name="close" size={16} />
+				</button>
 			{/if}
 		</div>
 	{/each}

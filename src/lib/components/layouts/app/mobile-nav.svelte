@@ -37,7 +37,7 @@
 </script>
 
 <dialog bind:this={dialog} class="slc-mobile-nav" aria-label={t('menu')} {onclick}>
-	<div class="bg-surface-50 flex h-full w-full flex-col overflow-hidden">
+	<div class="flex h-full w-full flex-col overflow-hidden bg-(--slc-system-bg-surface)">
 		<div class="border-surface-200 flex items-center justify-between border-b px-3 py-2">
 			<span class="text-surface-700 font-semibold">{t('menu')}</span>
 			<button
@@ -125,17 +125,19 @@
 		cursor: pointer;
 	}
 	.slc-mobile-nav-item:hover {
-		background-color: var(--color-surface-200);
+		background-color: color-mix(in oklab, var(--color-surface-200) 70%, transparent);
+		color: var(--color-surface-900);
 	}
 	/* Ağacı gösterilen modül */
 	.slc-mobile-nav-item[aria-pressed='true'] {
 		background-color: var(--color-surface-200);
 		color: var(--color-surface-900);
 	}
-	/* Bulunulan sayfanın modülü */
+	/* Bulunulan sayfanın modülü: rayla aynı (marka tonu; .slc-nav-current) */
 	.slc-mobile-nav-current,
 	.slc-mobile-nav-item[aria-current='page'] {
 		font-weight: 600;
-		color: var(--color-primary-700);
+		background-color: color-mix(in oklab, var(--color-primary-500) 15%, transparent);
+		color: var(--color-primary-800);
 	}
 </style>

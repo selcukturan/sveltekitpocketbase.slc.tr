@@ -73,7 +73,7 @@
 </script>
 
 <dialog bind:this={dialog} class="slc-palette" aria-label={t('menu_search')} {onclick}>
-	<div class="bg-surface-50 flex max-h-[min(32rem,80dvh)] flex-col overflow-hidden rounded-xl">
+	<div class="flex max-h-[min(32rem,80dvh)] flex-col overflow-hidden rounded-xl bg-(--slc-system-bg-surface)">
 		<div class="border-surface-200 flex items-center gap-2 border-b px-4">
 			<Icon name="search" size={18} class="text-surface-500 shrink-0" />
 			<input
@@ -107,8 +107,8 @@
 					onclick={() => choose(entry)}
 					{@attach intoView(i === active)}
 				>
-					<span class="text-surface-900 truncate">{entry.title}</span>
-					{#if entry.path.length}<span class="text-surface-500 truncate text-xs">{entry.path.join(' › ')}</span>{/if}
+					<span class="text-surface-950 truncate">{entry.title}</span>
+					{#if entry.path.length}<span class="text-surface-600 truncate text-xs">{entry.path.join(' › ')}</span>{/if}
 				</li>
 			{:else}
 				<li role="presentation" class="text-surface-500 px-3 py-6 text-center text-sm">{t('menu_search_empty')}</li>
@@ -154,8 +154,11 @@
 		border-radius: 0.5rem;
 		cursor: pointer;
 	}
+	/* Seçili: hafif marka tonu + solda marka şeridi. Tam dolu primary-100 koyu temada kahveye dönüyor, gri yol metni
+	   üzerinde okunmuyordu; bu ton her iki temada metni (surface-950 / surface-600) okunur bırakır. */
 	.slc-palette-option[aria-selected='true'] {
-		background-color: var(--color-primary-100);
+		background-color: color-mix(in oklab, var(--color-primary-500) 14%, transparent);
+		box-shadow: inset 3px 0 0 var(--color-primary-500);
 	}
 	kbd {
 		padding: 0 0.25rem;

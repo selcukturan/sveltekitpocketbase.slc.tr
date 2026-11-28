@@ -31,11 +31,11 @@
 						type="button"
 						aria-expanded={open}
 						onclick={() => toggle(node, depth)}
-						class="text-surface-700 hover:bg-surface-200 flex w-full cursor-pointer items-center gap-1 rounded px-1 py-1.5 text-left text-sm font-semibold select-none"
-						class:mt-5={depth === 0}
+						class="text-surface-800 hover:bg-surface-200/70 flex w-full cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold select-none"
+						class:mt-4={depth === 0}
 					>
-						<Icon name={open ? 'chevron_down' : 'chevron_right'} size={16} />
-						<span class="truncate">{menuTitle(node)}</span>
+						<span class="min-w-0 flex-1 truncate">{menuTitle(node)}</span>
+						<Icon name="chevron_right" size={16} class="text-surface-500 shrink-0 transition-transform {open ? 'rotate-90' : ''}" />
 					</button>
 					{#if open}
 						{@render branch(node.children, depth + 1)}
@@ -44,9 +44,11 @@
 					<a
 						href={node.href}
 						aria-current={node.id === activeId ? 'page' : undefined}
-						class="text-surface-500 hover:bg-surface-200 hover:text-surface-900 active:bg-surface-300 aria-[current]:bg-surface-200 aria-[current]:text-surface-900 my-0.5 flex min-h-10 w-full min-w-0 items-center gap-x-2 rounded px-3 py-1 text-base no-underline select-none"
+						class="my-px flex min-h-9 w-full min-w-0 items-center gap-x-2.5 rounded-md px-2.5 py-1 text-sm no-underline select-none {node.id === activeId
+							? 'slc-nav-current font-medium'
+							: 'text-surface-600 hover:bg-surface-200/70 hover:text-surface-900'}"
 					>
-						{#if node.icon}<Icon name={node.icon} size={20} />{/if}
+						{#if node.icon}<Icon name={node.icon} size={18} class="shrink-0 opacity-80" />{/if}
 						<span class="truncate">{menuTitle(node)}</span>
 					</a>
 				{/if}
@@ -57,9 +59,9 @@
 
 <nav aria-label={menuTitle(module)} class="flex h-full w-full flex-col overflow-hidden">
 	{#if heading}
-		<h2 class="text-surface-500 px-5 pt-4 pb-1 text-xs font-semibold tracking-wide uppercase">{menuTitle(module)}</h2>
+		<h2 class="text-surface-500 px-5 pt-4 pb-1 text-[11px] font-semibold tracking-wider uppercase">{menuTitle(module)}</h2>
 	{/if}
-	<div class="flex-1 overflow-x-hidden overflow-y-auto px-4 pb-4">
+	<div class="flex-1 overflow-x-hidden overflow-y-auto px-3 pb-4">
 		{@render branch(module.children, 0)}
 	</div>
 </nav>
@@ -67,8 +69,8 @@
 <style>
 	/* İkinci seviyeden itibaren girinti ve sol çizgi (hangi gruba ait olduğu görünsün); ilk grubun bağlantıları başlığın altında hizalı */
 	.slc-nav-nested {
-		margin-left: 0.75rem;
-		padding-left: 0.5rem;
-		border-left: 1px solid var(--color-surface-200);
+		margin-left: 0.875rem;
+		padding-left: 0.375rem;
+		border-left: 1px solid var(--color-surface-300);
 	}
 </style>

@@ -194,4 +194,17 @@
 	<symbol id={icons.database} viewBox="0 0 24 24">
 		<ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5" /><path d="M3 12A9 3 0 0 0 21 12" />
 	</symbol>
+	<symbol id={icons.refresh} viewBox="0 0 24 24">
+		<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
+	</symbol>
+	<symbol id={icons.check} viewBox="0 0 24 24">
+		<path d="M20 6 9 17l-5-5" />
+	</symbol>
+	<symbol id={icons.check_check} viewBox="0 0 24 24">
+		<path d="M18 6 7 17l-5-5" /><path d="m22 10-7.5 7.5L13 16" />
+	</symbol>
+	<symbol id={icons.inbox} viewBox="0 0 24 24">
+		<polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+		<path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+	</symbol>
 </svg>

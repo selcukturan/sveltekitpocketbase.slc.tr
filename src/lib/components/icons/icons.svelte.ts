@@ -38,7 +38,11 @@ export const icons = {
 	log_out: 'log-out',
 	circle_help: 'circle-help',
 	languages: 'languages',
-	database: 'database'
+	database: 'database',
+	refresh: 'refresh',
+	check: 'check',
+	check_check: 'check-check',
+	inbox: 'inbox'
 } as const;
 // ####################################### END TRANSLATIONS ######################################
 

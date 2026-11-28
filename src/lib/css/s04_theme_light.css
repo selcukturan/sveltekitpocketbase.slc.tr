@@ -1,5 +1,8 @@
 /* SLC Colors Light */
 :root {
+	/* Açık tema. color-scheme burada (s05'teki .dark'tan önce) olmalı: :root ve .dark aynı özgüllükte, sonra gelen kazanır.
+	   Sonra gelirse koyu temada <dialog>, popover ve native tarih seçici açık kalır (CanvasText siyah). */
+	color-scheme: light;
 	/* primary */
 	--provider-primary-50: var(--token-primary-50);
 	--provider-primary-100: var(--token-primary-100);

@@ -30,6 +30,12 @@
 		@apply m-0 h-full w-full overflow-hidden p-0;
 	}
 
+	/* Tarayıcı <dialog> ve popover'a CanvasText rengi verir; tema rengini kullansınlar (koyu temada okunur kalır) */
+	dialog,
+	[popover] {
+		color: var(--color-surface-950);
+	}
+
 	::selection {
 		background-color: color-mix(in srgb, var(--color-primary-200) 50%, transparent);
 	}
@@ -74,6 +80,41 @@
 	}
 	.dark .slc-card {
 		@apply bg-surface-200 border-surface-300 shadow-none;
+	}
+
+	/* Menü (modül rayı, menü ağacı, mobil menü): bulunulan öğe hafif marka tonu ve marka renginde metin. Tam dolu
+	   primary-50/100 koyu temada kahveye dönüyordu; yarı saydam ton her iki temada okunur. */
+	.slc-nav-current {
+		background-color: color-mix(in oklab, var(--color-primary-500) 15%, transparent);
+		color: var(--color-primary-800);
+	}
+
+	/* Tablo kartı (Page.Main.Table): zeminden ayrışsın. Açıkta belirgin kenarlık ve gölge; koyuda kartlar gibi bir kat
+	   açık (yükselti) ve tablonun iç renkleri (--dt-*) buna göre. */
+	.slc-table-card {
+		@apply bg-surface-50 border-surface-300 rounded-lg border shadow-md;
+	}
+	.dark .slc-table-card {
+		@apply bg-surface-200 border-surface-300 shadow-none;
+		--dt-bg: var(--color-surface-200);
+		--dt-bar-bg: var(--color-surface-200);
+		--dt-header-bg: var(--color-surface-300);
+		--dt-header-hover: var(--color-surface-400);
+		--dt-border: var(--color-surface-300);
+		--dt-border-strong: var(--color-surface-400);
+	}
+
+	/* Form alanı (form_inputs/Field): çerçeveli kutu; zemin ne olursa olsun (kart, drawer) sınırı görünür. Koyu temada
+	   kutu zeminden bir ton koyu (içe gömük), açıkta beyaza yakın. Odakta marka renginde kenarlık ve halka. */
+	.slc-field {
+		@apply bg-surface-50 border-surface-300 hover:border-surface-400 border transition-colors;
+	}
+	.slc-field:focus-within {
+		border-color: var(--color-primary-500);
+		box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary-500) 20%, transparent);
+	}
+	.slc-field-addon {
+		@apply bg-surface-100 border-surface-300 text-surface-700 border border-l-0;
 	}
 
 	/* Ana eylem düğmesi (marka rengi) ve ikincil (kenarlıklı) düğme: pano, giriş ve tanıtım sayfaları */

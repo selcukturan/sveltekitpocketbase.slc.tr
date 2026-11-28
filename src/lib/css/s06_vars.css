@@ -1,7 +1,6 @@
 :root {
 	/* Sistem renkleri yerine tema renkleri: Canvas/GrayText/Highlight işletim sistemine ve tarayıcıya göre değişiyor,
 	   açılır menüler (toggler) her cihazda farklı görünüyordu. Adlar geriye uyum için korunuyor. */
-	color-scheme: light;
 
 	--slc-system-color: var(--provider-surface-950);
 	--slc-system-border: color-mix(in oklab, var(--provider-surface-400) 45%, transparent);

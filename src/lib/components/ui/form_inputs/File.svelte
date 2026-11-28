@@ -68,7 +68,7 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field issues={formField.issues} required={formField.required} label={formField.label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+<Field issues={formField.issues} required={formField.required} label={formField.label} {id}>
 	<FileInput name={plusName} {id} {onValueChange} multiple={multiple as Tmultiple} {accept} maxSize={formField.meta.maxSize} {maxCount} inform {...restProps} />
 </Field>
 

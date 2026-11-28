@@ -345,6 +345,27 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Bildirimler yeniden tasarlandı: panel (başlık + canlı bağlantı noktası,
+  bölümlü filtre "Hepsi / Okunmamış / Okunmuş" sayılarıyla, okunmamışta marka
+  renginde nokta, satırda okundu ✓ ve kaldır × ikon düğmeleri, boş durum,
+  alt çubukta "Tümünü okundu yap", yeniden bağlan (artık dönen ok; önceden
+  kalem) ve tümünü kaldır) ve detay penceresi (açılır yüzey rengi, okunur
+  başlık ve içerik).
+- Toast'lar: doygun renkli zemin yerine nötr kart; türün rengi soldaki şeritte
+  ve ikonda, metin her türde okunur; eylem düğmesi kenarlıklı; hata toast'ı
+  `role="alert"`, diğerleri `role="status"`.
+- Menü: modül rayında ikon + kısa ad, bulunulan modül marka tonunda ve solda
+  şeritle; ağaçta grup başlığı sağda dönen okla, sayfalar daha sıkı, bulunulan
+  sayfa marka tonunda (`.slc-nav-current`, mobil menüde de aynı).
+- Menüde arama: seçili satır hafif marka tonu ve sol şerit (önceden dolu
+  turuncu zeminde yol metni okunmuyordu).
+- Form alanları çerçeveli (`.slc-field`: kenarlık, odakta marka rengi halka);
+  kart ya da drawer zemininde kaybolmuyor (Uygulama Ayarları). Form düğme
+  çubuğu saydam.
+- Veri tablosu kartı (`.slc-table-card`) zeminden ayrışır: açıkta belirgin
+  kenarlık ve gölge, koyuda bir kat açık (iç renkler `--dt-*` ile).
+- Yeni ikonlar: refresh, check, check_check, inbox.
+
 - Yer tutucu başlık ve alt bilgiler ("Settings Page Header", "Toast Footer"…)
   kaldırıldı; geliştirme sayfaları başlığı menüden alır. `Page.Main.Panel`
   ortak `.slc-card` (koyu temada zeminden açık), `Page.Footer` kenarlıklı alt
@@ -552,6 +573,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   ikon solda, ortalıda absolute); hücre ve alt satırda `tabular-nums`.
 
 ### Düzeltildi
+
+- Koyu temada `color-scheme` açık kalıyordu (alpha.237'de `:root { color-scheme:
+light }` `.dark`'tan sonra yükleniyordu): native tarih seçici açık, `<dialog>`
+  ve popover metni siyahtı (drawer başlığı, bildirim listesi ve detayı, ilişki
+  seçici, dosya girdisi koyu temada okunmuyordu). Kural `s04`'e taşındı;
+  `<dialog>` ve popover metni tema renginde. Test: `theme.spec.ts`.
 
 - Tema Tailwind'in varsayılan renklerini sıfırladığı için tanımsız kalan
   sınıflar (`text-white`, `bg-white`, `bg-gray-500`, `bg-blue-500`) geliştirme

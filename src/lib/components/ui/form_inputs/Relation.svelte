@@ -51,7 +51,7 @@
 	// ######### END: handle value change #####################
 </script>
 
-<Field issues={formField.issues} required={formField.required} label={formField.label} {id} fieldClasses="group-focus-within:bg-surface-200!">
+<Field issues={formField.issues} required={formField.required} label={formField.label} {id}>
 	<Relation multiple={multiple as Tmultiple} {collection} {onValueChange} {...restProps} {id} inform />
 
 	<!--Hidden Area-->
