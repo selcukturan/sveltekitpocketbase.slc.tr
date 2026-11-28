@@ -42,3 +42,24 @@ Ertelenen işler ve açık konular. Bir iş yapılınca buradan silinir (geçmi�
 ## Veri
 
 - **`search_label` toplu yeniden hesaplama:** hook'tan önce oluşturulmuş kayıtlarda `search_label` boş ya da eski olabilir. `demo_crud`'daki kayıtların `updated` tarihi değişmesin diye toplu güncelleme yapılmadı.
+
+## Tasarım
+
+### Anlamsal renkler (tema sadeleştirme)
+
+- **Durum (alpha.245):** renkler üç katmanlı: `--token-*` (sabit) → `--provider-*` (koyu temada aynalanır: 50↔950) → Tailwind `bg-surface-100`. Tek sınıf iki temada çalışıyor, ama aynalama "anlamı" çevirmiyor: açık temada zeminden açık olan kart koyu temada koyu kalıyor. Bunun için yamalar birikti: koyu tema surface 50–400 elle (`s05`), 12 `dark:` varyantı, 8 `.dark` kuralı (`.slc-card`, `.slc-table-card`, rozet, hover'lar), ara değişkenler (`--slc-system-bg-surface`, `--slc-input-bg`). Yeni bileşende "hangi numara, koyuda ne olur" kararı gerekiyor.
+- **Plan (2026-11-28'de konuşuldu, ertelendi):** sayısal skalaların üstüne anlamsal katman (shadcn / Radix / Primer yaklaşımı); her tema için tek yerde tanım, bileşenler yalnızca anlamı kullanır. Sayısal skalalar grafik ve özel durumlar için kalır.
+  - Zeminler: `bg-app` (içerik), `bg-chrome` (üst çubuk, ray, ağaç), `bg-card` (kart, tablo), `bg-overlay` (popover, drawer, diyalog, toast), `bg-input`, `bg-hover`, `bg-selected`.
+  - Kenarlık: `border`, `border-strong`. Metin: `text`, `text-muted`, `text-subtle`.
+  - Marka: `accent`, `accent-soft`, `accent-fg`; durum renkleri (danger, success, warning, info) aynı kalıpla.
+- **Aşamalar:**
+  1. Anlamsal değişkenleri mevcut sistemin yanına ekle (görünüm değişmez); liste önce onaya sunulacak.
+  2. Ortak parçalar: iskelet (`layouts/app`), `form_inputs` / `inputs`, Toggler / popover, drawer, DataTable, bildirimler, toast.
+  3. Sayfalar ve geliştirme demoları (59 dosya, ~578 surface sınıfı).
+  4. Gereksiz kalan `dark:` varyantları, `.dark` kuralları ve ara değişkenleri sil.
+- **Kontrol:** her aşamada iki temada ekran görüntüsü (bilerek değiştirilmedikçe aynı) ve `theme.spec.ts` dahil tüm testler.
+
+### Diğer
+
+- **Görüntüle drawer'ı (`RecordView`):** kaydın tüm alanlarını ham adlarıyla listeliyor (`collectionId` gibi sistem alanları dahil). Tablo kolonlarının etiketleri (`dt_<alan>`) ile gösterilebilir, sistem alanları gizlenebilir.
+- **Geliştirme bölümü:** kullanıcının talepleri gelecek (2026-11-28'de "sonra vereceğim" dedi).
