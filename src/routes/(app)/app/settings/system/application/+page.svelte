@@ -20,7 +20,7 @@
 </script>
 
 <Head>
-	<title>{t('settings_application')} - SLC Web Applications</title>
+	<title>{t('settings_application')} - {t('app_name')}</title>
 </Head>
 
 <Toasts toasterName="settings-toaster" />

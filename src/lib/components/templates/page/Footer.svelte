@@ -12,7 +12,12 @@
 	let { children, class: classes, boundary = false, ...attributes }: Props = $props();
 </script>
 
-<footer class="{classes} bg-surface-100/80" style:border-bottom="0px" style:border-left="0px" {...attributes}>
+<footer
+	class="bg-surface-50 text-surface-600 border-surface-200 flex min-h-10 items-center gap-2 border-t px-4 py-2 text-sm {classes}"
+	style:border-bottom="0px"
+	style:border-left="0px"
+	{...attributes}
+>
 	{#if boundary}
 		<Boundary>
 			{#if children}

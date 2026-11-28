@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 
 	import { Toasts, createToaster, getToaster } from '#lib/components/ui/toast/index.js';
 
@@ -7,17 +7,10 @@
 	const pageToaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 </script>
 
-<Head>
-	<title>SLC - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Toasts toasterName="page-toaster" />
 
 <Page>
-	<Page.Header>
-		<p>Zag.js UI Toast</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<p class="p-3">Page Toast</p>
@@ -175,8 +168,10 @@
 								}
 							}
 						});
-					}}>Info</button
+					}}
 				>
+					Info
+				</button>
 				<button
 					class="bg-success-400 text-success-50 rounded"
 					onclick={() => {
@@ -185,8 +180,10 @@
 							title: 'This is a APP toast!',
 							description: 'Success lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 						});
-					}}>Success</button
+					}}
 				>
+					Success
+				</button>
 				<button
 					class="bg-warning-400 text-warning-50 rounded"
 					onclick={() => {
@@ -195,8 +192,10 @@
 							title: 'This is a APP toast!',
 							description: 'Warning lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 						});
-					}}>Warning</button
+					}}
 				>
+					Warning
+				</button>
 				<button
 					class="bg-error-400 text-error-50 rounded"
 					onclick={() => {
@@ -205,12 +204,11 @@
 							title: 'This is a APP toast!',
 							description: 'Error lorem ipsum dolor sit amet, consectetur adipisicing elit.'
 						});
-					}}>Error</button
+					}}
 				>
+					Error
+				</button>
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Toast Footer</p>
-	</Page.Footer>
 </Page>

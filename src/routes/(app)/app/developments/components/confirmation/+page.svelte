@@ -1,20 +1,13 @@
 <script lang="ts">
 	import { confirm } from '#lib/components/ui/confirm/index.js';
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 
 	let answer = $state('init');
 </script>
 
-<Head>
-	<title>Confirmation - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <!-- Sayfa içeriği -->
 <Page>
-	<Page.Header>
-		<p>Confirmation Header</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<main class="p-8">
@@ -29,7 +22,7 @@
 								answer = 'false';
 							}
 						}}
-						class="bg-surface-300 hover:bg-surface-200 rounded bg-blue-500 px-4 py-2"
+						class="bg-surface-300 hover:bg-surface-200 bg-info-500 rounded px-4 py-2"
 					>
 						Confirmation (html dialog)
 					</button>
@@ -39,7 +32,4 @@
 			</main>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Confirmation Footer</p>
-	</Page.Footer>
 </Page>

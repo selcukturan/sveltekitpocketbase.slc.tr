@@ -1,22 +1,9 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 </script>
 
-<Head>
-	<title>Remote [command] - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
+<!-- Henüz hazır değil: başlık menüden, içerik boş durum -->
 <Page>
-	<Page.Header>
-		<p>Remote [command]</p>
-	</Page.Header>
-	<Page.Main>
-		<Page.Main.Panel boundary>
-			<p>dddd</p>
-		</Page.Main.Panel>
-	</Page.Main>
-	<Page.Footer>
-		<p>Remote [command] Page Footer</p>
-	</Page.Footer>
+	<Page.Header><Page.Header.Title /></Page.Header>
+	<Page.Main><Page.Main.Empty /></Page.Main>
 </Page>

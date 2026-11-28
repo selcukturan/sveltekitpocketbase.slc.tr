@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js'; // Bileşeninizi import ettiğiniz yer
 
 	// Test edilecek tüm placement kombinasyonları
@@ -21,15 +21,8 @@
 	let toggl = $state<ReturnType<typeof Toggler> | null>(null);
 </script>
 
-<Head>
-	<title>Remote [command] - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Remote [command]</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<main class="test-container">
@@ -197,9 +190,6 @@
 			</main>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p class="flex-1">Remote [command] Page Footer</p>
-	</Page.Footer>
 </Page>
 
 <style>

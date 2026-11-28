@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 	import { getGlobalContext } from '#lib/app/global.svelte.js';
 	import { getUser } from '#lib/remotes/guarded.remote.js';
 	import { resolve } from '$app/paths';
@@ -13,15 +13,8 @@
 	const testButton = 'bg-primary-200 text-primary-800 hover:bg-primary-300 active:bg-primary-400 rounded-md p-3 text-center';
 </script>
 
-<Head>
-	<title>Developments - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Application Tailwind v4 Theme System</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<div class="flex h-full w-full flex-col overflow-hidden">
@@ -189,5 +182,4 @@
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>
-	<!-- <Page.Footer>Footer</Page.Footer> -->
 </Page>

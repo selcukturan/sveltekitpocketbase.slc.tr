@@ -13,6 +13,13 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Eklendi
 
+- Sayfa şablonu (tasarım Aşama 5, tutarlılık): `Page.Header.Title` (başlık ve
+  sekme başlığı menüden, seçili dilde), `Page.Main.Index` (bölüm girişi:
+  bölümdeki sayfalar izne göre kart olarak) ve `Page.Main.Empty` (boş durum,
+  "Yakında"). Grapes, CRUD, Veri Tablosu → Demolar, Ayarlar ve Sistem giriş
+  sayfaları bölüm dizini oldu; Kayıtlar ve "Oluştur, Oku, Güncelle, Sil" boş
+  durum gösterir. Test: `acl-ui.spec.ts`.
+
 - Tanıtım sayfası (`/`, tasarım Aşama 4): üst çubuk (tema, dil, giriş), hero
   (rozet, başlık, "Demoyu dene" / oturum açıksa "Uygulamaya git", GitHub),
   özellik kartları, teknoloji şeridi, çağrı ve alt bilgi. Özellik listesi pano
@@ -338,6 +345,12 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Yer tutucu başlık ve alt bilgiler ("Settings Page Header", "Toast Footer"…)
+  kaldırıldı; geliştirme sayfaları başlığı menüden alır. `Page.Main.Panel`
+  ortak `.slc-card` (koyu temada zeminden açık), `Page.Footer` kenarlıklı alt
+  çubuk. Sekme başlıkları "… - SLC Web Uygulamaları" (çeviriden). Panodaki
+  CRUD kartı gerçek tabloya (Basit CRUD) gider.
+
 - Giriş sayfası yeniden tasarlandı: geniş ekranda solda marka paneli (öne çıkan
   üç bölüm, illüstrasyon, sürüm), sağda form kartı ("Giriş yap" başlığı, demo
   bilgisi notu, `autocomplete`, gönderilirken düğme kilitli), "Ana sayfaya dön"
@@ -539,6 +552,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   ikon solda, ortalıda absolute); hücre ve alt satırda `tabular-nums`.
 
 ### Düzeltildi
+
+- Tema Tailwind'in varsayılan renklerini sıfırladığı için tanımsız kalan
+  sınıflar (`text-white`, `bg-white`, `bg-gray-500`, `bg-blue-500`) geliştirme
+  sayfalarında tema renkleriyle değiştirildi.
 
 - Koyu temada `color-scheme: light dark` sistem renklerini (Canvas, kaydırma
   çubuğu, form denetimleri) uygulamanın teması yerine işletim sisteminin

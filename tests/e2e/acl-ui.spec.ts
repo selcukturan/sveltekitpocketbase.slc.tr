@@ -158,9 +158,27 @@ test('karşılama panosu: kartlar izne göre; kart sayfaya götürür; "Sayfa ar
 
 	await withAccess(page, (access) => {
 		delete access['settings.system.permissions'];
-		delete access['grapes.crud.full'];
+		delete access['grapes.crud.simple'];
 	});
 	await page.goto('/app');
 	await expect(features.getByRole('link')).toHaveCount(4);
 	await expect(features.getByRole('link', { name: /Yetkiler/ })).toHaveCount(0);
+});
+
+test('bölüm girişi: başlık ve sekme menüden; bölümdeki sayfalar izne göre kart olarak listelenir', async ({ page }) => {
+	await page.goto('/app/settings');
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ayarlar');
+	await expect(page).toHaveTitle('Ayarlar - SLC Web Uygulamaları');
+	const main = page.getByRole('main');
+	for (const name of ['Uygulama', 'Yetkiler', 'Kaynaklar']) await expect(main.getByRole('link', { name, exact: true })).toBeVisible();
+
+	await main.getByRole('link', { name: 'Kaynaklar', exact: true }).click();
+	await expect(page).toHaveURL(/\/app\/settings\/system\/resources/);
+
+	await withAccess(page, (access) => {
+		delete access['settings.system.resources'];
+	});
+	await page.goto('/app/settings');
+	await expect(main.getByRole('link', { name: 'Yetkiler', exact: true })).toBeVisible();
+	await expect(main.getByRole('link', { name: 'Kaynaklar', exact: true })).toHaveCount(0);
 });

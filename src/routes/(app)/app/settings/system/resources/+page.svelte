@@ -104,7 +104,7 @@
 {/snippet}
 
 <Head>
-	<title>{t('acl_resources_title')} - SLC Web Applications</title>
+	<title>{t('acl_resources_title')} - {t('app_name')}</title>
 </Head>
 
 <Toasts toasterName="resources-toaster" />

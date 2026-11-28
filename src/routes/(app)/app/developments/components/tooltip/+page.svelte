@@ -1,20 +1,13 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 	import { tooltip } from '#lib/attachments/index.js';
 
 	let content = $state('This is a SLC attachment tooltip');
 	let userSelected = $state('top');
 </script>
 
-<Head>
-	<title>Tooltip - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Tooltip Page Header</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<input bind:value={content} class="border" />
@@ -35,7 +28,4 @@
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Tooltip Page Footer</p>
-	</Page.Footer>
 </Page>

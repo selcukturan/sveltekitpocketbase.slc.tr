@@ -13,7 +13,7 @@ export type Feature = {
 
 // Tailwind sınıfları tam yazılmalı (dinamik birleştirme derlemede görünmez). Koyu temada tonlar kendiliğinden döner.
 export const features: Feature[] = [
-	{ key: 'grapes.crud.full', icon: 'grape', title: 'dash_f_crud_title', desc: 'dash_f_crud_desc', tone: 'bg-primary-100 text-primary-700' },
+	{ key: 'grapes.crud.simple', icon: 'grape', title: 'dash_f_crud_title', desc: 'dash_f_crud_desc', tone: 'bg-primary-100 text-primary-700' },
 	{ key: 'data_table.demos.common', icon: 'data_table', title: 'dash_f_table_title', desc: 'dash_f_table_desc', tone: 'bg-info-100 text-info-700' },
 	{ key: 'settings.system.permissions', icon: 'users', title: 'dash_f_acl_title', desc: 'dash_f_acl_desc', tone: 'bg-success-100 text-success-700' },
 	{ key: 'settings.system.resources', icon: 'file_symlink', title: 'dash_f_resources_title', desc: 'dash_f_resources_desc', tone: 'bg-tertiary-100 text-tertiary-700' },

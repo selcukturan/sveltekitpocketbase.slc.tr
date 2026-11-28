@@ -1,23 +1,9 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 </script>
 
-<Head>
-	<title>Data Table - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
+<!-- Bölüm girişi: başlık ve bölümdeki sayfalar kullanıcının menüsünden (Page.Header.Title, Page.Main.Index) -->
 <Page>
-	<Page.Header>
-		<p>Header</p>
-	</Page.Header>
-	<Page.Main>
-		<Page.Main.Table boundary>
-			<!-- <PageContent /> -->
-			<p>test-2</p>
-		</Page.Main.Table>
-	</Page.Main>
-	<Page.Footer>
-		<p>Footer</p>
-	</Page.Footer>
+	<Page.Header><Page.Header.Title /></Page.Header>
+	<Page.Main><Page.Main.Index /></Page.Main>
 </Page>

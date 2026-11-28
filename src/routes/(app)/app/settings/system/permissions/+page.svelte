@@ -91,7 +91,7 @@
 </script>
 
 <Head>
-	<title>{t('acl_title')} - SLC Web Applications</title>
+	<title>{t('acl_title')} - {t('app_name')}</title>
 </Head>
 
 <Toasts toasterName="permissions-toaster" />

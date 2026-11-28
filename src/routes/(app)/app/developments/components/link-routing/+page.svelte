@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 	import { Pagination } from '#lib/components/base/pagination/index.js';
 
 	// Örnek veri seti
@@ -12,15 +12,8 @@
 	let paginatedItems = $derived(allItems.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 </script>
 
-<Head>
-	<title>SLC Select - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Page Header Text</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<main>
@@ -42,7 +35,4 @@
 			</main>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Page Footer Text</p>
-	</Page.Footer>
 </Page>

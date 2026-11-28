@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t } from '#lib/app/localization/index.js';
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 	import * as input from '#lib/components/ui/inputs/index.js';
 	import { inputClasses } from '#lib/components/ui/inputs/common.js';
 
@@ -164,15 +164,8 @@
 	// ################### END Bool Variables ###################
 </script>
 
-<Head>
-	<title>Test Inputs - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Test Inputs</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel boundary>
 			<div class="flex flex-col gap-4">
@@ -201,11 +194,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(textInput)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(textInput)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(textInputBeforeValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(textInputBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -273,13 +266,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(textareaValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(textareaValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(textareaOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(textareaOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -347,13 +340,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(numberInput)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(numberInput)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(numberInputOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(numberInputOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -423,13 +416,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(selectSingleValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(selectSingleValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(selectSingleOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(selectSingleOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -505,13 +498,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(selectMultiValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(selectMultiValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(selectMultiOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(selectMultiOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -583,13 +576,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(datetimeInput)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(datetimeInput)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(datetimeInputOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(datetimeInputOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -657,13 +650,13 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(dateInput)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(dateInput)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(dateInputOnChangeBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">
+									{JSON.stringify(dateInputOnChangeBeforeValue)}
+								</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -732,11 +725,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="font-semibold">Aktif Dosya Değeri (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5">{JSON.stringify(singleValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5">{JSON.stringify(singleValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5">{JSON.stringify(singleBeforeValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5">{JSON.stringify(singleBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -749,7 +742,7 @@
 							<div>
 								<span class="mb-1 block font-semibold">Seçili Ham File Nesneleri (selectedFiles):</span>
 								{#if singleSelectedFiles.length > 0}
-									<ul class="border-surface-200 text-surface-800 list-inside list-disc space-y-1 rounded border bg-white p-2">
+									<ul class="border-surface-200 text-surface-800 bg-surface-50 list-inside list-disc space-y-1 rounded border p-2">
 										{#each singleSelectedFiles as file, idx (idx)}
 											<li>{file.name} ({(file.size / 1024).toFixed(1)} KB)</li>
 										{/each}
@@ -817,11 +810,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Dosya Değeri (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(multiValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(multiValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(multiBeforeValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(multiBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -834,7 +827,7 @@
 							<div>
 								<span class="mb-1 block font-semibold">Seçili Ham File Nesneleri (selectedFiles):</span>
 								{#if multiSelectedFiles.length > 0}
-									<ul class="border-surface-200 text-surface-800 list-inside list-disc space-y-1 rounded border bg-white p-2">
+									<ul class="border-surface-200 text-surface-800 bg-surface-50 list-inside list-disc space-y-1 rounded border p-2">
 										{#each multiSelectedFiles as file, idx (idx)}
 											<li>{file.name} ({(file.size / 1024).toFixed(1)} KB)</li>
 										{/each}
@@ -899,13 +892,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(relationSingleValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(relationSingleValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(relationSingleBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(relationSingleBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -972,13 +963,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="mb-1 block font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all">{JSON.stringify(relationMultiValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(relationMultiValue)}</code>
 							</p>
 							<p>
 								<span class="mb-1 block font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5 break-all"
-									>{JSON.stringify(relationMultiBeforeValue)}</code
-								>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5 break-all">{JSON.stringify(relationMultiBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -1043,11 +1032,11 @@
 						<div class="text-surface-600 grid grid-cols-1 gap-2">
 							<p>
 								<span class="font-semibold">Aktif Değer (value):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5">{JSON.stringify(boolValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5">{JSON.stringify(boolValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">Önceki Değer (beforeValue):</span>
-								<code class="border-surface-200 text-surface-800 rounded border bg-white px-1.5 py-0.5">{JSON.stringify(boolBeforeValue)}</code>
+								<code class="border-surface-200 text-surface-800 bg-surface-50 rounded border px-1.5 py-0.5">{JSON.stringify(boolBeforeValue)}</code>
 							</p>
 							<p>
 								<span class="font-semibold">İlk Yükleme mi (initial):</span>
@@ -1177,7 +1166,4 @@
 			</div>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Inputs Page Footer</p>
-	</Page.Footer>
 </Page>

@@ -25,7 +25,7 @@
 </script>
 
 <Head>
-	<title>Data Table - SLC Web Applications</title>
+	<title>Data Table - {t('app_name')}</title>
 	<meta name="description" content="SLC Web Applications" />
 </Head>
 

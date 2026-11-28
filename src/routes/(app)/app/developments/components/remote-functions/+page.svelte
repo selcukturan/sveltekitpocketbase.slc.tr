@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 
 	let logs = $state<string[]>([]);
 
@@ -36,14 +36,11 @@
 	};
 </script>
 
-<Head>
-	<title>Data Table - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
 	<Page.Header>
-		<button class={buttonClasses} onclick={() => (logs = [])}>Clear Log</button>
+		<Page.Header.Title>
+			<button class={buttonClasses} onclick={() => (logs = [])}>Clear Log</button>
+		</Page.Header.Title>
 	</Page.Header>
 	<Page.Main>
 		<Page.Main.Table class="flex items-center justify-center">
@@ -148,7 +145,4 @@
 			</div>
 		</Page.Main.Table>
 	</Page.Main>
-	<Page.Footer>
-		<p>Footer</p>
-	</Page.Footer>
 </Page>

@@ -1,16 +1,9 @@
 <script lang="ts">
-	import { Page, Head } from '#lib/components/templates/index.js';
+	import { Page } from '#lib/components/templates/index.js';
 </script>
 
-<Head>
-	<title>Tree - SLC Web Applications</title>
-	<meta name="description" content="SLC Web Applications" />
-</Head>
-
 <Page>
-	<Page.Header>
-		<p>Tree Page Header</p>
-	</Page.Header>
+	<Page.Header><Page.Header.Title /></Page.Header>
 	<Page.Main>
 		<Page.Main.Panel>
 			<ul class="slc-left-menu">
@@ -88,9 +81,6 @@
 			</ul>
 		</Page.Main.Panel>
 	</Page.Main>
-	<Page.Footer>
-		<p>Tree Page Footer</p>
-	</Page.Footer>
 </Page>
 
 <style>

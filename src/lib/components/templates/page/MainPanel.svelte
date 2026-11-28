@@ -15,7 +15,7 @@
 <!-- wrapper -->
 <div class="{classes} relative mx-auto w-4xl max-w-full p-6" {...attributes}>
 	<!-- panel -->
-	<div class="bg-surface-50 shadow-surface-400/40 rounded-xl p-6 shadow-xl/30">
+	<div class="slc-card p-6">
 		{#if boundary}
 			<Boundary>
 				{#if children}
