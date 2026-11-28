@@ -10,8 +10,9 @@
 	--slc-system-color-muted: var(--provider-surface-600);
 	--slc-system-color-shadow: color-mix(in oklab, var(--token-surface-950) 18%, transparent);
 
-	/* Girdi zemini (inputs/common.ts, .slc-field): açık temada beyaza yakın */
-	--slc-input-bg: var(--provider-surface-50);
+	/* Girdi zemini (inputs/common.ts, .slc-field): açık temada beyaz; drawer (surface-100) ve kartlar (surface-50) üstünde
+	   ayrışır */
+	--slc-input-bg: oklch(100% 0 0);
 }
 
 .dark {

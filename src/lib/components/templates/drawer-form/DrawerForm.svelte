@@ -14,7 +14,7 @@
 	const internalClasses = 'flex flex-col w-full h-full overflow-hidden';
 </script>
 
-<section class="{classes} {internalClasses} bg-(--slc-system-bg-surface)" {...attributes}>
+<section class="{classes} {internalClasses} bg-surface-100" {...attributes}>
 	{#if boundary}
 		<Boundary>
 			{#if children}

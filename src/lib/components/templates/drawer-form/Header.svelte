@@ -15,7 +15,7 @@
 	const internalClasses = 'flex items-center justify-between border-b p-4';
 </script>
 
-<header class="{classes} {internalClasses} bg-(--slc-system-bg-surface)" {...attributes}>
+<header class="{classes} {internalClasses} bg-surface-100" {...attributes}>
 	<h2 class="text-lg font-semibold">{label || 'Drawer Form Header'}</h2>
 
 	{#if boundary}

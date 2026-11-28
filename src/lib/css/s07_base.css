@@ -122,6 +122,18 @@
 	.slc-btn-primary {
 		@apply bg-primary-500 text-surface-token-950 hover:bg-primary-400 active:bg-primary-600 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-60;
 	}
+	/* Yumuşak marka düğmesi: bir grubun ana eylemi (ör. filtre çubuğunda "Ara"); sayfanın ana eylemiyle (dolu primary) yarışmaz */
+	.slc-btn-soft {
+		@apply text-primary-800 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors select-none;
+		background-color: color-mix(in oklab, var(--color-primary-500) 14%, transparent);
+	}
+	.slc-btn-soft:hover {
+		background-color: color-mix(in oklab, var(--color-primary-500) 22%, transparent);
+	}
+	/* Sade metin düğmesi (ör. "Temizle") */
+	.slc-btn-ghost {
+		@apply text-surface-600 hover:bg-surface-200 hover:text-surface-950 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50;
+	}
 	.slc-btn-outline {
 		@apply border-surface-300 text-surface-800 hover:bg-surface-100 active:bg-surface-200 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium whitespace-nowrap transition-colors select-none;
 	}

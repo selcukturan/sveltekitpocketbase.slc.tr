@@ -42,7 +42,9 @@ export const icons = {
 	refresh: 'refresh',
 	check: 'check',
 	check_check: 'check-check',
-	inbox: 'inbox'
+	inbox: 'inbox',
+	filter: 'filter',
+	plus: 'plus'
 } as const;
 // ####################################### END TRANSLATIONS ######################################
 

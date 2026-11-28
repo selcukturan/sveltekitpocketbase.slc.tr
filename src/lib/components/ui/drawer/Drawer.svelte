@@ -176,9 +176,10 @@
 		};
 	};
 
-	// Açılır yüzey rengi (bildirim paneli ve pencerelerle aynı): koyu temada çerçeveden ayrışır, alanlar içinde gömük durur
+	// Zemin surface-100 (koyuda açılır yüzeyle aynı ton): girdiler (--slc-input-bg) her iki temada ayrışır. Görünen kenar
+	// yuvarlak ve gölgeli (bildirim paneli gibi); telefonda köşesiz, tam ekran.
 	const dialogClasses =
-		'bg-(--slc-system-bg-surface) border-l border-y border-surface-300 rounded-l-2xl m-0 w-full max-w-2xl p-0 shadow-[-16px_0_48px_-12px_rgb(0_0_0/0.35)] overflow-hidden';
+		'bg-surface-100 border-surface-300 sm:border-l sm:border-y sm:rounded-l-2xl m-0 w-full max-w-2xl p-0 shadow-[-16px_0_48px_-12px_rgb(0_0_0/0.35)] overflow-hidden';
 	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 

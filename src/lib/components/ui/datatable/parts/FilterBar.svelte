@@ -1,5 +1,6 @@
 <script lang="ts" generics="TData extends Row">
 	import { t } from '#lib/app/localization/index.js';
+	import { Icon } from '#lib/components/icons/index.js';
 	import { Toggler } from '#lib/components/base/toggler/index.js';
 	import * as input from '#lib/components/ui/inputs/index.js';
 	import { formatDatetimeIsoToInput, parseDatetimeInputToIso } from '#lib/utils/input-helper.js';
@@ -69,26 +70,36 @@
 	</div>
 {/snippet}
 
+<!-- Filtre çubuğu: [🔍 arama alanları] [Filtreler] [Ara] [Temizle]. Gruptaki ana eylem "Ara" yumuşak marka tonunda;
+     sayfanın ana eylemi (ör. "Oluştur", dolu marka rengi) bununla yarışmaz. Yükseklikler h-9. -->
 <div class="slc-filter-bar">
 	{#each inline as f (f.field)}
 		{@const label = labelOf(f)}
-		<div class="w-56">
-			<input.Text bind:value={draft[f.field]} placeholder={t('search_contains', { field: label })} aria-label={label} onkeydown={(e) => onEnter(e)} />
+		<div class="relative w-56">
+			<Icon name="search" size={16} class="text-surface-400 pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2" />
+			<input.Text
+				bind:value={draft[f.field]}
+				placeholder={t('search_contains', { field: label })}
+				aria-label={label}
+				size="sm"
+				class="h-9 pl-8"
+				onkeydown={(e) => onEnter(e)}
+			/>
 		</div>
 	{/each}
 
 	{#if panel.length > 0}
 		<Toggler placement="bottom-end">
 			{#snippet trigger({ active, attr })}
-				<input.Button
+				<button
 					{...attr}
-					variant={active || applied > 0 ? 'light' : 'ghost'}
-					color="surface"
+					class="slc-btn-outline h-9 px-3 {active ? 'bg-surface-200' : ''} {applied > 0 ? 'border-primary-500' : ''}"
 					aria-label={applied > 0 ? t('dt_filters_applied', { count: applied }) : t('dt_filters')}
 				>
+					<Icon name="filter" size={16} />
 					{t('dt_filters')}
 					{#if applied > 0}<span class="slc-filter-badge">{applied}</span>{/if}
-				</input.Button>
+				</button>
 			{/snippet}
 			{#snippet children({ close })}
 				<div class="slc-filter-panel" role="group" aria-label={t('dt_filters')}>
@@ -131,8 +142,11 @@
 		</Toggler>
 	{/if}
 
-	<input.Button variant="filled" label={t('search')} onclick={list.search} />
-	<input.Button variant="ghost" color="surface" label={t('dt_filter_clear')} onclick={list.clear} />
+	<button type="button" class="slc-btn-soft h-9 px-3" onclick={list.search}>
+		<Icon name="search" size={16} />
+		{t('search')}
+	</button>
+	<button type="button" class="slc-btn-ghost h-9" onclick={list.clear}>{t('dt_filter_clear')}</button>
 </div>
 
 <style>
@@ -151,8 +165,9 @@
 		padding: 0 0.375rem;
 		border-radius: 9999px;
 		background-color: var(--color-primary-500);
-		color: white;
+		color: var(--color-surface-token-950);
 		font-size: 0.75rem;
+		font-weight: 600;
 	}
 	.slc-filter-panel {
 		display: grid;

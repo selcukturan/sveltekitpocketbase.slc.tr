@@ -21,7 +21,8 @@
 	const fieldsClasses = 'group flex w-full items-stretch';
 	const fieldInternalClasses = 'slc-field w-full min-w-0 relative flex flex-col justify-center min-h-9';
 	const fieldClassesRounded = $derived(addon ? 'rounded-l-lg' : 'rounded-lg');
-	const labelClasses = 'flex w-fit items-center gap-1 text-sm font-medium text-surface-800 select-none';
+	// Etiket veriden ayrışsın: daha küçük (13px) ve soluk (surface-600); veri text-sm ve surface-950
+	const labelClasses = 'flex w-fit items-center gap-1 text-[13px] leading-4 font-medium text-surface-600 select-none';
 	const addonClasses = 'slc-field-addon inline-flex items-center justify-center px-3 text-sm font-medium rounded-r-lg';
 	const issuesClasses = 'text-error-600 text-xs font-medium empty:hidden';
 </script>

@@ -345,6 +345,20 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Tablo araç çubuğu: arama alanlarında büyüteç; "Filtreler" ikonlu kenarlıklı
+  düğme (uygulanan filtre varsa marka renginde kenarlık ve sayı); "Ara" yumuşak
+  marka tonunda (`.slc-btn-soft`), "Temizle" sade metin (`.slc-btn-ghost`);
+  ayraçtan sonra "Yenile" ikon düğmesi (yüklenirken döner) ve artı ikonlu
+  "Oluştur". Tüm öğeler h-9.
+- Açık temada drawer zemini surface-100, girdiler beyaz (`--slc-input-bg`):
+  koyu temadaki ayrışma açık temada da. Drawer telefonda köşesiz, tam ekran.
+- Form alanı etiketi veriden ayrışır: 13px, surface-600 (veri 14px, surface-950).
+- İlişki / dosya girdisi: koyu temada hover belirgin; kaldır düğmesinde odak
+  halkası.
+- Bildirim rozeti: koyu temada bir ton koyu kırmızı, kalın ve biraz büyük rakam
+  (parlak kırmızı koyu zeminde ışıldayıp rakamı yutuyordu).
+- Yeni ikonlar: filter, plus.
+
 - Form alanı etiketleri çevrilir: etiket bir çeviri anahtarıysa çevrilir
   (`useFormField`), değilse olduğu gibi gösterilir. Basit CRUD formu tablo
   kolonlarıyla aynı anahtarları (`dt_<alan>`) kullanır; eksikler eklendi
@@ -601,6 +615,10 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
   ikon solda, ortalıda absolute); hücre ve alt satırda `tabular-nums`.
 
 ### Düzeltildi
+
+- `datatable.spec.ts` Ctrl+V testi tam koşuda ara sıra düşüyordu: varsayılan
+  sıralama (-sayı) yapıştırmadan sonra satırların yerini değiştirebiliyordu;
+  kontroller satır sırasından bağımsız.
 
 - Koyu temada `color-scheme` açık kalıyordu (alpha.237'de `:root { color-scheme:
 light }` `.dark`'tan sonra yükleniyordu): native tarih seçici açık, `<dialog>`

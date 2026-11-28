@@ -310,10 +310,9 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	await clip('10\tlinux\r\n20,5\twindows\r\n');
 	await page.keyboard.press('Control+v');
 	await expect(rangeCells(page)).toHaveCount(4); // yapıştırılan alan seçili
-	await expect(cell(page, 0, 5)).toHaveText('10');
-	await expect(cell(page, 0, 6)).toHaveText('linux');
-	await expect(cell(page, 1, 5)).toHaveText('20,5');
-	await expect(cell(page, 1, 6)).toHaveText('windows');
+	// Satır sırasına bakılmaz: varsayılan sıralama (-sayı) kayıttan sonra liste tazelenince 20,5'li satırı üste alabilir
+	const pairs = async () => [0, 1].map(async (r) => `${await cell(page, r, 5).textContent()}|${await cell(page, r, 6).textContent()}`);
+	await expect.poll(async () => (await Promise.all(await pairs())).map((p) => p.trim()).sort()).toEqual(['10|linux', '20,5|windows']);
 
 	// Tek değer + aralık: aralığı doldurur (bool)
 	await cell(page, 0, 10).click();
@@ -324,11 +323,13 @@ test('Ctrl+V: blok yapıştırır, tek değerle aralığı doldurur, geçersizle
 	await expect(cell(page, 1, 10).locator('span')).toHaveAttribute('aria-label', 'true');
 
 	// Geçersiz değer kaydedilmez, bildirilir
+	// Geçersiz yapıştırma hiçbir değeri değiştirmez (satır sırasından bağımsız kontrol)
+	const numbers = async () => (await Promise.all([0, 1].map((r) => cell(page, r, 5).textContent()))).map((v) => v?.trim()).sort();
 	await cell(page, 0, 5).click();
 	await clip('abc');
 	await page.keyboard.press('Control+v');
 	await expect(page.getByText('1 hücre yapıştırılamadı').first()).toBeVisible();
-	await expect(cell(page, 0, 5)).toHaveText('10');
+	await expect.poll(numbers).toEqual(['10', '20,5']);
 
 	// Düzenlenemeyen hücre (id) sessizce atlanır. Satır sırasına bakılmaz: varsayılan sıralama (-sayı) yukarıdaki
 	// yapıştırmalardan sonra liste tazelenince satırların yerini değiştirebilir.

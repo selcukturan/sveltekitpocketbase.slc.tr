@@ -156,7 +156,9 @@
 	--overflow="hidden"
 >
 	{#snippet trigger({ attr })}
-		<!-- Zil + okunmamış rozeti (okunmamış yoksa rozet yok) -->
+		<!-- Zil + okunmamış rozeti (okunmamış yoksa rozet yok). Sektör standardı kırmızı rozet + beyaz rakam (iOS, Android, Slack,
+		     GitHub). Koyu zeminde parlak kırmızı ışıldar ve rakamı yutar (özellikle OLED): koyu temada bir ton koyu kırmızı,
+		     kalın ve biraz büyük rakam; zemin rengi halka rozeti zilden ayırır. -->
 		<button
 			{...attr}
 			class="slc-icon-button touch-manipulation"
@@ -166,7 +168,7 @@
 			<Icon name="bell" size={20} />
 			{#if stream.unread.length}
 				<span
-					class="bg-error-token-600 ring-surface-50 text-surface-token-50 pointer-events-none absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold tabular-nums ring-2"
+					class="bg-error-token-600 dark:bg-error-token-700 ring-surface-50 text-surface-token-50 pointer-events-none absolute top-0.5 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-bold tabular-nums ring-2"
 					aria-hidden="true"
 				>
 					{badge}

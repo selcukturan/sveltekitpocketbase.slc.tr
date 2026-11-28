@@ -117,7 +117,7 @@
 	<!-- list-item -->
 	<div
 		transition:slide={{ duration: animationDuration }}
-		class="hover:bg-surface-200/50 border-surface-200 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
+		class="hover:bg-surface-200/60 dark:hover:bg-surface-300/40 border-surface-200 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
 		<div class="flex w-full max-w-full min-w-0 items-center gap-2 select-text">
@@ -147,7 +147,7 @@
 					disabled={isLoading}
 					type="button"
 					onclick={() => removeInputSelectedItem(id)}
-					class="slc-input text-surface-500 hover:bg-surface-200 hover:text-error-600 focus-visible:bg-surface-200 cursor-pointer rounded-md p-1 outline-none"
+					class="slc-input text-surface-500 hover:bg-surface-200 dark:hover:bg-surface-300 hover:text-error-600 focus-visible:text-error-600 focus-visible:ring-primary-500 cursor-pointer rounded-md p-1 outline-none focus-visible:ring-2"
 					aria-label={t('remove_item_aria', { name: label })}
 				>
 					{#if isLoading}
@@ -180,7 +180,7 @@
 				type="button"
 				{id}
 				onclick={pickerOpen}
-				class="slc-input text-surface-700 hover:bg-surface-200/70 hover:text-surface-950 focus-visible:bg-surface-200/70 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-start text-sm font-semibold outline-none"
+				class="slc-input text-surface-700 hover:bg-surface-200 dark:hover:bg-surface-300 hover:text-surface-950 focus-visible:ring-primary-500 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-start text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-inset"
 				{@attach watchValueChange}
 				tabindex={disabled || readonly ? -1 : 0}
 			>

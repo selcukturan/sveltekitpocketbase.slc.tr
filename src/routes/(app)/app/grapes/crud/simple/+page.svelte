@@ -10,6 +10,8 @@
 	import { getOne, getList, createForm, updateForm, deleteRecords, updateCells } from './page.remote';
 	import { can } from '#lib/app/acl/access.js';
 	import { getMyAccess } from '#lib/remotes/acl.remote.js';
+	import { Icon } from '#lib/components/icons/index.js';
+	import { tooltip } from '#lib/attachments/index.js';
 
 	const toaster = createToaster({ name: 'page-toaster', position: 'bottom-center' });
 	const list = dt.createList(getList, TABLE.listParamsSchema, { autoLoad: true }); // filtre + sayfalama + sıralama + sorgu
@@ -70,10 +72,24 @@
 	<Page.Header>
 		<Page.Header.Table>
 			<dt.FilterBar {list} filters={TABLE.filters} />
-			<input.Button variant="ghost" color="surface" label={t('refresh')} onclick={list.refresh} disabled={list.loading} />
+			<!-- ayraç: filtre grubu | tablo eylemi -->
+			<span class="bg-surface-300 mx-1 hidden h-6 w-px sm:block" aria-hidden="true"></span>
+			<button
+				type="button"
+				class="slc-icon-button border-surface-300 border disabled:cursor-not-allowed disabled:opacity-50"
+				aria-label={t('refresh')}
+				onclick={list.refresh}
+				disabled={list.loading}
+				{@attach tooltip(t('refresh'))}
+			>
+				<Icon name={list.loading ? 'loader' : 'refresh'} size={16} class={list.loading ? 'animate-spin' : ''} />
+			</button>
 			{#snippet actions()}
 				{#if allow.create}
-					<input.Button variant="filled" color="primary" label={t('create')} onclick={() => drawer.show('create')} />
+					<button type="button" class="slc-btn-primary h-9 px-3" onclick={() => drawer.show('create')}>
+						<Icon name="plus" size={16} />
+						{t('create')}
+					</button>
 				{/if}
 			{/snippet}
 		</Page.Header.Table>
