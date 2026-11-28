@@ -99,8 +99,8 @@ test('drawer kapanınca Tab odağı aktif hücreye döndürür', async ({ page }
 async function createRecord(page: Page, text: string) {
 	await page.getByRole('button', { name: 'Oluştur' }).first().click();
 	const dialog = page.getByRole('dialog');
-	await dialog.getByLabel('text_required').fill(text);
-	await dialog.getByLabel('text_optional').fill(text);
+	await dialog.getByLabel('Metin (Gerekli)').fill(text);
+	await dialog.getByLabel('Metin (İsteğe Bağlı)').fill(text);
 	await dialog.getByRole('button', { name: 'Oluştur' }).click();
 	await expect(page).not.toHaveURL(/cmd=create/);
 	// URL önce değişir, çekmece kapanma animasyonu (~150 ms) boyunca modal kalır: sayfa inert, fill boşa gider

@@ -392,7 +392,7 @@
 	<!-- list-item -->
 	<div
 		transition:slide={{ duration: 150 }}
-		class="hover:bg-surface-300/50 border-surface-300 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
+		class="hover:bg-surface-200/50 border-surface-200 relative flex min-h-8 w-full items-center gap-2.5 border-t px-3 py-1.5 wrap-break-word outline-none first:border-t-0"
 	>
 		<!-- content -->
 		<div class="flex w-full max-w-full min-w-0 items-center gap-2 select-text" class:opacity-50={file.deleted}>
@@ -431,7 +431,7 @@
 					<button
 						type="button"
 						onclick={() => removeFile(file)}
-						class="slc-input hover:bg-surface-400/50 focus:bg-surface-500/50 cursor-pointer rounded-full p-1 outline-none"
+						class="slc-input text-surface-500 hover:bg-surface-200 hover:text-error-600 focus-visible:bg-surface-200 cursor-pointer rounded-md p-1 outline-none"
 						aria-label={t('file_remove_aria', { name: file.name })}
 					>
 						<svg class="h-4 w-4" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -470,13 +470,13 @@
 		</div>
 	{/if}
 
-	<div class="border-surface-300 group/btn px-1 pt-1" class:border-t={!isEmpty}>
+	<div class="border-surface-200 p-1" class:border-t={!isEmpty}>
 		<button
 			{id}
 			type="button"
 			{disabled}
 			onclick={() => !readonly && inputElement?.click()}
-			class="slc-input group-hover/btn:bg-surface-400/50 focus:bg-surface-500/50 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md p-1 text-start text-sm font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			class="slc-input text-surface-700 hover:bg-surface-200/70 hover:text-surface-950 focus-visible:bg-surface-200/70 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-start text-sm font-semibold outline-none disabled:cursor-not-allowed disabled:opacity-50"
 			class:opacity-50={isFull || readonly}
 			tabindex={disabled || readonly ? -1 : 0}
 		>

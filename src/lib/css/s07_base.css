@@ -107,7 +107,8 @@
 	/* Form alanı (form_inputs/Field): çerçeveli kutu; zemin ne olursa olsun (kart, drawer) sınırı görünür. Koyu temada
 	   kutu zeminden bir ton koyu (içe gömük), açıkta beyaza yakın. Odakta marka renginde kenarlık ve halka. */
 	.slc-field {
-		@apply bg-surface-50 border-surface-300 hover:border-surface-400 border transition-colors;
+		@apply border-surface-300 hover:border-surface-400 border transition-colors;
+		background-color: var(--slc-input-bg);
 	}
 	.slc-field:focus-within {
 		border-color: var(--color-primary-500);

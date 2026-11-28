@@ -47,7 +47,12 @@ export function useFormField(source: () => FormFieldSource) {
 	const name = $derived(source().name ?? '');
 	const key = $derived(fieldKeyFromName(name));
 	const meta = $derived<InputMeta>((context.getValibotMetadata(key)?.slc as InputMeta | undefined) ?? { required: false });
-	const label = $derived(source().label || key || 'no_label');
+	// Etiket bir çeviri anahtarıysa çevrilir (ör. 'dt_text_required' → "Metin (Gerekli)"), değilse olduğu gibi gösterilir.
+	// Tablo kolonlarıyla aynı anahtarlar kullanılır: bir alanın adı tabloda ve formda aynıdır.
+	const label = $derived.by(() => {
+		const raw = source().label || key || 'no_label';
+		return t(raw, undefined, raw);
+	});
 	const issues = $derived.by(() => {
 		const params = metaParams(meta);
 		const shadowIssues = (source().shadowSuffixes ?? []).flatMap((suffix) => shadowField(key + suffix)?.allIssues() ?? []);

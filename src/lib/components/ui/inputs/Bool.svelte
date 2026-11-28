@@ -73,21 +73,19 @@
 		aria-checked={value}
 		aria-describedby={text ? textId : undefined}
 		disabled={disabled || readonly}
-		class="{value ? 'bg-success-300 border-success-400' : 'bg-surface-300 border-surface-400'}
-			{!disabled && !readonly ? (value ? 'group-hover:bg-success-400 group-hover:border-success-500' : 'group-hover:bg-surface-400 group-hover:border-surface-500') : ''}
+		class="{value ? 'bg-primary-500' : 'bg-surface-300'}
+			{!disabled && !readonly ? (value ? 'group-hover:bg-primary-400' : 'group-hover:bg-surface-400') : ''}
 			{disabled ? 'disabled:cursor-not-allowed disabled:opacity-50' : ''}
 			{readonly ? 'cursor-default' : 'cursor-pointer'}
-			relative h-6 w-11 overflow-hidden rounded-md border px-0.5 py-1"
+			relative inline-flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors"
 		{@attach buttonClick}
 		{...rest}
 	>
-		<span
-			class="bg-surface-800 pointer-events-none flex h-full w-1/2 items-center justify-center overflow-hidden rounded-md shadow transition-transform"
-			class:translate-x-full={value}
-		></span>
+		<!-- Anahtar: hap biçiminde iz, beyaz düğme; açıkken marka rengi -->
+		<span class="bg-surface-token-50 pointer-events-none size-4 rounded-full shadow-sm transition-transform" class:translate-x-4={value}></span>
 	</button>
 
 	{#if text}
-		<span id={textId} class="text-surface-900 text-sm font-medium">{text}</span>
+		<span id={textId} class="text-surface-800 text-sm">{text}</span>
 	{/if}
 </div>

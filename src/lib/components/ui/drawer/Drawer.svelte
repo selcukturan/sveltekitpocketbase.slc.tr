@@ -177,7 +177,8 @@
 	};
 
 	// Açılır yüzey rengi (bildirim paneli ve pencerelerle aynı): koyu temada çerçeveden ayrışır, alanlar içinde gömük durur
-	const dialogClasses = 'bg-(--slc-system-bg-surface) border-l border-surface-300 m-0 w-full max-w-2xl p-0 shadow-xl overflow-hidden';
+	const dialogClasses =
+		'bg-(--slc-system-bg-surface) border-l border-y border-surface-300 rounded-l-2xl m-0 w-full max-w-2xl p-0 shadow-[-16px_0_48px_-12px_rgb(0_0_0/0.35)] overflow-hidden';
 	const dialogFocusOverrideClasses = 'focus-override focus-visible:outline-primary-400 focus-visible:outline-2 focus-visible:-outline-offset-3';
 </script>
 

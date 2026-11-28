@@ -7,7 +7,7 @@ test('kayıt seçici arar, enjeksiyon denemesi sonuç döndürmez, seçilen kay�
 	await expect(page.getByRole('grid').locator('[data-slc-table-datacell]').first()).toBeVisible();
 	await page.getByRole('button', { name: 'Oluştur' }).first().click();
 	const form = page.getByRole('dialog').first();
-	await form.getByLabel('relation_optional_single').click();
+	await form.getByLabel('İlişki (Tekli)').click();
 
 	const search = page.getByPlaceholder('Ara...');
 	const items = page.getByRole('radio');

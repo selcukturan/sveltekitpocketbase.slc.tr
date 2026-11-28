@@ -103,7 +103,8 @@ test('sunucu reddederse (403) hata yalnızca drawer içinde görünür, sayfa ay
 	deny = false;
 	await alert.getByRole('button', { name: 'Tekrar dene' }).click();
 	await expect(alert).toHaveCount(0);
-	await expect(page.getByText('text_required').last()).toBeVisible();
+	// Görüntüle: kayıt görünümü (RecordView) alanları ham adlarıyla listeler
+	await expect(page.locator('dialog[open]').getByText('text_required', { exact: true })).toBeVisible();
 });
 
 test('uygulama özellikleri: izin yoksa üst çubukta bildirimler, kullanıcı menüsünde dil seçimi görünmez', async ({ page }) => {

@@ -9,7 +9,7 @@ const URL = '/app/grapes/crud/simple';
 const grid = (page: Page) => page.getByRole('grid');
 const rows = (page: Page) => grid(page).locator('[role="row"][aria-selected]');
 const cell = (page: Page, row: number, col: number) => grid(page).locator(`[data-slc-table-datacell][data-row="${row}"][data-col="${col}"]`);
-const drawer = (page: Page) => page.locator('dialog[open]').filter({ has: page.getByLabel('text_required', { exact: true }) });
+const drawer = (page: Page) => page.locator('dialog[open]').filter({ has: page.getByLabel('Metin (Gerekli)', { exact: true }) });
 const COL = { date: 8, datetime: 9 };
 
 async function search(page: Page, stamp: string, count: number) {
@@ -37,9 +37,9 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; filtre uyg
 	// İstanbul 2 Eylül 02:00 = UTC 1 Eylül 23:00 = New York 1 Eylül 19:00
 	await page.getByRole('button', { name: 'Oluştur' }).first().click();
 	const form = drawer(page);
-	await form.getByLabel('text_required').fill(stamp);
-	await form.getByLabel('date_optional').fill('2026-09-09');
-	await form.getByLabel('datetime_optional').fill('2026-09-02T02:00');
+	await form.getByLabel('Metin (Gerekli)').fill(stamp);
+	await form.getByLabel('Tarih', { exact: true }).fill('2026-09-09');
+	await form.getByLabel('Tarih-saat').fill('2026-09-02T02:00');
 	await form.getByRole('button', { name: 'Oluştur' }).click();
 	await expect(page).not.toHaveURL(/cmd=create/);
 
@@ -49,8 +49,8 @@ test('tarih-saat uygulama saat diliminde; tarih her yerde aynı gün; filtre uyg
 
 	// Güncelleme formu aynı duvar saatini gösterir
 	await cell(page, 0, 1).getByRole('button', { name: 'Güncelle' }).click();
-	await expect(drawer(page).getByLabel('datetime_optional')).toHaveValue('2026-09-02T02:00');
-	await expect(drawer(page).getByLabel('date_optional')).toHaveValue('2026-09-09');
+	await expect(drawer(page).getByLabel('Tarih-saat')).toHaveValue('2026-09-02T02:00');
+	await expect(drawer(page).getByLabel('Tarih', { exact: true })).toHaveValue('2026-09-09');
 	// Ham değer: kayıt görünümünde değil, PocketBase'de UTC; görüntüleme çekmecesi biçimlenmiş gösterir
 	await drawer(page).getByRole('button', { name: 'Kapat' }).first().click();
 	await expect(page).not.toHaveURL(/cmd=update/);

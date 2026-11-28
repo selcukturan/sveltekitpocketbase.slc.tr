@@ -41,21 +41,21 @@
 
 <!-- create ve update formlarının ortak inputları; kurallar page.shared.ts şemasından gelir -->
 {#snippet recordInputs(fields: typeof createForm.fields, data: Partial<Item>)}
-	<formInput.Text label="text_required" field={fields.text_required} value={data.text_required} />
-	<formInput.Text label="text_optional" field={fields.text_optional} value={data.text_optional} />
-	<formInput.Select label="select_optional_multiple" field={fields.select_optional_multiple} value={data.select_optional_multiple} />
-	<formInput.Select label="select_optional_single" field={fields.select_optional_single} value={data.select_optional_single} />
-	<formInput.Relation label="relation_optional_multiple" field={fields.relation_optional_multiple} value={data.relation_optional_multiple} />
-	<formInput.Relation label="relation_optional_single" field={fields.relation_optional_single} value={data.relation_optional_single} />
-	<formInput.Email label="email_optional" field={fields.email_optional} value={data.email_optional} />
-	<formInput.Number label="number_optional" field={fields.number_optional} value={data.number_optional} />
-	<formInput.Textarea label="textarea_optional" field={fields.textarea_optional} value={data.textarea_optional} />
-	<formInput.Url label="url_optional" field={fields.url_optional} value={data.url_optional} />
-	<formInput.Date label="date_optional" field={fields.date_optional} value={data.date_optional} />
-	<formInput.Datetime label="datetime_optional" field={fields.datetime_optional} value={data.datetime_optional} />
-	<formInput.File label="file_optional_single" field={fields.file_optional_single} value={data.file_optional_single} />
-	<formInput.File label="file_optional_multiple" field={fields.file_optional_multiple} value={data.file_optional_multiple} />
-	<formInput.Bool label="bool_optional" text={t('do_not_disturb')} field={fields.bool_optional} value={data.bool_optional} />
+	<formInput.Text label="dt_text_required" field={fields.text_required} value={data.text_required} />
+	<formInput.Text label="dt_text_optional" field={fields.text_optional} value={data.text_optional} />
+	<formInput.Select label="dt_select_optional_multiple" field={fields.select_optional_multiple} value={data.select_optional_multiple} />
+	<formInput.Select label="dt_select_optional_single" field={fields.select_optional_single} value={data.select_optional_single} />
+	<formInput.Relation label="dt_relation_optional_multiple" field={fields.relation_optional_multiple} value={data.relation_optional_multiple} />
+	<formInput.Relation label="dt_relation_optional_single" field={fields.relation_optional_single} value={data.relation_optional_single} />
+	<formInput.Email label="dt_email_optional" field={fields.email_optional} value={data.email_optional} />
+	<formInput.Number label="dt_number_optional" field={fields.number_optional} value={data.number_optional} />
+	<formInput.Textarea label="dt_textarea_optional" field={fields.textarea_optional} value={data.textarea_optional} />
+	<formInput.Url label="dt_url_optional" field={fields.url_optional} value={data.url_optional} />
+	<formInput.Date label="dt_date_optional" field={fields.date_optional} value={data.date_optional} />
+	<formInput.Datetime label="dt_datetime_optional" field={fields.datetime_optional} value={data.datetime_optional} />
+	<formInput.File label="dt_file_optional_single" field={fields.file_optional_single} value={data.file_optional_single} />
+	<formInput.File label="dt_file_optional_multiple" field={fields.file_optional_multiple} value={data.file_optional_multiple} />
+	<formInput.Bool label="dt_bool_optional" text={t('do_not_disturb')} field={fields.bool_optional} value={data.bool_optional} />
 {/snippet}
 
 {#snippet closeButton()}

@@ -9,32 +9,32 @@ const grid = (page: Page) => page.getByRole('grid');
 const rows = (page: Page) => grid(page).locator('[role="row"][aria-selected]');
 const cell = (page: Page, row: number, col: number) => grid(page).locator(`[data-slc-table-datacell][data-row="${row}"][data-col="${col}"]`);
 // Çekmece (Relation seçicisi de ayrı bir <dialog> açar)
-const drawer = (page: Page) => page.locator('dialog[open]').filter({ has: page.getByLabel('text_required', { exact: true }) });
+const drawer = (page: Page) => page.locator('dialog[open]').filter({ has: page.getByLabel('Metin (Gerekli)', { exact: true }) });
 const textFilter = (page: Page) => page.getByRole('textbox', { name: 'Metin (Gerekli)', exact: true });
 
 const LABELS = [
-	'text_required',
-	'text_optional',
-	'select_optional_multiple',
-	'select_optional_single',
-	'relation_optional_multiple',
-	'relation_optional_single',
-	'email_optional',
-	'number_optional',
-	'textarea_optional',
-	'url_optional',
-	'date_optional',
-	'datetime_optional',
-	'file_optional_single',
-	'file_optional_multiple',
-	'bool_optional'
+	'Metin (Gerekli)',
+	'Metin (İsteğe Bağlı)',
+	'Seçim (Çoklu)',
+	'Seçim (Tekli)',
+	'İlişki (Çoklu)',
+	'İlişki (Tekli)',
+	'E-posta',
+	'Sayı',
+	'Uzun Metin',
+	'Bağlantı (URL)',
+	'Tarih',
+	'Tarih-saat',
+	'Dosya (Tekli)',
+	'Dosya (Çoklu)',
+	'Onay'
 ];
 
 async function openCreate(page: Page) {
 	await page.goto(URL);
 	await expect(cell(page, 0, 3)).toBeVisible();
 	await page.getByRole('button', { name: 'Oluştur' }).first().click();
-	await expect(drawer(page).getByLabel('text_required')).toBeVisible();
+	await expect(drawer(page).getByLabel('Metin (Gerekli)')).toBeVisible();
 	return drawer(page);
 }
 
@@ -58,7 +58,7 @@ async function openUpdate(page: Page) {
 	await cell(page, 0, 1).getByRole('button', { name: 'Güncelle' }).click(); // işlemler kolonu
 	await expect(page).toHaveURL(/cmd=update/);
 	const form = drawer(page);
-	await expect(form.getByLabel('text_required')).not.toHaveValue('', { timeout: 10000 });
+	await expect(form.getByLabel('Metin (Gerekli)')).not.toHaveValue('', { timeout: 10000 });
 	return form;
 }
 
@@ -77,8 +77,8 @@ test('her alanın erişilebilir adı etiketinden gelir; ilk açılışta hata g�
 		await expect(form.getByLabel(label, { exact: true }), label).toHaveCount(1);
 	}
 	// Seçim kutuları (combobox) adını alan etiketinden alır, seçili değerden değil
-	await expect(form.getByRole('combobox', { name: 'select_optional_single', exact: true })).toBeVisible();
-	await expect(form.getByRole('combobox', { name: 'select_optional_multiple', exact: true })).toBeVisible();
+	await expect(form.getByRole('combobox', { name: 'Seçim (Tekli)', exact: true })).toBeVisible();
+	await expect(form.getByRole('combobox', { name: 'Seçim (Çoklu)', exact: true })).toBeVisible();
 	// Yalnızca ikonlu kapat düğmesinin adı var
 	await expect(form.getByRole('button', { name: 'Kapat' })).toHaveCount(2);
 	// Açılışta hata yok; gönder düğmesi etkin, sıfırla pasif (değişiklik yok)
@@ -90,44 +90,44 @@ test('her alanın erişilebilir adı etiketinden gelir; ilk açılışta hata g�
 test('doğrulama: zorunlu alan, e-posta ve url biçimi; hatalı form gönderilmez', async ({ page }) => {
 	const form = await openCreate(page);
 	await form.getByRole('button', { name: 'Oluştur' }).click();
-	await expect(form.getByLabel('text_required')).toHaveAttribute('aria-invalid', 'true');
+	await expect(form.getByLabel('Metin (Gerekli)')).toHaveAttribute('aria-invalid', 'true');
 	// Mesaj ekran okuyucuya duyurulan bölgede (role=status)
 	await expect(form.getByRole('status').filter({ hasText: 'Bu alan gereklidir.' })).toHaveCount(1);
 	await expect(page).toHaveURL(/cmd=create/); // çekmece açık kaldı
 
-	await form.getByLabel('text_required').fill('x');
-	await expect(form.getByLabel('text_required')).not.toHaveAttribute('aria-invalid', 'true');
-	await form.getByLabel('email_optional').fill('gecersiz');
-	await form.getByLabel('url_optional').fill('gecersiz');
+	await form.getByLabel('Metin (Gerekli)').fill('x');
+	await expect(form.getByLabel('Metin (Gerekli)')).not.toHaveAttribute('aria-invalid', 'true');
+	await form.getByLabel('E-posta').fill('gecersiz');
+	await form.getByLabel('Bağlantı (URL)').fill('gecersiz');
 	await form.getByRole('button', { name: 'Oluştur' }).click();
-	await expect(form.getByLabel('email_optional')).toHaveAttribute('aria-invalid', 'true');
-	await expect(form.getByLabel('url_optional')).toHaveAttribute('aria-invalid', 'true');
+	await expect(form.getByLabel('E-posta')).toHaveAttribute('aria-invalid', 'true');
+	await expect(form.getByLabel('Bağlantı (URL)')).toHaveAttribute('aria-invalid', 'true');
 	await expect(page).toHaveURL(/cmd=create/);
 
 	// Düzeltince hata kalkar
-	await form.getByLabel('email_optional').fill('a@b.co');
-	await form.getByLabel('url_optional').fill('https://example.com');
-	await expect(form.getByLabel('email_optional')).not.toHaveAttribute('aria-invalid', 'true');
-	await expect(form.getByLabel('url_optional')).not.toHaveAttribute('aria-invalid', 'true');
+	await form.getByLabel('E-posta').fill('a@b.co');
+	await form.getByLabel('Bağlantı (URL)').fill('https://example.com');
+	await expect(form.getByLabel('E-posta')).not.toHaveAttribute('aria-invalid', 'true');
+	await expect(form.getByLabel('Bağlantı (URL)')).not.toHaveAttribute('aria-invalid', 'true');
 });
 
 test('tüm alanlar kaydedilir ve güncelleme formunda geri okunur; sıfırla ve değişiklik takibi', async ({ page }) => {
 	const stamp = `seed-e2e-${Date.now().toString(36)}`;
 	const form = await openCreate(page);
 
-	await form.getByLabel('text_required').fill(stamp);
-	await form.getByLabel('text_optional').fill('isteğe bağlı');
-	await form.getByLabel('textarea_optional').fill('satır 1\nsatır 2');
-	await form.getByLabel('email_optional').fill('test@example.com');
-	await form.getByLabel('url_optional').fill('https://example.com/a');
-	await form.getByLabel('number_optional').fill('12.5');
-	await form.getByLabel('date_optional').fill('2026-03-04');
-	await form.getByLabel('datetime_optional').fill('2026-03-04T05:06');
-	await form.getByLabel('bool_optional').click();
-	await expect(form.getByLabel('bool_optional')).toHaveAttribute('aria-checked', 'true');
+	await form.getByLabel('Metin (Gerekli)').fill(stamp);
+	await form.getByLabel('Metin (İsteğe Bağlı)').fill('isteğe bağlı');
+	await form.getByLabel('Uzun Metin').fill('satır 1\nsatır 2');
+	await form.getByLabel('E-posta').fill('test@example.com');
+	await form.getByLabel('Bağlantı (URL)').fill('https://example.com/a');
+	await form.getByLabel('Sayı').fill('12.5');
+	await form.getByLabel('Tarih', { exact: true }).fill('2026-03-04');
+	await form.getByLabel('Tarih-saat').fill('2026-03-04T05:06');
+	await form.getByLabel('Onay').click();
+	await expect(form.getByLabel('Onay')).toHaveAttribute('aria-checked', 'true');
 
-	const single = form.getByRole('combobox', { name: 'select_optional_single' });
-	const multiple = form.getByRole('combobox', { name: 'select_optional_multiple' });
+	const single = form.getByRole('combobox', { name: 'Seçim (Tekli)' });
+	const multiple = form.getByRole('combobox', { name: 'Seçim (Çoklu)' });
 	const singleValue = (await single.click(), await page.getByRole('option').nth(1).textContent())!.trim();
 	await page.getByRole('option').nth(1).click();
 	await expect(single).toHaveText(singleValue);
@@ -149,17 +149,17 @@ test('tüm alanlar kaydedilir ve güncelleme formunda geri okunur; sıfırla ve 
 	// Güncelleme formu: değerler geri okunur
 	await searchStamp(page, stamp, 1);
 	const upd = await openUpdate(page);
-	await expect(upd.getByLabel('text_required')).toHaveValue(stamp);
-	await expect(upd.getByLabel('text_optional')).toHaveValue('isteğe bağlı');
-	await expect(upd.getByLabel('textarea_optional')).toHaveValue('satır 1\nsatır 2');
-	await expect(upd.getByLabel('email_optional')).toHaveValue('test@example.com');
-	await expect(upd.getByLabel('url_optional')).toHaveValue('https://example.com/a');
-	await expect(upd.getByLabel('number_optional')).toHaveValue('12.5');
-	await expect(upd.getByLabel('date_optional')).toHaveValue('2026-03-04');
-	await expect(upd.getByLabel('datetime_optional')).toHaveValue('2026-03-04T05:06');
-	await expect(upd.getByLabel('bool_optional')).toHaveAttribute('aria-checked', 'true');
-	await expect(upd.getByRole('combobox', { name: 'select_optional_single' })).toHaveText(singleValue);
-	await expect(upd.getByRole('combobox', { name: 'select_optional_multiple' })).toHaveText(`(2) ${multiValues.join(', ')}`);
+	await expect(upd.getByLabel('Metin (Gerekli)')).toHaveValue(stamp);
+	await expect(upd.getByLabel('Metin (İsteğe Bağlı)')).toHaveValue('isteğe bağlı');
+	await expect(upd.getByLabel('Uzun Metin')).toHaveValue('satır 1\nsatır 2');
+	await expect(upd.getByLabel('E-posta')).toHaveValue('test@example.com');
+	await expect(upd.getByLabel('Bağlantı (URL)')).toHaveValue('https://example.com/a');
+	await expect(upd.getByLabel('Sayı')).toHaveValue('12.5');
+	await expect(upd.getByLabel('Tarih', { exact: true })).toHaveValue('2026-03-04');
+	await expect(upd.getByLabel('Tarih-saat')).toHaveValue('2026-03-04T05:06');
+	await expect(upd.getByLabel('Onay')).toHaveAttribute('aria-checked', 'true');
+	await expect(upd.getByRole('combobox', { name: 'Seçim (Tekli)' })).toHaveText(singleValue);
+	await expect(upd.getByRole('combobox', { name: 'Seçim (Çoklu)' })).toHaveText(`(2) ${multiValues.join(', ')}`);
 	// PocketBase dosya adına sonek ekler: tekli_abc123.txt
 	await expect(fileName(upd, /^tekli.*\.txt$/)).toBeVisible();
 	await expect(fileName(upd, /^coklu_1_.*\.txt$/)).toBeVisible();
@@ -172,21 +172,21 @@ test('tüm alanlar kaydedilir ve güncelleme formunda geri okunur; sıfırla ve 
 	await expect(resetButton).toBeDisabled();
 
 	// Değiştir → etkin; ilk değere geri yazınca tekrar pasif
-	await upd.getByLabel('text_optional').fill('değişti');
+	await upd.getByLabel('Metin (İsteğe Bağlı)').fill('değişti');
 	await expect(updateButton).toBeEnabled();
-	await upd.getByLabel('text_optional').fill('isteğe bağlı');
+	await upd.getByLabel('Metin (İsteğe Bağlı)').fill('isteğe bağlı');
 	await expect(updateButton).toBeDisabled();
 
 	// Sıfırla: özel bileşenler dahil ilk değerlere döner
-	await upd.getByLabel('text_optional').fill('değişti');
-	await upd.getByLabel('bool_optional').click();
-	await pickOption(page, upd.getByRole('combobox', { name: 'select_optional_single' }), '-- Seçiniz --');
+	await upd.getByLabel('Metin (İsteğe Bağlı)').fill('değişti');
+	await upd.getByLabel('Onay').click();
+	await pickOption(page, upd.getByRole('combobox', { name: 'Seçim (Tekli)' }), '-- Seçiniz --');
 	await upd.getByRole('button', { name: /tekli.*\.txt dosyasını kaldır/i }).click();
 	await expect(resetButton).toBeEnabled();
 	await resetButton.click();
-	await expect(upd.getByLabel('text_optional')).toHaveValue('isteğe bağlı');
-	await expect(upd.getByLabel('bool_optional')).toHaveAttribute('aria-checked', 'true');
-	await expect(upd.getByRole('combobox', { name: 'select_optional_single' })).toHaveText(singleValue);
+	await expect(upd.getByLabel('Metin (İsteğe Bağlı)')).toHaveValue('isteğe bağlı');
+	await expect(upd.getByLabel('Onay')).toHaveAttribute('aria-checked', 'true');
+	await expect(upd.getByRole('combobox', { name: 'Seçim (Tekli)' })).toHaveText(singleValue);
 	await expect(upd.getByRole('button', { name: /tekli.*\.txt dosyasını kaldır/i })).toBeVisible();
 	await expect(updateButton).toBeDisabled();
 
@@ -196,14 +196,14 @@ test('tüm alanlar kaydedilir ve güncelleme formunda geri okunur; sıfırla ve 
 	await upd.getByRole('button', { name: /coklu_1_.*\.txt dosyasını geri al/i }).click();
 	await expect(updateButton).toBeDisabled();
 	await upd.getByRole('button', { name: /coklu_1_.*\.txt dosyasını kaldır/i }).click();
-	await upd.getByLabel('bool_optional').click();
+	await upd.getByLabel('Onay').click();
 	await updateButton.click();
 	await expect(page).not.toHaveURL(/cmd=update/);
 
 	const again = await openUpdate(page);
 	await expect(fileName(again, /^coklu_1_.*\.txt$/)).toHaveCount(0);
 	await expect(fileName(again, /^coklu_2_.*\.txt$/)).toBeVisible();
-	await expect(again.getByLabel('bool_optional')).toHaveAttribute('aria-checked', 'false');
+	await expect(again.getByLabel('Onay')).toHaveAttribute('aria-checked', 'false');
 	await again.getByRole('button', { name: 'Kapat' }).first().click();
 	await expect(page).not.toHaveURL(/cmd=update/);
 
@@ -214,7 +214,7 @@ test('tüm alanlar kaydedilir ve güncelleme formunda geri okunur; sıfırla ve 
 // alan dışındayken kapatır.
 test('Select: klavyeyle açılır/seçilir; Esc listeyi kapatır, çekmeceyi kapatmaz', async ({ page }) => {
 	const form = await openCreate(page);
-	const single = form.getByRole('combobox', { name: 'select_optional_single' });
+	const single = form.getByRole('combobox', { name: 'Seçim (Tekli)' });
 	const listbox = page.getByRole('listbox');
 
 	await single.focus();
@@ -244,7 +244,7 @@ test('Select: klavyeyle açılır/seçilir; Esc listeyi kapatır, çekmeceyi kap
 
 test('Bool: tıklama, metne tıklama ve Space ile değişir', async ({ page }) => {
 	const form = await openCreate(page);
-	const bool = form.getByLabel('bool_optional');
+	const bool = form.getByLabel('Onay');
 	await expect(bool).toHaveAttribute('aria-checked', 'false');
 	await bool.click();
 	await expect(bool).toHaveAttribute('aria-checked', 'true');
@@ -257,7 +257,7 @@ test('Bool: tıklama, metne tıklama ve Space ile değişir', async ({ page }) =
 
 test('kaydedilmemiş değişiklik: çekmece kapatılırken sorulur, Hayır açık bırakır', async ({ page }) => {
 	const form = await openCreate(page);
-	await form.getByLabel('text_optional').fill('değişiklik');
+	await form.getByLabel('Metin (İsteğe Bağlı)').fill('değişiklik');
 	await page.keyboard.press('Escape'); // odak alanda: hiçbir şey olmaz
 	await expect(page).toHaveURL(/cmd=create/);
 	await form.getByRole('heading', { name: 'Oluştur' }).click();
@@ -266,7 +266,7 @@ test('kaydedilmemiş değişiklik: çekmece kapatılırken sorulur, Hayır açı
 	await expect(ask).toBeVisible();
 	await page.getByRole('button', { name: 'Hayır' }).click();
 	await expect(page).toHaveURL(/cmd=create/);
-	await expect(form.getByLabel('text_optional')).toHaveValue('değişiklik');
+	await expect(form.getByLabel('Metin (İsteğe Bağlı)')).toHaveValue('değişiklik');
 	await form.getByRole('button', { name: 'Kapat' }).first().click();
 	await page.getByRole('button', { name: 'Evet' }).click();
 	await expect(page).not.toHaveURL(/cmd=create/);
@@ -274,7 +274,7 @@ test('kaydedilmemiş değişiklik: çekmece kapatılırken sorulur, Hayır açı
 
 test('Relation: seçici adlandırılmış, çoklu seçim eklenir/kaldırılır, Vazgeç değeri korur', async ({ page }) => {
 	const form = await openCreate(page);
-	await form.getByLabel('relation_optional_multiple').click();
+	await form.getByLabel('İlişki (Çoklu)').click();
 	const picker = page.locator('dialog[open]').filter({ has: page.getByRole('button', { name: 'Seçimi kaydet' }) });
 	const items = picker.getByRole('checkbox');
 	await expect.poll(() => items.count(), { timeout: 10000 }).toBeGreaterThan(1);
@@ -293,7 +293,7 @@ test('Relation: seçici adlandırılmış, çoklu seçim eklenir/kaldırılır, 
 	await expect(form.getByText(second, { exact: true })).toHaveCount(0);
 
 	// Vazgeç: değişiklik uygulanmaz
-	await form.getByLabel('relation_optional_multiple').click();
+	await form.getByLabel('İlişki (Çoklu)').click();
 	await expect.poll(() => items.count(), { timeout: 10000 }).toBeGreaterThan(1);
 	await items.nth(1).click();
 	await picker.getByRole('button', { name: 'Vazgeç' }).click();
@@ -309,7 +309,7 @@ test.describe('Türkçe yerel ayar', () => {
 	// Ondalık ayracını tarayıcı yönetir (bileşen tuşları değiştirmez): nokta da virgül de ondalık kabul edilir
 	test('Number: nokta ve virgül ondalık olarak girilir, değer sayı olarak tutulur', async ({ page }) => {
 		const form = await openCreate(page);
-		const number = form.getByLabel('number_optional');
+		const number = form.getByLabel('Sayı');
 		await number.click();
 		await page.keyboard.type('12.5');
 		await expect(number).toHaveJSProperty('valueAsNumber', 12.5);
@@ -325,9 +325,9 @@ test.describe('Türkçe yerel ayar', () => {
 
 test('Number: geçersiz metin sessizce 0 olarak gönderilmez; negatif ve ondalık girilir', async ({ page }) => {
 	const form = await openCreate(page);
-	const num = form.getByLabel('number_optional');
+	const num = form.getByLabel('Sayı');
 	const error = form.getByRole('status').filter({ hasText: 'Lütfen geçerli bir sayı girin.' });
-	await form.getByLabel('text_required').fill('seed-e2e-gonderilmemeli');
+	await form.getByLabel('Metin (Gerekli)').fill('seed-e2e-gonderilmemeli');
 
 	// Yazarken yarım metin ('123.') hata göstermez; bir sonraki tuşla geçerli olur
 	await num.click();

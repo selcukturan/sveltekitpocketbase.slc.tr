@@ -9,11 +9,11 @@ export const inputClasses = {
 
 	// Durum (variant): kenarlık ve odak halkası rengi
 	variants: {
-		default: `bg-surface-50 text-surface-950 placeholder-surface-400 border border-surface-300 hover:border-surface-400 focus:border-primary-500 focus:ring-primary-500/20 ${focus}`,
-		success: `bg-surface-50 text-surface-950 placeholder-surface-400 border border-success-500 focus:ring-success-500/20 ${focus}`,
-		error: `bg-surface-50 text-surface-950 placeholder-surface-400 border border-error-500 focus:ring-error-500/20 ${focus}`,
-		warning: `bg-surface-50 text-surface-950 placeholder-surface-400 border border-warning-500 focus:ring-warning-500/20 ${focus}`,
-		info: `bg-surface-50 text-surface-950 placeholder-surface-400 border border-info-500 focus:ring-info-500/20 ${focus}`,
+		default: `bg-(--slc-input-bg) text-surface-950 placeholder-surface-400 border border-surface-300 hover:border-surface-400 focus:border-primary-500 focus:ring-primary-500/20 ${focus}`,
+		success: `bg-(--slc-input-bg) text-surface-950 placeholder-surface-400 border border-success-500 focus:ring-success-500/20 ${focus}`,
+		error: `bg-(--slc-input-bg) text-surface-950 placeholder-surface-400 border border-error-500 focus:ring-error-500/20 ${focus}`,
+		warning: `bg-(--slc-input-bg) text-surface-950 placeholder-surface-400 border border-warning-500 focus:ring-warning-500/20 ${focus}`,
+		info: `bg-(--slc-input-bg) text-surface-950 placeholder-surface-400 border border-info-500 focus:ring-info-500/20 ${focus}`,
 		// Form alanı kutusunun (.slc-field) içinde: kutu çerçeveyi ve odağı çizer, girdi saydam
 		'with-field': 'outline-none focus-visible:outline-none bg-transparent text-surface-950 placeholder-surface-400'
 	},

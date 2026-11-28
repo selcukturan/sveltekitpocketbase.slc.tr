@@ -9,10 +9,16 @@
 	--slc-system-bg-hover: color-mix(in oklab, var(--provider-primary-500) 20%, transparent);
 	--slc-system-color-muted: var(--provider-surface-600);
 	--slc-system-color-shadow: color-mix(in oklab, var(--token-surface-950) 18%, transparent);
+
+	/* Girdi zemini (inputs/common.ts, .slc-field): açık temada beyaza yakın */
+	--slc-input-bg: var(--provider-surface-50);
 }
 
 .dark {
 	/* Koyu temada açılır pencereler zeminden bir kat açık (yükselti) */
 	--slc-system-bg-surface: var(--provider-surface-100);
 	--slc-system-color-shadow: color-mix(in oklab, black 55%, transparent);
+	/* Koyu temada girdi zemini kart (surface-200) ile açılır yüzey (surface-100) arasında: her ikisinde de okunur,
+	   gömük ve çok koyu durmaz */
+	--slc-input-bg: color-mix(in oklab, var(--provider-surface-200) 60%, var(--provider-surface-100));
 }

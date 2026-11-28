@@ -345,6 +345,19 @@ kayıtlar konu başlıklarına göre gruplanmıştır.
 
 ### Değişti
 
+- Form alanı etiketleri çevrilir: etiket bir çeviri anahtarıysa çevrilir
+  (`useFormField`), değilse olduğu gibi gösterilir. Basit CRUD formu tablo
+  kolonlarıyla aynı anahtarları (`dt_<alan>`) kullanır; eksikler eklendi
+  (ilişki, e-posta, uzun metin, URL, dosya). Testler Türkçe etiketlere geçti.
+- Girdi zemini `--slc-input-bg`: koyu temada kart ile açılır yüzey arasında
+  (önceden çok koyuydu).
+- Drawer'ın görünen kenarı yuvarlak ve gölgeli (bildirim paneli gibi).
+- İlişki ve dosya girdisi: "Kayıt seçiciyi aç" / "Dosya yükle" düğmesi kutunun
+  altına yapışmıyor (çevresinde boşluk, hafif hover); liste satırları ve
+  kaldır düğmesi sadeleşti.
+- Bool: hap biçiminde anahtar (açıkken marka rengi, beyaz düğme), form alanında
+  dikey ortalı.
+
 - Girdiler (`inputs/common.ts`): açık zemin, kenarlık, üzerine gelince koyulaşan
   kenarlık, odakta marka renginde kenarlık ve halka; durum renkleri yalnızca
   kenarlık ve halkada. Form alanında (`Field`) etiket kutunun üstünde, kutu
